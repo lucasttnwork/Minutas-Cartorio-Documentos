@@ -1,0 +1,200 @@
+{
+  "tipo_documento": "CERTIDAO_NASCIMENTO",
+  "versao": "1.0",
+  "descricao": "Schema de extracao para Certidao de Registro de Nascimento",
+  "complexidade": "MEDIA",
+  "campos": [
+    {
+      "nome": "matricula",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d{6}\\.\\d{2}\\.\\d{2}\\.\\d{4}\\.\\d\\.\\d{5}\\.\\d{3}\\.\\d{7}-\\d{2}",
+      "exemplo": "123456.01.55.2020.1.12345.123.1234567-89",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Matricula nacional (certidoes novas)"
+    },
+    {
+      "nome": "livro",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-Z]?-?\\d+",
+      "exemplo": "A-123",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Numero do livro"
+    },
+    {
+      "nome": "folha",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d+[vV]?",
+      "exemplo": "45v",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Numero da folha (v = verso)"
+    },
+    {
+      "nome": "termo",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d+",
+      "exemplo": "12345",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Numero do termo"
+    },
+    {
+      "nome": "nome_registrado",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "PEDRO HENRIQUE SILVA",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Nome completo do registrado"
+    },
+    {
+      "nome": "data_nascimento",
+      "tipo": "date",
+      "obrigatorio": true,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "15/03/1995",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data de nascimento"
+    },
+    {
+      "nome": "hora_nascimento",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d{2}[h:]\\d{2}",
+      "exemplo": "14:30",
+      "nivel_extracao": 1,
+      "confianca_esperada": "media",
+      "descricao": "Hora do nascimento"
+    },
+    {
+      "nome": "sexo",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "(MASCULINO|FEMININO|M|F)",
+      "exemplo": "MASCULINO",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Sexo do registrado"
+    },
+    {
+      "nome": "local_nascimento",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "SAO PAULO/SP",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Cidade e estado de nascimento"
+    },
+    {
+      "nome": "nome_pai",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "JOSE CARLOS SILVA",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Nome completo do pai"
+    },
+    {
+      "nome": "nome_mae",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "MARIA APARECIDA SILVA",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Nome completo da mae"
+    },
+    {
+      "nome": "avo_paterno",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "ANTONIO SILVA",
+      "nivel_extracao": 2,
+      "confianca_esperada": "baixa",
+      "descricao": "Nome do avo paterno"
+    },
+    {
+      "nome": "avo_paterna",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "JOANA SILVA",
+      "nivel_extracao": 2,
+      "confianca_esperada": "baixa",
+      "descricao": "Nome da avo paterna"
+    },
+    {
+      "nome": "avo_materno",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "JOAQUIM SANTOS",
+      "nivel_extracao": 2,
+      "confianca_esperada": "baixa",
+      "descricao": "Nome do avo materno"
+    },
+    {
+      "nome": "avo_materna",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "ROSA SANTOS",
+      "nivel_extracao": 2,
+      "confianca_esperada": "baixa",
+      "descricao": "Nome da avo materna"
+    },
+    {
+      "nome": "cartorio",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "1o CARTORIO DE REGISTRO CIVIL DE SAO PAULO",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Nome do cartorio de registro"
+    },
+    {
+      "nome": "municipio_cartorio",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ\\s]+",
+      "exemplo": "SAO PAULO",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Municipio do cartorio"
+    },
+    {
+      "nome": "data_registro",
+      "tipo": "date",
+      "obrigatorio": false,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "20/03/1995",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data do registro"
+    }
+  ],
+  "padroes_identificacao": [
+    "CERTIDAO DE NASCIMENTO",
+    "REGISTRO DE NASCIMENTO",
+    "REGISTRO CIVIL",
+    "NASCEU",
+    "FILIACAO"
+  ],
+  "validacoes": [
+    "data_nascimento_valida",
+    "data_registro_posterior_nascimento",
+    "matricula_formato_valido"
+  ]
+}

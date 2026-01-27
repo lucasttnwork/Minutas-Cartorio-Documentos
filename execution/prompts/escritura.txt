@@ -1,0 +1,113 @@
+Analise esta Escritura Publica (compra e venda, doacao, permuta, etc).
+
+TAREFAS OBRIGATORIAS:
+1. REESCRITA: Transcreva os principais termos da escritura de forma organizada.
+2. EXPLICACAO: Descreva as partes, objeto, valores e condicoes do negocio juridico.
+3. CATALOGACAO: Extraia todos os campos estruturados.
+
+FORMATO DE SAIDA (use exatamente este formato):
+
+## REESCRITA DO DOCUMENTO
+[transcricao organizada da escritura - preambulo, qualificacao das partes, objeto, condicoes, clausulas]
+
+## EXPLICACAO CONTEXTUAL
+
+### Dados da Escritura
+- Tipo: [Compra e Venda / Doacao / Permuta / etc]
+- Livro: [numero]
+- Folhas: [numeros]
+- Data: [data]
+- Cartorio: [nome completo]
+- Tabeliao: [nome]
+
+### Partes
+
+**Vendedor(es) / Outorgante(s):**
+1. [Nome completo]
+   - CPF: [numero]
+   - RG: [numero e orgao]
+   - Estado civil: [estado civil]
+   - Conjuge: [nome] (se aplicavel)
+   - Endereco: [completo]
+
+**Comprador(es) / Outorgado(s):**
+1. [Nome completo]
+   - CPF: [numero]
+   - RG: [numero e orgao]
+   - Estado civil: [estado civil]
+   - Conjuge: [nome] (se aplicavel)
+   - Endereco: [completo]
+
+### Objeto (Imovel)
+- Descricao: [tipo de imovel]
+- Endereco: [completo]
+- Matricula: [numero] no [cartorio]
+- SQL: [numero]
+- Area total: [m2]
+- Fracao ideal: [percentual] (se condominio)
+
+### Valores e Condicoes
+- Valor da transacao: R$ [valor]
+- Forma de pagamento: [descricao]
+- Valor declarado para ITBI: R$ [valor]
+- ITBI recolhido: Sim/Nao - Guia [numero]
+
+### Certidoes Apresentadas
+[Lista de certidoes mencionadas na escritura]
+
+## DADOS CATALOGADOS (JSON)
+```json
+{
+  "tipo_escritura": "COMPRA E VENDA",
+  "cartorio": "1o Tabeliao de Notas de Sao Paulo",
+  "tabeliao": "NOME DO TABELIAO",
+  "livro": "0001",
+  "folhas": "001-010",
+  "data_lavratura": "01/01/2024",
+  "vendedores": [
+    {
+      "nome": "NOME DO VENDEDOR",
+      "cpf": "000.000.000-00",
+      "rg": "00.000.000-0 SSP/SP",
+      "estado_civil": "CASADO",
+      "regime_bens": "COMUNHAO PARCIAL",
+      "conjuge": {
+        "nome": "NOME DO CONJUGE",
+        "cpf": "000.000.000-00"
+      },
+      "endereco": "Rua Exemplo, 123, Bairro, Cidade - UF"
+    }
+  ],
+  "compradores": [
+    {
+      "nome": "NOME DO COMPRADOR",
+      "cpf": "000.000.000-00",
+      "rg": "00.000.000-0 SSP/SP",
+      "estado_civil": "SOLTEIRO",
+      "endereco": "Rua Exemplo, 456, Bairro, Cidade - UF"
+    }
+  ],
+  "imovel": {
+    "tipo": "APARTAMENTO",
+    "endereco": "Rua Exemplo, 789, Apto 101, Bairro, Cidade - UF",
+    "matricula": "00000",
+    "cartorio_ri": "1o Cartorio de Registro de Imoveis de Sao Paulo",
+    "sql": "000.000.0000-0",
+    "area_privativa_m2": 70.00,
+    "area_comum_m2": 10.00,
+    "area_total_m2": 80.00,
+    "fracao_ideal": "0,5000%",
+    "vagas_garagem": 1
+  },
+  "valor_transacao": 500000.00,
+  "valor_declarado_itbi": 500000.00,
+  "forma_pagamento": "A VISTA",
+  "guia_itbi": "000000000000",
+  "certidoes_apresentadas": [
+    "CNDT",
+    "CND FEDERAL",
+    "CND MUNICIPAL",
+    "MATRICULA ATUALIZADA"
+  ]
+}
+```

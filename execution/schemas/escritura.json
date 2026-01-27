@@ -1,0 +1,224 @@
+{
+  "tipo_documento": "ESCRITURA",
+  "versao": "1.0",
+  "descricao": "Schema de extracao para Minuta de Escritura Publica",
+  "complexidade": "ALTA",
+  "campos": [
+    {
+      "nome": "tipo_escritura",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": "COMPRA E VENDA",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Tipo do ato (COMPRA E VENDA, DOACAO, PERMUTA, etc)"
+    },
+    {
+      "nome": "tabelionato",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "18o TABELIAO DE NOTAS DE SAO PAULO",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Tabelionato de notas responsavel"
+    },
+    {
+      "nome": "livro",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d+",
+      "exemplo": "2345",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Numero do livro"
+    },
+    {
+      "nome": "folhas",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d+(/\\d+)?",
+      "exemplo": "123/125",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Numero das folhas (inicio/fim)"
+    },
+    {
+      "nome": "outorgantes",
+      "tipo": "array",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": [{"nome": "JOAO DA SILVA", "cpf": "123.456.789-00", "qualificacao": "VENDEDOR"}],
+      "nivel_extracao": 3,
+      "confianca_esperada": "alta",
+      "descricao": "Lista de outorgantes (vendedores/doadores)",
+      "campos_internos": [
+        {"nome": "qualificacao", "tipo": "string", "exemplo": "VENDEDOR|DOADOR|PERMUTANTE"},
+        {"nome": "nome", "tipo": "string"},
+        {"nome": "nacionalidade", "tipo": "string"},
+        {"nome": "estado_civil", "tipo": "string"},
+        {"nome": "regime_bens", "tipo": "string"},
+        {"nome": "profissao", "tipo": "string"},
+        {"nome": "rg", "tipo": "string"},
+        {"nome": "orgao_rg", "tipo": "string"},
+        {"nome": "cpf", "tipo": "string"},
+        {"nome": "endereco", "tipo": "object"},
+        {"nome": "conjuge", "tipo": "object"}
+      ]
+    },
+    {
+      "nome": "outorgados",
+      "tipo": "array",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": [{"nome": "MARIA SANTOS", "cpf": "987.654.321-00", "qualificacao": "COMPRADOR"}],
+      "nivel_extracao": 3,
+      "confianca_esperada": "alta",
+      "descricao": "Lista de outorgados (compradores/donatarios)",
+      "campos_internos": [
+        {"nome": "qualificacao", "tipo": "string", "exemplo": "COMPRADOR|DONATARIO|PERMUTANTE"},
+        {"nome": "nome", "tipo": "string"},
+        {"nome": "nacionalidade", "tipo": "string"},
+        {"nome": "estado_civil", "tipo": "string"},
+        {"nome": "regime_bens", "tipo": "string"},
+        {"nome": "profissao", "tipo": "string"},
+        {"nome": "rg", "tipo": "string"},
+        {"nome": "orgao_rg", "tipo": "string"},
+        {"nome": "cpf", "tipo": "string"},
+        {"nome": "endereco", "tipo": "object"},
+        {"nome": "conjuge", "tipo": "object"}
+      ]
+    },
+    {
+      "nome": "imovel",
+      "tipo": "object",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": {"matricula": "123456", "cartorio_ri": "1o OFICIAL DE RI"},
+      "nivel_extracao": 3,
+      "confianca_esperada": "alta",
+      "descricao": "Dados do imovel objeto da escritura",
+      "campos_internos": [
+        {"nome": "tipo", "tipo": "string"},
+        {"nome": "descricao", "tipo": "string"},
+        {"nome": "endereco", "tipo": "string"},
+        {"nome": "matricula", "tipo": "string"},
+        {"nome": "cartorio_ri", "tipo": "string"},
+        {"nome": "sql", "tipo": "string"},
+        {"nome": "area_privativa", "tipo": "number"},
+        {"nome": "area_comum", "tipo": "number"},
+        {"nome": "area_total", "tipo": "number"},
+        {"nome": "fracao_ideal", "tipo": "number"}
+      ]
+    },
+    {
+      "nome": "valor_transacao",
+      "tipo": "number",
+      "obrigatorio": true,
+      "regex": "R\\$\\s*[\\d.,]+",
+      "exemplo": "500000.00",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Valor total da transacao"
+    },
+    {
+      "nome": "forma_pagamento",
+      "tipo": "object",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": {"a_vista": 100000, "financiado": 400000, "banco": "CAIXA"},
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Forma e condicoes de pagamento",
+      "campos_internos": [
+        {"nome": "a_vista", "tipo": "number"},
+        {"nome": "financiado", "tipo": "number"},
+        {"nome": "banco_financiador", "tipo": "string"},
+        {"nome": "tipo_financiamento", "tipo": "string"}
+      ]
+    },
+    {
+      "nome": "certidoes_apresentadas",
+      "tipo": "array",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": ["CNDT", "CND Municipal", "Matricula Atualizada"],
+      "nivel_extracao": 3,
+      "confianca_esperada": "media",
+      "descricao": "Lista de certidoes apresentadas"
+    },
+    {
+      "nome": "clausulas_especiais",
+      "tipo": "array",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": ["Clausula de inalienabilidade", "Reserva de usufruto"],
+      "nivel_extracao": 3,
+      "confianca_esperada": "baixa",
+      "descricao": "Clausulas especiais da escritura"
+    },
+    {
+      "nome": "dados_itbi",
+      "tipo": "object",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": {"guia": "2026.123.456", "valor": 15000.00, "data_pagamento": "25/01/2026"},
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Dados do ITBI pago",
+      "campos_internos": [
+        {"nome": "numero_guia", "tipo": "string"},
+        {"nome": "valor", "tipo": "number"},
+        {"nome": "data_pagamento", "tipo": "date"}
+      ]
+    },
+    {
+      "nome": "selo_digital",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-Z0-9]+",
+      "exemplo": "ABCD1234567890",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Codigo do selo digital"
+    },
+    {
+      "nome": "data_lavratura",
+      "tipo": "date",
+      "obrigatorio": false,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "27/01/2026",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data de lavratura da escritura"
+    },
+    {
+      "nome": "status_minuta",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "(MINUTA|LAVRADA|REGISTRADA)",
+      "exemplo": "MINUTA",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Status do documento (minuta ou escritura lavrada)"
+    }
+  ],
+  "padroes_identificacao": [
+    "ESCRITURA PUBLICA",
+    "TABELIAO DE NOTAS",
+    "OUTORGANTE",
+    "OUTORGADO",
+    "COMPRA E VENDA",
+    "DOACAO",
+    "MINUTA",
+    "LAVRATURA"
+  ],
+  "validacoes": [
+    "cpf_digito_verificador",
+    "matricula_valida",
+    "sql_formato_valido",
+    "soma_valores_pagamento",
+    "datas_coerentes"
+  ]
+}

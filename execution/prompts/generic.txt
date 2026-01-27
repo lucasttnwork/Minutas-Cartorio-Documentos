@@ -1,0 +1,105 @@
+Analise este documento brasileiro.
+
+## REGRAS OBRIGATORIAS
+
+1. **NUNCA INVENTAR DADOS**: Se um campo estiver ilegivel ou ausente, retorne null. NUNCA fabrique informacoes.
+2. **EXPLICACAO OBRIGATORIA**: O campo explicacao_contextual DEVE conter 3-5 paragrafos explicando o documento.
+3. **CAMPOS NULOS**: Preferimos null a dados fabricados. Na duvida, use null.
+4. **IDENTIFICACAO DO TIPO**: Tente identificar o tipo especifico do documento para melhor catalogacao.
+
+## TIPOS DE DOCUMENTOS CONHECIDOS
+
+Se identificar um destes tipos, mencione na explicacao:
+- **CNDT**: Certidao Negativa de Debitos Trabalhistas
+- **CND_FEDERAL**: Certidao de Debitos Federais (Receita/PGFN)
+- **CND_MUNICIPAL**: Certidao de Tributos Municipais
+- **CND_ESTADUAL**: Certidao de Debitos Estaduais
+- **MATRICULA**: Certidao de Matricula de Imovel
+- **PROTOCOLO_ONR**: Protocolo do Operador Nacional do Registro
+- **VVR**: Valor Venal de Referencia
+- **ITBI**: Guia de ITBI
+- **PROCURACAO**: Procuracao Publica ou Particular
+- **CONTRATO**: Contrato de Compra e Venda, Locacao, etc.
+- **ESCRITURA**: Escritura Publica
+
+## TAREFAS OBRIGATORIAS
+
+1. REESCRITA: Transcreva todos os dados visiveis no documento de forma organizada.
+2. EXPLICACAO: Descreva o tipo de documento, sua finalidade e informacoes relevantes (3-5 paragrafos).
+3. CATALOGACAO: Extraia todos os dados estruturados que puder identificar.
+
+## FORMATO DE SAIDA (use exatamente este formato):
+
+## REESCRITA DO DOCUMENTO
+[transcricao completa e organizada de todos os dados visiveis]
+
+## EXPLICACAO CONTEXTUAL
+[MINIMO 3 PARAGRAFOS - Esta secao e OBRIGATORIA e deve ser detalhada]
+
+Paragrafo 1: Identifique o TIPO de documento e o ORGAO EMISSOR. Descreva brevemente do que se trata o documento.
+
+Paragrafo 2: Explique a FINALIDADE do documento - para que serve, em que contexto e usado, qual sua importancia legal ou pratica.
+
+Paragrafo 3: Resuma as PRINCIPAIS INFORMACOES contidas no documento (pessoas envolvidas, datas, valores, identificadores).
+
+Paragrafo 4 (opcional): Mencione OBSERVACOES RELEVANTES como validade, condicoes especiais, ressalvas legais.
+
+Paragrafo 5 (opcional): Informacoes ADICIONAIS que possam ser uteis para o usuario (proximos passos, verificacao de autenticidade, etc.).
+
+## DADOS CATALOGADOS (JSON)
+```json
+{
+  "tipo_documento_identificado": "DESCRICAO DO TIPO",
+  "subtipo": "Se aplicavel, especificacao mais detalhada",
+  "orgao_emissor": "Nome do orgao/entidade que emitiu",
+  "data_emissao": "DD/MM/AAAA",
+  "hora_emissao": "HH:MM:SS",
+  "data_validade": null,
+  "pessoas_mencionadas": [
+    {
+      "nome": "NOME COMPLETO DA PESSOA",
+      "cpf": "000.000.000-00",
+      "cnpj": null,
+      "papel": "descricao do papel no documento (ex: outorgante, outorgado, comprador, vendedor)"
+    }
+  ],
+  "imovel": {
+    "endereco": "Endereco completo se mencionado",
+    "matricula": "Numero da matricula se mencionado",
+    "cartorio": "Nome do cartorio se mencionado",
+    "sql": "Numero de cadastro municipal se mencionado"
+  },
+  "valores_monetarios": [
+    {
+      "descricao": "Descricao do valor",
+      "valor": 0.00,
+      "moeda": "BRL"
+    }
+  ],
+  "datas_importantes": [
+    {
+      "descricao": "Descricao da data",
+      "data": "DD/MM/AAAA"
+    }
+  ],
+  "numeros_identificadores": [
+    {
+      "tipo": "Tipo do identificador (protocolo, certidao, processo, etc)",
+      "numero": "Numero do identificador"
+    }
+  ],
+  "codigo_verificacao": null,
+  "url_verificacao": null,
+  "status": null,
+  "observacoes": "Observacoes adicionais sobre o documento que nao se encaixam em outros campos"
+}
+```
+
+## NOTAS IMPORTANTES
+
+- Este prompt e usado para documentos nao classificados - seja o mais detalhado possivel
+- Tente SEMPRE identificar o tipo especifico do documento
+- Se houver multiplas pessoas, liste TODAS com seus respectivos papeis
+- Valores monetarios devem ser convertidos para float (300.000,00 -> 300000.00)
+- Datas devem manter o formato brasileiro DD/MM/AAAA
+- Use o campo "observacoes" para informacoes que nao se encaixam em outros campos

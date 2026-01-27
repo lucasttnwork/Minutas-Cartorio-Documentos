@@ -150,13 +150,81 @@ cat .tmp/catalogos/FC_515_124_p280509.json
 
 ---
 
+### Fase 2: OCR com Document AI
+
+A Fase 2 extrai texto de cada documento catalogado usando Google Document AI.
+
+#### Pre-requisitos
+
+1. Configure as credenciais do Document AI no `.env`:
+```env
+GOOGLE_APPLICATION_CREDENTIALS=caminho/para/credentials.json
+PROJECT_ID=seu-projeto-gcp
+PROCESSOR_ID=seu-processador-document-ai
+```
+
+2. Instale dependencias adicionais:
+```bash
+pip install google-cloud-documentai pywin32
+```
+
+#### Uso Basico
+
+**Processar documento unico:**
+```bash
+python execution/ocr_document_ai.py "Test-Docs/FC 515 - 124 p280509/COMPRADORA/RG.jpg"
+```
+
+**Processar em lote (recomendado):**
+```bash
+python execution/batch_ocr.py FC_515_124_p280509
+```
+
+**Modo paralelo (mais rapido):**
+```bash
+python execution/batch_ocr.py FC_515_124_p280509 --parallel --workers 4
+```
+
+**Modo mock (teste sem API):**
+```bash
+python execution/batch_ocr.py FC_515_124_p280509 --mock
+```
+
+**Reprocessar documentos:**
+```bash
+python execution/batch_ocr.py FC_515_124_p280509 --force
+```
+
+#### Flags Disponiveis (Fase 2)
+
+| Flag | Descricao | Uso |
+|------|-----------|-----|
+| `--parallel` | Processamento em paralelo | Reduz tempo em ~60% |
+| `--workers N` | Numero de workers paralelos | Padrao: 4 |
+| `--force` | Reprocessa documentos ja processados | Corrigir erros |
+| `--mock` | OCR simulado sem API | Testes rapidos |
+
+#### Saidas
+
+- `.tmp/ocr/{escritura_id}/` - Arquivos `.txt` com texto extraido
+- `.tmp/ocr/{escritura_id}_relatorio.json` - Relatorio de processamento
+- Catalogo atualizado com campos `status_ocr`, `data_ocr`, `confianca_ocr`
+
+#### Limpeza de Arquivos Temporarios
+
+```bash
+python execution/clean_temp_files.py
+```
+
+---
+
 ## Status do Projeto
 
 | Fase | Status | Descricao |
 |------|--------|-----------|
 | Fase 1 | COMPLETA | Catalogacao e classificacao visual |
-| Fase 2 | EM ANDAMENTO | OCR com Google Document AI |
-| Fase 3 | PLANEJADA | Extracao de dados estruturados |
+| Fase 2 | COMPLETA | OCR com Google Document AI |
+| Fase 3 | COMPLETA | Extracao de dados estruturados |
 | Fase 4 | PLANEJADA | Mapeamento para campos da minuta |
 
 ### Resultados da Validacao (Fase 1)
@@ -167,6 +235,53 @@ cat .tmp/catalogos/FC_515_124_p280509.json
 - **0** erros de processamento
 - **4** arquivos para revisao manual (tipo OUTRO)
 
+### Resultados da Validacao (Fase 2)
+
+- **39 documentos** processados via OCR
+- **93.36%** confianca media
+- **0** erros de processamento
+- **~1m 40s** tempo total (paralelo, 4 workers)
+- **2 DOCX** convertidos para PDF automaticamente
+
+**Qualidade por tipo de documento:**
+| Tipo | Confianca | Observacao |
+|------|-----------|------------|
+| COMPROVANTE_PAGAMENTO | 97.7% | Melhor qualidade |
+| VVR | 97.1% | Excelente |
+| ITBI | 96.6% | Excelente |
+| CERTIDAO_NASCIMENTO | 84.1% | Ainda aceitavel |
+
+### Resultados da Validacao (Fase 3)
+
+- **39 documentos** processados
+- **38 com campos extraidos** (97.4%)
+- **81.35%** confianca media
+- **0.06s** tempo total
+
+---
+
+### Fase 3: Extracao Estruturada
+
+A Fase 3 extrai campos estruturados de cada documento usando os textos OCR.
+
+#### Uso Basico
+
+```bash
+python execution/extract_structured.py FC_515_124_p280509
+```
+
+#### Flags Disponiveis (Fase 3)
+
+| Flag | Descricao | Uso |
+|------|-----------|-----|
+| `--type TIPO` | Filtra por tipo de documento | Processar apenas RG, CNH, etc |
+| `--limit N` | Processa apenas N documentos | Testes rapidos |
+| `--verbose` | Saida detalhada | Debug |
+
+#### Saida
+
+- `.tmp/structured/{escritura_id}/*.json` - Arquivos JSON com campos extraidos por documento
+
 ---
 
 ## Documentacao
@@ -176,6 +291,7 @@ cat .tmp/catalogos/FC_515_124_p280509.json
 | `directives/00_system_architecture.md` | Arquitetura de 3 camadas |
 | `directives/01_plano_catalogacao_documentos.md` | Plano completo do projeto |
 | `directives/02_tipos_documentos_completo.md` | Referencia dos 26 tipos de documentos |
+| `directives/03_fase2_ocr_completa.md` | Documentacao da Fase 2 (OCR) |
 | `Guia-de-campos-e-variaveis/` | Campos de minutas (180+) |
 
 ---
@@ -189,4 +305,4 @@ Desenvolvido com:
 
 ---
 
-*Versao 1.2 - 2026-01-27*
+*Versao 1.4 - 2026-01-27*

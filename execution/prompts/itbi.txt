@@ -1,0 +1,243 @@
+Analise esta guia de ITBI (Imposto de Transmissao de Bens Imoveis) brasileira.
+
+=============================================================================
+REGRAS ANTI-FABRICACAO DE DADOS (OBRIGATORIO)
+=============================================================================
+NUNCA INVENTE DADOS. Se um campo nao estiver visivel no documento:
+- Use null para campos ausentes
+- NUNCA fabrique CPFs, CNPJs, nomes, valores ou datas
+- NUNCA assuma valores que nao estao escritos
+- Se nao conseguir ler um valor, use null e indique na explicacao
+- Prefira deixar campos vazios a inventar informacoes
+
+=============================================================================
+TAREFAS OBRIGATORIAS
+=============================================================================
+
+## TAREFA 1: REESCRITA INTEGRAL
+Transcreva TODOS os dados visiveis na guia, incluindo:
+- Cabecalho (orgao emissor, tipo de documento)
+- Todos os campos numerados (01-SERIE, 02-VENCIMENTO, etc)
+- Codigo de barras/linha digitavel
+- Informacoes de autenticacao mecanica
+
+## TAREFA 2: EXPLICACAO CONTEXTUAL OBRIGATORIA
+Explique o documento respondendo:
+
+### O que e este documento?
+[Explique que ITBI e imposto sobre transmissao de imoveis entre vivos]
+
+### Qual transacao imobiliaria esta sendo tributada?
+[Descreva: tipo de transacao, imovel, partes envolvidas]
+
+### Como o imposto foi calculado?
+[Explique: base_calculo = MAX(valor_transacao, valor_venal_referencia)]
+[Explique: valor_itbi = base_calculo x aliquota]
+[Se transmissao parcial, explique a proporcao]
+
+### Qual o status deste documento?
+[Explique se e guia pendente, paga, vencida, etc]
+
+## TAREFA 3: CATALOGACAO ESTRUTURADA
+
+=============================================================================
+CAMPOS CRITICOS - EXTRACAO OBRIGATORIA
+=============================================================================
+
+ATENCAO ESPECIAL para estes campos que FREQUENTEMENTE sao ignorados:
+
+1. MATRICULA DO IMOVEL
+   - Procure: "MATRICULA / TRANSCRICAO DE REGISTRO DE IMOVEL"
+   - Campo numerico de 5-6 digitos
+   - CRITICO para identificacao no cartorio
+
+2. PROPORCAO TRANSMITIDA
+   - Procure: "PROPORCAO" ou percentual (ex: "74,89%")
+   - Se "TOTALIDADE DO IMOVEL" = "Nao", este campo e OBRIGATORIO
+   - Indica transmissao parcial de co-propriedade
+
+3. TRANSMISSAO TOTALIDADE
+   - Procure: "ESTA SENDO TRANSMITIDA A TOTALIDADE DO IMOVEL"
+   - Valores: "Sim" ou "Nao"
+   - Se "Nao", OBRIGATORIAMENTE extrair proporcao
+
+4. CARTORIO DE REGISTRO
+   - Procure: "CARTORIO DE REGISTRO" ou "CRI"
+   - Nome completo do cartorio (ex: "1o Cartorio de Registro de Imovel")
+
+5. LINHA DIGITAVEL / CODIGO DE BARRAS
+   - Sequencia numerica longa (47-48 digitos)
+   - Geralmente proxima a "AUTENTICACAO MECANICA"
+
+=============================================================================
+CONCEITOS IMPORTANTES - ENTENDA ANTES DE EXTRAIR
+=============================================================================
+
+VALOR DA TRANSACAO: Valor pelo qual o imovel foi negociado
+VALOR VENAL DE REFERENCIA (VVR): Valor cadastral da prefeitura
+BASE DE CALCULO: SEMPRE o MAIOR entre valor_transacao e VVR
+VALOR DO ITBI: Resultado do calculo (base_calculo x aliquota)
+ALIQUOTA: Percentual aplicado (geralmente 2-3%)
+
+ERRO COMUM: Nao confunda "base_calculo" com "valor_itbi"!
+- base_calculo e o valor sobre o qual incide o imposto
+- valor_itbi e o imposto calculado
+
+=============================================================================
+FORMATO DE SAIDA
+=============================================================================
+
+## REESCRITA DO DOCUMENTO
+[Transcricao completa e fiel de todos os dados visiveis]
+
+## EXPLICACAO CONTEXTUAL
+
+### O que e este documento?
+[Explicacao do ITBI]
+
+### Qual transacao esta sendo tributada?
+[Detalhes da transacao: natureza, imovel, partes]
+
+### Como o imposto foi calculado?
+[Passo a passo do calculo com valores]
+
+### Qual o status deste documento?
+[Status: pendente, pago, vencido]
+
+## DADOS CATALOGADOS (JSON)
+```json
+{
+  "identificacao": {
+    "numero_transacao": "string",
+    "sql": "string (formato 000.000.0000-0)",
+    "codigo_tributo": "string (ex: 114)",
+    "especificacao_tributo": "string (ex: ITBI-IV)",
+    "emitente": "string (ex: SF-RI)"
+  },
+
+  "datas": {
+    "data_emissao": "DD/MM/YYYY",
+    "data_transacao": "DD/MM/YYYY",
+    "data_vencimento": "DD/MM/YYYY",
+    "data_validade": "DD/MM/YYYY ou null"
+  },
+
+  "imovel": {
+    "endereco_completo": "string",
+    "logradouro": "string",
+    "numero": "string",
+    "complemento": "string ou null",
+    "bairro": "string ou null",
+    "cep": "string (00000-000)",
+    "cidade": "string",
+    "estado": "string (2 letras)",
+    "matricula": "string (CAMPO CRITICO)",
+    "cartorio_registro": "string (CAMPO CRITICO)",
+    "tipo_imovel": "APARTAMENTO/CASA/TERRENO/COMERCIAL/NAO IDENTIFICADO"
+  },
+
+  "transacao": {
+    "natureza": "string (COMPRA E VENDA, DOACAO, etc)",
+    "transmissao_totalidade": "boolean (true se 100%, false se parcial)",
+    "proporcao_transmitida": "float (percentual, ex: 74.89) ou null se 100%",
+    "tipo_instrumento": "string (Escritura publica de compra e venda, etc)",
+    "tipo_financiamento": "string ou null",
+    "valor_financiado": "float ou null"
+  },
+
+  "partes": {
+    "transmitente": {
+      "nome": "string ou null (VENDEDOR)",
+      "cpf_cnpj": "string ou null"
+    },
+    "adquirente": {
+      "nome": "string (COMPRADOR - geralmente o CONTRIBUINTE)",
+      "cpf_cnpj": "string ou null"
+    }
+  },
+
+  "cartorios": {
+    "cartorio_notas": "string ou null",
+    "cartorio_notas_uf": "string ou null",
+    "cartorio_notas_municipio": "string ou null"
+  },
+
+  "valores": {
+    "valor_transacao": "float",
+    "valor_venal_referencia": "float",
+    "base_calculo": "float (CALCULAR: max(valor_transacao, valor_venal_referencia))",
+    "aliquota_percentual": "float (CALCULAR: (valor_itbi / base_calculo) * 100)",
+    "valor_itbi": "float (valor do imposto)",
+    "multa": "float (0.00 se nao houver)",
+    "juros": "float (0.00 se nao houver)",
+    "atualizacao_monetaria": "float (0.00 se nao houver)",
+    "total_a_pagar": "float"
+  },
+
+  "pagamento": {
+    "status": "PENDENTE/PAGO/VENCIDO",
+    "linha_digitavel": "string ou null",
+    "codigo_autenticacao": "string ou null (se pago)",
+    "data_pagamento": "DD/MM/YYYY ou null"
+  },
+
+  "metadados_documento": {
+    "orgao_emissor": "string (ex: PREFEITURA DO MUNICIPIO DE SAO PAULO)",
+    "tipo_formulario": "string (ex: DAMSP)",
+    "municipio_competente": "string"
+  },
+
+  "validacoes_realizadas": {
+    "base_calculo_conferida": "boolean",
+    "aliquota_calculada": "boolean",
+    "total_conferido": "boolean"
+  }
+}
+```
+
+=============================================================================
+VALIDACOES OBRIGATORIAS (EXECUTE ANTES DE RETORNAR)
+=============================================================================
+
+1. VALIDAR BASE DE CALCULO:
+   base_calculo DEVE ser = max(valor_transacao, valor_venal_referencia)
+   Se diferente, CORRIGIR e explicar
+
+2. CALCULAR ALIQUOTA:
+   aliquota_percentual = (valor_itbi / base_calculo) * 100
+   Resultado esperado: geralmente entre 2% e 3%
+
+3. VALIDAR TOTAL:
+   total_a_pagar = valor_itbi + multa + juros + atualizacao_monetaria
+
+4. VALIDAR DATAS:
+   data_emissao <= data_transacao <= data_vencimento
+
+5. VALIDAR PARTES:
+   Se natureza = "COMPRA E VENDA", devem existir transmitente E adquirente
+   (mesmo que um nao esteja visivel no documento)
+
+6. VALIDAR TRANSMISSAO PARCIAL:
+   Se transmissao_totalidade = false, proporcao_transmitida DEVE estar preenchida
+
+=============================================================================
+CHECKLIST FINAL DE CAMPOS CRITICOS
+=============================================================================
+
+Antes de retornar, VERIFIQUE se extraiu:
+[ ] numero_transacao
+[ ] sql
+[ ] matricula (CRITICO - campo frequentemente ignorado)
+[ ] endereco completo com CEP
+[ ] valor_transacao
+[ ] valor_venal_referencia
+[ ] base_calculo (CALCULADO corretamente)
+[ ] aliquota_percentual (CALCULADO)
+[ ] valor_itbi
+[ ] proporcao_transmitida (se transmissao parcial)
+[ ] cartorio_registro (CRITICO)
+[ ] linha_digitavel
+[ ] nome do adquirente
+[ ] data_vencimento
+
+Se algum campo CRITICO nao foi extraido, INDIQUE na explicacao contextual.

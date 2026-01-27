@@ -1,0 +1,96 @@
+Analise este protocolo/comprovante do Operador Nacional do Registro (ONR/SAEC).
+
+## REGRAS OBRIGATORIAS
+
+1. **NUNCA INVENTAR DADOS**: Se um campo estiver ilegivel ou ausente, retorne null. NUNCA fabrique informacoes.
+2. **EXPLICACAO OBRIGATORIA**: O campo explicacao_contextual DEVE conter 3-5 paragrafos explicando o documento.
+3. **CAMPOS NULOS**: Preferimos null a dados fabricados. Na duvida, use null.
+4. **TIMESTAMP PRECISO**: Procure o timestamp mais preciso disponivel (pode estar em URLs ou parametros).
+
+## CAMPOS CRITICOS A EXTRAIR
+
+- **Numero do Protocolo**: Formato tipico "P00000000000X"
+- **Data e Hora**: Use o timestamp mais preciso disponivel
+- **Tipo de Solicitacao**: Inferir do titulo da pagina ou contexto (ex: "Certidao Digital")
+- **Status**: "GERADO COM SUCESSO", "AGUARDANDO PAGAMENTO", etc.
+
+Campos opcionais (extrair se visiveis):
+- URL do sistema (ex: registradores.onr.org.br)
+- Informacoes de suporte (telefone, email, horario)
+- Matricula, cartorio, comarca (se mencionados)
+
+## DICA PARA TIMESTAMPS
+
+Em protocolos ONR/SAEC, ha frequentemente dois timestamps:
+1. Data/hora do cabecalho da pagina (ex: "14/11/2023, 13:17")
+2. Timestamp em URLs/parametros (ex: "VOID=14/11/2023 13:16:59")
+PRIORIZE o timestamp mais preciso (com segundos).
+
+## TAREFAS OBRIGATORIAS
+
+1. REESCRITA: Transcreva todos os dados do protocolo.
+2. EXPLICACAO: Descreva o tipo de solicitacao e seu status (3-5 paragrafos).
+3. CATALOGACAO: Extraia todos os campos estruturados.
+
+## FORMATO DE SAIDA (use exatamente este formato):
+
+## REESCRITA DO DOCUMENTO
+[transcricao completa do protocolo, incluindo mensagens de sucesso]
+
+## EXPLICACAO CONTEXTUAL
+[MINIMO 3 PARAGRAFOS - Esta secao e OBRIGATORIA e deve ser detalhada]
+
+Paragrafo 1: Identifique o documento como comprovante de protocolo do Sistema de Atendimento Eletronico Compartilhado (SAEC) do Operador Nacional do Registro (ONR). Mencione o numero do protocolo e a data/hora de geracao.
+
+Paragrafo 2: Explique O QUE E O SAEC/ONR - O ONR e o Operador Nacional do Registro de Imoveis, responsavel pela integracao dos cartorios de registro de imoveis do Brasil. O SAEC e seu sistema de atendimento eletronico que permite solicitar certidoes, acompanhar pedidos e realizar diversos servicos registrais online.
+
+Paragrafo 3: Descreva o TIPO DE SOLICITACAO e o STATUS. Por exemplo: "Este protocolo refere-se a uma solicitacao de Certidao Digital, que foi gerada com sucesso. O solicitante pode acompanhar o andamento atraves do numero de protocolo informado."
+
+Paragrafo 4 (opcional): Informe sobre proximos passos - como acompanhar o pedido, prazos tipicos, ou onde obter suporte.
+
+Paragrafo 5 (opcional): Informacoes de contato do suporte ONR, se disponiveis no documento.
+
+## DADOS CATALOGADOS (JSON)
+```json
+{
+  "tipo_documento": "PROTOCOLO_ONR",
+  "numero_protocolo": "P23110224786D",
+  "data_protocolo": "14/11/2023",
+  "hora_protocolo": "13:16:59",
+  "timestamp_preciso": "14/11/2023 13:16:59",
+  "tipo_solicitacao": "CERTIDAO DIGITAL",
+  "status": "GERADO COM SUCESSO",
+  "sistema_origem": {
+    "sigla": "SAEC",
+    "nome_completo": "Servico de Atendimento Eletronico Compartilhado",
+    "operador": "ONR"
+  },
+  "url_sistema": "https://registradores.onr.org.br/CertidaoDigital/Default.aspx",
+  "matricula": null,
+  "cartorio": null,
+  "comarca": null,
+  "uf": null,
+  "solicitante": {
+    "nome": null,
+    "cpf_cnpj": null
+  },
+  "valor_emolumentos": null,
+  "codigo_verificacao": null,
+  "informacoes_suporte": {
+    "telefone": "(11) 3195-2290",
+    "email": "servicedesk@onr.org.br",
+    "horario": "2a a 6a feira - das 9h as 16h30"
+  },
+  "metadados_documento": {
+    "numero_paginas": 2,
+    "paginas_com_conteudo": [1]
+  }
+}
+```
+
+## NOTAS IMPORTANTES
+
+- O tipo de solicitacao pode ser inferido do titulo da pagina (ex: "Certidao Digital - SAEC")
+- Campos como matricula, cartorio, comarca podem estar AUSENTES em comprovantes de protocolo - use null
+- Se a pagina 2 contiver apenas menus de navegacao, ignore mas documente em metadados
+- O status deve refletir EXATAMENTE a mensagem do sistema ("gerado com sucesso" -> "GERADO COM SUCESSO")

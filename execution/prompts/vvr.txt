@@ -1,0 +1,71 @@
+Analise esta consulta de Valor Venal de Referencia (VVR) do imovel.
+
+## REGRAS OBRIGATORIAS
+
+1. **NUNCA INVENTAR DADOS**: Se um campo estiver ilegivel ou ausente, retorne null. NUNCA fabrique informacoes.
+2. **EXPLICACAO OBRIGATORIA**: O campo explicacao_contextual DEVE conter 3-5 paragrafos explicando o documento.
+3. **CAMPOS NULOS**: Preferimos null a dados fabricados. Na duvida, use null.
+4. **CONVERSAO MONETARIA**: Converta valores de "301.147,00" (formato brasileiro) para 301147.00 (float).
+
+## CAMPOS CRITICOS A EXTRAIR
+
+- **SQL**: Numero de cadastro do imovel (formato com pontos: 000.000.0000.0)
+- **Valor Venal**: Converter para numero (float)
+- **Endereco Completo**: Incluindo numero, complemento e CEP
+- **Data e Hora**: Da consulta
+
+Campos opcionais (extrair se visiveis):
+- URL do sistema de origem
+- Orgao emissor (Secretaria Municipal da Fazenda)
+- Estrutura do documento (paginas com conteudo)
+
+## TAREFAS OBRIGATORIAS
+
+1. REESCRITA: Transcreva todos os dados da consulta.
+2. EXPLICACAO: Explique o valor venal de referencia e sua aplicacao (3-5 paragrafos).
+3. CATALOGACAO: Extraia todos os campos estruturados.
+
+## FORMATO DE SAIDA (use exatamente este formato):
+
+## REESCRITA DO DOCUMENTO
+[transcricao completa da consulta VVR]
+
+## EXPLICACAO CONTEXTUAL
+[MINIMO 3 PARAGRAFOS - Esta secao e OBRIGATORIA e deve ser detalhada]
+
+Paragrafo 1: Identifique o imovel pelo SQL e endereco completo. Mencione o orgao emissor (Prefeitura/Secretaria da Fazenda).
+
+Paragrafo 2: Explique O QUE E O VVR - o Valor Venal de Referencia e o valor minimo de mercado estabelecido pela prefeitura para fins de calculo do ITBI (Imposto de Transmissao de Bens Imoveis). Este valor serve como piso para a base de calculo do imposto.
+
+Paragrafo 3: Explique A APLICACAO PRATICA - Se o valor da transacao imobiliaria for MENOR que o VVR, o ITBI sera calculado sobre o VVR. Se for MAIOR, sera calculado sobre o valor da transacao. Isso evita subdeclaracao de valores.
+
+Paragrafo 4 (opcional): Informe a data da consulta e que o valor pode ser atualizado periodicamente pela prefeitura.
+
+Paragrafo 5 (opcional): Outras informacoes relevantes sobre o sistema de consulta ou observacoes do documento.
+
+## DADOS CATALOGADOS (JSON)
+```json
+{
+  "tipo_documento": "VVR",
+  "sql": "000.000.0000.0",
+  "endereco_completo": "Rua Exemplo, 00123 Apto 101 BL-A 00000-000",
+  "valor_venal_referencia": 500000.00,
+  "data_consulta": "01/01/2024",
+  "hora_consulta": "10:00",
+  "orgao_emissor": "Secretaria Municipal da Fazenda (SF)",
+  "url_sistema_origem": "https://itbi.prefeitura.sp.gov.br/valorreferencia/",
+  "codigo_verificacao": null,
+  "estrutura_documento": {
+    "total_paginas": 3,
+    "paginas_com_conteudo": [1],
+    "paginas_em_branco": [2, 3]
+  }
+}
+```
+
+## NOTAS IMPORTANTES
+
+- O formato SQL pode variar: "039 080 0244 3" (entrada) vs "039.080.0244.3" (resultado) - use o formato com pontos
+- SEMPRE converta o valor monetario para float: "301.147,00" -> 301147.00
+- Se o documento tiver paginas em branco, ignore-as mas documente na estrutura
+- Codigo de verificacao geralmente NAO existe em consultas VVR - use null

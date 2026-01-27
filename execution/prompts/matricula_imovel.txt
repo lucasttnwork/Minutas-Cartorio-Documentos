@@ -1,0 +1,484 @@
+# PROMPT PARA ANÁLISE DE MATRÍCULA DE IMÓVEL - v2.0 CORRIGIDO
+
+## REGRAS OBRIGATÓRIAS (LEIA PRIMEIRO!)
+
+1. **CADEIA DOMINIAL COMPLETA**: Você DEVE listar TODOS os proprietários desde a abertura da matrícula até hoje. NUNCA omita o proprietário original.
+
+2. **ÔNUS COMPLETOS**: Capture TANTO ônus ativos QUANTO históricos (cancelados). Use campos separados: `onus_ativos` e `onus_historicos`.
+
+3. **VERIFICAR CANCELAMENTOS**: Procure SEMPRE por termos como "CANCELADA", "QUITADA", "BAIXADA" nas averbações. Um ônus cancelado NÃO deve aparecer em `onus_ativos`.
+
+4. **NUNCA CONFUNDIR**:
+   - OFICIAL DO CARTÓRIO (Flauzilino, escreventes, etc.) ≠ PARTE DO NEGÓCIO (vendedor, comprador)
+   - O oficial CERTIFICA o documento, ele NÃO É vendedor/comprador
+
+5. **NUNCA INVENTAR DADOS**: Se algo está ilegível ou ausente, retorne `null`. NUNCA invente datas, valores ou nomes.
+
+6. **EXPLICAÇÃO CONTEXTUAL OBRIGATÓRIA**: O campo `explicacao_contextual` DEVE conter 3-5 parágrafos explicando a história do imóvel. NUNCA deixe vazio ou com apenas "#".
+
+---
+
+## CONTEXTO DO DOCUMENTO
+
+Uma **matrícula de imóvel** é o documento oficial que registra toda a história de um imóvel no Brasil. Ela contém:
+- **Descrição do imóvel**: endereço, áreas, confrontações
+- **Proprietários originais**: quem abriu a matrícula
+- **Registros (R-1, R-2, R-3...)**: transmissões de propriedade (vendas, doações, heranças) e ônus (hipotecas, penhoras)
+- **Averbações (AV-1, AV-2...)**: modificações, cancelamentos, alterações de estado civil
+
+**O que são R-X e AV-X?**
+- **R-1, R-2, R-3...** = REGISTROS. Podem ser:
+  - Transmissão de propriedade (venda, doação, herança)
+  - Constituição de ônus (hipoteca, alienação fiduciária, penhora)
+- **AV-1, AV-2...** = AVERBAÇÕES. Podem ser:
+  - Cancelamento de ônus (hipoteca quitada)
+  - Mudança de estado civil
+  - Alteração de denominação social de empresas
+  - Retificação de dados
+
+---
+
+## TAREFAS OBRIGATÓRIAS
+
+### 1. REESCRITA INTERPRETADA
+Transcreva o documento COMPLETO, organizando por seções:
+- Dados de identificação (matrícula, cartório, livro, ficha)
+- Descrição do imóvel
+- Proprietário original (da abertura da matrícula)
+- Todos os registros R-X em ordem
+- Todas as averbações AV-X em ordem
+- Marque claramente se há texto como "(continua no verso)"
+
+### 2. ANÁLISE DA CADEIA DOMINIAL (CRÍTICO!)
+
+**PASSO A PASSO OBRIGATÓRIO:**
+
+a) **Identifique o PROPRIETÁRIO ORIGINAL**:
+   - Está no início da matrícula, após a descrição do imóvel
+   - Geralmente começa com "Proprietário:" ou logo após a descrição
+   - Inclui o TÍTULO AQUISITIVO (ex: "conforme Transcrição nº 85.258")
+
+b) **Siga CADA registro R-X cronologicamente**:
+   - R-1: Quem transmitiu? Para quem? Que tipo de ato? (venda, doação, hipoteca?)
+   - R-2: Mesmo processo
+   - Continue até o último registro
+
+c) **Verifique averbações de cancelamento**:
+   - Procure por "CANCELADA", "QUITADA", "BAIXADA"
+   - Se encontrar, o ônus correspondente está EXTINTO
+
+d) **Determine os PROPRIETÁRIOS ATUAIS**:
+   - São os ÚLTIMOS ADQUIRENTES de uma transmissão de propriedade (não de ônus)
+   - Se não houve nenhuma transmissão após a abertura, é o proprietário original
+
+### 3. ANÁLISE DE ÔNUS E GRAVAMES
+
+**Tipos de ônus comuns:**
+- HIPOTECA: Garantia de empréstimo
+- ALIENAÇÃO FIDUCIÁRIA: O credor é "dono" até quitação
+- PENHORA: Bloqueio judicial
+- USUFRUTO: Direito de uso por terceiro
+- SALDO DEVEDOR: Parcelamento ao vendedor
+
+**Para CADA ônus identificado:**
+1. Verifique se há averbação de cancelamento posterior
+2. Se CANCELADO → vai para `onus_historicos`
+3. Se ATIVO → vai para `onus_ativos`
+4. Se documento truncado ("continua no verso") → marque status como "DESCONHECIDO"
+
+### 4. CATALOGAÇÃO DE DADOS
+
+Extraia TODOS os dados estruturados conforme schema abaixo.
+
+---
+
+## FORMATO DE SAÍDA OBRIGATÓRIO
+
+Use EXATAMENTE este formato:
+
+```
+## REESCRITA DO DOCUMENTO
+
+[Transcrição completa organizada por seções]
+
+---
+
+## EXPLICAÇÃO CONTEXTUAL
+
+### Resumo da Matrícula
+[Parágrafo 1: Descrição geral do imóvel - o que é, onde fica, quando a matrícula foi aberta]
+
+### Cadeia Dominial Completa
+[Parágrafo 2-3: Conte a história de propriedade. Quem era o dono original? Para quem vendeu? Quando? Por quanto? Houve financiamento?]
+
+### Status dos Ônus
+[Parágrafo 4: Quais ônus existiram? Quais foram cancelados? Quais ainda estão ativos?]
+
+### Situação Atual
+[Parágrafo 5: Quem são os proprietários atuais? O imóvel está livre de ônus? Há algum alerta importante?]
+
+---
+
+## DADOS CATALOGADOS
+```json
+{
+  "tipo_documento": "MATRICULA_IMOVEL",
+  "numero_matricula": "46.511",
+  "livro": "2 - REGISTRO GERAL",
+  "ficha": "1",
+  "cartorio": "1º Cartório de Registro de Imóveis de São Paulo",
+  "data_abertura_matricula": "17/07/1984",
+
+  "imovel": {
+    "tipo_unidade": "apartamento|vaga_garagem|casa|sala_comercial|terreno|outro",
+    "descricao_completa": "Unidade autônoma nº 124 no 12º andar do Edifício Serra do Mar, Bloco B",
+    "endereco": {
+      "logradouro": "Rua Francisco Cruz",
+      "numero": "515",
+      "complemento": "Apto 124, Bloco B",
+      "edificio": "Edifício Serra do Mar",
+      "bairro": "Vila Mariana",
+      "subdistrito": "9º subdistrito",
+      "cidade": "São Paulo",
+      "uf": "SP",
+      "cep": null
+    },
+    "sql": "039.080.0244-3",
+    "area_util_m2": 70.83,
+    "area_comum_m2": 12.66,
+    "area_total_m2": 83.49,
+    "fracao_ideal": "0,65228%"
+  },
+
+  "cadeia_dominial": [
+    {
+      "sequencia": 1,
+      "tipo": "ABERTURA_MATRICULA",
+      "registro": "MATRICULA",
+      "data": "17/07/1984",
+      "proprietarios": [
+        {
+          "nome": "LUIZ CARLOS TEIXEIRA",
+          "cpf": "360.041.468-20",
+          "rg": "4.598.493-SP",
+          "nacionalidade": "brasileiro",
+          "profissao": "bancário",
+          "estado_civil": "casado",
+          "regime_casamento": "comunhão universal de bens, antes da Lei 6515/77",
+          "conjuge": {
+            "nome": "NILCE APARECIDA POLITO TEIXEIRA",
+            "rg": "06385079-6-RJ",
+            "profissao": "do lar"
+          },
+          "endereco": "Rua das Rosas, 33, São Paulo/SP"
+        }
+      ],
+      "titulo_aquisitivo": {
+        "tipo": "TRANSCRICAO",
+        "numero": "85.258"
+      },
+      "observacoes": "Proprietário original na abertura da matrícula"
+    },
+    {
+      "sequencia": 2,
+      "tipo": "TRANSMISSAO_VENDA",
+      "registro": "R-1/46.511",
+      "data_instrumento": "03/07/1984",
+      "data_registro": "17/07/1984",
+      "transmitentes": [
+        {
+          "nome": "LUIZ CARLOS TEIXEIRA",
+          "cpf": "360.041.468-20",
+          "rg": "4.598.493-SP",
+          "estado_civil": "casado",
+          "conjuge": "NILCE APARECIDA POLITO TEIXEIRA"
+        }
+      ],
+      "adquirentes": [
+        {
+          "nome": "ELIZETE APARECIDA SILVA",
+          "cpf": "949.735.638-20",
+          "rg": "7.878.936-SP",
+          "nacionalidade": "brasileira",
+          "profissao": "bancária",
+          "estado_civil": "solteira",
+          "fracao": "não especificada (presumida 50%)"
+        },
+        {
+          "nome": "RODOLFO WOLFGANG ORTRIWANO",
+          "cpf": "585.096.668-49",
+          "rg": "6.075.352-SP",
+          "nacionalidade": "brasileiro",
+          "profissao": "jornalista",
+          "estado_civil": "separado judicialmente",
+          "endereco": "Rua São Carlos do Pinhal, 37, apto 92",
+          "fracao": "não especificada (presumida 50%)"
+        }
+      ],
+      "valor_transacao": {
+        "moeda": "Cr$",
+        "valor": "22.000.000,00",
+        "forma_pagamento": "Cr$ 7.000.000,00 à vista + Cr$ 15.000.000,00 parcelado"
+      },
+      "instrumento": "particular",
+      "observacoes": "Saldo devedor registrado em R-2"
+    }
+  ],
+
+  "registros_averbacoes": [
+    {
+      "numero": "R-1/46.511",
+      "tipo": "TRANSMISSAO_VENDA",
+      "data": "17/07/1984",
+      "resumo": "Venda de LUIZ CARLOS TEIXEIRA para ELIZETE e RODOLFO"
+    },
+    {
+      "numero": "R-2/46.511",
+      "tipo": "CONSTITUICAO_HIPOTECA",
+      "data": "17/07/1984",
+      "resumo": "Hipoteca de Cr$ 15.000.000,00 para garantir saldo devedor",
+      "status_atual": "CANCELADO por AV-5"
+    },
+    {
+      "numero": "AV-3/46.511",
+      "tipo": "CESSAO_DIREITOS_CREDITORIOS",
+      "data": "17/07/1984",
+      "resumo": "Cessão dos direitos creditórios do R-2 para ITAÚ S/A CRÉDITO IMOBILIÁRIO"
+    },
+    {
+      "numero": "AV-4/46.511",
+      "tipo": "ALTERACAO_DENOMINACAO_SOCIAL",
+      "data": "23/11/1990",
+      "resumo": "ITAÚ S/A CRÉDITO IMOBILIÁRIO passa a se chamar BANCO ITAÚ S/A"
+    },
+    {
+      "numero": "AV-5/46.511",
+      "tipo": "CANCELAMENTO_HIPOTECA",
+      "data": "23/11/1990",
+      "resumo": "Hipoteca do R-2 CANCELADA mediante quitação dada pelo BANCO ITAÚ S/A"
+    }
+  ],
+
+  "proprietarios_atuais": [
+    {
+      "nome": "ELIZETE APARECIDA SILVA",
+      "cpf": "949.735.638-20",
+      "rg": "7.878.936-SP",
+      "nacionalidade": "brasileira",
+      "profissao": "bancária",
+      "estado_civil": "solteira",
+      "fracao": {
+        "valor": 0.5,
+        "tipo": "presumida",
+        "observacao": "Documento não especifica divisão percentual"
+      },
+      "registro_aquisicao": "R-1/46.511",
+      "data_aquisicao": "17/07/1984"
+    },
+    {
+      "nome": "RODOLFO WOLFGANG ORTRIWANO",
+      "cpf": "585.096.668-49",
+      "rg": "6.075.352-SP",
+      "nacionalidade": "brasileiro",
+      "profissao": "jornalista",
+      "estado_civil": "separado judicialmente",
+      "fracao": {
+        "valor": 0.5,
+        "tipo": "presumida",
+        "observacao": "Documento não especifica divisão percentual"
+      },
+      "registro_aquisicao": "R-1/46.511",
+      "data_aquisicao": "17/07/1984"
+    }
+  ],
+
+  "onus_ativos": [],
+
+  "onus_historicos": [
+    {
+      "tipo": "HIPOTECA",
+      "registro": "R-2/46.511",
+      "data_constituicao": "17/07/1984",
+      "valor_original": {
+        "moeda": "Cr$",
+        "valor": "15.000.000,00"
+      },
+      "credores": ["LUIZ CARLOS TEIXEIRA", "NILCE APARECIDA POLITO TEIXEIRA"],
+      "credor_final": "BANCO ITAÚ S/A",
+      "devedores": ["ELIZETE APARECIDA SILVA", "RODOLFO WOLFGANG ORTRIWANO"],
+      "status": "CANCELADO",
+      "averbacao_cancelamento": "AV-5/46.511",
+      "data_cancelamento": "23/11/1990",
+      "motivo_cancelamento": "Quitação dada pelo BANCO ITAÚ S/A a ELIZETE APARECIDA SILVA",
+      "observacoes": "Hipoteca tinha como garantia também a matrícula 46.512"
+    }
+  ],
+
+  "matriculas_relacionadas": [
+    {
+      "numero": "46.512",
+      "tipo_relacao": "garantia_solidaria_hipoteca",
+      "registro_referencia": "R-2/46.511",
+      "observacao": "Hipoteca R-2 tinha como garantia também este imóvel"
+    }
+  ],
+
+  "cessoes_direitos": [
+    {
+      "averbacao": "AV-3/46.511",
+      "data": "17/07/1984",
+      "cedentes": ["LUIZ CARLOS TEIXEIRA", "NILCE APARECIDA POLITO TEIXEIRA"],
+      "cessionario": {
+        "nome": "ITAÚ S/A CRÉDITO IMOBILIÁRIO",
+        "cnpj": "62.808.977/0001-97"
+      },
+      "objeto": "Todos os direitos creditórios oriundos do R-2"
+    }
+  ],
+
+  "certidao_metadata": {
+    "tipo": "CERTIDAO_DIGITAL",
+    "protocolo": "253159",
+    "data_emissao": "14/11/2023",
+    "hora_emissao": "09:39:32",
+    "oficial": "Flauzilino Araújo dos Santos",
+    "escrevente": "MÁRCIA HASSESIAN",
+    "selo_digital": "1114503C3000000119225123J",
+    "validade_para_escrituras_dias": 30,
+    "valor_custas": "R$ 68,25",
+    "url_verificacao": null
+  },
+
+  "contexto_pagina": {
+    "pagina_atual": 1,
+    "total_paginas": 3,
+    "conteudo": "frente_e_verso_completos",
+    "documento_completo": true,
+    "alertas_pagina": []
+  },
+
+  "alertas": [
+    {
+      "gravidade": "INFO",
+      "tipo": "IMÓVEL_LIVRE",
+      "mensagem": "Imóvel está livre e desembaraçado. Última hipoteca cancelada em 23/11/1990."
+    }
+  ],
+
+  "data_ultima_atualizacao": "14/11/2023"
+}
+```
+
+---
+
+## INSTRUÇÕES ESPECÍFICAS POR SITUAÇÃO
+
+### Quando o documento indica "continua no verso":
+```json
+{
+  "contexto_pagina": {
+    "documento_completo": false,
+    "alertas_pagina": ["Documento indica continuação no verso - informações podem estar incompletas"]
+  },
+  "alertas": [
+    {
+      "gravidade": "ALTA",
+      "tipo": "DOCUMENTO_INCOMPLETO",
+      "mensagem": "R-2 incompleto - documento indica continuação no verso. Solicitar página complementar."
+    }
+  ]
+}
+```
+
+### Quando NÃO há transmissão de propriedade (só a abertura):
+O proprietário original É o proprietário atual.
+
+### Quando há múltiplas transmissões (R-1, R-3, R-5...):
+Siga a cadeia até o ÚLTIMO registro de transmissão de propriedade (não de ônus).
+
+### Quando o ônus NÃO tem informação de cancelamento:
+Marque como ATIVO (princípio da cautela):
+```json
+{
+  "onus_ativos": [
+    {
+      "tipo": "HIPOTECA",
+      "registro": "R-2/46.511",
+      "status": "ATIVO",
+      "observacoes": "Sem averbação de cancelamento encontrada no documento"
+    }
+  ]
+}
+```
+
+### Como distinguir OFICIAL DO CARTÓRIO de PARTE DO NEGÓCIO:
+- **OFICIAIS/ESCREVENTES** (IGNORAR como pessoa_relacionada):
+  - Aparecem no FIM do documento, na assinatura/certificação
+  - Exemplos: "Flauzilino Araújo dos Santos - Oficial", "Escrevente: MÁRCIA HASSESIAN"
+
+- **PARTES DO NEGÓCIO** (INCLUIR como pessoa_relacionada):
+  - Aparecem NOS REGISTROS (R-X) e AVERBAÇÕES (AV-X)
+  - São: vendedores, compradores, doadores, donatários, credores, devedores
+
+### Valores em moedas antigas:
+- Cr$ = Cruzeiros (até 1986)
+- Cz$ = Cruzados (1986-1989)
+- NCz$ = Cruzados Novos (1989-1990)
+- Cr$ = Cruzeiros novamente (1990-1993)
+- CR$ = Cruzeiros Reais (1993-1994)
+- R$ = Reais (1994-atual)
+
+Mantenha o valor ORIGINAL com a moeda da época. Não converta.
+
+---
+
+## VALIDAÇÕES OBRIGATÓRIAS ANTES DE RETORNAR
+
+Antes de retornar o JSON, verifique:
+
+1. [ ] Campo `cadeia_dominial` contém o proprietário original?
+2. [ ] Campo `proprietarios_atuais` está preenchido (não vazio)?
+3. [ ] Todos os ônus com "CANCELADA/QUITADA" estão em `onus_historicos` (não em `onus_ativos`)?
+4. [ ] Campo `explicacao_contextual` tem 3-5 parágrafos (não está vazio ou com "#")?
+5. [ ] O campo `pessoa_relacionada` NÃO contém oficiais do cartório?
+6. [ ] Todas as datas são do documento (não inventadas)?
+7. [ ] Se documento truncado, há alerta em `alertas`?
+
+---
+
+## EXEMPLO COMPLETO DE EXPLICAÇÃO CONTEXTUAL (OBRIGATÓRIO!)
+
+### Modelo que DEVE ser seguido:
+
+```
+## EXPLICAÇÃO CONTEXTUAL
+
+### Resumo da Matrícula
+Esta certidão refere-se à matrícula nº 46.511, aberta em 17/07/1984 perante o 1º Cartório de Registro de Imóveis de São Paulo. O imóvel é a unidade autônoma nº 124 (apartamento) localizada no 12º andar do Edifício Serra do Mar, Bloco B, situado na Rua Francisco Cruz, 515, Vila Mariana, São Paulo/SP. O apartamento possui 70,83m² de área útil, 12,66m² de área comum, totalizando 83,49m², com fração ideal de 0,65228% no condomínio.
+
+### Cadeia Dominial Completa
+A matrícula foi aberta em nome de LUIZ CARLOS TEIXEIRA e sua esposa NILCE APARECIDA POLITO TEIXEIRA, casados sob o regime de comunhão universal de bens (anterior à Lei 6515/77). O título aquisitivo original foi a Transcrição nº 85.258 (sistema de registro anterior às matrículas).
+
+No mesmo dia da abertura (17/07/1984), o casal vendeu o imóvel para ELIZETE APARECIDA SILVA (bancária, solteira) e RODOLFO WOLFGANG ORTRIWANO (jornalista, separado judicialmente) pelo valor de Cr$ 22.000.000,00, conforme R-1/46.511. O instrumento foi particular, datado de 03/07/1984.
+
+### Status dos Ônus
+Para garantir o pagamento do saldo devedor de Cr$ 15.000.000,00, foi constituída hipoteca (R-2/46.511) em favor dos vendedores. Os vendedores então cederam seus direitos creditórios ao ITAÚ S/A CRÉDITO IMOBILIÁRIO (AV-3/46.511). Em 1990, após mudança de denominação social do banco para BANCO ITAÚ S/A (AV-4/46.511), a hipoteca foi QUITADA e formalmente CANCELADA em 23/11/1990 (AV-5/46.511).
+
+### Situação Atual
+Atualmente, os proprietários são ELIZETE APARECIDA SILVA (CPF 949.735.638-20) e RODOLFO WOLFGANG ORTRIWANO (CPF 585.096.668-49), em frações presumidamente iguais (50% cada), visto que o documento não especifica divisão percentual. O imóvel encontra-se LIVRE E DESEMBARAÇADO de qualquer ônus ou gravame, estando apto para alienação. A presente certidão foi emitida em 14/11/2023 e tem validade de 30 dias para fins de lavratura de escrituras.
+```
+
+---
+
+## LEMBRETE FINAL
+
+Este prompt foi criado para resolver os seguintes problemas críticos identificados:
+1. ❌ Proprietários atuais vazios → ✅ Sempre preencher a partir da cadeia dominial
+2. ❌ Ônus ativos vazios quando há ônus → ✅ Verificar cancelamentos antes de classificar
+3. ❌ Cadeia dominial incompleta → ✅ Incluir SEMPRE o proprietário original
+4. ❌ Oficial do cartório como vendedor → ✅ Distinguir autoridade de parte
+5. ❌ Explicação contextual vazia → ✅ Obrigatório 3-5 parágrafos
+6. ❌ Ônus históricos não capturados → ✅ Campo `onus_historicos` separado
+7. ❌ Matrículas relacionadas ignoradas → ✅ Campo `matriculas_relacionadas`
+
+SIGA ESTAS INSTRUÇÕES COM RIGOR. A precisão jurídica desta análise é CRÍTICA para operações imobiliárias.

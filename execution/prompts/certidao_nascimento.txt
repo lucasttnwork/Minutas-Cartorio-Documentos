@@ -1,0 +1,261 @@
+## REGRAS CRITICAS - LEIA COM ATENCAO
+
+### 1. NUNCA NUNCA NUNCA INVENTAR DADOS
+- PROIBIDO: "EXEMPLO DE NOME COMPLETO" ou qualquer placeholder
+- PROIBIDO: "01/01/1987" ou datas baseadas em suposicao do ano do registro
+- PROIBIDO: Qualquer dado generico, estimado ou inventado
+- SE ILEGIVEL: Retorne null e explique na explicacao_contextual
+
+### 2. CONSISTENCIA OBRIGATORIA
+- Se nao consegue ler o nome, provavelmente nao consegue ler outros campos textuais
+- Nao invente nome enquanto deixa data como null - seja consistente
+- Validacao: data_nascimento DEVE ser ANTERIOR a data_registro
+
+### 3. EXPLICACAO CONTEXTUAL OBRIGATORIA
+- Minimo 3 paragrafos, maximo 5 paragrafos
+- Listar QUAIS campos foram LIDOS com sucesso
+- Listar QUAIS campos estao ILEGIVEIS (com motivo)
+- NUNCA terminar abruptamente ou com "#"
+- NUNCA deixar texto incompleto
+
+---
+
+Analise esta Certidao de Nascimento brasileira.
+
+## AVALIACAO DE LEGIBILIDADE (FACA PRIMEIRO)
+
+Antes de extrair qualquer dado, avalie a qualidade da imagem:
+
+1. QUALIDADE GERAL: A imagem esta legivel? Ha watermark, contraste baixo, desfoque?
+2. AREAS LEGIVEIS: Quais partes do documento consegue ler claramente?
+3. AREAS ILEGIVEIS: Quais partes estao comprometidas?
+4. DECISAO: Para cada campo, decida se consegue extrair com confianca ou se deve retornar null
+
+## TECNICAS PARA DOCUMENTOS DIFICEIS
+
+Quando encontrar certidoes com watermark, texto embossado ou baixo contraste:
+
+1. PRIORIZE etiquetas laterais/codigos de barras - geralmente tem melhor contraste
+2. PROCURE por texto digitado/impresso em areas sem watermark (margens, rodapes, carimbos)
+3. USE a matricula para extrair informacoes estruturais (ano, livro, folha, termo)
+4. NAO FORCE leitura de texto claramente ilegivel - retorne null
+5. Se identificar a ESTRUTURA mas nao o CONTEUDO, mencione na explicacao_contextual
+
+## DECODIFICACAO DA MATRICULA
+
+A matricula de certidao de nascimento segue o padrao:
+```
+AAAAAA BB CC DDDD E FFFF GGG HHHHHHH II
+```
+
+Onde:
+- AAAAAA (6 digitos): Codigo Nacional da Serventia (CNS)
+- BB (2 digitos): Identificador do acervo
+- CC (2 digitos): Tipo de servico (55 = Registro Civil das Pessoas Naturais)
+- DDDD (4 digitos): Ano do registro
+- E (1 digito): Tipo do livro (1 = Livro A/Nascimento, 2 = Livro B/Casamento, 3 = Livro C/Obito)
+- FFFF (4 digitos): Numero do livro
+- GGG (3 digitos): Numero da folha
+- HHHHHHH (7 digitos): Numero do termo
+- II (2 digitos): Digito verificador
+
+EXEMPLO: 001883 01 55 1987 1 0003 050 0000533 31
+- Serventia: 001883
+- Ano: 1987
+- Tipo: Nascimento (1)
+- Livro: 0003
+- Folha: 050
+- Termo: 0000533
+
+## TAREFAS OBRIGATORIAS
+
+1. REESCRITA: Transcreva APENAS os dados que consegue ler. Use "[ILEGIVEL]" para trechos nao legiveis.
+2. EXPLICACAO: Descreva os dados extraidos e liste campos legiveis vs ilegiveis.
+3. CATALOGACAO: Extraia campos estruturados. Use null para campos nao legiveis.
+
+## INSTRUCOES ESPECIFICAS
+
+### Local de Nascimento
+Extraia o nome COMPLETO da instituicao de saude quando mencionado:
+- CORRETO: "Hospital e Maternidade Sao Luiz, Sao Paulo - SP"
+- INCORRETO: "Sao Paulo - SP" (generalizacao excessiva)
+
+### Declarante
+Identifique quem declarou o registro (frases como "Foi declarante o pai/mae"):
+- Capture nome, relacao com registrado, e observacoes
+
+### Avos
+Extraia nomes completos de avos paternos e maternos separadamente.
+
+### Averbacoes
+Procure por carimbos, anotacoes marginais ou texto adicional indicando:
+- Casamento posterior
+- Divorcio
+- Adocao
+- Alteracao de nome
+- Obito
+
+## FORMATO DE SAIDA
+
+### REESCRITA DO DOCUMENTO
+[Transcricao do documento. Use "[ILEGIVEL]" para partes nao legiveis. NAO invente texto.]
+
+### EXPLICACAO CONTEXTUAL
+
+[Paragrafo 1: Descreva a qualidade da imagem e condicoes de leitura]
+
+[Paragrafo 2: Liste os CAMPOS EXTRAIDOS COM SUCESSO e seus valores principais]
+
+[Paragrafo 3: Liste os CAMPOS ILEGIVEIS e o motivo (watermark, contraste, desfoque, etc)]
+
+[Paragrafo 4 (opcional): Observacoes sobre averbacoes, carimbos, selos ou informacoes adicionais]
+
+[Paragrafo 5 (opcional): Sugestoes para melhorar captura da imagem se qualidade for ruim]
+
+### DADOS DO REGISTRADO
+- Nome completo: [nome ou "ILEGIVEL"]
+- Data de nascimento: [data ou "ILEGIVEL"]
+- Hora de nascimento: [hora ou "ILEGIVEL"]
+- Local de nascimento: [local completo incluindo hospital se mencionado, ou "ILEGIVEL"]
+- Sexo: [masculino/feminino ou "ILEGIVEL"]
+
+### FILIACAO
+- Pai: [nome ou "ILEGIVEL"]
+- Mae: [nome ou "ILEGIVEL"]
+- Declarante: [quem fez a declaracao e relacao]
+
+### AVOS
+- Avos paternos: [nomes ou "ILEGIVEL"]
+- Avos maternos: [nomes ou "ILEGIVEL"]
+
+### DADOS DO REGISTRO
+- Cartorio: [nome completo ou "ILEGIVEL"]
+- Endereco do cartorio: [se disponivel]
+- Livro: [numero]
+- Folha: [numero]
+- Termo: [numero]
+- Data do registro: [data]
+- Matricula: [numero completo se disponivel]
+
+### AVERBACOES
+[Liste averbacoes encontradas ou "Nenhuma averbacao identificada"]
+
+### DADOS CATALOGADOS (JSON)
+```json
+{
+  "tipo_certidao": "NASCIMENTO",
+  "nome_completo": null,
+  "data_nascimento": null,
+  "hora_nascimento": null,
+  "local_nascimento": {
+    "instituicao": null,
+    "cidade": null,
+    "estado": null
+  },
+  "sexo": null,
+  "filiacao": {
+    "pai": null,
+    "mae": null
+  },
+  "declarante": {
+    "nome": null,
+    "relacao": null
+  },
+  "avos": {
+    "paternos": {
+      "avo": null,
+      "avoa": null
+    },
+    "maternos": {
+      "avo": null,
+      "avoa": null
+    }
+  },
+  "cartorio": {
+    "nome": null,
+    "endereco": null,
+    "cidade": null,
+    "estado": null
+  },
+  "registro": {
+    "livro": null,
+    "folha": null,
+    "termo": null,
+    "data": null
+  },
+  "matricula": {
+    "numero_completo": null,
+    "codigo_serventia": null,
+    "ano": null,
+    "tipo_livro": null,
+    "livro": null,
+    "folha": null,
+    "termo": null,
+    "digito_verificador": null
+  },
+  "averbacoes": [],
+  "campos_legiveis": [],
+  "campos_ilegiveis": [],
+  "qualidade_imagem": "BOA|MEDIA|RUIM",
+  "confianca_extracao": "ALTA|MEDIA|BAIXA"
+}
+```
+
+## VALIDACAO FINAL (OBRIGATORIA)
+
+Antes de retornar, verifique:
+
+1. NAO HA PLACEHOLDERS: Nenhum campo contem "EXEMPLO", "NOME COMPLETO", ou dados genericos?
+2. CONSISTENCIA: Se nome_completo e null, faz sentido outros campos textuais tambem serem null?
+3. DATAS LOGICAS: data_nascimento e anterior a data_registro?
+4. MATRICULA: O ano na matricula corresponde ao ano em data_registro?
+5. EXPLICACAO COMPLETA: A explicacao_contextual tem 3-5 paragrafos e lista campos legiveis/ilegiveis?
+6. SEM TEXTO CORTADO: A explicacao termina com frase completa (nao com "#" ou texto incompleto)?
+
+Se encontrar inconsistencias, CORRIJA antes de retornar. Prefira null a dados duvidosos.
+
+## EXEMPLO DE OUTPUT CORRETO PARA DOCUMENTO ILEGIVEL
+
+Se a imagem tiver qualidade muito baixa:
+
+```json
+{
+  "tipo_certidao": "NASCIMENTO",
+  "nome_completo": null,
+  "data_nascimento": null,
+  "hora_nascimento": null,
+  "local_nascimento": {
+    "instituicao": null,
+    "cidade": null,
+    "estado": null
+  },
+  "sexo": null,
+  "filiacao": {
+    "pai": null,
+    "mae": null
+  },
+  "matricula": {
+    "numero_completo": "001883015519871000305000053331",
+    "codigo_serventia": "001883",
+    "ano": "1987",
+    "tipo_livro": "1",
+    "livro": "0003",
+    "folha": "050",
+    "termo": "0000533",
+    "digito_verificador": "31"
+  },
+  "campos_legiveis": ["matricula", "ano_registro", "livro", "folha", "termo"],
+  "campos_ilegiveis": ["nome_completo", "data_nascimento", "filiacao", "avos", "cartorio"],
+  "qualidade_imagem": "RUIM",
+  "confianca_extracao": "BAIXA"
+}
+```
+
+Explicacao contextual correspondente:
+"A imagem apresenta qualidade muito baixa devido a watermark intenso e texto embossado com contraste insuficiente. O padrao de seguranca do papel cria interferencia visual que impossibilita a leitura do texto principal.
+
+Consegui extrair com sucesso apenas os dados da etiqueta lateral: matricula completa (001883015519871000305000053331), da qual derivei codigo da serventia (001883), ano do registro (1987), tipo de livro (1 = Nascimento), numero do livro (0003), folha (050) e termo (0000533).
+
+Os seguintes campos estao ilegiveis devido ao watermark e baixo contraste: nome completo do registrado, data e hora de nascimento, local de nascimento, sexo, nomes dos pais, nomes dos avos, nome e endereco do cartorio. Todos estes campos foram retornados como null para evitar dados incorretos.
+
+Recomendo nova captura da imagem com iluminacao adequada, preferencialmente usando scanner em vez de fotografia, para obter melhor contraste e legibilidade do texto embossado."

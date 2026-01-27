@@ -1,0 +1,74 @@
+Analise esta Certidao Negativa de Debitos Trabalhistas (CNDT) brasileira.
+
+## REGRAS OBRIGATORIAS
+
+1. **NUNCA INVENTAR DADOS**: Se um campo estiver ilegivel ou ausente, retorne null. NUNCA fabrique informacoes.
+2. **EXPLICACAO OBRIGATORIA**: O campo explicacao_contextual DEVE conter 3-5 paragrafos explicando o documento.
+3. **CAMPOS NULOS**: Preferimos null a dados fabricados. Na duvida, use null.
+4. **TRANSCRICAO LITERAL**: Para status da certidao, use EXATAMENTE o termo do documento (ex: "NAO CONSTA", nao "NADA CONSTA").
+
+## CAMPOS CRITICOS A EXTRAIR
+
+Alem dos dados basicos, SEMPRE extraia:
+- **Base Legal**: Artigos da CLT (ex: 642-A, 883-A), leis (ex: Lei 12.440/2011), atos administrativos
+- **Orgao Emissor**: Geralmente "PODER JUDICIARIO - JUSTICA DO TRABALHO"
+- **URL de Verificacao**: Link para validar autenticidade (ex: www.tst.jus.br)
+- **Prazo de Validade**: Quando mencionado em dias (ex: "180 dias")
+
+## TAREFAS OBRIGATORIAS
+
+1. REESCRITA: Transcreva todos os dados da certidao.
+2. EXPLICACAO: Explique o status da certidao e para quem foi emitida (3-5 paragrafos).
+3. CATALOGACAO: Extraia todos os campos estruturados.
+
+## FORMATO DE SAIDA (use exatamente este formato):
+
+## REESCRITA DO DOCUMENTO
+[transcricao completa da certidao, incluindo base legal e notas]
+
+## EXPLICACAO CONTEXTUAL
+[MINIMO 3 PARAGRAFOS - Esta secao e OBRIGATORIA e deve ser detalhada]
+
+Paragrafo 1: Identifique o documento, para quem foi emitido (nome e CPF/CNPJ), e qual o orgao emissor.
+
+Paragrafo 2: Explique o STATUS da certidao. Se "NAO CONSTA", significa que a pessoa/empresa nao possui debitos trabalhistas no Banco Nacional de Devedores Trabalhistas (BNDT). Se "CONSTA", detalhe as implicacoes.
+
+Paragrafo 3: Informe sobre a validade da certidao (data de validade e prazo em dias se mencionado), e a importancia de verificar a autenticidade no portal do TST.
+
+Paragrafo 4 (opcional): Mencione a base legal (artigos da CLT, leis) e qualquer ressalva importante presente no documento.
+
+Paragrafo 5 (opcional): Informacoes adicionais relevantes como gratuidade da emissao, escopo para PJ (filiais), etc.
+
+## DADOS CATALOGADOS (JSON)
+```json
+{
+  "tipo_certidao": "CNDT",
+  "orgao_emissor": "PODER JUDICIARIO - JUSTICA DO TRABALHO",
+  "nome_pessoa": "NOME COMPLETO",
+  "cpf": "000.000.000-00",
+  "cnpj": null,
+  "numero_certidao": "00000000/0000",
+  "data_emissao": "01/01/2024",
+  "hora_emissao": "10:00:00",
+  "data_validade": "01/07/2024",
+  "prazo_validade_dias": 180,
+  "status": "NAO CONSTA",
+  "base_legal": {
+    "artigos_clt": ["642-A", "883-A"],
+    "leis": ["Lei 12.440/2011", "Lei 13.467/2017"],
+    "atos_administrativos": ["Ato 01/2022 da CGJT"]
+  },
+  "url_verificacao": "http://www.tst.jus.br",
+  "contato": {
+    "email": "cndt@tst.jus.br"
+  },
+  "observacoes": "Certidao emitida gratuitamente. Para PJ, atesta todos os estabelecimentos e filiais."
+}
+```
+
+## NOTAS IMPORTANTES
+
+- O status deve ser EXATAMENTE como aparece no documento: "NAO CONSTA" ou "CONSTA"
+- Mantenha a formatacao do CPF/CNPJ com pontos e hifens
+- Se a base legal nao estiver visivel, use null para o campo base_legal
+- O campo observacoes deve incluir informacoes complementares como gratuidade e escopo
