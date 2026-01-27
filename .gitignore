@@ -4,3 +4,7 @@ credentials.json
 token.json
 __pycache__/
 *.pyc
+
+nul
+credentials/
+push_error.txt
