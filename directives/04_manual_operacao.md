@@ -17,11 +17,15 @@ pip install -r execution/requirements.txt
 
 ### 1.2 Configuração de Credenciais
 
-**Arquivo `.env`:**
+**Arquivo `.env`:** (copie de `.env.example` e preencha com seus valores)
 ```env
-GOOGLE_APPLICATION_CREDENTIALS=credentials/sua-credencial.json
-GOOGLE_PROJECT_ID=ia-cartorio-fluxo-minutas
-GEMINI_API_KEY=sua-api-key-aqui
+GOOGLE_APPLICATION_CREDENTIALS=credentials/[SEU_ARQUIVO_CREDENCIAIS].json
+GOOGLE_PROJECT_ID=[SEU_PROJECT_ID]
+DOCUMENT_AI_PROCESSOR_ID=[SEU_PROCESSOR_ID]
+DOCUMENT_AI_LOCATION=us
+GEMINI_API_KEY=[SUA_GEMINI_API_KEY]
+GEMINI_MODEL=gemini-3-flash-preview
+GEMINI_MODEL_FALLBACK=gemini-2.5-flash
 ```
 
 **Credencial Google Cloud:**

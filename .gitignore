@@ -1,11 +1,31 @@
+# Arquivos de ambiente e secrets
 .env
-.tmp/
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# Credenciais Google Cloud
+credentials/
 credentials.json
 token.json
+*-credentials.json
+service-account*.json
+
+# Cache Python
 __pycache__/
 *.pyc
+*.pyo
 
+# Arquivos temporarios
+.tmp/
 nul
-credentials/
 push_error.txt
+
+# IDE e ferramentas
 .claude/
+.vscode/
+.idea/
+
+# Logs sensiveis
+*.log

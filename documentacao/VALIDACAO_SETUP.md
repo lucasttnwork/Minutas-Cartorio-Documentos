@@ -71,26 +71,27 @@ ls -la .env  # Linux/macOS
 # ou
 dir .env     # Windows
 
-# 3.2 Se não existir, criar
-cat > .env << 'EOF'
-GOOGLE_APPLICATION_CREDENTIALS=credentials/ia-cartorio-fluxo-minutas-7749530005bd.json
-GOOGLE_PROJECT_ID=ia-cartorio-fluxo-minutas
-DOCUMENT_AI_PROCESSOR_ID=9bc0134de4126073
-DOCUMENT_AI_LOCATION=us
-GEMINI_API_KEY=AIzaSyDTIvZMDH3wYYMWoU3vDmsA7zUdPLIbz_0
-EOF
+# 3.2 Se não existir, copiar do exemplo e preencher com seus valores
+cp .env.example .env
+# Edite o arquivo .env com seus valores reais:
+# nano .env  # ou use seu editor preferido
+#
+# IMPORTANTE: Veja .env.example para a lista de variáveis necessárias
+# NUNCA commite o arquivo .env com valores reais!
 
 # 3.3 Verificar conteúdo
 cat .env
 ```
 
-**Variáveis obrigatórias:**
+**Variáveis obrigatórias:** (veja .env.example para detalhes)
 ```
-GOOGLE_APPLICATION_CREDENTIALS=credentials/ia-cartorio-fluxo-minutas-7749530005bd.json
-GOOGLE_PROJECT_ID=ia-cartorio-fluxo-minutas
-DOCUMENT_AI_PROCESSOR_ID=9bc0134de4126073
+GOOGLE_APPLICATION_CREDENTIALS=credentials/[SEU_ARQUIVO_CREDENCIAIS].json
+GOOGLE_PROJECT_ID=[SEU_PROJECT_ID]
+DOCUMENT_AI_PROCESSOR_ID=[SEU_PROCESSOR_ID]
 DOCUMENT_AI_LOCATION=us
-GEMINI_API_KEY=AIzaSyDTIvZMDH3wYYMWoU3vDmsA7zUdPLIbz_0
+GEMINI_API_KEY=[SUA_GEMINI_API_KEY]
+GEMINI_MODEL=gemini-3-flash-preview
+GEMINI_MODEL_FALLBACK=gemini-2.5-flash
 ```
 
 **Status de Aprovação:**
@@ -104,26 +105,27 @@ GEMINI_API_KEY=AIzaSyDTIvZMDH3wYYMWoU3vDmsA7zUdPLIbz_0
 
 ```bash
 # 4.1 Verificar se arquivo de credenciais existe
-ls -la credentials/ia-cartorio-fluxo-minutas-7749530005bd.json
+# Substitua [SEU_ARQUIVO] pelo nome do seu arquivo de credenciais
+ls -la credentials/[SEU_ARQUIVO_CREDENCIAIS].json
 # ou
-dir credentials\ia-cartorio-fluxo-minutas-7749530005bd.json  # Windows
+dir credentials\[SEU_ARQUIVO_CREDENCIAIS].json  # Windows
 
 # 4.2 Verificar formato JSON
-python -c "import json; json.load(open('credentials/ia-cartorio-fluxo-minutas-7749530005bd.json'))"
+python -c "import json; import os; json.load(open(os.getenv('GOOGLE_APPLICATION_CREDENTIALS')))"
 # Esperado: Sem erro (retorna sem saída)
 
 # 4.3 Verificar campo obrigatório
-python -c "import json; d = json.load(open('credentials/ia-cartorio-fluxo-minutas-7749530005bd.json')); print('✓ tipo:', d['type'])"
+python -c "import json; import os; d = json.load(open(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))); print('✓ tipo:', d['type'])"
 ```
 
 **Campos esperados no JSON:**
 ```json
 {
   "type": "service_account",
-  "project_id": "ia-cartorio-fluxo-minutas",
+  "project_id": "[SEU_PROJECT_ID]",
   "private_key_id": "[id]",
-  "private_key": "[chave]",
-  "client_email": "[email]",
+  "private_key": "[chave_privada]",
+  "client_email": "[email_service_account]",
   "client_id": "[id]",
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
   "token_uri": "https://oauth2.googleapis.com/token",
@@ -223,11 +225,11 @@ EOF
 
 **Saída esperada:**
 ```
-✓ GOOGLE_APPLICATION_CREDENTIALS     = credentials/ia-car...
-✓ GOOGLE_PROJECT_ID                  = ia-cartorio-fluxo-minutas
-✓ DOCUMENT_AI_PROCESSOR_ID           = 9bc0134de4126073
+✓ GOOGLE_APPLICATION_CREDENTIALS     = credentials/[seu-a...
+✓ GOOGLE_PROJECT_ID                  = [seu-project-id]
+✓ DOCUMENT_AI_PROCESSOR_ID           = [seu-processor-id]
 ✓ DOCUMENT_AI_LOCATION               = us
-✓ GEMINI_API_KEY                     = AIzaSyDTIvZMDH3wY...
+✓ GEMINI_API_KEY                     = [sua-api-key]...
 
 Total: 5/5 OK
 ```
