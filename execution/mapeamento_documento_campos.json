@@ -1,0 +1,1151 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "date": "2026-01-28",
+    "total_document_types": 26,
+    "total_fields": 191
+  },
+  "field_definitions": {
+    "pessoa_natural": {
+      "nome": "Nome completo da pessoa",
+      "cpf": "Cadastro de Pessoa Fisica",
+      "rg": "Numero do RG",
+      "orgao_emissor_rg": "Orgao emissor do RG (SSP, DETRAN, etc.)",
+      "estado_emissor_rg": "UF de emissao do RG",
+      "data_emissao_rg": "Data de emissao do RG",
+      "nacionalidade": "Nacionalidade (brasileiro, etc.)",
+      "profissao": "Profissao ou ocupacao",
+      "data_nascimento": "Data de nascimento",
+      "data_obito": "Data do obito (se falecido)",
+      "cnh": "Numero da CNH",
+      "orgao_emissor_cnh": "Orgao emissor da CNH (DETRAN-XX)",
+      "estado_civil": "Estado civil (solteiro, casado, etc.)",
+      "regime_bens": "Regime de bens do casamento",
+      "data_casamento": "Data do casamento",
+      "data_separacao": "Data da separacao",
+      "data_divorcio": "Data do divorcio",
+      "data_falecimento_conjuge": "Data de falecimento do conjuge",
+      "uniao_estavel": "Possui uniao estavel (sim/nao)",
+      "regime_bens_uniao_estavel": "Regime de bens da uniao estavel",
+      "data_uniao_estavel": "Data da uniao estavel",
+      "data_extincao_uniao_estavel": "Data de extincao da uniao estavel",
+      "filiacao_pai": "Nome do pai",
+      "filiacao_mae": "Nome da mae",
+      "naturalidade": "Local de nascimento (cidade/UF)",
+      "domicilio_logradouro": "Logradouro do domicilio",
+      "domicilio_numero": "Numero do domicilio",
+      "domicilio_complemento": "Complemento do domicilio",
+      "domicilio_bairro": "Bairro do domicilio",
+      "domicilio_cidade": "Cidade do domicilio",
+      "domicilio_estado": "Estado do domicilio",
+      "domicilio_cep": "CEP do domicilio",
+      "email": "Endereco de e-mail",
+      "telefone": "Numero de telefone",
+      "cndt_numero": "Numero da CNDT",
+      "cndt_data_expedicao": "Data de expedicao da CNDT",
+      "cndt_hora_expedicao": "Hora de expedicao da CNDT",
+      "certidao_uniao_tipo": "Tipo da certidao (negativa, positiva com efeitos de negativa)",
+      "certidao_uniao_data_emissao": "Data de emissao da certidao da Uniao",
+      "certidao_uniao_hora_emissao": "Hora de emissao da certidao da Uniao",
+      "certidao_uniao_validade": "Data de validade da certidao",
+      "certidao_uniao_codigo_controle": "Codigo de controle da certidao"
+    },
+    "pessoa_juridica": {
+      "pj_denominacao": "Razao social ou denominacao",
+      "pj_cnpj": "CNPJ da empresa",
+      "pj_nire": "NIRE (Numero de Inscricao no Registro de Empresas)",
+      "pj_sede_logradouro": "Logradouro da sede",
+      "pj_sede_numero": "Numero da sede",
+      "pj_sede_complemento": "Complemento da sede",
+      "pj_sede_bairro": "Bairro da sede",
+      "pj_sede_cidade": "Cidade da sede",
+      "pj_sede_estado": "Estado da sede",
+      "pj_sede_cep": "CEP da sede",
+      "pj_instrumento_constitutivo": "Tipo do instrumento constitutivo",
+      "pj_junta_comercial": "Junta Comercial de registro",
+      "pj_numero_registro_contrato": "Numero de registro do contrato social",
+      "pj_data_sessao_registro": "Data da sessao de registro",
+      "pj_data_expedicao_ficha_cadastral": "Data de expedicao da ficha cadastral",
+      "pj_data_expedicao_certidao_registro": "Data de expedicao da certidao de registro",
+      "pj_admin_nome": "Nome do administrador",
+      "pj_admin_cpf": "CPF do administrador",
+      "pj_admin_rg": "RG do administrador",
+      "pj_admin_orgao_emissor_rg": "Orgao emissor do RG do administrador",
+      "pj_admin_estado_emissor_rg": "Estado emissor do RG do administrador",
+      "pj_admin_data_emissao_rg": "Data emissao RG do administrador",
+      "pj_admin_cnh": "CNH do administrador",
+      "pj_admin_orgao_emissor_cnh": "Orgao emissor CNH do administrador",
+      "pj_admin_data_nascimento": "Data de nascimento do administrador",
+      "pj_admin_estado_civil": "Estado civil do administrador",
+      "pj_admin_profissao": "Profissao do administrador",
+      "pj_admin_nacionalidade": "Nacionalidade do administrador",
+      "pj_admin_domicilio_logradouro": "Logradouro do administrador",
+      "pj_admin_domicilio_numero": "Numero do administrador",
+      "pj_admin_domicilio_complemento": "Complemento do administrador",
+      "pj_admin_domicilio_bairro": "Bairro do administrador",
+      "pj_admin_domicilio_cidade": "Cidade do administrador",
+      "pj_admin_domicilio_estado": "Estado do administrador",
+      "pj_admin_domicilio_cep": "CEP do administrador",
+      "pj_admin_email": "E-mail do administrador",
+      "pj_admin_telefone": "Telefone do administrador",
+      "pj_tipo_representacao": "Tipo de representacao (administrador/procurador)",
+      "pj_clausula_indica_admin": "Clausula que indica o administrador",
+      "pj_data_ata_admin": "Data da ata que indica o administrador",
+      "pj_numero_registro_ata": "Numero de registro da ata",
+      "pj_clausula_poderes_admin": "Clausula sobre poderes do administrador",
+      "pj_procurador_nome": "Nome do procurador",
+      "pj_procurador_cpf": "CPF do procurador",
+      "pj_procurador_rg": "RG do procurador",
+      "pj_procurador_orgao_emissor_rg": "Orgao emissor RG do procurador",
+      "pj_procurador_estado_emissor_rg": "Estado emissor RG do procurador",
+      "pj_procurador_data_emissao_rg": "Data emissao RG do procurador",
+      "pj_procurador_cnh": "CNH do procurador",
+      "pj_procurador_orgao_emissor_cnh": "Orgao emissor CNH do procurador",
+      "pj_procurador_data_nascimento": "Data de nascimento do procurador",
+      "pj_procurador_estado_civil": "Estado civil do procurador",
+      "pj_procurador_profissao": "Profissao do procurador",
+      "pj_procurador_nacionalidade": "Nacionalidade do procurador",
+      "pj_procurador_domicilio_logradouro": "Logradouro do procurador",
+      "pj_procurador_domicilio_numero": "Numero do procurador",
+      "pj_procurador_domicilio_complemento": "Complemento do procurador",
+      "pj_procurador_domicilio_bairro": "Bairro do procurador",
+      "pj_procurador_domicilio_cidade": "Cidade do procurador",
+      "pj_procurador_domicilio_estado": "Estado do procurador",
+      "pj_procurador_domicilio_cep": "CEP do procurador",
+      "pj_procurador_email": "E-mail do procurador",
+      "pj_procurador_telefone": "Telefone do procurador",
+      "pj_tabelionato_procuracao": "Tabelionato da procuracao publica",
+      "pj_data_procuracao": "Data da procuracao publica",
+      "pj_livro_procuracao": "Livro da procuracao publica",
+      "pj_paginas_procuracao": "Paginas da procuracao publica",
+      "pj_data_expedicao_certidao_procuracao": "Data de expedicao da certidao da procuracao",
+      "pj_cndt_numero": "Numero da CNDT da PJ",
+      "pj_cndt_data_expedicao": "Data de expedicao da CNDT da PJ",
+      "pj_cndt_hora_expedicao": "Hora de expedicao da CNDT da PJ",
+      "pj_certidao_uniao_tipo": "Tipo da certidao da Uniao da PJ",
+      "pj_certidao_uniao_data_emissao": "Data de emissao da certidao da Uniao da PJ",
+      "pj_certidao_uniao_hora_emissao": "Hora de emissao da certidao da Uniao da PJ",
+      "pj_certidao_uniao_validade": "Validade da certidao da Uniao da PJ",
+      "pj_certidao_uniao_codigo_controle": "Codigo de controle da certidao da Uniao da PJ"
+    },
+    "imovel": {
+      "matricula_numero": "Numero da matricula",
+      "matricula_cartorio_numero": "Numero do Registro de Imoveis",
+      "matricula_cartorio_cidade": "Cidade do Registro de Imoveis",
+      "matricula_cartorio_estado": "Estado do Registro de Imoveis",
+      "matricula_numero_nacional": "Numero nacional da matricula",
+      "imovel_denominacao": "Tipo do imovel (apartamento, casa, terreno, etc.)",
+      "imovel_area_total": "Area total em m2",
+      "imovel_area_privativa": "Area privativa em m2",
+      "imovel_area_construida": "Area construida em m2",
+      "imovel_logradouro": "Logradouro do imovel",
+      "imovel_numero": "Numero do imovel",
+      "imovel_complemento": "Complemento do imovel",
+      "imovel_bairro": "Bairro do imovel",
+      "imovel_cidade": "Cidade do imovel",
+      "imovel_estado": "Estado do imovel",
+      "imovel_cep": "CEP do imovel",
+      "imovel_descricao_conforme_matricula": "Descricao completa conforme matricula",
+      "imovel_sql": "Cadastro Municipal (SQL)",
+      "imovel_data_certidao_cadastro": "Data de expedicao da certidao de cadastro municipal",
+      "imovel_valor_venal_iptu": "Valor venal para IPTU",
+      "imovel_valor_venal_referencia": "Valor venal de referencia para ITBI",
+      "imovel_cnd_iptu_numero": "Numero da certidao negativa de IPTU",
+      "imovel_cnd_iptu_data": "Data de expedicao da CND de IPTU",
+      "imovel_cnd_iptu_valida": "Certidao de IPTU valida (sim/nao)",
+      "imovel_certidao_matricula_numero": "Numero da certidao da matricula",
+      "imovel_certidao_matricula_data": "Data de expedicao da certidao da matricula",
+      "imovel_certidao_matricula_valida": "Certidao da matricula valida (sim/nao)",
+      "proprietario_nome": "Nome do proprietario",
+      "proprietario_fracao_ideal": "Fracao ideal do proprietario",
+      "proprietario_registro_aquisicao": "Numero do registro de aquisicao (R.X)",
+      "proprietario_data_registro": "Data do registro de aquisicao",
+      "proprietario_titulo_aquisicao": "Titulo de aquisicao (compra e venda, etc.)",
+      "onus_titulo": "Titulo do onus (penhora, hipoteca, etc.)",
+      "onus_registro": "Numero do registro do onus",
+      "onus_data_registro": "Data do registro do onus",
+      "onus_descricao": "Descricao do onus conforme matricula",
+      "onus_titular_nome": "Nome do titular do onus",
+      "onus_titular_fracao": "Fracao do titular do onus",
+      "ressalva_existencia": "Existe ressalva na certificacao (sim/nao)",
+      "ressalva_descricao": "Descricao da ressalva"
+    },
+    "negocio": {
+      "negocio_valor_matricula": "Valor da matricula",
+      "negocio_fracao_alienada": "Fracao ideal alienada",
+      "negocio_valor_total": "Valor total da alienacao",
+      "alienante_nome": "Nome do alienante",
+      "alienante_fracao_ideal": "Fracao ideal do alienante",
+      "alienante_valor_alienacao": "Valor da alienacao do alienante",
+      "alienante_conjuge": "Conjuge do alienante",
+      "alienante_comparece_escritura": "Alienante comparece na escritura (sim/nao)",
+      "alienante_qualidade_comparecimento": "Qualidade do comparecimento (autocontratante, etc.)",
+      "alienante_pj_denominacao": "Denominacao da PJ alienante",
+      "alienante_pj_fracao_ideal": "Fracao ideal da PJ alienante",
+      "alienante_pj_valor_alienacao": "Valor da alienacao da PJ alienante",
+      "adquirente_nome": "Nome do adquirente",
+      "adquirente_fracao_ideal": "Fracao ideal do adquirente",
+      "adquirente_valor_aquisicao": "Valor da aquisicao do adquirente",
+      "adquirente_pj_denominacao": "Denominacao da PJ adquirente",
+      "adquirente_pj_fracao_ideal": "Fracao ideal da PJ adquirente",
+      "adquirente_pj_valor_aquisicao": "Valor da aquisicao da PJ adquirente",
+      "pagamento_tipo": "Tipo de pagamento (a vista, financiado, etc.)",
+      "pagamento_modo": "Modo de pagamento (transferencia, PIX, etc.)",
+      "pagamento_data": "Data do pagamento",
+      "pagamento_banco_origem": "Banco de origem do pagamento",
+      "pagamento_agencia_origem": "Agencia de origem do pagamento",
+      "pagamento_conta_origem": "Conta de origem do pagamento",
+      "pagamento_banco_destino": "Banco de destino do pagamento",
+      "pagamento_agencia_destino": "Agencia de destino do pagamento",
+      "pagamento_conta_destino": "Conta de destino do pagamento",
+      "termos_promessa": "Termos constantes na promessa de compra e venda",
+      "termos_especiais": "Termos especiais para a minuta",
+      "instrucoes_extras": "Instrucoes extras para a minuta",
+      "itbi_numero_guia": "Numero da guia de ITBI",
+      "itbi_base_calculo": "Base de calculo do ITBI",
+      "itbi_valor": "Valor do ITBI"
+    }
+  },
+  "document_field_mapping": {
+    "RG": {
+      "pessoa_natural": [
+        "nome",
+        "cpf",
+        "rg",
+        "orgao_emissor_rg",
+        "estado_emissor_rg",
+        "data_emissao_rg",
+        "data_nascimento",
+        "naturalidade",
+        "filiacao_pai",
+        "filiacao_mae"
+      ],
+      "pessoa_juridica": [],
+      "imovel": [],
+      "negocio": []
+    },
+    "CNH": {
+      "pessoa_natural": [
+        "nome",
+        "cpf",
+        "cnh",
+        "orgao_emissor_cnh",
+        "data_nascimento"
+      ],
+      "pessoa_juridica": [],
+      "imovel": [],
+      "negocio": []
+    },
+    "CPF": {
+      "pessoa_natural": [
+        "nome",
+        "cpf",
+        "data_nascimento"
+      ],
+      "pessoa_juridica": [],
+      "imovel": [],
+      "negocio": []
+    },
+    "CERTIDAO_NASCIMENTO": {
+      "pessoa_natural": [
+        "nome",
+        "data_nascimento",
+        "naturalidade",
+        "filiacao_pai",
+        "filiacao_mae"
+      ],
+      "pessoa_juridica": [],
+      "imovel": [],
+      "negocio": []
+    },
+    "CERTIDAO_CASAMENTO": {
+      "pessoa_natural": [
+        "nome",
+        "cpf",
+        "data_nascimento",
+        "estado_civil",
+        "regime_bens",
+        "data_casamento",
+        "filiacao_pai",
+        "filiacao_mae",
+        "nacionalidade"
+      ],
+      "pessoa_juridica": [],
+      "imovel": [],
+      "negocio": [
+        "alienante_conjuge"
+      ]
+    },
+    "CERTIDAO_OBITO": {
+      "pessoa_natural": [
+        "nome",
+        "data_obito",
+        "estado_civil",
+        "data_falecimento_conjuge"
+      ],
+      "pessoa_juridica": [],
+      "imovel": [],
+      "negocio": []
+    },
+    "COMPROVANTE_RESIDENCIA": {
+      "pessoa_natural": [
+        "nome",
+        "domicilio_logradouro",
+        "domicilio_numero",
+        "domicilio_complemento",
+        "domicilio_bairro",
+        "domicilio_cidade",
+        "domicilio_estado",
+        "domicilio_cep"
+      ],
+      "pessoa_juridica": [],
+      "imovel": [],
+      "negocio": []
+    },
+    "CNDT": {
+      "pessoa_natural": [
+        "nome",
+        "cpf",
+        "cndt_numero",
+        "cndt_data_expedicao",
+        "cndt_hora_expedicao"
+      ],
+      "pessoa_juridica": [
+        "pj_denominacao",
+        "pj_cnpj",
+        "pj_cndt_numero",
+        "pj_cndt_data_expedicao",
+        "pj_cndt_hora_expedicao"
+      ],
+      "imovel": [],
+      "negocio": []
+    },
+    "CND_FEDERAL": {
+      "pessoa_natural": [
+        "nome",
+        "cpf",
+        "certidao_uniao_tipo",
+        "certidao_uniao_data_emissao",
+        "certidao_uniao_hora_emissao",
+        "certidao_uniao_validade",
+        "certidao_uniao_codigo_controle"
+      ],
+      "pessoa_juridica": [
+        "pj_denominacao",
+        "pj_cnpj",
+        "pj_certidao_uniao_tipo",
+        "pj_certidao_uniao_data_emissao",
+        "pj_certidao_uniao_hora_emissao",
+        "pj_certidao_uniao_validade",
+        "pj_certidao_uniao_codigo_controle"
+      ],
+      "imovel": [],
+      "negocio": []
+    },
+    "CND_ESTADUAL": {
+      "pessoa_natural": [
+        "nome",
+        "cpf"
+      ],
+      "pessoa_juridica": [
+        "pj_denominacao",
+        "pj_cnpj"
+      ],
+      "imovel": [],
+      "negocio": []
+    },
+    "CND_MUNICIPAL": {
+      "pessoa_natural": [
+        "nome",
+        "cpf"
+      ],
+      "pessoa_juridica": [
+        "pj_denominacao",
+        "pj_cnpj"
+      ],
+      "imovel": [
+        "imovel_sql",
+        "imovel_logradouro",
+        "imovel_numero",
+        "imovel_bairro",
+        "imovel_cidade",
+        "imovel_estado",
+        "imovel_cnd_iptu_numero",
+        "imovel_cnd_iptu_data",
+        "imovel_cnd_iptu_valida"
+      ],
+      "negocio": []
+    },
+    "CND_IMOVEL": {
+      "pessoa_natural": [],
+      "pessoa_juridica": [],
+      "imovel": [
+        "imovel_sql",
+        "matricula_numero",
+        "imovel_logradouro",
+        "imovel_numero",
+        "imovel_complemento",
+        "imovel_bairro",
+        "imovel_cidade",
+        "imovel_estado",
+        "imovel_cnd_iptu_numero",
+        "imovel_cnd_iptu_data",
+        "imovel_cnd_iptu_valida"
+      ],
+      "negocio": []
+    },
+    "CND_CONDOMINIO": {
+      "pessoa_natural": [
+        "nome"
+      ],
+      "pessoa_juridica": [],
+      "imovel": [
+        "imovel_complemento"
+      ],
+      "negocio": []
+    },
+    "CONTRATO_SOCIAL": {
+      "pessoa_natural": [],
+      "pessoa_juridica": [
+        "pj_denominacao",
+        "pj_cnpj",
+        "pj_nire",
+        "pj_sede_logradouro",
+        "pj_sede_numero",
+        "pj_sede_complemento",
+        "pj_sede_bairro",
+        "pj_sede_cidade",
+        "pj_sede_estado",
+        "pj_sede_cep",
+        "pj_instrumento_constitutivo",
+        "pj_junta_comercial",
+        "pj_numero_registro_contrato",
+        "pj_data_sessao_registro",
+        "pj_admin_nome",
+        "pj_admin_cpf",
+        "pj_admin_rg",
+        "pj_admin_orgao_emissor_rg",
+        "pj_admin_estado_emissor_rg",
+        "pj_admin_data_nascimento",
+        "pj_admin_estado_civil",
+        "pj_admin_profissao",
+        "pj_admin_nacionalidade",
+        "pj_admin_domicilio_logradouro",
+        "pj_admin_domicilio_numero",
+        "pj_admin_domicilio_bairro",
+        "pj_admin_domicilio_cidade",
+        "pj_admin_domicilio_estado",
+        "pj_admin_domicilio_cep",
+        "pj_tipo_representacao",
+        "pj_clausula_indica_admin",
+        "pj_clausula_poderes_admin"
+      ],
+      "imovel": [],
+      "negocio": []
+    },
+    "MATRICULA_IMOVEL": {
+      "pessoa_natural": [
+        "nome",
+        "cpf",
+        "estado_civil",
+        "profissao",
+        "nacionalidade"
+      ],
+      "pessoa_juridica": [
+        "pj_denominacao",
+        "pj_cnpj"
+      ],
+      "imovel": [
+        "matricula_numero",
+        "matricula_cartorio_numero",
+        "matricula_cartorio_cidade",
+        "matricula_cartorio_estado",
+        "matricula_numero_nacional",
+        "imovel_denominacao",
+        "imovel_area_total",
+        "imovel_area_privativa",
+        "imovel_area_construida",
+        "imovel_logradouro",
+        "imovel_numero",
+        "imovel_complemento",
+        "imovel_bairro",
+        "imovel_cidade",
+        "imovel_estado",
+        "imovel_cep",
+        "imovel_descricao_conforme_matricula",
+        "imovel_certidao_matricula_numero",
+        "imovel_certidao_matricula_data",
+        "proprietario_nome",
+        "proprietario_fracao_ideal",
+        "proprietario_registro_aquisicao",
+        "proprietario_data_registro",
+        "proprietario_titulo_aquisicao",
+        "onus_titulo",
+        "onus_registro",
+        "onus_data_registro",
+        "onus_descricao",
+        "onus_titular_nome",
+        "onus_titular_fracao",
+        "ressalva_existencia",
+        "ressalva_descricao"
+      ],
+      "negocio": []
+    },
+    "ITBI": {
+      "pessoa_natural": [
+        "nome",
+        "cpf"
+      ],
+      "pessoa_juridica": [
+        "pj_denominacao",
+        "pj_cnpj"
+      ],
+      "imovel": [
+        "imovel_sql",
+        "imovel_logradouro",
+        "imovel_numero",
+        "imovel_bairro",
+        "imovel_cidade",
+        "imovel_estado"
+      ],
+      "negocio": [
+        "negocio_valor_total",
+        "alienante_nome",
+        "adquirente_nome",
+        "itbi_numero_guia",
+        "itbi_base_calculo",
+        "itbi_valor"
+      ]
+    },
+    "VVR": {
+      "pessoa_natural": [],
+      "pessoa_juridica": [],
+      "imovel": [
+        "imovel_sql",
+        "imovel_valor_venal_referencia",
+        "imovel_logradouro",
+        "imovel_numero",
+        "imovel_area_construida"
+      ],
+      "negocio": []
+    },
+    "IPTU": {
+      "pessoa_natural": [
+        "nome",
+        "cpf"
+      ],
+      "pessoa_juridica": [],
+      "imovel": [
+        "imovel_sql",
+        "imovel_valor_venal_iptu",
+        "imovel_logradouro",
+        "imovel_numero",
+        "imovel_bairro",
+        "imovel_cidade",
+        "imovel_estado",
+        "imovel_cep",
+        "imovel_area_total",
+        "imovel_area_construida"
+      ],
+      "negocio": []
+    },
+    "DADOS_CADASTRAIS": {
+      "pessoa_natural": [],
+      "pessoa_juridica": [],
+      "imovel": [
+        "imovel_sql",
+        "imovel_logradouro",
+        "imovel_numero",
+        "imovel_complemento",
+        "imovel_bairro",
+        "imovel_cidade",
+        "imovel_estado",
+        "imovel_cep",
+        "imovel_area_total",
+        "imovel_area_construida",
+        "imovel_denominacao",
+        "imovel_data_certidao_cadastro"
+      ],
+      "negocio": []
+    },
+    "ESCRITURA": {
+      "pessoa_natural": [
+        "nome",
+        "cpf",
+        "rg",
+        "orgao_emissor_rg",
+        "estado_emissor_rg",
+        "nacionalidade",
+        "profissao",
+        "estado_civil",
+        "regime_bens",
+        "domicilio_logradouro",
+        "domicilio_numero",
+        "domicilio_bairro",
+        "domicilio_cidade",
+        "domicilio_estado",
+        "domicilio_cep"
+      ],
+      "pessoa_juridica": [
+        "pj_denominacao",
+        "pj_cnpj",
+        "pj_sede_logradouro",
+        "pj_sede_numero",
+        "pj_sede_bairro",
+        "pj_sede_cidade",
+        "pj_sede_estado",
+        "pj_sede_cep",
+        "pj_admin_nome",
+        "pj_admin_cpf"
+      ],
+      "imovel": [
+        "matricula_numero",
+        "matricula_cartorio_numero",
+        "matricula_cartorio_cidade",
+        "imovel_denominacao",
+        "imovel_descricao_conforme_matricula",
+        "imovel_logradouro",
+        "imovel_numero",
+        "imovel_complemento",
+        "imovel_bairro",
+        "imovel_cidade",
+        "imovel_estado"
+      ],
+      "negocio": [
+        "negocio_valor_total",
+        "alienante_nome",
+        "adquirente_nome",
+        "pagamento_tipo",
+        "pagamento_modo"
+      ]
+    },
+    "COMPROMISSO_COMPRA_VENDA": {
+      "pessoa_natural": [
+        "nome",
+        "cpf",
+        "rg",
+        "orgao_emissor_rg",
+        "estado_emissor_rg",
+        "nacionalidade",
+        "profissao",
+        "estado_civil",
+        "regime_bens",
+        "data_nascimento",
+        "domicilio_logradouro",
+        "domicilio_numero",
+        "domicilio_complemento",
+        "domicilio_bairro",
+        "domicilio_cidade",
+        "domicilio_estado",
+        "domicilio_cep",
+        "email",
+        "telefone"
+      ],
+      "pessoa_juridica": [
+        "pj_denominacao",
+        "pj_cnpj",
+        "pj_sede_logradouro",
+        "pj_sede_numero",
+        "pj_sede_complemento",
+        "pj_sede_bairro",
+        "pj_sede_cidade",
+        "pj_sede_estado",
+        "pj_sede_cep"
+      ],
+      "imovel": [
+        "matricula_numero",
+        "matricula_cartorio_numero",
+        "matricula_cartorio_cidade",
+        "imovel_denominacao",
+        "imovel_logradouro",
+        "imovel_numero",
+        "imovel_complemento",
+        "imovel_bairro",
+        "imovel_cidade",
+        "imovel_estado",
+        "imovel_area_total",
+        "imovel_area_privativa"
+      ],
+      "negocio": [
+        "negocio_valor_total",
+        "negocio_fracao_alienada",
+        "alienante_nome",
+        "alienante_fracao_ideal",
+        "alienante_valor_alienacao",
+        "alienante_conjuge",
+        "adquirente_nome",
+        "adquirente_fracao_ideal",
+        "adquirente_valor_aquisicao",
+        "pagamento_tipo",
+        "pagamento_modo",
+        "pagamento_data",
+        "termos_promessa"
+      ]
+    },
+    "PROCURACAO": {
+      "pessoa_natural": [
+        "nome",
+        "cpf",
+        "rg",
+        "orgao_emissor_rg",
+        "estado_emissor_rg",
+        "nacionalidade",
+        "profissao",
+        "estado_civil",
+        "domicilio_logradouro",
+        "domicilio_numero",
+        "domicilio_bairro",
+        "domicilio_cidade",
+        "domicilio_estado",
+        "domicilio_cep"
+      ],
+      "pessoa_juridica": [
+        "pj_denominacao",
+        "pj_cnpj",
+        "pj_procurador_nome",
+        "pj_procurador_cpf",
+        "pj_procurador_rg",
+        "pj_procurador_orgao_emissor_rg",
+        "pj_procurador_estado_emissor_rg",
+        "pj_procurador_data_nascimento",
+        "pj_procurador_estado_civil",
+        "pj_procurador_profissao",
+        "pj_procurador_nacionalidade",
+        "pj_procurador_domicilio_logradouro",
+        "pj_procurador_domicilio_numero",
+        "pj_procurador_domicilio_bairro",
+        "pj_procurador_domicilio_cidade",
+        "pj_procurador_domicilio_estado",
+        "pj_procurador_domicilio_cep",
+        "pj_tabelionato_procuracao",
+        "pj_data_procuracao",
+        "pj_livro_procuracao",
+        "pj_paginas_procuracao"
+      ],
+      "imovel": [],
+      "negocio": []
+    },
+    "COMPROVANTE_PAGAMENTO": {
+      "pessoa_natural": [
+        "nome"
+      ],
+      "pessoa_juridica": [
+        "pj_denominacao"
+      ],
+      "imovel": [],
+      "negocio": [
+        "pagamento_tipo",
+        "pagamento_modo",
+        "pagamento_data",
+        "pagamento_banco_origem",
+        "pagamento_agencia_origem",
+        "pagamento_conta_origem",
+        "pagamento_banco_destino",
+        "pagamento_agencia_destino",
+        "pagamento_conta_destino"
+      ]
+    },
+    "PROTOCOLO_ONR": {
+      "pessoa_natural": [],
+      "pessoa_juridica": [],
+      "imovel": [
+        "matricula_numero",
+        "matricula_cartorio_numero"
+      ],
+      "negocio": []
+    },
+    "ASSINATURA_DIGITAL": {
+      "pessoa_natural": [
+        "nome"
+      ],
+      "pessoa_juridica": [],
+      "imovel": [],
+      "negocio": []
+    },
+    "OUTRO": {
+      "pessoa_natural": [],
+      "pessoa_juridica": [],
+      "imovel": [],
+      "negocio": []
+    }
+  },
+  "coverage_report": {
+    "totals_by_category": {
+      "pessoa_natural": 42,
+      "pessoa_juridica": 76,
+      "imovel": 40,
+      "negocio": 33
+    },
+    "total_fields": 191,
+    "total_documents": 26,
+    "document_coverage": {
+      "RG": {
+        "pessoa_natural": 10,
+        "pessoa_juridica": 0,
+        "imovel": 0,
+        "negocio": 0,
+        "total": 10
+      },
+      "CNH": {
+        "pessoa_natural": 5,
+        "pessoa_juridica": 0,
+        "imovel": 0,
+        "negocio": 0,
+        "total": 5
+      },
+      "CPF": {
+        "pessoa_natural": 3,
+        "pessoa_juridica": 0,
+        "imovel": 0,
+        "negocio": 0,
+        "total": 3
+      },
+      "CERTIDAO_NASCIMENTO": {
+        "pessoa_natural": 5,
+        "pessoa_juridica": 0,
+        "imovel": 0,
+        "negocio": 0,
+        "total": 5
+      },
+      "CERTIDAO_CASAMENTO": {
+        "pessoa_natural": 9,
+        "pessoa_juridica": 0,
+        "imovel": 0,
+        "negocio": 1,
+        "total": 10
+      },
+      "CERTIDAO_OBITO": {
+        "pessoa_natural": 4,
+        "pessoa_juridica": 0,
+        "imovel": 0,
+        "negocio": 0,
+        "total": 4
+      },
+      "COMPROVANTE_RESIDENCIA": {
+        "pessoa_natural": 8,
+        "pessoa_juridica": 0,
+        "imovel": 0,
+        "negocio": 0,
+        "total": 8
+      },
+      "CNDT": {
+        "pessoa_natural": 5,
+        "pessoa_juridica": 5,
+        "imovel": 0,
+        "negocio": 0,
+        "total": 10
+      },
+      "CND_FEDERAL": {
+        "pessoa_natural": 7,
+        "pessoa_juridica": 7,
+        "imovel": 0,
+        "negocio": 0,
+        "total": 14
+      },
+      "CND_ESTADUAL": {
+        "pessoa_natural": 2,
+        "pessoa_juridica": 2,
+        "imovel": 0,
+        "negocio": 0,
+        "total": 4
+      },
+      "CND_MUNICIPAL": {
+        "pessoa_natural": 2,
+        "pessoa_juridica": 2,
+        "imovel": 9,
+        "negocio": 0,
+        "total": 13
+      },
+      "CND_IMOVEL": {
+        "pessoa_natural": 0,
+        "pessoa_juridica": 0,
+        "imovel": 11,
+        "negocio": 0,
+        "total": 11
+      },
+      "CND_CONDOMINIO": {
+        "pessoa_natural": 1,
+        "pessoa_juridica": 0,
+        "imovel": 1,
+        "negocio": 0,
+        "total": 2
+      },
+      "CONTRATO_SOCIAL": {
+        "pessoa_natural": 0,
+        "pessoa_juridica": 32,
+        "imovel": 0,
+        "negocio": 0,
+        "total": 32
+      },
+      "MATRICULA_IMOVEL": {
+        "pessoa_natural": 5,
+        "pessoa_juridica": 2,
+        "imovel": 32,
+        "negocio": 0,
+        "total": 39
+      },
+      "ITBI": {
+        "pessoa_natural": 2,
+        "pessoa_juridica": 2,
+        "imovel": 6,
+        "negocio": 6,
+        "total": 16
+      },
+      "VVR": {
+        "pessoa_natural": 0,
+        "pessoa_juridica": 0,
+        "imovel": 5,
+        "negocio": 0,
+        "total": 5
+      },
+      "IPTU": {
+        "pessoa_natural": 2,
+        "pessoa_juridica": 0,
+        "imovel": 10,
+        "negocio": 0,
+        "total": 12
+      },
+      "DADOS_CADASTRAIS": {
+        "pessoa_natural": 0,
+        "pessoa_juridica": 0,
+        "imovel": 12,
+        "negocio": 0,
+        "total": 12
+      },
+      "ESCRITURA": {
+        "pessoa_natural": 15,
+        "pessoa_juridica": 10,
+        "imovel": 11,
+        "negocio": 5,
+        "total": 41
+      },
+      "COMPROMISSO_COMPRA_VENDA": {
+        "pessoa_natural": 19,
+        "pessoa_juridica": 9,
+        "imovel": 12,
+        "negocio": 13,
+        "total": 53
+      },
+      "PROCURACAO": {
+        "pessoa_natural": 14,
+        "pessoa_juridica": 21,
+        "imovel": 0,
+        "negocio": 0,
+        "total": 35
+      },
+      "COMPROVANTE_PAGAMENTO": {
+        "pessoa_natural": 1,
+        "pessoa_juridica": 1,
+        "imovel": 0,
+        "negocio": 9,
+        "total": 11
+      },
+      "PROTOCOLO_ONR": {
+        "pessoa_natural": 0,
+        "pessoa_juridica": 0,
+        "imovel": 2,
+        "negocio": 0,
+        "total": 2
+      },
+      "ASSINATURA_DIGITAL": {
+        "pessoa_natural": 1,
+        "pessoa_juridica": 0,
+        "imovel": 0,
+        "negocio": 0,
+        "total": 1
+      },
+      "OUTRO": {
+        "pessoa_natural": 0,
+        "pessoa_juridica": 0,
+        "imovel": 0,
+        "negocio": 0,
+        "total": 0
+      }
+    },
+    "fields_with_coverage": 156,
+    "uncovered_fields": [
+      {
+        "field": "data_separacao",
+        "category": "pessoa_natural"
+      },
+      {
+        "field": "data_divorcio",
+        "category": "pessoa_natural"
+      },
+      {
+        "field": "uniao_estavel",
+        "category": "pessoa_natural"
+      },
+      {
+        "field": "regime_bens_uniao_estavel",
+        "category": "pessoa_natural"
+      },
+      {
+        "field": "data_uniao_estavel",
+        "category": "pessoa_natural"
+      },
+      {
+        "field": "data_extincao_uniao_estavel",
+        "category": "pessoa_natural"
+      },
+      {
+        "field": "pj_data_expedicao_ficha_cadastral",
+        "category": "pessoa_juridica"
+      },
+      {
+        "field": "pj_data_expedicao_certidao_registro",
+        "category": "pessoa_juridica"
+      },
+      {
+        "field": "pj_admin_data_emissao_rg",
+        "category": "pessoa_juridica"
+      },
+      {
+        "field": "pj_admin_cnh",
+        "category": "pessoa_juridica"
+      },
+      {
+        "field": "pj_admin_orgao_emissor_cnh",
+        "category": "pessoa_juridica"
+      },
+      {
+        "field": "pj_admin_domicilio_complemento",
+        "category": "pessoa_juridica"
+      },
+      {
+        "field": "pj_admin_email",
+        "category": "pessoa_juridica"
+      },
+      {
+        "field": "pj_admin_telefone",
+        "category": "pessoa_juridica"
+      },
+      {
+        "field": "pj_data_ata_admin",
+        "category": "pessoa_juridica"
+      },
+      {
+        "field": "pj_numero_registro_ata",
+        "category": "pessoa_juridica"
+      },
+      {
+        "field": "pj_procurador_data_emissao_rg",
+        "category": "pessoa_juridica"
+      },
+      {
+        "field": "pj_procurador_cnh",
+        "category": "pessoa_juridica"
+      },
+      {
+        "field": "pj_procurador_orgao_emissor_cnh",
+        "category": "pessoa_juridica"
+      },
+      {
+        "field": "pj_procurador_domicilio_complemento",
+        "category": "pessoa_juridica"
+      },
+      {
+        "field": "pj_procurador_email",
+        "category": "pessoa_juridica"
+      },
+      {
+        "field": "pj_procurador_telefone",
+        "category": "pessoa_juridica"
+      },
+      {
+        "field": "pj_data_expedicao_certidao_procuracao",
+        "category": "pessoa_juridica"
+      },
+      {
+        "field": "imovel_certidao_matricula_valida",
+        "category": "imovel"
+      },
+      {
+        "field": "negocio_valor_matricula",
+        "category": "negocio"
+      },
+      {
+        "field": "alienante_comparece_escritura",
+        "category": "negocio"
+      },
+      {
+        "field": "alienante_qualidade_comparecimento",
+        "category": "negocio"
+      },
+      {
+        "field": "alienante_pj_denominacao",
+        "category": "negocio"
+      },
+      {
+        "field": "alienante_pj_fracao_ideal",
+        "category": "negocio"
+      },
+      {
+        "field": "alienante_pj_valor_alienacao",
+        "category": "negocio"
+      },
+      {
+        "field": "adquirente_pj_denominacao",
+        "category": "negocio"
+      },
+      {
+        "field": "adquirente_pj_fracao_ideal",
+        "category": "negocio"
+      },
+      {
+        "field": "adquirente_pj_valor_aquisicao",
+        "category": "negocio"
+      },
+      {
+        "field": "termos_especiais",
+        "category": "negocio"
+      },
+      {
+        "field": "instrucoes_extras",
+        "category": "negocio"
+      }
+    ],
+    "most_redundant_fields": [
+      [
+        "nome",
+        20
+      ],
+      [
+        "cpf",
+        14
+      ],
+      [
+        "pj_denominacao",
+        11
+      ],
+      [
+        "pj_cnpj",
+        10
+      ],
+      [
+        "imovel_logradouro",
+        9
+      ],
+      [
+        "imovel_numero",
+        9
+      ],
+      [
+        "imovel_bairro",
+        8
+      ],
+      [
+        "imovel_cidade",
+        8
+      ],
+      [
+        "imovel_estado",
+        8
+      ],
+      [
+        "data_nascimento",
+        6
+      ]
+    ]
+  }
+}

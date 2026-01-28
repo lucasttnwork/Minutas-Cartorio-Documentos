@@ -1,7 +1,7 @@
 # Fase 3: Extracao Contextual com Gemini 3 Flash
 
-**Versao:** 3.0
-**Data:** 2026-01-27
+**Versao:** 3.2
+**Data:** 2026-01-28
 **Status:** COMPLETA - FUNCIONANDO
 **Modelo:** `gemini-3-flash-preview`
 **Dependencias:** Catalogo de documentos (Fase 1)
@@ -9,6 +9,15 @@
 ---
 
 ## Changelog
+
+### v3.2 (2026-01-28) - Processamento Paralelo
+- **ADICIONADO** modo paralelo com `--parallel` flag
+- **ADICIONADO** configuracao de workers com `--workers N`
+- **ADICIONADO** configuracao de RPM com `--rpm N`
+- **ADICIONADO** flag `--force-workers` para ignorar auto-ajuste
+- Performance: **2.4x mais rapido** com 3 workers (free tier)
+- Throughput: ~3.8 docs/min (vs 1.6 docs/min serial)
+- Rate limiting inteligente com semaforo thread-safe
 
 ### v3.1 (2026-01-27) - Correções de Processamento de Arquivos
 - **CORRIGIDO** processamento multipágina: nova função `extract_all_pages_from_pdf()`
@@ -285,11 +294,18 @@ MODEL_CHAIN = [
 
 ### 3.4 Rate Limiting
 
-| Limite | Valor | Estrategia |
-|--------|-------|------------|
-| Requisicoes/minuto | 30 | Semaforo + delay 4s |
-| Tokens/minuto | 2.000.000 | Monitoramento |
-| Requisicoes/dia | 3.000 | Batch planning |
+**Limites por tier:**
+
+| Tier | RPM | TPM | Recomendacao |
+|------|-----|-----|--------------|
+| Free | 15 | 250.000 | 3 workers |
+| Paid | 150-300 | 1.000.000 | 10 workers |
+
+**Estrategia de paralelizacao:**
+- Semaforo thread-safe para controle de concorrencia
+- Delay de `60 / RPM` segundos entre requisicoes do pool
+- Auto-ajuste de workers baseado no RPM configurado
+- Retry com backoff exponencial para erros 429
 
 ---
 
@@ -356,7 +372,7 @@ Localização: `execution/prompts/`
 - Valida conforme regras criticas
 - Salva arquivos estruturados
 
-**Uso:**
+**Uso basico (modo serial):**
 ```bash
 # Processar escritura completa
 python execution/extract_with_gemini.py FC_515_124_p280509
@@ -368,7 +384,53 @@ python execution/extract_with_gemini.py FC_515_124_p280509 --type MATRICULA_IMOV
 python execution/extract_with_gemini.py FC_515_124_p280509 --limit 5
 ```
 
-### 5.2 Estrutura de Saida
+### 5.2 Modo Paralelo (v3.2)
+
+**Uso com paralelizacao:**
+```bash
+# Modo paralelo (auto-ajusta workers baseado no RPM)
+python execution/extract_with_gemini.py FC_515_124_p280509 --parallel
+
+# Especificar numero de workers
+python execution/extract_with_gemini.py FC_515_124_p280509 --parallel --workers 5
+
+# Forcar workers mesmo acima do recomendado
+python execution/extract_with_gemini.py FC_515_124_p280509 --parallel --workers 10 --force-workers
+
+# Para paid tier (150 RPM)
+python execution/extract_with_gemini.py FC_515_124_p280509 --parallel --rpm 150 --workers 10
+
+# Teste com poucos documentos
+python execution/extract_with_gemini.py FC_515_124_p280509 --parallel --limit 5 --verbose
+```
+
+**Flags disponiveis:**
+
+| Flag | Descricao | Default |
+|------|-----------|---------|
+| `--parallel` / `-p` | Ativa modo paralelo | False |
+| `--workers N` / `-w N` | Numero de workers | 5 |
+| `--rpm N` | Rate limit (req/min) | 150 (paid tier) |
+| `--force-workers` | Ignora auto-ajuste de workers | False |
+
+**Calculo automatico de workers:**
+- Free tier (15 RPM): max 3 workers recomendado
+- **Paid tier (150 RPM): max 10 workers recomendado** (configuracao atual)
+- Formula: `workers = max(2, rpm // 5)`
+
+**Performance medida (Paid Tier 1):**
+
+| Configuracao | Throughput | Tempo |
+|--------------|------------|-------|
+| Serial (1 worker) | 1.6 docs/min | ~25 min (39 docs) |
+| Paralelo (10 workers) | **7.5 docs/min** | **~5 min (39 docs)** |
+
+**Melhoria: 4.7x mais rapido** com 10 workers no paid tier.
+
+> **NOTA:** Este projeto usa API Gemini com Paid Tier 1 (150 RPM).
+> O tier foi confirmado via teste de stress em 2026-01-28.
+
+### 5.3 Estrutura de Saida
 
 ```
 .tmp/
@@ -446,24 +508,27 @@ def validar_output(resultado):
 
 ---
 
-## 7. PROXIMOS PASSOS
+## 7. STATUS E PROXIMOS PASSOS
 
-### 7.1 Implementacao Imediata
+### 7.1 Status Atual: COMPLETA
 
+Fase 3 foi concluída com sucesso:
 1. [x] Documentar novo modelo Gemini 3 Flash
 2. [x] Atualizar script para usar `gemini-3-flash-preview`
 3. [x] Remover dependencia de OCR
 4. [x] Disparar subagentes Opus para melhorar cada prompt
 5. [x] Testar com escritura FC_515_124_p280509
-6. [x] Validar metricas atingem metas
+6. [x] Validar metricas (37/39 documentos - 94.9% sucesso)
+7. [x] Corrigir processamento multipágina de PDFs
+8. [x] Adicionar suporte a arquivos DOCX
 
-### 7.2 Subagentes para Melhoria de Prompts
+**Resultado:** 37 arquivos JSON estruturados prontos para mapeamento.
 
-Um subagente Opus sera disparado para CADA tipo de documento:
-- Lera analise manual do subagente anterior
-- Implementara melhorias no prompt correspondente
-- Testara com documento original
-- Iterara ate atingir qualidade maxima
+### 7.2 Próxima Fase: FASE 4 - MAPEAMENTO
+
+A Fase 4 mapeia os dados extraídos para campos da minuta.
+
+**Ver:** `05_fase4_mapeamento_campos.md` para detalhes completos.
 
 ---
 

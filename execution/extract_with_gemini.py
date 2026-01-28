@@ -29,6 +29,8 @@ import os
 import re
 import sys
 import time
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
@@ -52,30 +54,29 @@ except ImportError as e:
 # Bibliotecas opcionais para conversao DOCX
 DOCX_SUPPORT_AVAILABLE = False
 DOCX_CONVERSION_METHOD = None
+DOCX_TEXT_EXTRACTION_AVAILABLE = False
 
+# Primeiro tenta python-docx para extracao de texto (mais confiavel)
 try:
-    import docx2pdf
+    from docx import Document as DocxDocument
+    DOCX_TEXT_EXTRACTION_AVAILABLE = True
     DOCX_SUPPORT_AVAILABLE = True
-    DOCX_CONVERSION_METHOD = 'docx2pdf'
+    DOCX_CONVERSION_METHOD = 'text-extraction'
 except ImportError:
     pass
 
-# Fallback: tenta usar python-docx + reportlab para conversao manual
+# Fallback: docx2pdf para conversao visual (requer Word/LibreOffice)
 if not DOCX_SUPPORT_AVAILABLE:
     try:
-        from docx import Document as DocxDocument
-        from reportlab.lib.pagesizes import letter, A4
-        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image as RLImage
-        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-        from reportlab.lib.units import inch
+        import docx2pdf
         DOCX_SUPPORT_AVAILABLE = True
-        DOCX_CONVERSION_METHOD = 'python-docx'
+        DOCX_CONVERSION_METHOD = 'docx2pdf'
     except ImportError:
         pass
 
 if not DOCX_SUPPORT_AVAILABLE:
     logging.getLogger(__name__).warning(
-        "Suporte a DOCX nao disponivel. Instale: pip install docx2pdf ou pip install python-docx reportlab"
+        "Suporte a DOCX nao disponivel. Instale: pip install python-docx"
     )
 
 # Carrega variaveis de ambiente
@@ -99,6 +100,15 @@ SAVE_PROGRESS_INTERVAL = 5
 SUPPORTED_IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'}
 SUPPORTED_PDF_EXTENSION = '.pdf'
 SUPPORTED_DOCX_EXTENSION = '.docx'
+
+# Constantes para processamento paralelo
+DEFAULT_WORKERS = 5  # Numero padrao de workers
+DEFAULT_RPM_FREE = 15  # Rate limit para tier gratuito
+DEFAULT_RPM_PAID = 150  # Rate limit para tier pago
+
+# Semaforo global para rate limiting (inicializado em run_extraction_parallel)
+_rate_limit_semaphore: Optional[threading.Semaphore] = None
+_rate_limit_lock = threading.Lock()  # Lock para operacoes thread-safe
 
 
 # =============================================================================
@@ -351,6 +361,62 @@ def extract_all_pages_from_pdf(pdf_path: Path, max_pages: int = 50) -> Optional[
         return None
 
 
+def extract_text_from_docx(docx_path: Path) -> Optional[str]:
+    """
+    Extrai texto de um arquivo DOCX usando python-docx.
+
+    Esta e a abordagem preferida para DOCX pois:
+    1. Nao depende de Microsoft Word ou LibreOffice
+    2. Funciona em qualquer plataforma
+    3. O Gemini processa texto com alta qualidade
+
+    Args:
+        docx_path: Caminho para o arquivo DOCX
+
+    Returns:
+        Texto extraido do documento ou None se falhar
+    """
+    if not DOCX_TEXT_EXTRACTION_AVAILABLE:
+        logger.warning("python-docx nao disponivel para extracao de texto")
+        return None
+
+    try:
+        from docx import Document as DocxDocument
+
+        logger.info(f"Extraindo texto do DOCX: {docx_path.name}")
+        doc = DocxDocument(str(docx_path))
+
+        text_parts = []
+
+        # Extrai paragrafos
+        for para in doc.paragraphs:
+            if para.text.strip():
+                text_parts.append(para.text.strip())
+
+        # Extrai tabelas (formatadas como texto)
+        for table_idx, table in enumerate(doc.tables, 1):
+            table_text = [f"\n[TABELA {table_idx}]"]
+            for row in table.rows:
+                row_cells = [cell.text.strip() for cell in row.cells]
+                if any(row_cells):
+                    table_text.append(" | ".join(row_cells))
+            if len(table_text) > 1:
+                text_parts.extend(table_text)
+
+        if not text_parts:
+            logger.warning(f"DOCX vazio ou sem texto extraivel: {docx_path}")
+            return None
+
+        full_text = "\n".join(text_parts)
+        logger.info(f"Texto extraido do DOCX: {len(full_text)} caracteres, {len(text_parts)} blocos")
+
+        return full_text
+
+    except Exception as e:
+        logger.error(f"Erro ao extrair texto do DOCX {docx_path}: {e}")
+        return None
+
+
 def convert_docx_to_images(docx_path: Path, max_pages: int = 50) -> Optional[Image.Image]:
     """
     Converte um arquivo DOCX para imagem(s), usando conversao para PDF intermediario.
@@ -487,11 +553,15 @@ def load_original_file(file_path: Path) -> Tuple[Optional[bytes], Optional[str]]
     """
     Carrega arquivo original como bytes e detecta MIME type.
 
+    Para arquivos DOCX, retorna o texto extraido com mime_type 'text/plain'.
+    Isso permite que o chamador use call_gemini_text_only() em vez de call_gemini().
+
     Args:
         file_path: Caminho para o arquivo
 
     Returns:
-        Tuple (bytes do arquivo, MIME type) ou (None, None) se falhar
+        Tuple (bytes/texto do arquivo, MIME type) ou (None, None) se falhar
+        Para DOCX: retorna (texto_str.encode('utf-8'), 'text/plain')
     """
     if not file_path.exists():
         logger.error(f"Arquivo nao encontrado: {file_path}")
@@ -500,7 +570,6 @@ def load_original_file(file_path: Path) -> Tuple[Optional[bytes], Optional[str]]
     ext = file_path.suffix.lower()
 
     # Mapeamento de extensao para MIME type
-    # Nota: .docx requer conversao especial, nao tem MIME direto para envio ao Gemini
     mime_types = {
         '.pdf': 'application/pdf',
         '.jpg': 'image/jpeg',
@@ -509,7 +578,7 @@ def load_original_file(file_path: Path) -> Tuple[Optional[bytes], Optional[str]]
         '.gif': 'image/gif',
         '.bmp': 'image/bmp',
         '.webp': 'image/webp',
-        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        '.docx': 'text/plain'  # DOCX sera convertido para texto
     }
 
     mime_type = mime_types.get(ext)
@@ -518,22 +587,31 @@ def load_original_file(file_path: Path) -> Tuple[Optional[bytes], Optional[str]]
         return None, None
 
     try:
-        # Para arquivos DOCX, converte para imagem via PDF intermediario
+        # Para arquivos DOCX, extrai texto diretamente (metodo preferido)
         if ext == '.docx':
             if not DOCX_SUPPORT_AVAILABLE:
-                logger.error(f"Suporte a DOCX nao disponivel. Instale: pip install docx2pdf")
+                logger.error(f"Suporte a DOCX nao disponivel. Instale: pip install python-docx")
                 return None, None
 
+            # Tenta primeiro extracao de texto (mais confiavel)
+            if DOCX_TEXT_EXTRACTION_AVAILABLE:
+                text = extract_text_from_docx(file_path)
+                if text:
+                    logger.info(f"DOCX carregado via extracao de texto: {len(text)} caracteres")
+                    return text.encode('utf-8'), 'text/plain'
+                else:
+                    logger.warning(f"Extracao de texto falhou para {file_path}, tentando conversao para imagem...")
+
+            # Fallback: conversao para imagem (requer Word/LibreOffice)
             img = convert_docx_to_images(file_path)
             if img is None:
-                logger.error(f"Falha ao converter DOCX: {file_path}")
+                logger.error(f"Falha ao processar DOCX: {file_path}")
                 return None, None
 
-            # Converte imagem para bytes JPEG (mesmo processo do PDF)
+            # Converte imagem para bytes JPEG
             import io
             buffer = io.BytesIO()
 
-            # Calcula qualidade baseada no tamanho
             total_pixels = img.width * img.height
             if total_pixels > 50_000_000:
                 quality = 70
@@ -546,7 +624,7 @@ def load_original_file(file_path: Path) -> Tuple[Optional[bytes], Optional[str]]
             image_bytes = buffer.getvalue()
 
             size_mb = len(image_bytes) / (1024 * 1024)
-            logger.info(f"DOCX convertido: {img.width}x{img.height} pixels, {size_mb:.2f}MB")
+            logger.info(f"DOCX convertido para imagem: {img.width}x{img.height} pixels, {size_mb:.2f}MB")
 
             img.close()
             return image_bytes, 'image/jpeg'
@@ -695,6 +773,73 @@ def call_gemini(
     raise RuntimeError(f"Nenhum modelo Gemini disponivel: {last_error}")
 
 
+def call_gemini_text_only(
+    client: genai.Client,
+    prompt: str,
+    document_text: str
+) -> str:
+    """
+    Chama Gemini apenas com texto (sem imagem).
+
+    Esta funcao e usada para processar documentos DOCX onde o texto
+    foi extraido diretamente. O Gemini processa texto com alta qualidade.
+
+    Args:
+        client: Cliente Gemini configurado
+        prompt: Prompt do tipo de documento
+        document_text: Texto extraido do documento
+
+    Returns:
+        Texto da resposta do Gemini
+    """
+    # Monta o prompt com o texto do documento
+    full_prompt = f"""{prompt}
+
+=== CONTEUDO DO DOCUMENTO ===
+
+{document_text}
+
+=== FIM DO DOCUMENTO ===
+
+Analise o documento acima e forneca a resposta no formato solicitado."""
+
+    # Configura geracao com temperatura baixa para extracao precisa
+    config = types.GenerateContentConfig(
+        temperature=0.1,
+        max_output_tokens=16384
+    )
+
+    # Envia para o Gemini usando o novo SDK
+    model_names = [GEMINI_MODEL, "gemini-2.5-flash", "gemini-2.0-flash"]
+
+    last_error = None
+    for model_name in model_names:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=[full_prompt],
+                config=config
+            )
+
+            # Validacao: verifica se response tem texto
+            if response is None or not response.text:
+                finish_reason = getattr(response, 'finish_reason', 'UNKNOWN') if response else 'NO_RESPONSE'
+                logger.warning(
+                    f"Modelo {model_name} retornou resposta vazia. Finish reason: {finish_reason}"
+                )
+                continue
+
+            return response.text
+        except Exception as e:
+            last_error = e
+            if "not found" in str(e).lower() or "unavailable" in str(e).lower():
+                logger.warning(f"Modelo {model_name} nao disponivel, tentando proximo...")
+                continue
+            raise
+
+    raise RuntimeError(f"Nenhum modelo Gemini disponivel: {last_error}")
+
+
 def call_gemini_with_retry(
     client: genai.Client,
     prompt: str,
@@ -725,6 +870,46 @@ def call_gemini_with_retry(
     for attempt in range(max_retries):
         try:
             return call_gemini(client, prompt, image_bytes, mime_type, ocr_text)
+
+        except Exception as e:
+            last_error = e
+            wait_time = (2 ** attempt) * 2  # 2, 4, 8 segundos
+
+            logger.warning(f"Tentativa {attempt + 1}/{max_retries} falhou: {e}")
+
+            if attempt < max_retries - 1:
+                logger.info(f"Aguardando {wait_time}s antes de retry...")
+                time.sleep(wait_time)
+
+    raise GeminiExtractionError(f"Falha apos {max_retries} tentativas: {last_error}")
+
+
+def call_gemini_text_only_with_retry(
+    client: genai.Client,
+    prompt: str,
+    document_text: str,
+    max_retries: int = MAX_RETRIES
+) -> str:
+    """
+    Chama Gemini com texto puro (sem imagem) com retry e backoff exponencial.
+
+    Args:
+        client: Cliente Gemini configurado
+        prompt: Prompt do tipo de documento
+        document_text: Texto extraido do documento
+        max_retries: Numero maximo de tentativas
+
+    Returns:
+        Texto da resposta do Gemini
+
+    Raises:
+        GeminiExtractionError: Se todas as tentativas falharem
+    """
+    last_error = None
+
+    for attempt in range(max_retries):
+        try:
+            return call_gemini_text_only(client, prompt, document_text)
 
         except Exception as e:
             last_error = e
@@ -843,9 +1028,9 @@ def process_document(
     try:
         # 1. Carrega o arquivo original
         file_path = Path(doc_info.get('caminho_absoluto', ''))
-        image_bytes, mime_type = load_original_file(file_path)
+        content_bytes, mime_type = load_original_file(file_path)
 
-        if image_bytes is None:
+        if content_bytes is None:
             raise FileLoadError(f"Nao foi possivel carregar: {file_path}")
 
         # 2. Carrega texto OCR (opcional)
@@ -857,14 +1042,24 @@ def process_document(
         tipo = doc_info.get('tipo_documento', 'OUTRO')
         prompt = load_prompt(tipo)
 
-        # 4. Chama Gemini
-        response = call_gemini_with_retry(
-            client=client,
-            prompt=prompt,
-            image_bytes=image_bytes,
-            mime_type=mime_type,
-            ocr_text=ocr_text
-        )
+        # 4. Chama Gemini (modo texto ou imagem dependendo do mime_type)
+        if mime_type == 'text/plain':
+            # DOCX convertido para texto - usa call_gemini_text_only
+            document_text = content_bytes.decode('utf-8')
+            response = call_gemini_text_only_with_retry(
+                client=client,
+                prompt=prompt,
+                document_text=document_text
+            )
+        else:
+            # PDF/imagem - usa call_gemini com imagem
+            response = call_gemini_with_retry(
+                client=client,
+                prompt=prompt,
+                image_bytes=content_bytes,
+                mime_type=mime_type,
+                ocr_text=ocr_text
+            )
 
         # 5. Parseia resposta
         parsed = parse_gemini_response(response)
@@ -1083,6 +1278,344 @@ def run_extraction(
     return resultado_final
 
 
+# =============================================================================
+# FUNCOES DE PROCESSAMENTO PARALELO
+# =============================================================================
+
+def process_document_threadsafe(
+    client: genai.Client,
+    doc_info: Dict[str, Any],
+    escritura_id: str,
+    output_dir: Path,
+    worker_id: int,
+    rpm: int,
+    num_workers: int,
+    verbose: bool = False
+) -> Dict[str, Any]:
+    """
+    Wrapper thread-safe para processamento de documento com rate limiting.
+
+    Usa semaforo global para controlar acesso concorrente e distribui
+    o delay de rate limiting entre os workers.
+
+    Args:
+        client: Cliente Gemini configurado
+        doc_info: Informacoes do documento do catalogo
+        escritura_id: ID da escritura
+        output_dir: Diretorio para salvar resultados
+        worker_id: ID do worker (para logging)
+        rpm: Requests per minute permitidos
+        num_workers: Numero total de workers
+        verbose: Modo verbose
+
+    Returns:
+        Dicionario com resultado da extracao
+    """
+    global _rate_limit_semaphore
+
+    nome = doc_info['nome']
+    tipo = doc_info.get('tipo_documento', 'OUTRO')
+
+    # Calcula delay distribuido entre workers
+    # Se temos 15 RPM e 3 workers, cada worker espera 4s entre suas requisicoes
+    # Mas como sao concorrentes, o delay efetivo por worker e (60/rpm)
+    delay_per_request = 60.0 / rpm
+
+    try:
+        # Adquire semaforo para controlar concorrencia
+        with _rate_limit_semaphore:
+            logger.info(f"[Worker {worker_id}] Processando: {nome} ({tipo})")
+
+            # Processa o documento
+            resultado = process_document(client, doc_info, escritura_id)
+
+            # Adiciona metadados do catalogo
+            resultado['id'] = doc_info['id']
+            resultado['nome_arquivo'] = nome
+            resultado['pessoa_relacionada'] = doc_info.get('pessoa_relacionada')
+            resultado['papel_inferido'] = doc_info.get('papel_inferido')
+            resultado['worker_id'] = worker_id
+
+            # Salva resultado individual
+            output_file = output_dir / f"{doc_info['id']}_{tipo}.json"
+            with _rate_limit_lock:
+                with open(output_file, 'w', encoding='utf-8') as f:
+                    json.dump(resultado, f, ensure_ascii=False, indent=2)
+
+            if resultado['status'] == 'sucesso':
+                if verbose:
+                    logger.info(f"[Worker {worker_id}] Sucesso: {nome} - "
+                               f"{len(resultado.get('dados_catalogados', {}))} campos, "
+                               f"{resultado['metadados']['tempo_processamento_s']}s")
+            else:
+                logger.warning(f"[Worker {worker_id}] Erro em {nome}: {resultado.get('erro', 'desconhecido')}")
+
+            # Rate limiting: espera antes de liberar para proximo
+            time.sleep(delay_per_request)
+
+            return resultado
+
+    except Exception as e:
+        logger.error(f"[Worker {worker_id}] Excecao ao processar {nome}: {e}")
+        return {
+            'id': doc_info['id'],
+            'nome_arquivo': nome,
+            'tipo_documento': tipo,
+            'status': 'erro',
+            'erro': str(e),
+            'worker_id': worker_id,
+            'metadados': {'tempo_processamento_s': 0}
+        }
+
+
+def calculate_optimal_workers(rpm: int, base_delay: float = RATE_LIMIT_DELAY) -> int:
+    """
+    Calcula o numero otimo de workers baseado no RPM disponivel.
+
+    A logica correta e: com N workers fazendo requisicoes, o delay global
+    entre qualquer requisicao deve ser (60/rpm) segundos. Cada worker
+    individualmente espera N * (60/rpm) segundos entre suas proprias requisicoes.
+
+    Ex: 15 RPM = 1 req a cada 4s globalmente
+        Com 3 workers, cada um faz 1 req a cada 12s
+        Total = 5 req/min por worker * 3 workers = 15 RPM
+
+    Ex: 150 RPM = 1 req a cada 0.4s globalmente
+        Com 10 workers, cada um faz 1 req a cada 4s
+        Total = 15 req/min por worker * 10 workers = 150 RPM
+
+    Args:
+        rpm: Requests per minute permitidos
+        base_delay: Delay base entre requisicoes (segundos) - nao usado, mantido para compatibilidade
+
+    Returns:
+        Numero recomendado de workers (minimo 2 para paralelizacao)
+    """
+    # Formula: workers = rpm / 5 (cada worker faz ~5 req/min com delay razoavel)
+    # Isso resulta em delay por worker de 12s, que e confortavel
+    recommended_workers = max(2, rpm // 5)
+
+    # Limita a 10 workers para evitar sobrecarga de memoria/threads
+    return min(recommended_workers, 10)
+
+
+def run_extraction_parallel(
+    escritura_id: str,
+    limit: Optional[int] = None,
+    tipo_filtro: Optional[str] = None,
+    workers: int = DEFAULT_WORKERS,
+    rpm: int = DEFAULT_RPM_FREE,
+    verbose: bool = False,
+    force_workers: bool = False
+) -> Dict[str, Any]:
+    """
+    Executa extracao contextual em paralelo para toda a escritura.
+
+    Usa ThreadPoolExecutor para processar multiplos documentos simultaneamente,
+    com controle de rate limiting via semaforo.
+
+    Args:
+        escritura_id: ID da escritura
+        limit: Limite de arquivos a processar
+        tipo_filtro: Filtrar por tipo de documento
+        workers: Numero de workers paralelos
+        rpm: Requests per minute permitidos pela API
+        verbose: Modo verbose
+        force_workers: Se True, usa o numero de workers solicitado sem auto-ajuste
+
+    Returns:
+        Estatisticas e resultados da extracao
+    """
+    global _rate_limit_semaphore
+
+    start_time = datetime.now()
+
+    # Calcula workers otimos e avisa se diferente do solicitado
+    optimal_workers = calculate_optimal_workers(rpm)
+    if workers > optimal_workers:
+        if force_workers:
+            logger.warning(f"ATENCAO: Usando {workers} workers (forcado) com RPM {rpm}. "
+                          f"Recomendado: {optimal_workers}. Pode causar rate limiting!")
+        else:
+            logger.info(f"Ajustando workers de {workers} para {optimal_workers} "
+                       f"baseado no RPM ({rpm}). Use --force-workers para ignorar.")
+            workers = optimal_workers
+    elif workers < optimal_workers:
+        logger.info(f"Usando {workers} workers. Poderia usar ate {optimal_workers} com RPM {rpm}.")
+
+    # Inicializa semaforo para controle de concorrencia
+    # Permite ate 'workers' requisicoes simultaneas
+    _rate_limit_semaphore = threading.Semaphore(workers)
+
+    # Configura Gemini
+    api_key = load_environment()
+    client = configure_gemini(api_key)
+
+    # Carrega catalogo
+    catalog = load_catalog(escritura_id)
+
+    # Filtra arquivos
+    arquivos = catalog.get('arquivos', [])
+
+    # Filtra apenas arquivos com OCR processado
+    arquivos = [a for a in arquivos if a.get('status_ocr') == 'processado']
+
+    # Filtra por tipo se especificado
+    if tipo_filtro:
+        tipo_upper = tipo_filtro.upper()
+        arquivos = [a for a in arquivos if a.get('tipo_documento') == tipo_upper]
+
+    # Aplica limite
+    if limit:
+        arquivos = arquivos[:limit]
+
+    total = len(arquivos)
+
+    if total == 0:
+        logger.warning("Nenhum arquivo para processar")
+        return {
+            'escritura_id': escritura_id,
+            'data_extracao': start_time.isoformat(),
+            'modo': 'paralelo',
+            'workers': workers,
+            'rpm': rpm,
+            'total_arquivos': 0,
+            'extraidos_sucesso': 0,
+            'extraidos_erro': 0,
+            'extracoes': []
+        }
+
+    logger.info("=" * 60)
+    logger.info("EXTRACAO CONTEXTUAL COM GEMINI (MODO PARALELO)")
+    logger.info(f"  Escritura: {escritura_id}")
+    logger.info(f"  Total de arquivos: {total}")
+    logger.info(f"  Workers: {workers}")
+    logger.info(f"  RPM configurado: {rpm}")
+    logger.info(f"  Modelo: {GEMINI_MODEL}")
+    if tipo_filtro:
+        logger.info(f"  Filtro de tipo: {tipo_filtro}")
+    logger.info(f"  Prompts disponiveis: {len(list_available_prompts())}")
+    logger.info("=" * 60)
+
+    # Diretorio de saida
+    output_dir = TMP_DIR / 'contextual' / escritura_id
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Resultados
+    extracoes = []
+    sucesso = 0
+    erro = 0
+    erros_detalhados = []
+
+    # Processa em paralelo usando ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        # Submete todas as tarefas
+        future_to_doc = {
+            executor.submit(
+                process_document_threadsafe,
+                client=client,
+                doc_info=arquivo,
+                escritura_id=escritura_id,
+                output_dir=output_dir,
+                worker_id=idx % workers,
+                rpm=rpm,
+                num_workers=workers,
+                verbose=verbose
+            ): (idx, arquivo)
+            for idx, arquivo in enumerate(arquivos, 1)
+        }
+
+        # Coleta resultados conforme completam
+        completed = 0
+        for future in as_completed(future_to_doc):
+            idx, arquivo = future_to_doc[future]
+            completed += 1
+
+            try:
+                resultado = future.result()
+                extracoes.append(resultado)
+
+                if resultado['status'] == 'sucesso':
+                    sucesso += 1
+                else:
+                    erro += 1
+                    erros_detalhados.append({
+                        'arquivo': arquivo['nome'],
+                        'erro': resultado.get('erro', 'desconhecido')
+                    })
+
+                # Log de progresso
+                if completed % SAVE_PROGRESS_INTERVAL == 0 or completed == total:
+                    logger.info(f"Progresso: {completed}/{total} "
+                               f"(sucesso: {sucesso}, erro: {erro})")
+
+            except Exception as e:
+                erro += 1
+                erros_detalhados.append({
+                    'arquivo': arquivo['nome'],
+                    'erro': str(e)
+                })
+                logger.error(f"Excecao ao processar {arquivo['nome']}: {e}")
+
+    # Ordena resultados por ID para manter consistencia
+    extracoes.sort(key=lambda x: x.get('id', ''))
+
+    # Calcula estatisticas
+    tempos = [e['metadados']['tempo_processamento_s'] for e in extracoes if e.get('metadados')]
+    tempo_medio = sum(tempos) / len(tempos) if tempos else 0
+    tempo_total = (datetime.now() - start_time).total_seconds()
+
+    # Resultado final
+    resultado_final = {
+        'escritura_id': escritura_id,
+        'data_extracao': start_time.isoformat(),
+        'data_conclusao': datetime.now().isoformat(),
+        'modo': 'paralelo',
+        'workers': workers,
+        'rpm': rpm,
+        'tempo_processamento_total': tempo_total,
+        'tempo_medio_por_documento': round(tempo_medio, 2),
+        'throughput_docs_por_minuto': round(total / (tempo_total / 60), 2) if tempo_total > 0 else 0,
+        'modelo': GEMINI_MODEL,
+        'total_arquivos': total,
+        'extraidos_sucesso': sucesso,
+        'extraidos_erro': erro,
+        'taxa_sucesso': round(sucesso / total * 100, 1) if total > 0 else 0,
+        'erros_detalhados': erros_detalhados,
+        'extracoes': extracoes
+    }
+
+    # Salva relatorio completo
+    report_path = output_dir / 'relatorio_contextual.json'
+    with open(report_path, 'w', encoding='utf-8') as f:
+        json.dump(resultado_final, f, ensure_ascii=False, indent=2)
+
+    # Resumo final
+    logger.info("=" * 60)
+    logger.info("EXTRACAO CONTEXTUAL CONCLUIDA (MODO PARALELO)")
+    logger.info(f"  Escritura: {escritura_id}")
+    logger.info(f"  Total processados: {total}")
+    logger.info(f"  Sucesso: {sucesso}")
+    logger.info(f"  Erros: {erro}")
+    logger.info(f"  Taxa de sucesso: {resultado_final['taxa_sucesso']}%")
+    logger.info(f"  Tempo total: {tempo_total:.2f}s")
+    logger.info(f"  Tempo medio/doc: {tempo_medio:.2f}s")
+    logger.info(f"  Throughput: {resultado_final['throughput_docs_por_minuto']:.1f} docs/min")
+    logger.info(f"  Workers utilizados: {workers}")
+    logger.info(f"  Saida: {output_dir}")
+
+    if erros_detalhados:
+        logger.info(f"  Erros encontrados:")
+        for err in erros_detalhados[:5]:  # Mostra ate 5 erros
+            logger.info(f"    - {err['arquivo']}: {err['erro'][:50]}...")
+        if len(erros_detalhados) > 5:
+            logger.info(f"    ... e mais {len(erros_detalhados) - 5} erros")
+
+    logger.info("=" * 60)
+
+    return resultado_final
+
+
 def main():
     """Funcao principal - entry point do script"""
     parser = argparse.ArgumentParser(
@@ -1090,14 +1623,26 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Exemplos:
+  # Modo serial (padrao)
   python extract_with_gemini.py FC_515_124_p280509
   python extract_with_gemini.py FC_515_124_p280509 --type MATRICULA_IMOVEL
   python extract_with_gemini.py FC_515_124_p280509 --limit 5
-  python extract_with_gemini.py FC_515_124_p280509 --verbose
+
+  # Modo paralelo
+  python extract_with_gemini.py FC_515_124_p280509 --parallel
+  python extract_with_gemini.py FC_515_124_p280509 -p --workers 3
+  python extract_with_gemini.py FC_515_124_p280509 -p -w 5 --rpm 150
 
 O script usa a visao multimodal do Gemini 3 Flash para interpretar documentos
 de cartorio DIRETAMENTE (sem OCR), gerando reescrita organizada, explicacao
 contextual e dados estruturados.
+
+Modo paralelo:
+  - Use --parallel/-p para ativar processamento paralelo
+  - --workers/-w define numero de workers (padrao: 5)
+  - --rpm define o rate limit da API (padrao: 15 para free tier)
+  - O numero de workers e ajustado automaticamente baseado no RPM
+  - Use --force-workers para ignorar o auto-ajuste (use com cuidado)
 
 Prompts disponiveis em: execution/prompts/
         """
@@ -1135,6 +1680,36 @@ Prompts disponiveis em: execution/prompts/
         help='Lista prompts disponiveis e sai'
     )
 
+    # Argumentos para modo paralelo
+    parser.add_argument(
+        '--parallel', '-p',
+        action='store_true',
+        help='Ativa modo de processamento paralelo'
+    )
+
+    parser.add_argument(
+        '--workers', '-w',
+        type=int,
+        default=DEFAULT_WORKERS,
+        help=f'Numero de workers paralelos (padrao: {DEFAULT_WORKERS}). '
+             f'Ajustado automaticamente baseado no RPM.'
+    )
+
+    parser.add_argument(
+        '--rpm',
+        type=int,
+        default=DEFAULT_RPM_PAID,
+        help=f'Rate limit da API em requests/minuto (padrao: {DEFAULT_RPM_FREE} para free tier). '
+             f'Use {DEFAULT_RPM_PAID} para tier pago.'
+    )
+
+    parser.add_argument(
+        '--force-workers',
+        action='store_true',
+        help='Forca o uso do numero de workers especificado, ignorando auto-ajuste baseado no RPM. '
+             'Use com cuidado: pode causar erros de rate limiting.'
+    )
+
     args = parser.parse_args()
 
     # Configura nivel de log
@@ -1157,12 +1732,26 @@ Prompts disponiveis em: execution/prompts/
         parser.error("escritura_id e obrigatorio (ex: FC_515_124_p280509)")
 
     try:
-        result = run_extraction(
-            escritura_id=args.escritura_id,
-            limit=args.limit,
-            tipo_filtro=args.tipo,
-            verbose=args.verbose
-        )
+        # Decide entre modo serial ou paralelo
+        if args.parallel:
+            logger.info("Modo PARALELO ativado")
+            result = run_extraction_parallel(
+                escritura_id=args.escritura_id,
+                limit=args.limit,
+                tipo_filtro=args.tipo,
+                workers=args.workers,
+                rpm=args.rpm,
+                verbose=args.verbose,
+                force_workers=args.force_workers
+            )
+        else:
+            logger.info("Modo SERIAL (padrao)")
+            result = run_extraction(
+                escritura_id=args.escritura_id,
+                limit=args.limit,
+                tipo_filtro=args.tipo,
+                verbose=args.verbose
+            )
 
         # Retorna codigo de saida baseado em erros
         if result['extraidos_erro'] > result['extraidos_sucesso']:
