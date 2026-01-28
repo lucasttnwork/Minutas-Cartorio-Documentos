@@ -360,6 +360,81 @@ O script identifica quem vende (alienante) e quem compra (adquirente):
 **Estratégia 2: Catálogo (Fallback)**
 - Campo `papel_inferido` baseado na subpasta (VENDEDORES/, COMPRADORA/)
 
+### 4.8 Regras Avançadas de Mapeamento (CRÍTICO)
+
+Estas regras foram aprendidas através de auditorias e correções de bugs:
+
+#### REGRA #1: Merge de Proprietários por Imóvel
+Quando há múltiplas fontes de proprietários para o mesmo imóvel:
+- **NÃO sobrescrever** - fazer merge por CPF ou nome
+- Evitar duplicatas usando CPF como chave única
+- Quando CPF não disponível, usar nome em maiúsculas
+- Se proprietário já existe, apenas atualizar campos vazios
+
+```python
+# ERRADO: sobrescreve proprietários
+imovel.proprietarios = proprietarios_novos
+
+# CORRETO: merge inteligente
+for prop_novo in proprietarios_novos:
+    if prop_novo['cpf'] not in cpfs_existentes:
+        imovel.proprietarios.append(prop_novo)
+```
+
+#### REGRA #2: Priorização Temporal de RGs
+Quando há múltiplos RGs para a mesma pessoa:
+- Priorizar o RG com `data_expedicao` mais recente
+- Se RG atual tem data e novo não tem, manter atual
+- Usar atribuição direta (não `set_field`) para forçar atualização quando priorização temporal indica
+
+#### REGRA #3: Tipo de Imóvel Específico vs Genérico
+Para o campo `tipo_imovel`, aplicar lógica especial:
+- Valores específicos (`apartamento`, `vaga_garagem`) têm prioridade sobre genéricos (`outro`, `desconhecido`)
+- MATRICULA_IMOVEL é a fonte mais confiável para tipo de imóvel
+- Se compromisso diz "outro" e matrícula diz "vaga_garagem", usar "vaga_garagem"
+
+#### REGRA #4: Estado Civil Atual vs Histórico
+Quando há múltiplas certidões de casamento:
+- Priorizar casamento mais recente por `data_casamento`
+- Casamento de 2022 sobrepõe casamento de 1978
+- Gerar **ALERTA JURÍDICO** quando detectar múltiplos casamentos
+
+#### REGRA #5: Data de Pagamento do ITBI
+Extrair data de pagamento dos comprovantes (`COMPROVANTE_PAGAMENTO`):
+- Campo: `datas.pagamento_efetivo` ou `datas.transacao`
+- Vincular ao guia ITBI correspondente pelo valor
+- Incluir código de autenticação bancária
+
+#### REGRA #6: Extração do Andar
+Quando `andar` não existe como campo direto:
+- Extrair de `descricao_completa` usando regex
+- Padrões: "no 12º andar", "12o andar do Edifício"
+- Retornar no formato "12º"
+
+### 4.9 Alertas Jurídicos
+
+O sistema gera alertas automáticos para situações que requerem atenção:
+
+| Tipo de Alerta | Severidade | Descrição |
+|----------------|------------|-----------|
+| `MULTIPLOS_CASAMENTOS` | ALTA | Pessoa com 2+ certidões de casamento |
+| `ONUS_NAO_CANCELADO` | ALTA | Hipoteca ou outro ônus ainda ativo |
+| `CPF_DIVERGENTE` | MÉDIA | CPF diferente entre documentos |
+| `DATA_INVALIDA` | MÉDIA | Data de casamento posterior a documento |
+
+Os alertas são incluídos no JSON de saída:
+```json
+{
+  "alertas_juridicos": [{
+    "tipo": "MULTIPLOS_CASAMENTOS",
+    "severidade": "ALTA",
+    "pessoa": "FULANO DE TAL",
+    "mensagem": "Detectados 2 casamentos...",
+    "recomendacao": "Solicitar certidão de averbação..."
+  }]
+}
+```
+
 ---
 
 ## Campos Mapeados por Categoria

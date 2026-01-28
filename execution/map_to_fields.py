@@ -279,12 +279,68 @@ class Imovel:
         self._fontes: Dict[str, List[str]] = {}
 
     def set_field(self, field: str, value: Any, source: str) -> bool:
-        """Define um campo com rastreamento de fonte."""
+        """
+        Define um campo com rastreamento de fonte e resolução de conflitos.
+
+        Respeita prioridade de fontes (como PessoaNatural) para evitar que
+        fontes menos confiáveis sobrescrevam dados de fontes mais confiáveis.
+
+        EXCEÇÃO: Para o campo tipo_imovel, a MATRICULA tem prioridade máxima
+        quando o valor é específico (apartamento, vaga_garagem, etc.) em vez
+        de genérico (outro, desconhecido).
+        """
         if value is None or (isinstance(value, str) and not value.strip()):
             return False
 
         if isinstance(value, str):
             value = value.strip()
+
+        current_value = getattr(self, field, None) if hasattr(self, field) else None
+
+        # Se campo já tem valor, verifica prioridade
+        if current_value is not None and current_value != value:
+            # Tratamento especial para tipo_imovel: prioriza valores específicos sobre genéricos
+            if field == 'tipo_imovel':
+                tipos_genericos = ['outro', 'desconhecido', 'nao_informado', '']
+                novo_eh_generico = value.lower() in tipos_genericos
+                atual_eh_generico = current_value.lower() in tipos_genericos
+
+                # Se atual é genérico e novo é específico, aceita
+                if atual_eh_generico and not novo_eh_generico:
+                    logger.debug(f"Imovel.set_field: tipo_imovel atualizado de genérico '{current_value}' para específico '{value}'")
+                # Se atual é específico e novo é genérico, rejeita
+                elif not atual_eh_generico and novo_eh_generico:
+                    logger.debug(f"Imovel.set_field: tipo_imovel '{value}' (genérico) rejeitado em favor de '{current_value}' (específico)")
+                    return False
+                # Se ambos são específicos, usa a prioridade padrão de fonte
+                # mas MATRICULA_IMOVEL tem prioridade especial para tipo
+                elif 'MATRICULA_IMOVEL' in source.upper() and 'MATRICULA_IMOVEL' not in str(self._fontes.get(field, [])).upper():
+                    logger.debug(f"Imovel.set_field: tipo_imovel '{value}' da MATRICULA substitui '{current_value}'")
+                else:
+                    # Verifica prioridade normal
+                    current_sources = self._fontes.get(field, [])
+                    current_priority = max(
+                        (self._get_source_priority(s) for s in current_sources),
+                        default=0
+                    )
+                    new_priority = self._get_source_priority(source)
+                    if new_priority <= current_priority:
+                        logger.debug(f"Imovel.set_field: tipo_imovel conflito ignorado: mantendo '{current_value}'")
+                        return False
+            else:
+                # Prioridade normal para outros campos
+                current_sources = self._fontes.get(field, [])
+                current_priority = max(
+                    (self._get_source_priority(s) for s in current_sources),
+                    default=0
+                )
+                new_priority = self._get_source_priority(source)
+
+                if new_priority <= current_priority:
+                    logger.debug(f"Imovel.set_field: Conflito ignorado para {field}: mantendo '{current_value}' (prioridade {current_priority}) vs '{value}' (prioridade {new_priority})")
+                    return False
+                else:
+                    logger.debug(f"Imovel.set_field: Conflito resolvido para {field}: substituindo '{current_value}' por '{value}' (maior prioridade)")
 
         if hasattr(self, field):
             setattr(self, field, value)
@@ -295,6 +351,13 @@ class Imovel:
             self._fontes[field].append(source)
 
         return True
+
+    def _get_source_priority(self, source: str) -> int:
+        """Obtém prioridade de uma fonte baseado no tipo do documento."""
+        for tipo, priority in SOURCE_PRIORITY.items():
+            if tipo in source.upper():
+                return priority
+        return SOURCE_PRIORITY['OUTRO']
 
     def to_dict(self) -> Dict[str, Any]:
         """Converte para dicionario."""
@@ -537,12 +600,53 @@ def extrair_unidade_andar(complemento: str) -> Tuple[Optional[str], Optional[str
         if unidade_match:
             unidade = unidade_match.group(1)
 
-        # Padroes: "12o andar", "12o andar", "andar 12"
-        andar_match = re.search(r'(\d+)[º°]?\s*andar|andar\s*(\d+)', complemento, re.IGNORECASE)
+        # Padroes: "12o andar", "12o andar", "andar 12", "no 12º andar"
+        andar_match = re.search(r'(\d+)[º°o]?\s*andar|andar\s*(\d+)|no\s+(\d+)[º°o]?\s*andar', complemento, re.IGNORECASE)
         if andar_match:
-            andar = f"{andar_match.group(1) or andar_match.group(2)}º"
+            andar = f"{andar_match.group(1) or andar_match.group(2) or andar_match.group(3)}º"
 
     return unidade, andar
+
+
+def extrair_andar_de_descricao(descricao: str) -> Optional[str]:
+    """Extrai o andar de uma descrição completa do imóvel."""
+    if not descricao:
+        return None
+
+    # Padrões comuns em descrições de matrícula
+    # "Unidade autônoma nº 124 no 12º andar"
+    # "apartamento 124, 12o andar"
+    # "no 12º andar do Edifício"
+    patterns = [
+        r'no\s+(\d+)[º°o]?\s*andar',
+        r'(\d+)[º°o]?\s*andar\s+do',
+        r'(\d+)[º°o]?\s*andar',
+        r'andar\s*(\d+)',
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, descricao, re.IGNORECASE)
+        if match:
+            numero = match.group(1)
+            if numero:
+                return f"{numero}º"
+
+    return None
+
+
+def parse_date_br(date_str: Optional[str]) -> Optional[datetime]:
+    """Converte data no formato brasileiro (DD/MM/YYYY) para datetime."""
+    if not date_str:
+        return None
+    try:
+        # Tenta formato brasileiro
+        return datetime.strptime(date_str.strip(), '%d/%m/%Y')
+    except ValueError:
+        try:
+            # Tenta formato ISO
+            return datetime.strptime(date_str.strip(), '%Y-%m-%d')
+        except ValueError:
+            return None
 
 
 def map_rg_to_pessoa(dados: Dict, pessoa: PessoaNatural, source: str) -> None:
@@ -550,16 +654,74 @@ def map_rg_to_pessoa(dados: Dict, pessoa: PessoaNatural, source: str) -> None:
     Mapeia dados de RG para pessoa.
 
     Campos extraidos: nome, rg, orgao_expedidor, data_nascimento, filiacao, cpf, naturalidade
+
+    IMPORTANTE: Implementa priorização temporal - RGs mais recentes têm prioridade
+    sobre RGs antigos, independente da ordem de processamento.
     """
     dados_cat = dados.get('dados_catalogados') or {}
 
+    # Extrai data de emissão do novo RG
+    nova_data_emissao_str = dados_cat.get('data_expedicao')
+    nova_data_emissao = parse_date_br(nova_data_emissao_str)
+
+    # Verifica se já existe RG e se o novo é mais recente
+    rg_atual = pessoa.rg
+    data_atual_str = pessoa.data_emissao_rg
+    data_atual = parse_date_br(data_atual_str)
+
+    # Determina se deve atualizar o RG baseado na data
+    deve_atualizar_rg = True
+    if rg_atual and nova_data_emissao and data_atual:
+        # Ambos têm data - prioriza o mais recente
+        if nova_data_emissao <= data_atual:
+            deve_atualizar_rg = False
+            logger.debug(f"RG ignorado por ser mais antigo: {dados_cat.get('numero_rg')} ({nova_data_emissao_str}) vs atual ({data_atual_str})")
+    elif rg_atual and data_atual and not nova_data_emissao:
+        # Atual tem data, novo não tem - mantém o atual
+        deve_atualizar_rg = False
+        logger.debug(f"RG ignorado por não ter data de emissão: {dados_cat.get('numero_rg')}")
+
+    # Nome sempre pode ser atualizado (não depende de RG)
     pessoa.set_field('nome', dados_cat.get('nome_completo'), source)
-    pessoa.set_field('rg', dados_cat.get('numero_rg'), source)
-    pessoa.set_field('orgao_emissor_rg', dados_cat.get('orgao_expedidor'), source)
-    pessoa.set_field('estado_emissor_rg', dados_cat.get('uf_expedidor'), source)
-    pessoa.set_field('data_emissao_rg', dados_cat.get('data_expedicao'), source)
     pessoa.set_field('data_nascimento', dados_cat.get('data_nascimento'), source)
     pessoa.set_field('naturalidade', dados_cat.get('naturalidade'), source)
+
+    # RG e campos relacionados - só atualiza se for mais recente
+    # Usa atribuição direta para forçar atualização quando priorização temporal indica
+    if deve_atualizar_rg:
+        novo_rg = dados_cat.get('numero_rg')
+        if novo_rg:
+            # Atribuição direta para ignorar prioridade de fonte (priorização temporal tem precedência)
+            pessoa.rg = novo_rg
+            if 'rg' not in pessoa._fontes:
+                pessoa._fontes['rg'] = []
+            if source not in pessoa._fontes['rg']:
+                pessoa._fontes['rg'].append(source)
+
+        novo_orgao = dados_cat.get('orgao_expedidor')
+        if novo_orgao:
+            pessoa.orgao_emissor_rg = novo_orgao
+            if 'orgao_emissor_rg' not in pessoa._fontes:
+                pessoa._fontes['orgao_emissor_rg'] = []
+            if source not in pessoa._fontes['orgao_emissor_rg']:
+                pessoa._fontes['orgao_emissor_rg'].append(source)
+
+        novo_estado = dados_cat.get('uf_expedidor')
+        if novo_estado:
+            pessoa.estado_emissor_rg = novo_estado
+            if 'estado_emissor_rg' not in pessoa._fontes:
+                pessoa._fontes['estado_emissor_rg'] = []
+            if source not in pessoa._fontes['estado_emissor_rg']:
+                pessoa._fontes['estado_emissor_rg'].append(source)
+
+        if nova_data_emissao_str:
+            pessoa.data_emissao_rg = nova_data_emissao_str
+            if 'data_emissao_rg' not in pessoa._fontes:
+                pessoa._fontes['data_emissao_rg'] = []
+            if source not in pessoa._fontes['data_emissao_rg']:
+                pessoa._fontes['data_emissao_rg'].append(source)
+
+        logger.debug(f"RG atualizado por priorização temporal: {novo_rg} (emissão: {nova_data_emissao_str})")
 
     # CPF pode estar no RG
     cpf = dados_cat.get('cpf')
@@ -592,11 +754,16 @@ def map_certidao_nascimento_to_pessoa(dados: Dict, pessoa: PessoaNatural, source
         pessoa.set_field('filiacao_mae', filiacao.get('mae'), source)
 
 
-def map_certidao_casamento_to_pessoa(dados: Dict, pessoa: PessoaNatural, nome_pessoa: str, source: str) -> None:
+def map_certidao_casamento_to_pessoa(dados: Dict, pessoa: PessoaNatural, nome_pessoa: str, source: str) -> Dict:
     """
     Mapeia dados de Certidao de Casamento para pessoa.
 
     Campos extraidos: estado_civil, conjuge, regime_bens, data_casamento, cpf
+
+    IMPORTANTE: Prioriza casamentos mais recentes e detecta múltiplos casamentos.
+
+    Returns:
+        Dicionário com informações do casamento detectado para alertas
     """
     dados_cat = dados.get('dados_catalogados') or {}
 
@@ -628,20 +795,55 @@ def map_certidao_casamento_to_pessoa(dados: Dict, pessoa: PessoaNatural, nome_pe
             pessoa.set_field('filiacao_pai', filiacao.get('pai'), source)
             pessoa.set_field('filiacao_mae', filiacao.get('mae'), source)
 
-    if conjuge_dados:
+    # Extrai data do casamento para comparação temporal
+    data_casamento_str = dados_cat.get('data_casamento')
+    data_casamento = parse_date_br(data_casamento_str)
+
+    # Verifica se já existe um casamento registrado e compara datas
+    data_casamento_atual_str = pessoa.data_casamento
+    data_casamento_atual = parse_date_br(data_casamento_atual_str)
+
+    # Determina se este casamento é mais recente
+    casamento_info = {
+        'data': data_casamento_str,
+        'conjuge': conjuge_dados.get('nome_completo') if conjuge_dados else None,
+        'regime': dados_cat.get('regime_bens'),
+        'situacao': dados_cat.get('situacao_atual_vinculo', ''),
+        'fonte': source,
+        'is_mais_recente': False
+    }
+
+    deve_atualizar = True
+    if data_casamento and data_casamento_atual:
+        if data_casamento > data_casamento_atual:
+            # Novo casamento é mais recente
+            casamento_info['is_mais_recente'] = True
+            logger.info(f"Casamento mais recente detectado: {data_casamento_str} (anterior: {data_casamento_atual_str})")
+        else:
+            # Casamento atual é mais recente - não atualiza estado civil
+            deve_atualizar = False
+            logger.debug(f"Casamento ignorado por ser anterior: {data_casamento_str} vs {data_casamento_atual_str}")
+    elif data_casamento:
+        casamento_info['is_mais_recente'] = True
+
+    # Atualiza dados do cônjuge atual
+    if conjuge_dados and deve_atualizar:
         pessoa.set_field('conjuge', conjuge_dados.get('nome_completo'), source)
 
-    # Dados do casamento
-    situacao = dados_cat.get('situacao_atual_vinculo', '').upper()
-    if situacao == 'CASADOS':
-        pessoa.set_field('estado_civil', 'CASADO', source)
-    elif situacao == 'DIVORCIADOS':
-        pessoa.set_field('estado_civil', 'DIVORCIADO', source)
-    elif situacao == 'SEPARADOS':
-        pessoa.set_field('estado_civil', 'SEPARADO JUDICIALMENTE', source)
+    # Dados do casamento - só atualiza estado civil se for o casamento mais recente
+    if deve_atualizar:
+        situacao = dados_cat.get('situacao_atual_vinculo', '').upper()
+        if situacao == 'CASADOS':
+            pessoa.set_field('estado_civil', 'CASADO', source)
+        elif situacao == 'DIVORCIADOS':
+            pessoa.set_field('estado_civil', 'DIVORCIADO', source)
+        elif situacao == 'SEPARADOS':
+            pessoa.set_field('estado_civil', 'SEPARADO JUDICIALMENTE', source)
 
-    pessoa.set_field('regime_bens', dados_cat.get('regime_bens'), source)
-    pessoa.set_field('data_casamento', dados_cat.get('data_casamento'), source)
+        pessoa.set_field('regime_bens', dados_cat.get('regime_bens'), source)
+        pessoa.set_field('data_casamento', data_casamento_str, source)
+
+    return casamento_info
 
 
 def map_cndt_to_pessoa(dados: Dict, pessoa: PessoaNatural, source: str) -> None:
@@ -871,29 +1073,86 @@ def map_matricula_to_imovel(dados: Dict, imovel: Imovel, source: str) -> List[Di
             imovel.set_field('matricula_estado', endereco.get('uf'), source)
             imovel.set_field('matricula_cidade', endereco.get('cidade'), source)
 
-            # Extrai unidade e andar do complemento
-            complemento = endereco.get('complemento', '')
-            unidade_extraida, andar_extraido = extrair_unidade_andar(complemento)
-            if unidade_extraida:
-                imovel.set_field('unidade', unidade_extraida, source)
-            if andar_extraido:
-                imovel.set_field('andar', andar_extraido, source)
+            # Extrai unidade e andar - primeiro tenta campos diretos, depois do complemento/descrição
+            # Campo andar direto (prioridade)
+            andar_direto = imovel_dados.get('andar')
+            if andar_direto:
+                imovel.set_field('andar', andar_direto, source)
+            else:
+                # Tenta extrair da descrição completa
+                descricao_completa = imovel_dados.get('descricao_completa', '')
+                andar_de_descricao = extrair_andar_de_descricao(descricao_completa)
+                if andar_de_descricao:
+                    imovel.set_field('andar', andar_de_descricao, source)
+                else:
+                    # Tenta extrair do complemento
+                    complemento = endereco.get('complemento', '')
+                    unidade_extraida, andar_extraido = extrair_unidade_andar(complemento)
+                    if unidade_extraida:
+                        imovel.set_field('unidade', unidade_extraida, source)
+                    if andar_extraido:
+                        imovel.set_field('andar', andar_extraido, source)
 
-    # Proprietarios atuais
-    proprietarios = []
+    # Proprietarios atuais - com merge inteligente
+    proprietarios_novos = []
     for prop in (dados_cat.get('proprietarios_atuais') or []):
-        proprietarios.append({
+        prop_data = {
             'nome': prop.get('nome'),
             'cpf': normalizar_cpf(prop.get('cpf')),
             'rg': prop.get('rg'),
             'estado_civil': prop.get('estado_civil'),
             'profissao': prop.get('profissao'),
             'fracao': prop.get('fracao', {}).get('valor'),
-            'data_aquisicao': prop.get('data_aquisicao')
-        })
+            'data_aquisicao': prop.get('data_aquisicao'),
+            '_fonte': source  # Rastreia fonte para auditoria
+        }
+        proprietarios_novos.append(prop_data)
 
-    if proprietarios:
-        imovel.proprietarios = proprietarios
+    if proprietarios_novos:
+        if not imovel.proprietarios:
+            # Se não há proprietários ainda, simplesmente atribui
+            imovel.proprietarios = proprietarios_novos
+            logger.debug(f"Proprietários iniciais definidos para imóvel: {len(proprietarios_novos)} proprietário(s)")
+        else:
+            # Merge inteligente: evita duplicatas por CPF ou nome
+            cpfs_existentes = {p.get('cpf') for p in imovel.proprietarios if p.get('cpf')}
+            nomes_existentes = {p.get('nome', '').upper() for p in imovel.proprietarios if p.get('nome')}
+
+            for prop_novo in proprietarios_novos:
+                cpf_novo = prop_novo.get('cpf')
+                nome_novo = (prop_novo.get('nome') or '').upper()
+
+                # Verifica se já existe por CPF
+                if cpf_novo and cpf_novo in cpfs_existentes:
+                    # Atualiza dados do proprietário existente se houver info nova
+                    for i, p_existente in enumerate(imovel.proprietarios):
+                        if p_existente.get('cpf') == cpf_novo:
+                            for campo, valor in prop_novo.items():
+                                if campo != '_fonte' and valor and not p_existente.get(campo):
+                                    p_existente[campo] = valor
+                                    logger.debug(f"Campo '{campo}' atualizado para proprietário CPF {cpf_novo}")
+                            break
+                # Verifica se já existe por nome
+                elif nome_novo and nome_novo in nomes_existentes:
+                    # Atualiza dados do proprietário existente se houver info nova
+                    for i, p_existente in enumerate(imovel.proprietarios):
+                        if (p_existente.get('nome') or '').upper() == nome_novo:
+                            for campo, valor in prop_novo.items():
+                                if campo != '_fonte' and valor and not p_existente.get(campo):
+                                    p_existente[campo] = valor
+                            # Se não tinha CPF e agora tem, atualiza
+                            if cpf_novo and not p_existente.get('cpf'):
+                                p_existente['cpf'] = cpf_novo
+                                cpfs_existentes.add(cpf_novo)
+                            break
+                else:
+                    # Proprietário novo, adiciona à lista
+                    imovel.proprietarios.append(prop_novo)
+                    if cpf_novo:
+                        cpfs_existentes.add(cpf_novo)
+                    if nome_novo:
+                        nomes_existentes.add(nome_novo)
+                    logger.debug(f"Novo proprietário adicionado: {prop_novo.get('nome')} (fonte: {source})")
 
     # Onus - com lógica de prioridade para não sobrescrever imóvel livre com status desconhecido
     onus_ativos = dados_cat.get('onus_ativos') or []
@@ -937,7 +1196,7 @@ def map_matricula_to_imovel(dados: Dict, imovel: Imovel, source: str) -> List[Di
             })
         imovel.set_field('onus_historicos', onus_hist_normalizados, source)
 
-    return proprietarios
+    return proprietarios_novos
 
 
 def map_iptu_to_imovel(dados: Dict, imovel: Imovel, source: str) -> None:
@@ -1046,6 +1305,54 @@ def map_itbi_to_negocio(dados: Dict, negocio: Negocio, source: str) -> None:
             negocio.set_field('fracao_alienada', f"{transacao.get('proporcao_transmitida')}%", source)
 
 
+def map_comprovante_pagamento_to_negocio(dados: Dict, negocio: Negocio, source: str) -> None:
+    """
+    Mapeia dados de Comprovante de Pagamento para extrair data de pagamento do ITBI.
+
+    Campos extraidos: data_pagamento (do ITBI)
+    """
+    dados_cat = dados.get('dados_catalogados') or {}
+
+    # Verifica se é comprovante de ITBI
+    metadados = dados_cat.get('metadados_documento', {})
+    resumo = dados_cat.get('resumo', {})
+    tipo_tributo = resumo.get('tipo_tributo', '').upper() if resumo else ''
+
+    # Também verifica no arquivo de origem
+    arquivo_origem = dados.get('arquivo_origem', '').upper()
+    is_itbi = 'ITBI' in tipo_tributo or 'ITBI' in arquivo_origem
+
+    if not is_itbi:
+        return
+
+    # Processa pagamentos
+    pagamentos = dados_cat.get('pagamentos', [])
+
+    for pagamento in pagamentos:
+        datas = pagamento.get('datas', {})
+
+        # Data de pagamento efetivo tem prioridade
+        data_pagamento = datas.get('pagamento_efetivo') or datas.get('transacao')
+
+        if data_pagamento:
+            # Só atualiza se não tiver data de pagamento ainda
+            if not negocio.itbi_data_pagamento:
+                negocio.set_field('itbi_data_pagamento', data_pagamento, source)
+                logger.debug(f"Data de pagamento ITBI definida: {data_pagamento} (fonte: {source})")
+
+        # Também vincula ao guia correspondente pelo valor
+        valor_pagamento = pagamento.get('valor')
+        if valor_pagamento:
+            valor_str = normalizar_valor(valor_pagamento)
+            for guia in negocio.itbi_guias:
+                if guia.get('valor') == valor_str and not guia.get('data_pagamento'):
+                    guia['data_pagamento'] = data_pagamento
+                    guia['status_pagamento'] = pagamento.get('status_pagamento', 'PAGO')
+                    guia['codigo_autenticacao'] = pagamento.get('codigo_autenticacao')
+                    logger.debug(f"Guia ITBI {guia.get('numero_guia')} atualizada com data de pagamento")
+                    break
+
+
 # =============================================================================
 # FUNCAO PRINCIPAL DE MAPEAMENTO
 # =============================================================================
@@ -1119,6 +1426,10 @@ def map_documents_to_fields(caso_id: str, verbose: bool = False) -> Dict[str, An
     # Listas para rastrear papeis
     cpfs_vendedores: Set[str] = set()
     cpfs_compradores: Set[str] = set()
+
+    # Estrutura para rastrear múltiplos casamentos e alertas jurídicos
+    casamentos_por_pessoa: Dict[str, List[Dict]] = {}  # CPF -> lista de casamentos detectados
+    alertas_juridicos: List[Dict] = []
 
     # Primeira passagem: Compromisso de Compra e Venda (define papeis)
     for doc in documentos:
@@ -1212,7 +1523,34 @@ def map_documents_to_fields(caso_id: str, verbose: bool = False) -> Dict[str, An
             for conj in [conjuge1, conjuge2]:
                 cpf = normalizar_cpf(conj.get('cpf'))
                 if cpf and cpf in pessoas:
-                    map_certidao_casamento_to_pessoa(doc, pessoas[cpf], conj.get('nome_completo', ''), source)
+                    casamento_info = map_certidao_casamento_to_pessoa(doc, pessoas[cpf], conj.get('nome_completo', ''), source)
+
+                    # Rastreia múltiplos casamentos
+                    if cpf not in casamentos_por_pessoa:
+                        casamentos_por_pessoa[cpf] = []
+                    casamentos_por_pessoa[cpf].append(casamento_info)
+
+                    # Se detectou mais de um casamento para mesma pessoa, gera alerta
+                    if len(casamentos_por_pessoa[cpf]) > 1:
+                        nome_pessoa = pessoas[cpf].nome or cpf
+                        alerta = {
+                            'tipo': 'MULTIPLOS_CASAMENTOS',
+                            'severidade': 'ALTA',
+                            'pessoa': nome_pessoa,
+                            'cpf': cpf,
+                            'casamentos': casamentos_por_pessoa[cpf],
+                            'mensagem': f"Detectados {len(casamentos_por_pessoa[cpf])} casamentos para {nome_pessoa}. Verificar situação de dissolução do(s) casamento(s) anterior(es).",
+                            'recomendacao': "Solicitar certidão de averbação de divórcio ou óbito do cônjuge anterior."
+                        }
+                        # Evita duplicatas de alertas
+                        alertas_existentes = [a for a in alertas_juridicos if a.get('cpf') == cpf and a.get('tipo') == 'MULTIPLOS_CASAMENTOS']
+                        if alertas_existentes:
+                            # Atualiza alerta existente
+                            alertas_existentes[0]['casamentos'] = casamentos_por_pessoa[cpf]
+                            alertas_existentes[0]['mensagem'] = alerta['mensagem']
+                        else:
+                            alertas_juridicos.append(alerta)
+                            logger.warning(f"ALERTA JURÍDICO: {alerta['mensagem']}")
 
         elif tipo == 'CNDT':
             cpf_cndt = normalizar_cpf(dados_cat.get('cpf'))
@@ -1259,6 +1597,9 @@ def map_documents_to_fields(caso_id: str, verbose: bool = False) -> Dict[str, An
 
         elif tipo == 'ITBI':
             map_itbi_to_negocio(doc, negocio, source)
+
+        elif tipo == 'COMPROVANTE_PAGAMENTO':
+            map_comprovante_pagamento_to_negocio(doc, negocio, source)
 
     # Consolida pessoas temporarias (sem CPF)
     temp_pessoas = [k for k in pessoas.keys() if k.startswith('_TEMP_')]
@@ -1490,7 +1831,8 @@ def map_documents_to_fields(caso_id: str, verbose: bool = False) -> Dict[str, An
             "documentos_processados": len(documentos),
             "campos_preenchidos": campos_preenchidos,
             "campos_faltantes": campos_faltantes,
-            "total_imoveis": len(imoveis_list)
+            "total_imoveis": len(imoveis_list),
+            "total_alertas": len(alertas_juridicos)
         },
         "alienantes": alienantes,
         "adquirentes": adquirentes,
@@ -1514,7 +1856,8 @@ def map_documents_to_fields(caso_id: str, verbose: bool = False) -> Dict[str, An
             "vvr": {
                 "valor": primeiro_imovel_dict.get('valores_venais', {}).get('vvr')
             }
-        }
+        },
+        "alertas_juridicos": alertas_juridicos
     }
 
     return resultado
