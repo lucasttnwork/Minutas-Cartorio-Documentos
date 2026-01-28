@@ -207,8 +207,20 @@ VALID_DOCUMENT_TYPES = {
     'DADOS_CADASTRAIS', 'COMPROMISSO_COMPRA_VENDA', 'ESCRITURA', 'PROCURACAO',
     'COMPROVANTE_RESIDENCIA', 'COMPROVANTE_PAGAMENTO', 'CONTRATO_SOCIAL',
     'PROTOCOLO_ONR', 'ASSINATURA_DIGITAL',
-    'OUTRO', 'ILEGIVEL'
+    'OUTRO', 'ILEGIVEL', 'DESCONHECIDO'
 }
+
+# Categorias válidas para documentos desconhecidos
+VALID_CATEGORIES = {
+    'DOCUMENTOS_PESSOAIS',
+    'CERTIDOES',
+    'DOCUMENTOS_IMOVEL',
+    'DOCUMENTOS_NEGOCIO',
+    'ADMINISTRATIVOS'
+}
+
+# Diretório para salvar descobertas de novos tipos
+DISCOVERIES_DIR = '.tmp/descobertas'
 
 # Prompt de classificação padronizado
 CLASSIFICATION_PROMPT = """Você é um especialista em documentos brasileiros de cartório e registro de imóveis.
@@ -240,12 +252,17 @@ Analise esta imagem de documento e identifique:
    - CONTRATO_SOCIAL (Pessoa Jurídica)
    - PROTOCOLO_ONR (Protocolo/comprovante do Operador Nacional do Registro - SAEC, pedido de certidão digital, confirmação de protocolo ONR)
    - ASSINATURA_DIGITAL (Certificado de assinatura eletrônica - DocuSign, Adobe Sign, GOV.BR, ou similar com lista de assinaturas e validação)
-   - OUTRO (não se encaixa nas categorias acima)
+   - OUTRO (documento reconhecido mas não se encaixa nas categorias acima)
    - ILEGIVEL (documento muito ruim para identificar)
+   - DESCONHECIDO (documento claramente identificável mas de um tipo que não existe na lista acima)
 
 ATENÇÃO - Exemplos para ajudar na classificação:
 - Documentos com "SAEC", "ONR", "Operador Nacional", "protocolo gerado" -> PROTOCOLO_ONR
 - Documentos com "Certificate of Completion", "DocuSign", "assinatura eletrônica", "Summary" de assinaturas -> ASSINATURA_DIGITAL
+
+IMPORTANTE sobre DESCONHECIDO vs OUTRO:
+- Use OUTRO quando você reconhece o documento mas ele não se encaixa nas categorias
+- Use DESCONHECIDO quando você identifica um TIPO NOVO de documento que deveria ser adicionado à lista
 
 2. CONFIANCA: Alta, Media ou Baixa
 
@@ -253,8 +270,20 @@ ATENÇÃO - Exemplos para ajudar na classificação:
 
 4. OBSERVACAO: Breve descrição do que você vê (máximo 100 caracteres)
 
-Responda APENAS em JSON válido, sem markdown:
-{"tipo_documento": "...", "confianca": "...", "pessoa_relacionada": "...", "observacao": "..."}"""
+5. SE E SOMENTE SE tipo_documento for "DESCONHECIDO", inclua TAMBÉM estes campos adicionais:
+   - tipo_sugerido: Nome sugerido para este novo tipo de documento em SNAKE_CASE (ex: "CERTIDAO_AMBIENTAL")
+   - descricao: Breve descrição do que é este tipo de documento (máximo 200 caracteres)
+   - categoria_recomendada: Uma das categorias: DOCUMENTOS_PESSOAIS, CERTIDOES, DOCUMENTOS_IMOVEL, DOCUMENTOS_NEGOCIO, ADMINISTRATIVOS
+   - caracteristicas_identificadoras: Lista de 3-5 características visuais/textuais que identificam este tipo de documento
+   - campos_principais: Lista de 3-8 campos de dados importantes que aparecem neste documento
+
+Responda APENAS em JSON válido, sem markdown.
+
+Exemplo para documento CONHECIDO:
+{"tipo_documento": "RG", "confianca": "Alta", "pessoa_relacionada": "JOAO SILVA", "observacao": "RG do estado de SP"}
+
+Exemplo para documento DESCONHECIDO:
+{"tipo_documento": "DESCONHECIDO", "confianca": "Alta", "pessoa_relacionada": null, "observacao": "Certidão ambiental do IBAMA", "tipo_sugerido": "CERTIDAO_AMBIENTAL", "descricao": "Certidão de regularidade ambiental emitida pelo IBAMA", "categoria_recomendada": "CERTIDOES", "caracteristicas_identificadoras": ["Logo do IBAMA", "Título Certidão Ambiental", "Número de protocolo", "QR Code de validação"], "campos_principais": ["numero_certidao", "cpf_cnpj", "nome_requerente", "data_emissao", "data_validade", "situacao_ambiental"]}"""
 
 
 def load_environment():
@@ -420,6 +449,13 @@ def parse_gemini_response(response_text: str) -> dict:
     """
     Faz o parsing da resposta do Gemini, tratando possíveis erros de formato.
 
+    Suporta campos adicionais para documentos DESCONHECIDO:
+    - tipo_sugerido: Nome sugerido para o novo tipo
+    - descricao: Descrição do tipo de documento
+    - categoria_recomendada: Categoria sugerida
+    - caracteristicas_identificadoras: Lista de características
+    - campos_principais: Lista de campos importantes
+
     Args:
         response_text: Texto de resposta do Gemini
 
@@ -461,6 +497,10 @@ def parse_gemini_response(response_text: str) -> dict:
         if data.get('observacao') and len(data['observacao']) > 100:
             data['observacao'] = data['observacao'][:97] + '...'
 
+        # Processa campos adicionais para documentos DESCONHECIDO
+        if data['tipo_documento'] == 'DESCONHECIDO':
+            data = _process_unknown_document_fields(data)
+
         return data
 
     except json.JSONDecodeError as e:
@@ -474,6 +514,70 @@ def parse_gemini_response(response_text: str) -> dict:
             'pessoa_relacionada': None,
             'observacao': f'Erro parsing: {str(e)[:50]}'
         }
+
+
+def _process_unknown_document_fields(data: dict) -> dict:
+    """
+    Processa e valida os campos adicionais para documentos DESCONHECIDO.
+
+    Args:
+        data: Dicionário com dados já parseados
+
+    Returns:
+        Dicionário com campos de documento desconhecido validados
+    """
+    # Normaliza tipo_sugerido para SNAKE_CASE
+    tipo_sugerido = data.get('tipo_sugerido', '')
+    if tipo_sugerido:
+        # Remove caracteres especiais e converte para SNAKE_CASE
+        tipo_sugerido = tipo_sugerido.upper().strip()
+        tipo_sugerido = ''.join(c if c.isalnum() or c == '_' else '_' for c in tipo_sugerido)
+        tipo_sugerido = '_'.join(filter(None, tipo_sugerido.split('_')))  # Remove underscores duplicados
+        data['tipo_sugerido'] = tipo_sugerido
+    else:
+        data['tipo_sugerido'] = None
+
+    # Trunca descrição se necessário
+    descricao = data.get('descricao', '')
+    if descricao and len(descricao) > 200:
+        data['descricao'] = descricao[:197] + '...'
+    elif not descricao:
+        data['descricao'] = None
+
+    # Valida categoria_recomendada
+    categoria = data.get('categoria_recomendada', '').upper().strip() if data.get('categoria_recomendada') else None
+    if categoria and categoria in VALID_CATEGORIES:
+        data['categoria_recomendada'] = categoria
+    else:
+        data['categoria_recomendada'] = 'ADMINISTRATIVOS'  # Default
+
+    # Valida caracteristicas_identificadoras (deve ser lista)
+    caracteristicas = data.get('caracteristicas_identificadoras', [])
+    if isinstance(caracteristicas, list):
+        # Filtra strings vazias e limita a 10 itens
+        data['caracteristicas_identificadoras'] = [
+            str(c).strip() for c in caracteristicas if c and str(c).strip()
+        ][:10]
+    else:
+        data['caracteristicas_identificadoras'] = []
+
+    # Valida campos_principais (deve ser lista)
+    campos = data.get('campos_principais', [])
+    if isinstance(campos, list):
+        # Normaliza para snake_case e filtra vazios
+        normalized_campos = []
+        for c in campos:
+            if c and str(c).strip():
+                campo = str(c).lower().strip()
+                campo = ''.join(ch if ch.isalnum() or ch == '_' else '_' for ch in campo)
+                campo = '_'.join(filter(None, campo.split('_')))
+                if campo:
+                    normalized_campos.append(campo)
+        data['campos_principais'] = normalized_campos[:15]  # Limita a 15 campos
+    else:
+        data['campos_principais'] = []
+
+    return data
 
 
 def classify_docx_by_name(file_info: dict) -> dict:
@@ -600,15 +704,18 @@ def classify_with_mock(file_info: dict) -> dict:
     }
 
 
-def classify_document(model, file_info: dict, mock_mode: bool = False) -> dict:
+def classify_document(model, file_info: dict, mock_mode: bool = False, caso_id: str = 'unknown') -> dict:
     """
     Classifica um único documento usando o Gemini.
     Implementa retry com backoff exponencial.
+
+    Para documentos DESCONHECIDO, salva automaticamente em .tmp/descobertas/.
 
     Args:
         model: Modelo Gemini configurado
         file_info: Informações do arquivo do inventário
         mock_mode: Se True, usa classificação mock
+        caso_id: ID do caso/escritura para registro de descobertas
 
     Returns:
         Resultado da classificação
@@ -691,7 +798,8 @@ def classify_document(model, file_info: dict, mock_mode: bool = False) -> dict:
             # Parse da resposta
             result = parse_gemini_response(response.text)
 
-            return {
+            # Monta resultado base
+            classification = {
                 'id': file_info['id'],
                 'nome': file_info['nome'],
                 'tipo_documento': result.get('tipo_documento'),
@@ -700,6 +808,19 @@ def classify_document(model, file_info: dict, mock_mode: bool = False) -> dict:
                 'observacao': result.get('observacao'),
                 'status': 'sucesso'
             }
+
+            # Se for DESCONHECIDO, adiciona campos extras e salva descoberta
+            if result.get('tipo_documento') == 'DESCONHECIDO':
+                classification['tipo_sugerido'] = result.get('tipo_sugerido')
+                classification['descricao'] = result.get('descricao')
+                classification['categoria_recomendada'] = result.get('categoria_recomendada')
+                classification['caracteristicas_identificadoras'] = result.get('caracteristicas_identificadoras', [])
+                classification['campos_principais'] = result.get('campos_principais', [])
+
+                # Salva descoberta para análise posterior
+                save_discovery(caso_id, file_info['nome'], classification)
+
+            return classification
 
         except Exception as e:
             wait_time = (2 ** attempt) * 2  # 2, 4, 8 segundos
@@ -876,7 +997,8 @@ def prepare_document(file_info: Dict[str, Any], mock_mode: bool = False) -> Prep
 def classify_prepared_document(
     model,
     prepared: PreparedDocument,
-    rate_limiter: RateLimiter
+    rate_limiter: RateLimiter,
+    caso_id: str = 'unknown'
 ) -> Dict[str, Any]:
     """
     Classifica um documento ja preparado usando o Gemini.
@@ -884,10 +1006,13 @@ def classify_prepared_document(
     Se o documento tem resultado pre-computado (DOCX, mock, erro), retorna direto.
     Caso contrario, usa o rate_limiter para aguardar e faz a chamada a API.
 
+    Para documentos DESCONHECIDO, salva automaticamente em .tmp/descobertas/.
+
     Args:
         model: Modelo Gemini configurado
         prepared: Documento preparado
         rate_limiter: Instancia do rate limiter
+        caso_id: ID do caso/escritura para registro de descobertas
 
     Returns:
         Resultado da classificacao
@@ -923,7 +1048,8 @@ def classify_prepared_document(
             # Parse da resposta
             result = parse_gemini_response(response.text)
 
-            return {
+            # Monta resultado base
+            classification = {
                 'id': prepared.file_info['id'],
                 'nome': prepared.file_info['nome'],
                 'tipo_documento': result.get('tipo_documento'),
@@ -932,6 +1058,19 @@ def classify_prepared_document(
                 'observacao': result.get('observacao'),
                 'status': 'sucesso'
             }
+
+            # Se for DESCONHECIDO, adiciona campos extras e salva descoberta
+            if result.get('tipo_documento') == 'DESCONHECIDO':
+                classification['tipo_sugerido'] = result.get('tipo_sugerido')
+                classification['descricao'] = result.get('descricao')
+                classification['categoria_recomendada'] = result.get('categoria_recomendada')
+                classification['caracteristicas_identificadoras'] = result.get('caracteristicas_identificadoras', [])
+                classification['campos_principais'] = result.get('campos_principais', [])
+
+                # Salva descoberta para análise posterior
+                save_discovery(caso_id, prepared.file_info['nome'], classification)
+
+            return classification
 
         except Exception as e:
             wait_time_retry = (2 ** attempt) * 2  # 2, 4, 8 segundos
@@ -1098,7 +1237,7 @@ def run_classification_parallel(
         logger.info(f"Classificando {idx}/{total}: {prepared.file_info['nome']}")
 
         # Classifica (respeitando rate limit se necessario)
-        classification = classify_prepared_document(model, prepared, rate_limiter)
+        classification = classify_prepared_document(model, prepared, rate_limiter, escritura_id)
         result['classificacoes'].append(classification)
 
         # Atualiza contadores
@@ -1146,6 +1285,205 @@ def save_progress(output_path: Path, result: dict):
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
     logger.debug(f"Progresso salvo em {output_path}")
+
+
+def save_discovery(
+    caso_id: str,
+    arquivo_origem: str,
+    classification: Dict[str, Any]
+) -> Optional[Path]:
+    """
+    Salva informações de um documento DESCONHECIDO para análise posterior.
+
+    Cria um arquivo JSON em .tmp/descobertas/ com as informações do novo tipo
+    sugerido pelo Gemini.
+
+    Args:
+        caso_id: ID do caso/escritura
+        arquivo_origem: Nome do arquivo de origem
+        classification: Resultado da classificação contendo campos de documento desconhecido
+
+    Returns:
+        Path do arquivo salvo ou None se não for documento DESCONHECIDO
+    """
+    # Só salva se for documento DESCONHECIDO com tipo sugerido
+    if classification.get('tipo_documento') != 'DESCONHECIDO':
+        return None
+
+    if not classification.get('tipo_sugerido'):
+        logger.warning(f"Documento DESCONHECIDO sem tipo_sugerido: {arquivo_origem}")
+        return None
+
+    # Cria diretório de descobertas se não existir
+    discoveries_dir = ROOT_DIR / DISCOVERIES_DIR
+    discoveries_dir.mkdir(parents=True, exist_ok=True)
+
+    # Gera timestamp para nome único
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+
+    # Monta dados da descoberta
+    discovery = {
+        'caso_id': caso_id,
+        'arquivo_origem': arquivo_origem,
+        'data_descoberta': datetime.now().isoformat(),
+        'tipo_sugerido': classification.get('tipo_sugerido'),
+        'descricao': classification.get('descricao'),
+        'categoria_recomendada': classification.get('categoria_recomendada'),
+        'caracteristicas_identificadoras': classification.get('caracteristicas_identificadoras', []),
+        'campos_principais': classification.get('campos_principais', []),
+        'observacao_original': classification.get('observacao'),
+        'confianca': classification.get('confianca')
+    }
+
+    # Salva arquivo
+    discovery_file = discoveries_dir / f'{caso_id}_descoberta_{timestamp}.json'
+    with open(discovery_file, 'w', encoding='utf-8') as f:
+        json.dump(discovery, f, ensure_ascii=False, indent=2)
+
+    logger.info(f"Descoberta salva: {discovery_file.name} - tipo_sugerido: {classification.get('tipo_sugerido')}")
+    return discovery_file
+
+
+def consolidate_discoveries() -> Dict[str, Any]:
+    """
+    Consolida todas as descobertas em .tmp/descobertas/ agrupadas por tipo_sugerido.
+
+    Útil para o orquestrador analisar padrões e decidir quais novos tipos
+    devem ser adicionados ao sistema.
+
+    Returns:
+        Dicionário com descobertas consolidadas:
+        {
+            'data_consolidacao': timestamp,
+            'total_descobertas': int,
+            'tipos_sugeridos': {
+                'TIPO_A': {
+                    'contagem': int,
+                    'categoria_mais_comum': str,
+                    'descricoes': [str, ...],
+                    'caracteristicas_unificadas': [str, ...],
+                    'campos_unificados': [str, ...],
+                    'arquivos_exemplo': [str, ...],
+                    'casos': [str, ...]
+                },
+                ...
+            }
+        }
+    """
+    discoveries_dir = ROOT_DIR / DISCOVERIES_DIR
+
+    # Verifica se diretório existe
+    if not discoveries_dir.exists():
+        logger.info("Nenhuma descoberta encontrada - diretório não existe")
+        return {
+            'data_consolidacao': datetime.now().isoformat(),
+            'total_descobertas': 0,
+            'tipos_sugeridos': {}
+        }
+
+    # Carrega todas as descobertas
+    discovery_files = list(discoveries_dir.glob('*_descoberta_*.json'))
+
+    if not discovery_files:
+        logger.info("Nenhuma descoberta encontrada")
+        return {
+            'data_consolidacao': datetime.now().isoformat(),
+            'total_descobertas': 0,
+            'tipos_sugeridos': {}
+        }
+
+    # Agrupa por tipo_sugerido
+    tipos_agrupados: Dict[str, Dict[str, Any]] = {}
+
+    for discovery_file in discovery_files:
+        try:
+            with open(discovery_file, 'r', encoding='utf-8') as f:
+                discovery = json.load(f)
+
+            tipo = discovery.get('tipo_sugerido')
+            if not tipo:
+                continue
+
+            if tipo not in tipos_agrupados:
+                tipos_agrupados[tipo] = {
+                    'contagem': 0,
+                    'categorias': [],
+                    'descricoes': [],
+                    'caracteristicas_todas': [],
+                    'campos_todos': [],
+                    'arquivos_exemplo': [],
+                    'casos': []
+                }
+
+            grupo = tipos_agrupados[tipo]
+            grupo['contagem'] += 1
+
+            if discovery.get('categoria_recomendada'):
+                grupo['categorias'].append(discovery['categoria_recomendada'])
+
+            if discovery.get('descricao'):
+                grupo['descricoes'].append(discovery['descricao'])
+
+            if discovery.get('caracteristicas_identificadoras'):
+                grupo['caracteristicas_todas'].extend(discovery['caracteristicas_identificadoras'])
+
+            if discovery.get('campos_principais'):
+                grupo['campos_todos'].extend(discovery['campos_principais'])
+
+            if discovery.get('arquivo_origem'):
+                grupo['arquivos_exemplo'].append(discovery['arquivo_origem'])
+
+            if discovery.get('caso_id'):
+                grupo['casos'].append(discovery['caso_id'])
+
+        except Exception as e:
+            logger.warning(f"Erro ao processar descoberta {discovery_file}: {e}")
+
+    # Processa grupos para formato final
+    tipos_consolidados = {}
+    for tipo, grupo in tipos_agrupados.items():
+        # Encontra categoria mais comum
+        categorias = grupo['categorias']
+        categoria_mais_comum = max(set(categorias), key=categorias.count) if categorias else 'ADMINISTRATIVOS'
+
+        # Remove duplicatas mantendo ordem
+        caracteristicas_unicas = list(dict.fromkeys(grupo['caracteristicas_todas']))
+        campos_unicos = list(dict.fromkeys(grupo['campos_todos']))
+        arquivos_unicos = list(dict.fromkeys(grupo['arquivos_exemplo']))[:10]  # Máximo 10 exemplos
+        casos_unicos = list(dict.fromkeys(grupo['casos']))
+
+        tipos_consolidados[tipo] = {
+            'contagem': grupo['contagem'],
+            'categoria_mais_comum': categoria_mais_comum,
+            'descricoes': list(dict.fromkeys(grupo['descricoes']))[:5],  # Máximo 5 descrições
+            'caracteristicas_unificadas': caracteristicas_unicas[:15],  # Máximo 15
+            'campos_unificados': campos_unicos[:20],  # Máximo 20
+            'arquivos_exemplo': arquivos_unicos,
+            'casos': casos_unicos
+        }
+
+    # Ordena por contagem (mais frequentes primeiro)
+    tipos_ordenados = dict(
+        sorted(tipos_consolidados.items(), key=lambda x: x[1]['contagem'], reverse=True)
+    )
+
+    resultado = {
+        'data_consolidacao': datetime.now().isoformat(),
+        'total_descobertas': len(discovery_files),
+        'total_tipos_unicos': len(tipos_ordenados),
+        'tipos_sugeridos': tipos_ordenados
+    }
+
+    # Salva consolidação
+    consolidation_file = discoveries_dir / '_consolidacao.json'
+    with open(consolidation_file, 'w', encoding='utf-8') as f:
+        json.dump(resultado, f, ensure_ascii=False, indent=2)
+
+    logger.info(f"Consolidação salva: {consolidation_file}")
+    logger.info(f"Total de descobertas: {len(discovery_files)}")
+    logger.info(f"Tipos únicos sugeridos: {len(tipos_ordenados)}")
+
+    return resultado
 
 
 def load_inventory(input_path: Path) -> dict:
@@ -1257,7 +1595,7 @@ def run_classification(
         logger.info(f"Processando {idx}/{total}: {file_info['nome']}")
 
         # Classifica
-        classification = classify_document(model, file_info, mock_mode)
+        classification = classify_document(model, file_info, mock_mode, escritura_id)
         result['classificacoes'].append(classification)
 
         # Atualiza contadores
@@ -1312,8 +1650,17 @@ Modo Paralelo (recomendado para lotes grandes):
   python classify_with_gemini.py --parallel --workers 8 FC_515_124
   python classify_with_gemini.py --parallel --mock FC_515_124
 
+Consolidar Descobertas (documentos DESCONHECIDO):
+  python classify_with_gemini.py --consolidar-descobertas
+
 O modo paralelo prepara documentos (carrega imagens/PDFs) em paralelo
 enquanto mantém o rate limit de 6s entre chamadas à API Gemini.
+
+Documentos DESCONHECIDO:
+  Quando o Gemini identifica um documento que não se encaixa nos tipos
+  conhecidos, ele sugere um novo tipo com descrição, categoria e campos.
+  Essas descobertas são salvas em .tmp/descobertas/ para análise posterior.
+  Use --consolidar-descobertas para ver um resumo agrupado por tipo sugerido.
         """
     )
 
@@ -1366,11 +1713,33 @@ enquanto mantém o rate limit de 6s entre chamadas à API Gemini.
         help=f'Número de workers para preparação paralela (default: {PARALLEL_WORKERS})'
     )
 
+    parser.add_argument(
+        '--consolidar-descobertas',
+        action='store_true',
+        help='Consolida todas as descobertas de documentos DESCONHECIDO em .tmp/descobertas/'
+    )
+
     args = parser.parse_args()
 
     # Configura nível de log
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
+
+    # Se solicitou consolidação de descobertas, executa e sai
+    if args.consolidar_descobertas:
+        logger.info("Consolidando descobertas de documentos DESCONHECIDO...")
+        result = consolidate_discoveries()
+        if result['total_descobertas'] > 0:
+            print(f"\nConsolidação concluída:")
+            print(f"  Total de descobertas: {result['total_descobertas']}")
+            print(f"  Tipos únicos sugeridos: {result['total_tipos_unicos']}")
+            print(f"\nTipos sugeridos (ordenados por frequência):")
+            for tipo, dados in result['tipos_sugeridos'].items():
+                print(f"  - {tipo}: {dados['contagem']}x ({dados['categoria_mais_comum']})")
+            print(f"\nArquivo de consolidação: {ROOT_DIR / DISCOVERIES_DIR / '_consolidacao.json'}")
+        else:
+            print("Nenhuma descoberta encontrada para consolidar.")
+        sys.exit(0)
 
     # Determina caminhos
     tmp_dir = ROOT_DIR / '.tmp'

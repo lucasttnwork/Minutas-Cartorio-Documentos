@@ -1,0 +1,287 @@
+{
+  "tipo_documento": "DESCONHECIDO",
+  "versao": "1.0",
+  "descricao": "Schema para documentos nao reconhecidos automaticamente - usado para analise e sugestao de novos tipos",
+  "complexidade": "ALTA",
+  "campos": [
+    {
+      "nome": "analise_documento",
+      "tipo": "object",
+      "obrigatorio": true,
+      "descricao": "Objeto contendo a analise detalhada do documento",
+      "subcampos": [
+        {
+          "nome": "documento_reconhecido",
+          "tipo": "boolean",
+          "obrigatorio": true,
+          "descricao": "Indica se o documento foi reconhecido como um tipo existente"
+        },
+        {
+          "nome": "tipo_identificado",
+          "tipo": "string",
+          "obrigatorio": false,
+          "descricao": "Tipo identificado se corresponder a algum tipo conhecido (SNAKE_CASE)"
+        },
+        {
+          "nome": "tipo_sugerido",
+          "tipo": "string",
+          "obrigatorio": true,
+          "regex": "^[A-Z][A-Z0-9_]*$",
+          "exemplo": "LAUDO_AVALIACAO_IMOVEL",
+          "descricao": "Nome sugerido para o tipo em SNAKE_CASE"
+        },
+        {
+          "nome": "categoria_recomendada",
+          "tipo": "string",
+          "obrigatorio": true,
+          "enum": [
+            "DOCUMENTOS_PESSOAIS",
+            "CERTIDOES",
+            "DOCUMENTOS_IMOVEL",
+            "DOCUMENTOS_NEGOCIO",
+            "DOCUMENTOS_ADMINISTRATIVOS"
+          ],
+          "descricao": "Uma das 5 categorias do sistema"
+        },
+        {
+          "nome": "confianca_analise",
+          "tipo": "string",
+          "obrigatorio": true,
+          "enum": ["alta", "media", "baixa"],
+          "descricao": "Nivel de confianca na analise realizada"
+        },
+        {
+          "nome": "justificativa",
+          "tipo": "string",
+          "obrigatorio": true,
+          "descricao": "Explicacao detalhada da analise e recomendacao"
+        },
+        {
+          "nome": "orgao_emissor",
+          "tipo": "string",
+          "obrigatorio": false,
+          "descricao": "Nome do orgao emissor se identificado"
+        },
+        {
+          "nome": "data_documento",
+          "tipo": "date",
+          "obrigatorio": false,
+          "regex": "\\d{2}/\\d{2}/\\d{4}",
+          "exemplo": "15/03/2024",
+          "descricao": "Data do documento se identificada"
+        },
+        {
+          "nome": "qualidade_imagem",
+          "tipo": "string",
+          "obrigatorio": false,
+          "enum": ["boa", "media", "ruim"],
+          "descricao": "Qualidade da imagem/digitalizacao"
+        }
+      ]
+    },
+    {
+      "nome": "caracteristicas_identificadoras",
+      "tipo": "object",
+      "obrigatorio": true,
+      "descricao": "Caracteristicas que ajudam a identificar este tipo de documento",
+      "subcampos": [
+        {
+          "nome": "palavras_chave",
+          "tipo": "array",
+          "obrigatorio": true,
+          "item_tipo": "string",
+          "exemplo": ["CERTIDAO", "REGISTRO", "IMOVEIS"],
+          "descricao": "Lista de palavras-chave distintivas encontradas no documento"
+        },
+        {
+          "nome": "elementos_layout",
+          "tipo": "array",
+          "obrigatorio": false,
+          "item_tipo": "string",
+          "exemplo": ["cabecalho_brasao", "tabela_valores", "rodape_assinatura"],
+          "descricao": "Elementos de layout caracteristicos do documento"
+        },
+        {
+          "nome": "elementos_visuais",
+          "tipo": "array",
+          "obrigatorio": false,
+          "item_tipo": "string",
+          "exemplo": ["brasao_republica", "logo_prefeitura", "qr_code"],
+          "descricao": "Elementos visuais distintivos"
+        },
+        {
+          "nome": "padroes_numeracao",
+          "tipo": "array",
+          "obrigatorio": false,
+          "item_tipo": "string",
+          "exemplo": ["numero_matricula_6_digitos", "codigo_verificacao_alfanumerico"],
+          "descricao": "Padroes de numeracao encontrados"
+        }
+      ]
+    },
+    {
+      "nome": "campos_recomendados",
+      "tipo": "array",
+      "obrigatorio": true,
+      "descricao": "Lista de campos que devem ser extraidos deste tipo de documento",
+      "item_schema": {
+        "nome": {
+          "tipo": "string",
+          "obrigatorio": true,
+          "regex": "^[a-z][a-z0-9_]*$",
+          "descricao": "Nome do campo em snake_case"
+        },
+        "tipo": {
+          "tipo": "string",
+          "obrigatorio": true,
+          "enum": ["string", "date", "number", "boolean", "array", "object"],
+          "descricao": "Tipo de dado do campo"
+        },
+        "obrigatorio": {
+          "tipo": "boolean",
+          "obrigatorio": true,
+          "descricao": "Se o campo e obrigatorio"
+        },
+        "regex": {
+          "tipo": "string",
+          "obrigatorio": false,
+          "descricao": "Expressao regular para validacao"
+        },
+        "descricao": {
+          "tipo": "string",
+          "obrigatorio": true,
+          "descricao": "Descricao do campo"
+        },
+        "exemplo": {
+          "tipo": "string",
+          "obrigatorio": false,
+          "descricao": "Exemplo de valor"
+        }
+      }
+    },
+    {
+      "nome": "padroes_identificacao",
+      "tipo": "object",
+      "obrigatorio": true,
+      "descricao": "Padroes usados para identificar automaticamente este tipo de documento",
+      "subcampos": [
+        {
+          "nome": "palavras_obrigatorias",
+          "tipo": "array",
+          "obrigatorio": false,
+          "item_tipo": "string",
+          "descricao": "Palavras que DEVEM estar presentes para identificar o documento"
+        },
+        {
+          "nome": "palavras_opcionais",
+          "tipo": "array",
+          "obrigatorio": false,
+          "item_tipo": "string",
+          "descricao": "Palavras que ajudam na identificacao mas nao sao obrigatorias"
+        },
+        {
+          "nome": "layout_esperado",
+          "tipo": "string",
+          "obrigatorio": false,
+          "descricao": "Descricao do layout esperado"
+        },
+        {
+          "nome": "regex_identificacao",
+          "tipo": "array",
+          "obrigatorio": false,
+          "item_tipo": "string",
+          "descricao": "Expressoes regulares para identificacao"
+        }
+      ]
+    },
+    {
+      "nome": "schema_sugerido",
+      "tipo": "object",
+      "obrigatorio": true,
+      "descricao": "Schema JSON completo proposto para este tipo de documento",
+      "formato_livre": true,
+      "exemplo": {
+        "tipo_documento": "NOVO_TIPO",
+        "versao": "1.0",
+        "descricao": "Descricao do documento",
+        "complexidade": "MEDIA",
+        "campos": [
+          {
+            "nome": "campo_exemplo",
+            "tipo": "string",
+            "obrigatorio": true
+          }
+        ],
+        "padroes_identificacao": ["PALAVRA_CHAVE"],
+        "validacoes": ["validacao_exemplo"]
+      }
+    },
+    {
+      "nome": "dados_extraidos",
+      "tipo": "object",
+      "obrigatorio": true,
+      "descricao": "Dados que foram possivel extrair do documento",
+      "subcampos": [
+        {
+          "nome": "explicacao_contextual",
+          "tipo": "string",
+          "obrigatorio": true,
+          "descricao": "Explicacao detalhada do documento (3-5 paragrafos)"
+        },
+        {
+          "nome": "partes",
+          "tipo": "array",
+          "obrigatorio": false,
+          "descricao": "Partes/pessoas envolvidas no documento"
+        },
+        {
+          "nome": "valores",
+          "tipo": "object",
+          "obrigatorio": false,
+          "descricao": "Valores monetarios encontrados"
+        },
+        {
+          "nome": "datas_importantes",
+          "tipo": "array",
+          "obrigatorio": false,
+          "descricao": "Datas relevantes encontradas"
+        },
+        {
+          "nome": "numeros_identificadores",
+          "tipo": "array",
+          "obrigatorio": false,
+          "descricao": "Numeros e codigos identificadores"
+        },
+        {
+          "nome": "imovel",
+          "tipo": "object",
+          "obrigatorio": false,
+          "descricao": "Dados de imovel se presente"
+        },
+        {
+          "nome": "observacoes",
+          "tipo": "string",
+          "obrigatorio": false,
+          "descricao": "Observacoes adicionais"
+        }
+      ]
+    }
+  ],
+  "padroes_identificacao": [
+    "DESCONHECIDO",
+    "NAO IDENTIFICADO",
+    "DOCUMENTO NAO RECONHECIDO"
+  ],
+  "validacoes": [
+    "tipo_sugerido_snake_case",
+    "categoria_valida",
+    "campos_recomendados_nao_vazio",
+    "schema_sugerido_valido"
+  ],
+  "notas": [
+    "Este schema e usado quando o sistema nao consegue identificar automaticamente o tipo de documento",
+    "O objetivo e coletar informacoes suficientes para criar um novo tipo de documento no sistema",
+    "O campo schema_sugerido deve conter um schema completo que pode ser usado como base para um novo prompt",
+    "Os campos_recomendados devem listar todos os campos que devem ser extraidos deste tipo de documento"
+  ]
+}

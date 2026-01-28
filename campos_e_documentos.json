@@ -1,0 +1,691 @@
+{
+  "metadata": {
+    "version": "2.0",
+    "date": "2026-01-28",
+    "fonte_da_verdade": "Guia-de-campos-e-variaveis/*.md",
+    "descricao": "Mapeamento de campos de dados por categoria e tipos de documentos que podem fornece-los"
+  },
+
+  "categorias_campos": {
+    "pessoa_natural": {
+      "total_campos": 39,
+      "grupos": {
+        "dados_individuais": {
+          "descricao": "Dados de identificacao da pessoa",
+          "campos": [
+            {"id": "pn_nome", "nome": "NOME", "formato": "Texto", "exemplo": "MARIA DA SILVA SANTOS"},
+            {"id": "pn_cpf", "nome": "CPF", "formato": "000.000.000-00", "exemplo": "123.456.789-00"},
+            {"id": "pn_rg", "nome": "RG", "formato": "00.000.000-X", "exemplo": "12.345.678-9"},
+            {"id": "pn_orgao_emissor_rg", "nome": "ORGAO EMISSOR DO RG", "formato": "Texto", "exemplo": "SSP"},
+            {"id": "pn_estado_emissor_rg", "nome": "ESTADO EMISSOR DO RG", "formato": "UF", "exemplo": "SP"},
+            {"id": "pn_data_emissao_rg", "nome": "DATA DE EMISSAO DO RG", "formato": "DD/MM/AAAA", "exemplo": "15/03/2010"},
+            {"id": "pn_nacionalidade", "nome": "NACIONALIDADE", "formato": "Texto", "exemplo": "BRASILEIRA"},
+            {"id": "pn_profissao", "nome": "PROFISSAO", "formato": "Texto", "exemplo": "ENGENHEIRA CIVIL"},
+            {"id": "pn_data_nascimento", "nome": "DATA DE NASCIMENTO", "formato": "DD/MM/AAAA", "exemplo": "22/07/1985"},
+            {"id": "pn_data_obito", "nome": "DATA DO OBITO", "formato": "DD/MM/AAAA", "exemplo": "10/01/2024"},
+            {"id": "pn_cnh", "nome": "CNH", "formato": "00000000000", "exemplo": "04567891234"},
+            {"id": "pn_orgao_emissor_cnh", "nome": "ORGAO EMISSOR DA CNH", "formato": "DETRAN-UF", "exemplo": "DETRAN-SP"}
+          ]
+        },
+        "dados_familiares": {
+          "descricao": "Dados de estado civil e relacionamentos",
+          "campos": [
+            {"id": "pn_estado_civil", "nome": "ESTADO CIVIL", "formato": "Texto", "exemplo": "CASADA", "valores_validos": ["SOLTEIRO(A)", "CASADO(A)", "DIVORCIADO(A)", "VIUVO(A)", "SEPARADO(A) JUDICIALMENTE"]},
+            {"id": "pn_regime_bens", "nome": "REGIME DE BENS", "formato": "Texto", "exemplo": "COMUNHAO PARCIAL DE BENS", "valores_validos": ["COMUNHAO PARCIAL DE BENS", "COMUNHAO UNIVERSAL DE BENS", "SEPARACAO TOTAL DE BENS", "SEPARACAO OBRIGATORIA DE BENS", "PARTICIPACAO FINAL NOS AQUESTOS"]},
+            {"id": "pn_data_casamento", "nome": "DATA DO CASAMENTO", "formato": "DD/MM/AAAA", "exemplo": "20/11/2010"},
+            {"id": "pn_data_separacao", "nome": "DATA DA SEPARACAO", "formato": "DD/MM/AAAA", "exemplo": "15/06/2020"},
+            {"id": "pn_data_divorcio", "nome": "DATA DO DIVORCIO", "formato": "DD/MM/AAAA", "exemplo": "22/12/2021"},
+            {"id": "pn_data_falecimento_conjuge", "nome": "DATA DE FALECIMENTO DO CONJUGE", "formato": "DD/MM/AAAA", "exemplo": "05/03/2023"},
+            {"id": "pn_uniao_estavel", "nome": "UNIAO ESTAVEL", "formato": "SIM/NAO", "exemplo": "NAO"},
+            {"id": "pn_regime_bens_uniao_estavel", "nome": "REGIME DE BENS (Uniao Estavel)", "formato": "Texto", "exemplo": "COMUNHAO PARCIAL DE BENS"},
+            {"id": "pn_data_uniao_estavel", "nome": "DATA DA UNIAO ESTAVEL", "formato": "DD/MM/AAAA", "exemplo": "01/01/2015"},
+            {"id": "pn_data_extincao_uniao_estavel", "nome": "DATA DA EXTINCAO DA UNIAO ESTAVEL", "formato": "DD/MM/AAAA", "exemplo": "30/06/2022"}
+          ]
+        },
+        "domicilio": {
+          "descricao": "Endereco de residencia",
+          "campos": [
+            {"id": "pn_domicilio_logradouro", "nome": "LOGRADOURO", "formato": "Texto", "exemplo": "RUA DAS FLORES"},
+            {"id": "pn_domicilio_numero", "nome": "NUMERO", "formato": "Texto", "exemplo": "1250"},
+            {"id": "pn_domicilio_complemento", "nome": "COMPLEMENTO", "formato": "Texto", "exemplo": "APTO 101 BLOCO B"},
+            {"id": "pn_domicilio_bairro", "nome": "BAIRRO", "formato": "Texto", "exemplo": "JARDIM PAULISTA"},
+            {"id": "pn_domicilio_cidade", "nome": "CIDADE", "formato": "Texto", "exemplo": "SAO PAULO"},
+            {"id": "pn_domicilio_estado", "nome": "ESTADO", "formato": "UF", "exemplo": "SP"},
+            {"id": "pn_domicilio_cep", "nome": "CEP", "formato": "00000-000", "exemplo": "01310-100"}
+          ]
+        },
+        "contatos": {
+          "descricao": "Informacoes de contato",
+          "campos": [
+            {"id": "pn_email", "nome": "E-MAIL", "formato": "email@dominio.com", "exemplo": "maria.santos@email.com"},
+            {"id": "pn_telefone", "nome": "TELEFONE", "formato": "+55 (00) 00000-0000", "exemplo": "+55 (11) 99876-5432"}
+          ]
+        },
+        "cndt": {
+          "descricao": "Certidao Negativa de Debitos Trabalhistas",
+          "campos": [
+            {"id": "pn_cndt_numero", "nome": "NUMERO DA CNDT", "formato": "Texto", "exemplo": "12345678901234567890"},
+            {"id": "pn_cndt_data_expedicao", "nome": "DATA DE EXPEDICAO DA CNDT", "formato": "DD/MM/AAAA", "exemplo": "28/01/2026"},
+            {"id": "pn_cndt_hora_expedicao", "nome": "HORA DE EXPEDICAO DA CNDT", "formato": "HH:MM", "exemplo": "14:32"}
+          ]
+        },
+        "certidao_uniao": {
+          "descricao": "Certidao da Receita Federal/PGFN",
+          "campos": [
+            {"id": "pn_certidao_uniao_tipo", "nome": "CERTIDAO DA UNIAO", "formato": "Texto", "exemplo": "NEGATIVA", "valores_validos": ["NEGATIVA", "POSITIVA COM EFEITOS DE NEGATIVA"]},
+            {"id": "pn_certidao_uniao_data_emissao", "nome": "DATA DE EMISSAO", "formato": "DD/MM/AAAA", "exemplo": "28/01/2026"},
+            {"id": "pn_certidao_uniao_hora_emissao", "nome": "HORA DE EMISSAO", "formato": "HH:MM", "exemplo": "10:15"},
+            {"id": "pn_certidao_uniao_validade", "nome": "VALIDADE DA CERTIDAO", "formato": "DD/MM/AAAA", "exemplo": "27/07/2026"},
+            {"id": "pn_certidao_uniao_codigo_controle", "nome": "CODIGO DE CONTROLE", "formato": "Texto", "exemplo": "ABCD.1234.EFGH.5678"}
+          ]
+        }
+      }
+    },
+
+    "pessoa_juridica": {
+      "total_campos": 76,
+      "grupos": {
+        "qualificacao": {
+          "descricao": "Dados de identificacao da empresa",
+          "campos": [
+            {"id": "pj_denominacao", "nome": "DENOMINACAO", "formato": "Texto", "exemplo": "CONSTRUTORA ALPHA LTDA"},
+            {"id": "pj_cnpj", "nome": "CNPJ", "formato": "00.000.000/0000-00", "exemplo": "12.345.678/0001-90"},
+            {"id": "pj_nire", "nome": "NIRE", "formato": "Texto", "exemplo": "35.215.678.901"}
+          ]
+        },
+        "sede": {
+          "descricao": "Endereco da sede da empresa",
+          "campos": [
+            {"id": "pj_sede_logradouro", "nome": "LOGRADOURO", "formato": "Texto", "exemplo": "AVENIDA PAULISTA"},
+            {"id": "pj_sede_numero", "nome": "NUMERO", "formato": "Texto", "exemplo": "1000"},
+            {"id": "pj_sede_complemento", "nome": "COMPLEMENTO", "formato": "Texto", "exemplo": "CONJUNTO 1501"},
+            {"id": "pj_sede_bairro", "nome": "BAIRRO", "formato": "Texto", "exemplo": "BELA VISTA"},
+            {"id": "pj_sede_cidade", "nome": "CIDADE", "formato": "Texto", "exemplo": "SAO PAULO"},
+            {"id": "pj_sede_estado", "nome": "ESTADO", "formato": "UF", "exemplo": "SP"},
+            {"id": "pj_sede_cep", "nome": "CEP", "formato": "00000-000", "exemplo": "01310-100"}
+          ]
+        },
+        "registro_vigente": {
+          "descricao": "Dados do registro empresarial",
+          "campos": [
+            {"id": "pj_instrumento_constitutivo", "nome": "INSTRUMENTO CONSTITUTIVO", "formato": "Texto", "exemplo": "CONTRATO SOCIAL E SUAS ALTERACOES"},
+            {"id": "pj_junta_comercial", "nome": "JUNTA COMERCIAL", "formato": "Texto", "exemplo": "JUCESP"},
+            {"id": "pj_numero_registro_contrato", "nome": "NUMERO DO REGISTRO DO CONTRATO SOCIAL", "formato": "Texto", "exemplo": "123.456.789.012"},
+            {"id": "pj_data_sessao_registro", "nome": "DATA DA SESSAO DO REGISTRO DO CONTRATO SOCIAL", "formato": "DD/MM/AAAA", "exemplo": "15/03/2020"}
+          ]
+        },
+        "certidao": {
+          "descricao": "Certidoes da empresa",
+          "campos": [
+            {"id": "pj_data_expedicao_ficha_cadastral", "nome": "DATA DE EXPEDICAO DA FICHA CADASTRAL", "formato": "DD/MM/AAAA", "exemplo": "20/01/2026"},
+            {"id": "pj_data_expedicao_certidao_registro", "nome": "DATA DE EXPEDICAO DA CERTIDAO DE REGISTRO", "formato": "DD/MM/AAAA", "exemplo": "20/01/2026"}
+          ]
+        },
+        "representacao_administracao": {
+          "descricao": "Dados do administrador da empresa",
+          "subgrupos": {
+            "dados_pessoais": {
+              "campos": [
+                {"id": "pj_admin_nome", "nome": "NOME", "formato": "Texto", "exemplo": "JOAO CARLOS MENDES"},
+                {"id": "pj_admin_cpf", "nome": "CPF", "formato": "000.000.000-00", "exemplo": "987.654.321-00"},
+                {"id": "pj_admin_rg", "nome": "RG", "formato": "00.000.000-X", "exemplo": "23.456.789-0"},
+                {"id": "pj_admin_orgao_emissor_rg", "nome": "ORGAO EMISSOR DO RG", "formato": "Texto", "exemplo": "SSP"},
+                {"id": "pj_admin_estado_emissor_rg", "nome": "ESTADO EMISSOR DO RG", "formato": "UF", "exemplo": "SP"},
+                {"id": "pj_admin_data_emissao_rg", "nome": "DATA DE EMISSAO DO RG", "formato": "DD/MM/AAAA", "exemplo": "10/05/2008"},
+                {"id": "pj_admin_cnh", "nome": "CNH", "formato": "00000000000", "exemplo": "98765432100"},
+                {"id": "pj_admin_orgao_emissor_cnh", "nome": "ORGAO EMISSOR DA CNH", "formato": "DETRAN-UF", "exemplo": "DETRAN-SP"},
+                {"id": "pj_admin_data_nascimento", "nome": "DATA DE NASCIMENTO", "formato": "DD/MM/AAAA", "exemplo": "12/08/1975"},
+                {"id": "pj_admin_estado_civil", "nome": "ESTADO CIVIL", "formato": "Texto", "exemplo": "CASADO"},
+                {"id": "pj_admin_profissao", "nome": "PROFISSAO", "formato": "Texto", "exemplo": "EMPRESARIO"},
+                {"id": "pj_admin_nacionalidade", "nome": "NACIONALIDADE", "formato": "Texto", "exemplo": "BRASILEIRO"}
+              ]
+            },
+            "domicilio": {
+              "campos": [
+                {"id": "pj_admin_domicilio_logradouro", "nome": "LOGRADOURO", "formato": "Texto", "exemplo": "RUA DOS PINHEIROS"},
+                {"id": "pj_admin_domicilio_numero", "nome": "NUMERO", "formato": "Texto", "exemplo": "500"},
+                {"id": "pj_admin_domicilio_complemento", "nome": "COMPLEMENTO", "formato": "Texto", "exemplo": "CASA 3"},
+                {"id": "pj_admin_domicilio_bairro", "nome": "BAIRRO", "formato": "Texto", "exemplo": "PINHEIROS"},
+                {"id": "pj_admin_domicilio_cidade", "nome": "CIDADE", "formato": "Texto", "exemplo": "SAO PAULO"},
+                {"id": "pj_admin_domicilio_estado", "nome": "ESTADO", "formato": "UF", "exemplo": "SP"},
+                {"id": "pj_admin_domicilio_cep", "nome": "CEP", "formato": "00000-000", "exemplo": "05422-000"}
+              ]
+            },
+            "contato": {
+              "campos": [
+                {"id": "pj_admin_email", "nome": "E-MAIL", "formato": "email@dominio.com", "exemplo": "joao.mendes@construtoraalpha.com.br"},
+                {"id": "pj_admin_telefone", "nome": "TELEFONE", "formato": "+55 (00) 00000-0000", "exemplo": "+55 (11) 98765-4321"}
+              ]
+            },
+            "instrumento": {
+              "campos": [
+                {"id": "pj_tipo_representacao", "nome": "TIPO DE REPRESENTACAO", "formato": "Texto", "exemplo": "ADMINISTRADOR INDICADO NO CONTRATO SOCIAL", "valores_validos": ["ADMINISTRADOR INDICADO NO CONTRATO SOCIAL", "ADMINISTRADOR INDICADO EM ATA"]},
+                {"id": "pj_clausula_indica_admin", "nome": "CLAUSULA CONTRATUAL QUE INDICA O ADMINISTRADOR", "formato": "Texto", "exemplo": "CLAUSULA DECIMA SEGUNDA"},
+                {"id": "pj_data_ata_admin", "nome": "DATA DA ATA QUE INDICA O ADMINISTRADOR", "formato": "DD/MM/AAAA", "exemplo": "10/01/2024"},
+                {"id": "pj_numero_registro_ata", "nome": "NUMERO DE REGISTRO DA ATA QUE INDICA O ADMINISTRADOR", "formato": "Texto", "exemplo": "456.789.012.345"},
+                {"id": "pj_clausula_poderes_admin", "nome": "CLAUSULA CONTRATUAL QUE DISPOE SOBRE OS PODERES DO ADMINISTRADOR", "formato": "Texto", "exemplo": "CLAUSULA DECIMA TERCEIRA"}
+              ]
+            }
+          }
+        },
+        "representacao_procuracao": {
+          "descricao": "Dados do procurador da empresa",
+          "subgrupos": {
+            "dados_pessoais": {
+              "campos": [
+                {"id": "pj_procurador_nome", "nome": "NOME", "formato": "Texto", "exemplo": "ANA PAULA FERREIRA"},
+                {"id": "pj_procurador_cpf", "nome": "CPF", "formato": "000.000.000-00", "exemplo": "111.222.333-44"},
+                {"id": "pj_procurador_rg", "nome": "RG", "formato": "00.000.000-X", "exemplo": "34.567.890-1"},
+                {"id": "pj_procurador_orgao_emissor_rg", "nome": "ORGAO EMISSOR DO RG", "formato": "Texto", "exemplo": "SSP"},
+                {"id": "pj_procurador_estado_emissor_rg", "nome": "ESTADO EMISSOR DO RG", "formato": "UF", "exemplo": "RJ"},
+                {"id": "pj_procurador_data_emissao_rg", "nome": "DATA DE EMISSAO DO RG", "formato": "DD/MM/AAAA", "exemplo": "20/09/2012"},
+                {"id": "pj_procurador_cnh", "nome": "CNH", "formato": "00000000000", "exemplo": "11122233344"},
+                {"id": "pj_procurador_orgao_emissor_cnh", "nome": "ORGAO EMISSOR DA CNH", "formato": "DETRAN-UF", "exemplo": "DETRAN-RJ"},
+                {"id": "pj_procurador_data_nascimento", "nome": "DATA DE NASCIMENTO", "formato": "DD/MM/AAAA", "exemplo": "05/04/1982"},
+                {"id": "pj_procurador_estado_civil", "nome": "ESTADO CIVIL", "formato": "Texto", "exemplo": "DIVORCIADA"},
+                {"id": "pj_procurador_profissao", "nome": "PROFISSAO", "formato": "Texto", "exemplo": "ADVOGADA"},
+                {"id": "pj_procurador_nacionalidade", "nome": "NACIONALIDADE", "formato": "Texto", "exemplo": "BRASILEIRA"}
+              ]
+            },
+            "domicilio": {
+              "campos": [
+                {"id": "pj_procurador_domicilio_logradouro", "nome": "LOGRADOURO", "formato": "Texto", "exemplo": "PRAIA DE BOTAFOGO"},
+                {"id": "pj_procurador_domicilio_numero", "nome": "NUMERO", "formato": "Texto", "exemplo": "300"},
+                {"id": "pj_procurador_domicilio_complemento", "nome": "COMPLEMENTO", "formato": "Texto", "exemplo": "SALA 801"},
+                {"id": "pj_procurador_domicilio_bairro", "nome": "BAIRRO", "formato": "Texto", "exemplo": "BOTAFOGO"},
+                {"id": "pj_procurador_domicilio_cidade", "nome": "CIDADE", "formato": "Texto", "exemplo": "RIO DE JANEIRO"},
+                {"id": "pj_procurador_domicilio_estado", "nome": "ESTADO", "formato": "UF", "exemplo": "RJ"},
+                {"id": "pj_procurador_domicilio_cep", "nome": "CEP", "formato": "00000-000", "exemplo": "22250-040"}
+              ]
+            },
+            "contato": {
+              "campos": [
+                {"id": "pj_procurador_email", "nome": "E-MAIL", "formato": "email@dominio.com", "exemplo": "ana.ferreira@escritorio.adv.br"},
+                {"id": "pj_procurador_telefone", "nome": "TELEFONE", "formato": "+55 (00) 00000-0000", "exemplo": "+55 (21) 97654-3210"}
+              ]
+            },
+            "instrumento": {
+              "campos": [
+                {"id": "pj_tabelionato_procuracao", "nome": "TABELIONATO DA PROCURACAO PUBLICA", "formato": "Texto", "exemplo": "2o TABELIAO DE NOTAS DE SAO PAULO"},
+                {"id": "pj_data_procuracao", "nome": "DATA DA PROCURACAO PUBLICA", "formato": "DD/MM/AAAA", "exemplo": "05/01/2026"},
+                {"id": "pj_livro_procuracao", "nome": "LIVRO DA PROCURACAO PUBLICA", "formato": "Texto", "exemplo": "LIVRO 1250"},
+                {"id": "pj_paginas_procuracao", "nome": "PAGINAS DA PROCURACAO PUBLICA", "formato": "Texto", "exemplo": "FOLHAS 125/128"},
+                {"id": "pj_data_expedicao_certidao_procuracao", "nome": "DATA DA EXPEDICAO DA CERTIDAO DA PROCURACAO", "formato": "DD/MM/AAAA", "exemplo": "10/01/2026"}
+              ]
+            }
+          }
+        },
+        "cndt": {
+          "descricao": "Certidao Negativa de Debitos Trabalhistas da PJ",
+          "campos": [
+            {"id": "pj_cndt_numero", "nome": "NUMERO DA CNDT", "formato": "Texto", "exemplo": "98765432109876543210"},
+            {"id": "pj_cndt_data_expedicao", "nome": "DATA DE EXPEDICAO DA CNDT", "formato": "DD/MM/AAAA", "exemplo": "28/01/2026"},
+            {"id": "pj_cndt_hora_expedicao", "nome": "HORA DE EXPEDICAO DA CNDT", "formato": "HH:MM", "exemplo": "09:45"}
+          ]
+        },
+        "certidao_uniao": {
+          "descricao": "Certidao da Receita Federal/PGFN da PJ",
+          "campos": [
+            {"id": "pj_certidao_uniao_tipo", "nome": "CERTIDAO DA UNIAO", "formato": "Texto", "exemplo": "NEGATIVA"},
+            {"id": "pj_certidao_uniao_data_emissao", "nome": "DATA DE EMISSAO", "formato": "DD/MM/AAAA", "exemplo": "28/01/2026"},
+            {"id": "pj_certidao_uniao_hora_emissao", "nome": "HORA DE EMISSAO", "formato": "HH:MM", "exemplo": "11:30"},
+            {"id": "pj_certidao_uniao_validade", "nome": "VALIDADE DA CERTIDAO", "formato": "DD/MM/AAAA", "exemplo": "27/07/2026"},
+            {"id": "pj_certidao_uniao_codigo_controle", "nome": "CODIGO DE CONTROLE", "formato": "Texto", "exemplo": "WXYZ.5678.ABCD.9012"}
+          ]
+        }
+      }
+    },
+
+    "dados_imovel": {
+      "total_campos": 33,
+      "nota": "Total pode variar com multiplos proprietarios e titulares de onus",
+      "grupos": {
+        "matricula_imobiliaria": {
+          "descricao": "Dados da matricula do imovel",
+          "campos": [
+            {"id": "im_matricula_numero", "nome": "NUMERO DA MATRICULA", "formato": "Texto", "exemplo": "123.456"},
+            {"id": "im_matricula_cartorio_numero", "nome": "NUMERO DO REGISTRO DE IMOVEIS", "formato": "Texto", "exemplo": "1o"},
+            {"id": "im_matricula_cartorio_cidade", "nome": "CIDADE DO REGISTRO DE IMOVEIS", "formato": "Texto", "exemplo": "SAO PAULO"},
+            {"id": "im_matricula_cartorio_estado", "nome": "ESTADO DO REGISTRO DE IMOVEIS", "formato": "UF", "exemplo": "SP"},
+            {"id": "im_matricula_numero_nacional", "nome": "NUMERO NACIONAL DE MATRICULA", "formato": "Texto", "exemplo": "35.1.0123456.1.00001.001"}
+          ]
+        },
+        "descricao_imovel": {
+          "descricao": "Caracteristicas fisicas e localizacao do imovel",
+          "campos": [
+            {"id": "im_denominacao", "nome": "DENOMINACAO", "formato": "Texto", "exemplo": "APARTAMENTO"},
+            {"id": "im_area_total", "nome": "AREA TOTAL EM M2", "formato": "Numero", "exemplo": "85,50"},
+            {"id": "im_area_privativa", "nome": "AREA PRIVATIVA EM M2", "formato": "Numero", "exemplo": "62,30"},
+            {"id": "im_area_construida", "nome": "AREA CONSTRUIDA", "formato": "Numero", "exemplo": "62,30"},
+            {"id": "im_logradouro", "nome": "LOGRADOURO", "formato": "Texto", "exemplo": "RUA AUGUSTA"},
+            {"id": "im_numero", "nome": "NUMERO", "formato": "Texto", "exemplo": "2000"},
+            {"id": "im_complemento", "nome": "COMPLEMENTO", "formato": "Texto", "exemplo": "APARTAMENTO 101, BLOCO A"},
+            {"id": "im_bairro", "nome": "BAIRRO", "formato": "Texto", "exemplo": "CERQUEIRA CESAR"},
+            {"id": "im_cidade", "nome": "CIDADE", "formato": "Texto", "exemplo": "SAO PAULO"},
+            {"id": "im_estado", "nome": "ESTADO", "formato": "UF", "exemplo": "SP"},
+            {"id": "im_cep", "nome": "CEP", "formato": "00000-000", "exemplo": "01412-000"},
+            {"id": "im_descricao_conforme_matricula", "nome": "DESCRICAO CONFORME A MATRICULA", "formato": "Texto longo", "exemplo": "APARTAMENTO No 101, LOCALIZADO NO 1o ANDAR DO BLOCO A DO CONDOMINIO RESIDENCIAL AUGUSTA PARK, CONTENDO SALA, 2 DORMITORIOS, COZINHA, AREA DE SERVICO E 1 VAGA DE GARAGEM COBERTA No 15."}
+          ]
+        },
+        "cadastro_imobiliario": {
+          "descricao": "Dados do cadastro municipal",
+          "campos": [
+            {"id": "im_sql", "nome": "CADASTRO MUNICIPAL (SQL)", "formato": "Texto", "exemplo": "031.045.0123-4"},
+            {"id": "im_data_certidao_cadastro", "nome": "DATA DE EXPEDICAO DA CERTIDAO DE CADASTRO MUNICIPAL", "formato": "DD/MM/AAAA", "exemplo": "25/01/2026"}
+          ]
+        },
+        "valores_venais": {
+          "descricao": "Valores de referencia do imovel",
+          "campos": [
+            {"id": "im_valor_venal_iptu", "nome": "VALOR VENAL (IPTU)", "formato": "R$ 0.000,00", "exemplo": "R$ 450.000,00"},
+            {"id": "im_valor_venal_referencia", "nome": "VALOR VENAL DE REFERENCIA (ITBI)", "formato": "R$ 0.000,00", "exemplo": "R$ 520.000,00"}
+          ]
+        },
+        "negativa_iptu": {
+          "descricao": "Certidao negativa de IPTU",
+          "campos": [
+            {"id": "im_cnd_iptu_numero", "nome": "NUMERO DA CERTIDAO", "formato": "Texto", "exemplo": "CND-2026-123456"},
+            {"id": "im_cnd_iptu_data", "nome": "DATA DE EXPEDICAO", "formato": "DD/MM/AAAA", "exemplo": "27/01/2026"},
+            {"id": "im_cnd_iptu_valida", "nome": "CERTIDAO VALIDA?", "formato": "SIM/NAO", "exemplo": "SIM"}
+          ]
+        },
+        "certidao_matricula": {
+          "descricao": "Certidao da matricula do RI",
+          "campos": [
+            {"id": "im_certidao_matricula_numero", "nome": "CERTIDAO DA MATRICULA", "formato": "Texto", "exemplo": "CERT-123456-2026"},
+            {"id": "im_certidao_matricula_data", "nome": "DATA DE EXPEDICAO DA CERTIDAO DA MATRICULA", "formato": "DD/MM/AAAA", "exemplo": "26/01/2026"},
+            {"id": "im_certidao_matricula_valida", "nome": "CERTIDAO VALIDA?", "formato": "SIM/NAO", "exemplo": "SIM"}
+          ]
+        },
+        "proprietarios": {
+          "descricao": "Lista de proprietarios do imovel (pode ter multiplos)",
+          "campos_por_proprietario": [
+            {"id": "im_prop_nome", "nome": "NOME", "formato": "Texto", "exemplo": "MARIA DA SILVA SANTOS"},
+            {"id": "im_prop_fracao_ideal", "nome": "FRACAO IDEAL", "formato": "Percentual", "exemplo": "50%"},
+            {"id": "im_prop_registro_aquisicao", "nome": "REGISTRO DE AQUISICAO", "formato": "R.X", "exemplo": "R.4"},
+            {"id": "im_prop_data_registro", "nome": "DATA DO REGISTRO DE AQUISICAO", "formato": "DD/MM/AAAA", "exemplo": "15/06/2018"},
+            {"id": "im_prop_titulo_aquisicao", "nome": "TITULO DE AQUISICAO", "formato": "Texto", "exemplo": "COMPRA E VENDA"}
+          ]
+        },
+        "onus_registrados": {
+          "descricao": "Onus e gravames sobre o imovel",
+          "campos": [
+            {"id": "im_onus_titulo", "nome": "TITULO DO ONUS", "formato": "Texto", "exemplo": "ALIENACAO FIDUCIARIA"},
+            {"id": "im_onus_registro", "nome": "REGISTRO DO ONUS", "formato": "R.X", "exemplo": "R.5"},
+            {"id": "im_onus_data_registro", "nome": "DATA DO REGISTRO DO ONUS", "formato": "DD/MM/AAAA", "exemplo": "15/06/2018"},
+            {"id": "im_onus_descricao", "nome": "DESCRICAO DO ONUS CONFORME A MATRICULA", "formato": "Texto longo", "exemplo": "ALIENACAO FIDUCIARIA EM GARANTIA DE FINANCIAMENTO IMOBILIARIO, EM FAVOR DA CAIXA ECONOMICA FEDERAL, NO VALOR DE R$ 300.000,00"}
+          ],
+          "titulares_por_onus": [
+            {"id": "im_onus_titular_nome", "nome": "NOME", "formato": "Texto", "exemplo": "CAIXA ECONOMICA FEDERAL"},
+            {"id": "im_onus_titular_fracao", "nome": "FRACAO IDEAL", "formato": "Percentual", "exemplo": "100%"}
+          ]
+        },
+        "ressalvas": {
+          "descricao": "Ressalvas na certificacao da matricula",
+          "campos": [
+            {"id": "im_ressalva_existencia", "nome": "EXISTENCIA DE RESSALVA", "formato": "SIM/NAO", "exemplo": "NAO"},
+            {"id": "im_ressalva_descricao", "nome": "DESCRICAO DA RESSALVA", "formato": "Texto", "exemplo": "NAO HA RESSALVAS"}
+          ]
+        }
+      }
+    },
+
+    "negocio_juridico": {
+      "total_campos": 33,
+      "nota": "Total pode variar com multiplos alienantes e adquirentes",
+      "grupos": {
+        "valor": {
+          "descricao": "Valores do negocio",
+          "campos": [
+            {"id": "nj_valor_matricula", "nome": "VALOR DA MATRICULA", "formato": "R$ 0.000,00", "exemplo": "R$ 600.000,00"},
+            {"id": "nj_fracao_alienada", "nome": "FRACAO IDEAL ALIENADA", "formato": "Percentual", "exemplo": "100%"},
+            {"id": "nj_valor_total", "nome": "VALOR TOTAL DA ALIENACAO", "formato": "R$ 0.000,00", "exemplo": "R$ 600.000,00"}
+          ]
+        },
+        "alienantes_pessoa_natural": {
+          "descricao": "Alienantes pessoa fisica",
+          "campos_por_alienante": [
+            {"id": "nj_alienante_nome", "nome": "NOME", "formato": "Texto", "exemplo": "MARIA DA SILVA SANTOS"},
+            {"id": "nj_alienante_fracao_ideal", "nome": "FRACAO IDEAL", "formato": "Percentual", "exemplo": "50%"},
+            {"id": "nj_alienante_valor_alienacao", "nome": "VALOR DA ALIENACAO", "formato": "R$ 0.000,00", "exemplo": "R$ 300.000,00"},
+            {"id": "nj_alienante_conjuge", "nome": "CONJUGE", "formato": "Texto", "exemplo": "CARLOS ALBERTO SANTOS"},
+            {"id": "nj_alienante_comparece_escritura", "nome": "COMPARECE NA ESCRITURA", "formato": "SIM/NAO", "exemplo": "SIM"},
+            {"id": "nj_alienante_qualidade_comparecimento", "nome": "QUALIDADE DO COMPARECIMENTO", "formato": "Texto", "exemplo": "ALIENANTE E ANUENTE", "valores_validos": ["SO ALIENANTE", "AUTOCONTRATANTE", "ALIENANTE E ANUENTE"]}
+          ]
+        },
+        "alienantes_pessoa_juridica": {
+          "descricao": "Alienantes pessoa juridica",
+          "campos_por_alienante": [
+            {"id": "nj_alienante_pj_denominacao", "nome": "DENOMINACAO", "formato": "Texto", "exemplo": "CONSTRUTORA ALPHA LTDA"},
+            {"id": "nj_alienante_pj_fracao_ideal", "nome": "FRACAO IDEAL", "formato": "Percentual", "exemplo": "50%"},
+            {"id": "nj_alienante_pj_valor_alienacao", "nome": "VALOR DA ALIENACAO", "formato": "R$ 0.000,00", "exemplo": "R$ 300.000,00"}
+          ]
+        },
+        "adquirentes_pessoa_natural": {
+          "descricao": "Adquirentes pessoa fisica",
+          "campos_por_adquirente": [
+            {"id": "nj_adquirente_nome", "nome": "NOME", "formato": "Texto", "exemplo": "PEDRO HENRIQUE OLIVEIRA"},
+            {"id": "nj_adquirente_fracao_ideal", "nome": "FRACAO IDEAL", "formato": "Percentual", "exemplo": "100%"},
+            {"id": "nj_adquirente_valor_aquisicao", "nome": "VALOR DA AQUISICAO", "formato": "R$ 0.000,00", "exemplo": "R$ 600.000,00"}
+          ]
+        },
+        "adquirentes_pessoa_juridica": {
+          "descricao": "Adquirentes pessoa juridica",
+          "campos_por_adquirente": [
+            {"id": "nj_adquirente_pj_denominacao", "nome": "DENOMINACAO", "formato": "Texto", "exemplo": "INVESTIMENTOS BETA LTDA"},
+            {"id": "nj_adquirente_pj_fracao_ideal", "nome": "FRACAO IDEAL", "formato": "Percentual", "exemplo": "100%"},
+            {"id": "nj_adquirente_pj_valor_aquisicao", "nome": "VALOR DA AQUISICAO", "formato": "R$ 0.000,00", "exemplo": "R$ 600.000,00"}
+          ]
+        },
+        "forma_pagamento": {
+          "descricao": "Informacoes sobre o pagamento",
+          "campos": [
+            {"id": "nj_pagamento_tipo", "nome": "TIPO DE PAGAMENTO", "formato": "Texto", "exemplo": "A VISTA", "valores_validos": ["A VISTA", "FINANCIADO", "PARCELADO DIRETO", "PERMUTA"]},
+            {"id": "nj_pagamento_modo", "nome": "MODO DE PAGAMENTO", "formato": "Texto", "exemplo": "TRANSFERENCIA BANCARIA", "valores_validos": ["TRANSFERENCIA BANCARIA", "PIX", "DOC", "TED", "CHEQUE"]},
+            {"id": "nj_pagamento_data", "nome": "DATA DO PAGAMENTO", "formato": "DD/MM/AAAA", "exemplo": "28/01/2026"}
+          ],
+          "conta_origem": {
+            "campos": [
+              {"id": "nj_pagamento_banco_origem", "nome": "BANCO DO PAGAMENTO", "formato": "Texto", "exemplo": "BANCO DO BRASIL"},
+              {"id": "nj_pagamento_agencia_origem", "nome": "AGENCIA DO PAGAMENTO", "formato": "Texto", "exemplo": "1234-5"},
+              {"id": "nj_pagamento_conta_origem", "nome": "CONTA DO PAGAMENTO", "formato": "Texto", "exemplo": "12345-6"}
+            ]
+          },
+          "conta_destino": {
+            "campos": [
+              {"id": "nj_pagamento_banco_destino", "nome": "BANCO DE DESTINO", "formato": "Texto", "exemplo": "ITAU"},
+              {"id": "nj_pagamento_agencia_destino", "nome": "AGENCIA DE DESTINO", "formato": "Texto", "exemplo": "0987"},
+              {"id": "nj_pagamento_conta_destino", "nome": "CONTA DE DESTINO", "formato": "Texto", "exemplo": "98765-4"}
+            ]
+          }
+        },
+        "termos_especiais": {
+          "descricao": "Clausulas e termos especiais",
+          "campos": [
+            {"id": "nj_termos_promessa", "nome": "TERMOS CONSTANTES NA PROMESSA DE COMPRA E VENDA", "formato": "Texto longo", "exemplo": "CONFORME CLAUSULA QUINTA DO COMPROMISSO, O IMOVEL SERA ENTREGUE LIVRE E DESEMBARACADO"},
+            {"id": "nj_termos_especiais", "nome": "TERMOS ESPECIAIS", "formato": "Texto longo", "exemplo": "CONDICAO RESOLUTIVA: A PRESENTE VENDA FICA CONDICIONADA A APROVACAO DO FINANCIAMENTO"},
+            {"id": "nj_instrucoes_extras", "nome": "INSTRUCOES EXTRAS", "formato": "Texto longo", "exemplo": "INCLUIR CLAUSULA DE PREFERENCIA EM CASO DE VENDA FUTURA"}
+          ]
+        },
+        "imposto_transmissao": {
+          "descricao": "Dados do ITBI",
+          "campos": [
+            {"id": "nj_itbi_numero_guia", "nome": "NUMERO DA GUIA DE ITBI", "formato": "Texto", "exemplo": "ITBI-2026-789012"},
+            {"id": "nj_itbi_base_calculo", "nome": "BASE DE CALCULO", "formato": "R$ 0.000,00", "exemplo": "R$ 600.000,00"},
+            {"id": "nj_itbi_valor", "nome": "VALOR DA GUIA", "formato": "R$ 0.000,00", "exemplo": "R$ 18.000,00"}
+          ]
+        }
+      }
+    }
+  },
+
+  "tipos_documentos": {
+    "total": 26,
+    "lista": [
+      "RG",
+      "CNH",
+      "CPF",
+      "CERTIDAO_NASCIMENTO",
+      "CERTIDAO_CASAMENTO",
+      "CERTIDAO_OBITO",
+      "COMPROVANTE_RESIDENCIA",
+      "CNDT",
+      "CND_FEDERAL",
+      "CND_ESTADUAL",
+      "CND_MUNICIPAL",
+      "CND_IMOVEL",
+      "CND_CONDOMINIO",
+      "CONTRATO_SOCIAL",
+      "MATRICULA_IMOVEL",
+      "ITBI",
+      "VVR",
+      "IPTU",
+      "DADOS_CADASTRAIS",
+      "ESCRITURA",
+      "COMPROMISSO_COMPRA_VENDA",
+      "PROCURACAO",
+      "COMPROVANTE_PAGAMENTO",
+      "PROTOCOLO_ONR",
+      "ASSINATURA_DIGITAL",
+      "OUTRO"
+    ]
+  },
+
+  "mapeamento_documento_campos": {
+    "RG": {
+      "descricao": "Carteira de Identidade (Registro Geral)",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome", "pn_cpf", "pn_rg", "pn_orgao_emissor_rg", "pn_estado_emissor_rg", "pn_data_emissao_rg", "pn_data_nascimento"]
+      }
+    },
+    "CNH": {
+      "descricao": "Carteira Nacional de Habilitacao",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome", "pn_cpf", "pn_cnh", "pn_orgao_emissor_cnh", "pn_data_nascimento"]
+      }
+    },
+    "CPF": {
+      "descricao": "Cadastro de Pessoa Fisica (documento avulso)",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome", "pn_cpf", "pn_data_nascimento"]
+      }
+    },
+    "CERTIDAO_NASCIMENTO": {
+      "descricao": "Certidao de Registro de Nascimento",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome", "pn_data_nascimento"]
+      }
+    },
+    "CERTIDAO_CASAMENTO": {
+      "descricao": "Certidao de Registro de Casamento",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome", "pn_cpf", "pn_data_nascimento", "pn_estado_civil", "pn_regime_bens", "pn_data_casamento", "pn_nacionalidade"],
+        "negocio_juridico": ["nj_alienante_conjuge"]
+      }
+    },
+    "CERTIDAO_OBITO": {
+      "descricao": "Certidao de Registro de Obito",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome", "pn_data_obito", "pn_estado_civil", "pn_data_falecimento_conjuge"]
+      }
+    },
+    "COMPROVANTE_RESIDENCIA": {
+      "descricao": "Documento que comprova endereco do titular",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome", "pn_domicilio_logradouro", "pn_domicilio_numero", "pn_domicilio_complemento", "pn_domicilio_bairro", "pn_domicilio_cidade", "pn_domicilio_estado", "pn_domicilio_cep"]
+      }
+    },
+    "CNDT": {
+      "descricao": "Certidao Negativa de Debitos Trabalhistas",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome", "pn_cpf", "pn_cndt_numero", "pn_cndt_data_expedicao", "pn_cndt_hora_expedicao"],
+        "pessoa_juridica": ["pj_denominacao", "pj_cnpj", "pj_cndt_numero", "pj_cndt_data_expedicao", "pj_cndt_hora_expedicao"]
+      }
+    },
+    "CND_FEDERAL": {
+      "descricao": "Certidao de Regularidade Fiscal junto a Uniao",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome", "pn_cpf", "pn_certidao_uniao_tipo", "pn_certidao_uniao_data_emissao", "pn_certidao_uniao_hora_emissao", "pn_certidao_uniao_validade", "pn_certidao_uniao_codigo_controle"],
+        "pessoa_juridica": ["pj_denominacao", "pj_cnpj", "pj_certidao_uniao_tipo", "pj_certidao_uniao_data_emissao", "pj_certidao_uniao_hora_emissao", "pj_certidao_uniao_validade", "pj_certidao_uniao_codigo_controle"]
+      }
+    },
+    "CND_ESTADUAL": {
+      "descricao": "Certidao Negativa de Debitos Estaduais",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome", "pn_cpf"],
+        "pessoa_juridica": ["pj_denominacao", "pj_cnpj"]
+      }
+    },
+    "CND_MUNICIPAL": {
+      "descricao": "Certidao Negativa de Debitos Municipais",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome", "pn_cpf"],
+        "pessoa_juridica": ["pj_denominacao", "pj_cnpj"],
+        "dados_imovel": ["im_sql", "im_logradouro", "im_numero", "im_bairro", "im_cidade", "im_estado", "im_cnd_iptu_numero", "im_cnd_iptu_data", "im_cnd_iptu_valida"]
+      }
+    },
+    "CND_IMOVEL": {
+      "descricao": "Certidao Negativa de Debitos relativa a um imovel especifico",
+      "campos_extraiveis": {
+        "dados_imovel": ["im_sql", "im_matricula_numero", "im_logradouro", "im_numero", "im_complemento", "im_bairro", "im_cidade", "im_estado", "im_cnd_iptu_numero", "im_cnd_iptu_data", "im_cnd_iptu_valida"]
+      }
+    },
+    "CND_CONDOMINIO": {
+      "descricao": "Declaracao de Quitacao Condominial",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome"],
+        "dados_imovel": ["im_complemento"]
+      }
+    },
+    "CONTRATO_SOCIAL": {
+      "descricao": "Contrato Social de Pessoa Juridica",
+      "campos_extraiveis": {
+        "pessoa_juridica": [
+          "pj_denominacao", "pj_cnpj", "pj_nire",
+          "pj_sede_logradouro", "pj_sede_numero", "pj_sede_complemento", "pj_sede_bairro", "pj_sede_cidade", "pj_sede_estado", "pj_sede_cep",
+          "pj_instrumento_constitutivo", "pj_junta_comercial", "pj_numero_registro_contrato", "pj_data_sessao_registro",
+          "pj_admin_nome", "pj_admin_cpf", "pj_admin_rg", "pj_admin_orgao_emissor_rg", "pj_admin_estado_emissor_rg",
+          "pj_admin_data_nascimento", "pj_admin_estado_civil", "pj_admin_profissao", "pj_admin_nacionalidade",
+          "pj_admin_domicilio_logradouro", "pj_admin_domicilio_numero", "pj_admin_domicilio_bairro",
+          "pj_admin_domicilio_cidade", "pj_admin_domicilio_estado", "pj_admin_domicilio_cep",
+          "pj_tipo_representacao", "pj_clausula_indica_admin", "pj_clausula_poderes_admin"
+        ]
+      }
+    },
+    "MATRICULA_IMOVEL": {
+      "descricao": "Certidao de Matricula do Registro de Imoveis",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome", "pn_cpf", "pn_estado_civil", "pn_profissao", "pn_nacionalidade"],
+        "pessoa_juridica": ["pj_denominacao", "pj_cnpj"],
+        "dados_imovel": [
+          "im_matricula_numero", "im_matricula_cartorio_numero", "im_matricula_cartorio_cidade", "im_matricula_cartorio_estado", "im_matricula_numero_nacional",
+          "im_denominacao", "im_area_total", "im_area_privativa", "im_area_construida",
+          "im_logradouro", "im_numero", "im_complemento", "im_bairro", "im_cidade", "im_estado", "im_cep",
+          "im_descricao_conforme_matricula", "im_certidao_matricula_numero", "im_certidao_matricula_data",
+          "im_prop_nome", "im_prop_fracao_ideal", "im_prop_registro_aquisicao", "im_prop_data_registro", "im_prop_titulo_aquisicao",
+          "im_onus_titulo", "im_onus_registro", "im_onus_data_registro", "im_onus_descricao",
+          "im_onus_titular_nome", "im_onus_titular_fracao",
+          "im_ressalva_existencia", "im_ressalva_descricao"
+        ]
+      }
+    },
+    "ITBI": {
+      "descricao": "Guia ou Comprovante de ITBI",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome", "pn_cpf"],
+        "pessoa_juridica": ["pj_denominacao", "pj_cnpj"],
+        "dados_imovel": ["im_sql", "im_logradouro", "im_numero", "im_bairro", "im_cidade", "im_estado"],
+        "negocio_juridico": ["nj_valor_total", "nj_alienante_nome", "nj_adquirente_nome", "nj_itbi_numero_guia", "nj_itbi_base_calculo", "nj_itbi_valor"]
+      }
+    },
+    "VVR": {
+      "descricao": "Valor Venal de Referencia",
+      "campos_extraiveis": {
+        "dados_imovel": ["im_sql", "im_valor_venal_referencia", "im_logradouro", "im_numero", "im_area_construida"]
+      }
+    },
+    "IPTU": {
+      "descricao": "Carne ou Certidao de IPTU",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome", "pn_cpf"],
+        "dados_imovel": ["im_sql", "im_valor_venal_iptu", "im_logradouro", "im_numero", "im_bairro", "im_cidade", "im_estado", "im_cep", "im_area_total", "im_area_construida"]
+      }
+    },
+    "DADOS_CADASTRAIS": {
+      "descricao": "Ficha Cadastral do Imovel na Prefeitura",
+      "campos_extraiveis": {
+        "dados_imovel": ["im_sql", "im_logradouro", "im_numero", "im_complemento", "im_bairro", "im_cidade", "im_estado", "im_cep", "im_area_total", "im_area_construida", "im_denominacao", "im_data_certidao_cadastro"]
+      }
+    },
+    "ESCRITURA": {
+      "descricao": "Escritura Publica de Compra e Venda",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome", "pn_cpf", "pn_rg", "pn_orgao_emissor_rg", "pn_estado_emissor_rg", "pn_nacionalidade", "pn_profissao", "pn_estado_civil", "pn_regime_bens", "pn_domicilio_logradouro", "pn_domicilio_numero", "pn_domicilio_bairro", "pn_domicilio_cidade", "pn_domicilio_estado", "pn_domicilio_cep"],
+        "pessoa_juridica": ["pj_denominacao", "pj_cnpj", "pj_sede_logradouro", "pj_sede_numero", "pj_sede_bairro", "pj_sede_cidade", "pj_sede_estado", "pj_sede_cep", "pj_admin_nome", "pj_admin_cpf"],
+        "dados_imovel": ["im_matricula_numero", "im_matricula_cartorio_numero", "im_matricula_cartorio_cidade", "im_denominacao", "im_descricao_conforme_matricula", "im_logradouro", "im_numero", "im_complemento", "im_bairro", "im_cidade", "im_estado"],
+        "negocio_juridico": ["nj_valor_total", "nj_alienante_nome", "nj_adquirente_nome", "nj_pagamento_tipo", "nj_pagamento_modo"]
+      }
+    },
+    "COMPROMISSO_COMPRA_VENDA": {
+      "descricao": "Contrato Particular de Compromisso de Compra e Venda",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome", "pn_cpf", "pn_rg", "pn_orgao_emissor_rg", "pn_estado_emissor_rg", "pn_nacionalidade", "pn_profissao", "pn_estado_civil", "pn_regime_bens", "pn_data_nascimento", "pn_domicilio_logradouro", "pn_domicilio_numero", "pn_domicilio_complemento", "pn_domicilio_bairro", "pn_domicilio_cidade", "pn_domicilio_estado", "pn_domicilio_cep", "pn_email", "pn_telefone"],
+        "pessoa_juridica": ["pj_denominacao", "pj_cnpj", "pj_sede_logradouro", "pj_sede_numero", "pj_sede_complemento", "pj_sede_bairro", "pj_sede_cidade", "pj_sede_estado", "pj_sede_cep"],
+        "dados_imovel": ["im_matricula_numero", "im_matricula_cartorio_numero", "im_matricula_cartorio_cidade", "im_denominacao", "im_logradouro", "im_numero", "im_complemento", "im_bairro", "im_cidade", "im_estado", "im_area_total", "im_area_privativa"],
+        "negocio_juridico": ["nj_valor_total", "nj_fracao_alienada", "nj_alienante_nome", "nj_alienante_fracao_ideal", "nj_alienante_valor_alienacao", "nj_alienante_conjuge", "nj_adquirente_nome", "nj_adquirente_fracao_ideal", "nj_adquirente_valor_aquisicao", "nj_pagamento_tipo", "nj_pagamento_modo", "nj_pagamento_data", "nj_termos_promessa"]
+      }
+    },
+    "PROCURACAO": {
+      "descricao": "Procuracao para representacao",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome", "pn_cpf", "pn_rg", "pn_orgao_emissor_rg", "pn_estado_emissor_rg", "pn_nacionalidade", "pn_profissao", "pn_estado_civil", "pn_domicilio_logradouro", "pn_domicilio_numero", "pn_domicilio_bairro", "pn_domicilio_cidade", "pn_domicilio_estado", "pn_domicilio_cep"],
+        "pessoa_juridica": ["pj_denominacao", "pj_cnpj", "pj_procurador_nome", "pj_procurador_cpf", "pj_procurador_rg", "pj_procurador_orgao_emissor_rg", "pj_procurador_estado_emissor_rg", "pj_procurador_data_nascimento", "pj_procurador_estado_civil", "pj_procurador_profissao", "pj_procurador_nacionalidade", "pj_procurador_domicilio_logradouro", "pj_procurador_domicilio_numero", "pj_procurador_domicilio_bairro", "pj_procurador_domicilio_cidade", "pj_procurador_domicilio_estado", "pj_procurador_domicilio_cep", "pj_tabelionato_procuracao", "pj_data_procuracao", "pj_livro_procuracao", "pj_paginas_procuracao"]
+      }
+    },
+    "COMPROVANTE_PAGAMENTO": {
+      "descricao": "Comprovante de transacao financeira",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome"],
+        "pessoa_juridica": ["pj_denominacao"],
+        "negocio_juridico": ["nj_pagamento_tipo", "nj_pagamento_modo", "nj_pagamento_data", "nj_pagamento_banco_origem", "nj_pagamento_agencia_origem", "nj_pagamento_conta_origem", "nj_pagamento_banco_destino", "nj_pagamento_agencia_destino", "nj_pagamento_conta_destino"]
+      }
+    },
+    "PROTOCOLO_ONR": {
+      "descricao": "Protocolo do Operador Nacional do Registro (SAEC)",
+      "campos_extraiveis": {
+        "dados_imovel": ["im_matricula_numero", "im_matricula_cartorio_numero"]
+      }
+    },
+    "ASSINATURA_DIGITAL": {
+      "descricao": "Certificado ou comprovante de assinatura eletronica",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome"]
+      }
+    },
+    "OUTRO": {
+      "descricao": "Documento que nao se encaixa nas categorias acima",
+      "campos_extraiveis": {}
+    }
+  },
+
+  "campos_compartilhados": {
+    "descricao": "Campos que aparecem em multiplos tipos de documentos, permitindo correlacao entre documentos",
+    "correlacoes": {
+      "pn_nome": {
+        "nome_exibicao": "Nome da Pessoa",
+        "documentos": ["RG", "CNH", "CPF", "CERTIDAO_NASCIMENTO", "CERTIDAO_CASAMENTO", "CERTIDAO_OBITO", "COMPROVANTE_RESIDENCIA", "CNDT", "CND_FEDERAL", "CND_ESTADUAL", "CND_MUNICIPAL", "CND_CONDOMINIO", "MATRICULA_IMOVEL", "ITBI", "IPTU", "ESCRITURA", "COMPROMISSO_COMPRA_VENDA", "PROCURACAO", "COMPROVANTE_PAGAMENTO", "ASSINATURA_DIGITAL"],
+        "total_documentos": 20
+      },
+      "pn_cpf": {
+        "nome_exibicao": "CPF",
+        "documentos": ["RG", "CNH", "CPF", "CERTIDAO_CASAMENTO", "CNDT", "CND_FEDERAL", "CND_ESTADUAL", "CND_MUNICIPAL", "MATRICULA_IMOVEL", "ITBI", "IPTU", "ESCRITURA", "COMPROMISSO_COMPRA_VENDA", "PROCURACAO"],
+        "total_documentos": 14
+      },
+      "pj_denominacao": {
+        "nome_exibicao": "Razao Social",
+        "documentos": ["CNDT", "CND_FEDERAL", "CND_ESTADUAL", "CND_MUNICIPAL", "CONTRATO_SOCIAL", "MATRICULA_IMOVEL", "ITBI", "ESCRITURA", "COMPROMISSO_COMPRA_VENDA", "PROCURACAO", "COMPROVANTE_PAGAMENTO"],
+        "total_documentos": 11
+      },
+      "pj_cnpj": {
+        "nome_exibicao": "CNPJ",
+        "documentos": ["CNDT", "CND_FEDERAL", "CND_ESTADUAL", "CND_MUNICIPAL", "CONTRATO_SOCIAL", "MATRICULA_IMOVEL", "ITBI", "ESCRITURA", "COMPROMISSO_COMPRA_VENDA", "PROCURACAO"],
+        "total_documentos": 10
+      },
+      "im_logradouro": {
+        "nome_exibicao": "Logradouro do Imovel",
+        "documentos": ["CND_MUNICIPAL", "CND_IMOVEL", "MATRICULA_IMOVEL", "ITBI", "VVR", "IPTU", "DADOS_CADASTRAIS", "ESCRITURA", "COMPROMISSO_COMPRA_VENDA"],
+        "total_documentos": 9
+      },
+      "im_matricula_numero": {
+        "nome_exibicao": "Numero da Matricula",
+        "documentos": ["CND_IMOVEL", "MATRICULA_IMOVEL", "ESCRITURA", "COMPROMISSO_COMPRA_VENDA", "PROTOCOLO_ONR"],
+        "total_documentos": 5
+      },
+      "im_sql": {
+        "nome_exibicao": "Cadastro Municipal (SQL)",
+        "documentos": ["CND_MUNICIPAL", "CND_IMOVEL", "ITBI", "VVR", "IPTU", "DADOS_CADASTRAIS"],
+        "total_documentos": 6
+      }
+    }
+  }
+}

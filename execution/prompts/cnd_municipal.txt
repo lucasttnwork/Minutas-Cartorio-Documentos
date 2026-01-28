@@ -1,0 +1,93 @@
+Analise esta Certidao Negativa de Debitos Municipais / Certidao de Tributos Imobiliarios.
+
+## REGRAS OBRIGATORIAS
+
+1. **NUNCA INVENTAR DADOS**: Se um campo estiver ilegivel ou ausente, retorne null. NUNCA fabrique informacoes.
+2. **EXPLICACAO OBRIGATORIA**: O campo explicacao_contextual DEVE conter 3-5 paragrafos explicando o documento.
+3. **CAMPOS NULOS**: Preferimos null a dados fabricados. Na duvida, use null.
+4. **ACENTUACAO**: Mantenha acentuacao correta em portugues (certidao, situacao, valida, Sao Paulo).
+5. **SEM DUPLICACAO**: Evite duplicar campos na reescrita (ex: CEP aparecer duas vezes).
+
+## CAMPOS CRITICOS A EXTRAIR
+
+Alem dos dados basicos, SEMPRE extraia:
+- **Tributos Cobertos**: Lista completa (IPTU, taxas, contribuicoes)
+- **URLs de Verificacao**: Links para validar autenticidade
+- **Clausulas Legais**: Ressalvas da Fazenda, condicoes de aceitacao
+- **Base Legal**: Portarias, decretos, leis citados
+- **Data de Liberacao vs Emissao**: Se houver duas datas diferentes
+
+## TAREFAS OBRIGATORIAS
+
+1. REESCRITA: Transcreva todos os dados da certidao.
+2. EXPLICACAO: Explique o status da certidao e a situacao fiscal do imovel (3-5 paragrafos).
+3. CATALOGACAO: Extraia todos os campos estruturados.
+
+## FORMATO DE SAIDA (use exatamente este formato):
+
+## REESCRITA DO DOCUMENTO
+[transcricao completa da certidao - evite duplicacao de campos como CEP]
+
+## EXPLICACAO CONTEXTUAL
+[MINIMO 3 PARAGRAFOS - Esta secao e OBRIGATORIA e deve ser detalhada]
+
+Paragrafo 1: Identifique o documento, o imovel (SQL e endereco), e o orgao emissor (Prefeitura e Secretaria).
+
+Paragrafo 2: Explique o STATUS fiscal e QUAIS TRIBUTOS sao cobertos por esta certidao (IPTU, taxas de limpeza, conservacao, combate a sinistros, contribuicao de melhoria, etc.).
+
+Paragrafo 3: Informe sobre a validade da certidao e a IMPORTANCIA do codigo de autenticidade para verificacao no site da prefeitura.
+
+Paragrafo 4 (opcional): Mencione as RESSALVAS legais presentes (ex: "Ressalvado o direito da Fazenda Municipal cobrar dividas futuras...").
+
+Paragrafo 5 (opcional): Outras informacoes relevantes como base legal, condicoes de aceitacao, clausulas de invalidacao.
+
+## DADOS CATALOGADOS (JSON)
+```json
+{
+  "tipo_certidao": "CND_MUNICIPAL",
+  "nome_certidao_completo": "Certidao Conjunta de Debitos de Tributos Imobiliarios",
+  "orgao_emissor": "Prefeitura Municipal de Cidade",
+  "secretaria_emissora": "Secretaria Municipal da Fazenda",
+  "sql": "000.000.0000-0",
+  "endereco_imovel": "Rua Exemplo, 123, Apto 101",
+  "cep": "00000-000",
+  "contribuinte": "NOME DO CONTRIBUINTE",
+  "cpf_cnpj_contribuinte": "000.000.000-00",
+  "numero_certidao": "000000000-0000",
+  "data_liberacao": "DD/MM/AAAA",
+  "data_emissao": "DD/MM/AAAA",
+  "hora_emissao": "HH:MM:SS",
+  "fuso_horario": "hora e data de Brasilia",
+  "data_validade": "DD/MM/AAAA",
+  "status": "REGULAR",
+  "tributos_cobertos": [
+    "Imposto Predial e Territorial Urbano (IPTU)",
+    "Taxa de Limpeza Publica",
+    "Taxa de Conservacao de Vias e Logradouros Publicos",
+    "Taxa de Combate e Sinistros",
+    "Contribuicao de Melhoria"
+  ],
+  "debitos_pendentes": [],
+  "codigo_verificacao": "ABCD1234567890",
+  "urls_verificacao": [
+    "http://www.prefeitura.cidade.gov.br/verificacao"
+  ],
+  "clausulas_legais": {
+    "ressalva_fazenda": "Ressalvado o direito de a Fazenda Municipal cobrar...",
+    "condicao_aceitacao": "A aceitacao desta certidao esta condicionada a verificacao...",
+    "clausula_invalidacao": "Qualquer rasura invalidara este documento"
+  },
+  "base_legal": [
+    "Portaria Municipal n XX, de DD de mes de AAAA",
+    "Decreto n XXXXX, de DD de mes de AAAA"
+  ]
+}
+```
+
+## NOTAS IMPORTANTES
+
+- Diferencie DATA DE LIBERACAO (quando foi aprovada) de DATA DE EMISSAO (quando foi gerada/impressa)
+- Extraia TODOS os tributos mencionados no corpo da certidao
+- O CEP deve ser extraido como campo separado, alem de estar no endereco
+- Se houver sigilo fiscal (contribuinte oculto), mantenha como aparece no documento
+- Capture as clausulas legais COMPLETAS, nao resuma

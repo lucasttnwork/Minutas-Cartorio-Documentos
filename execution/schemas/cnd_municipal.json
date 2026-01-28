@@ -1,0 +1,131 @@
+{
+  "tipo_documento": "CND_MUNICIPAL",
+  "versao": "1.0",
+  "descricao": "Schema de extracao para Certidao Negativa de Debitos Municipais (Tributos Imobiliarios)",
+  "complexidade": "BAIXA",
+  "campos": [
+    {
+      "nome": "numero_certidao",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "[\\d.-]+",
+      "exemplo": "2026.123.456.789",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Numero da certidao"
+    },
+    {
+      "nome": "cadastro_imovel",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "\\d{3}\\.\\d{3}\\.\\d{4}-\\d",
+      "exemplo": "000.000.0000-0",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "SQL - Setor Quadra Lote do imovel"
+    },
+    {
+      "nome": "nome_contribuinte",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "JOAO DA SILVA",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Nome do contribuinte"
+    },
+    {
+      "nome": "cpf_contribuinte",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}",
+      "exemplo": "123.456.789-00",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "CPF do contribuinte"
+    },
+    {
+      "nome": "endereco_imovel",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "RUA DAS FLORES, 123",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Endereco do imovel"
+    },
+    {
+      "nome": "situacao_fiscal",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "(SEM DEBITOS|REGULAR|NEGATIVA|POSITIVA)",
+      "exemplo": "SEM DEBITOS",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Situacao fiscal do imovel"
+    },
+    {
+      "nome": "tributos_abrangidos",
+      "tipo": "array",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": ["IPTU", "TAXAS"],
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Lista de tributos cobertos pela certidao"
+    },
+    {
+      "nome": "data_liberacao",
+      "tipo": "date",
+      "obrigatorio": false,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "27/01/2026",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data de liberacao da certidao"
+    },
+    {
+      "nome": "data_validade",
+      "tipo": "date",
+      "obrigatorio": true,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "26/04/2026",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data de validade da certidao"
+    },
+    {
+      "nome": "data_emissao",
+      "tipo": "date",
+      "obrigatorio": true,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "27/01/2026",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data de emissao da certidao"
+    },
+    {
+      "nome": "codigo_autenticidade",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-Z0-9-]+",
+      "exemplo": "ABC123-DEF456",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Codigo para verificacao online"
+    }
+  ],
+  "padroes_identificacao": [
+    "CERTIDAO NEGATIVA DE TRIBUTOS",
+    "TRIBUTOS IMOBILIARIOS",
+    "PREFEITURA",
+    "CND MUNICIPAL",
+    "SEM DEBITOS",
+    "IPTU"
+  ],
+  "validacoes": [
+    "sql_formato_valido",
+    "cpf_digito_verificador",
+    "data_validade_futura"
+  ]
+}

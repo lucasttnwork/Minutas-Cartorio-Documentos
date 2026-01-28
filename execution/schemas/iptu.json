@@ -1,0 +1,188 @@
+{
+  "tipo_documento": "IPTU",
+  "versao": "1.0",
+  "descricao": "Schema de extracao para Carne ou Certidao de IPTU",
+  "complexidade": "MEDIA",
+  "campos": [
+    {
+      "nome": "cadastro_imovel",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "\\d{3}\\.\\d{3}\\.\\d{4}-\\d",
+      "exemplo": "000.000.0000-0",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "SQL - Setor Quadra Lote do imovel"
+    },
+    {
+      "nome": "ano_exercicio",
+      "tipo": "number",
+      "obrigatorio": true,
+      "regex": "\\d{4}",
+      "exemplo": "2026",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Ano do exercicio fiscal"
+    },
+    {
+      "nome": "endereco_imovel",
+      "tipo": "object",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": {"logradouro": "RUA DAS FLORES", "numero": "123", "complemento": "APTO 101"},
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Endereco completo do imovel",
+      "campos_internos": [
+        {"nome": "logradouro", "tipo": "string"},
+        {"nome": "numero", "tipo": "string"},
+        {"nome": "complemento", "tipo": "string"},
+        {"nome": "bairro", "tipo": "string"},
+        {"nome": "cep", "tipo": "string"}
+      ]
+    },
+    {
+      "nome": "endereco_notificacao",
+      "tipo": "object",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": {"logradouro": "AV PAULISTA", "numero": "1000"},
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Endereco para correspondencia (se diferente)"
+    },
+    {
+      "nome": "contribuintes",
+      "tipo": "array",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": [{"nome": "JOAO DA SILVA", "cpf": "123.456.789-00"}],
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Lista de contribuintes do imovel"
+    },
+    {
+      "nome": "dados_terreno",
+      "tipo": "object",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": {"area": 150.00, "fracao_ideal": 0.0125, "testada": 5.00},
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Dados do terreno",
+      "campos_internos": [
+        {"nome": "area", "tipo": "number", "unidade": "m2"},
+        {"nome": "fracao_ideal", "tipo": "number"},
+        {"nome": "testada", "tipo": "number", "unidade": "m"}
+      ]
+    },
+    {
+      "nome": "dados_construcao",
+      "tipo": "object",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": {"area": 65.00, "tipo": "APARTAMENTO", "padrao": "MEDIO", "ano": 2010},
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Dados da construcao",
+      "campos_internos": [
+        {"nome": "area", "tipo": "number", "unidade": "m2"},
+        {"nome": "tipo", "tipo": "string"},
+        {"nome": "padrao", "tipo": "string"},
+        {"nome": "ano_construcao", "tipo": "number"}
+      ]
+    },
+    {
+      "nome": "valores_m2",
+      "tipo": "object",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": {"terreno": 1500.00, "construcao": 3000.00},
+      "nivel_extracao": 1,
+      "confianca_esperada": "media",
+      "descricao": "Valores por metro quadrado"
+    },
+    {
+      "nome": "valor_venal_terreno",
+      "tipo": "number",
+      "obrigatorio": false,
+      "regex": "R\\$\\s*[\\d.,]+",
+      "exemplo": "200000.00",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Valor venal do terreno"
+    },
+    {
+      "nome": "valor_venal_construcao",
+      "tipo": "number",
+      "obrigatorio": false,
+      "regex": "R\\$\\s*[\\d.,]+",
+      "exemplo": "250000.00",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Valor venal da construcao"
+    },
+    {
+      "nome": "valor_venal_total",
+      "tipo": "number",
+      "obrigatorio": true,
+      "regex": "R\\$\\s*[\\d.,]+",
+      "exemplo": "450000.00",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Valor venal total do imovel"
+    },
+    {
+      "nome": "valores_iptu",
+      "tipo": "object",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": {"imposto": 5000.00, "taxa_lixo": 500.00, "total": 5500.00},
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Valores do imposto",
+      "campos_internos": [
+        {"nome": "imposto", "tipo": "number"},
+        {"nome": "taxa_lixo", "tipo": "number"},
+        {"nome": "taxa_bombeiros", "tipo": "number"},
+        {"nome": "total", "tipo": "number"},
+        {"nome": "desconto", "tipo": "number"},
+        {"nome": "total_com_desconto", "tipo": "number"}
+      ]
+    },
+    {
+      "nome": "uso_imovel",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "(RESIDENCIAL|COMERCIAL|INDUSTRIAL|MISTO|TERRENO)",
+      "exemplo": "RESIDENCIAL",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Uso do imovel"
+    },
+    {
+      "nome": "data_emissao",
+      "tipo": "date",
+      "obrigatorio": false,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "15/01/2026",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data de emissao do carne"
+    }
+  ],
+  "padroes_identificacao": [
+    "IPTU",
+    "IMPOSTO PREDIAL",
+    "IMPOSTO TERRITORIAL",
+    "PREFEITURA",
+    "EXERCICIO",
+    "VALOR VENAL"
+  ],
+  "validacoes": [
+    "sql_formato_valido",
+    "cpf_digito_verificador",
+    "soma_valores_venais",
+    "ano_exercicio_valido"
+  ]
+}

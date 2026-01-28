@@ -1,0 +1,117 @@
+{
+  "tipo_documento": "PROTOCOLO_ONR",
+  "versao": "1.0",
+  "descricao": "Schema de extracao para Protocolo do ONR (Operador Nacional do Registro de Imoveis Eletronico)",
+  "complexidade": "BAIXA",
+  "campos": [
+    {
+      "nome": "numero_protocolo",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "[A-Z]{2,5}[.-]?\\d{4,}[.-]?\\d*",
+      "exemplo": "ONR-2026-123456",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Numero do protocolo de solicitacao"
+    },
+    {
+      "nome": "data_protocolo",
+      "tipo": "date",
+      "obrigatorio": true,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "27/01/2026",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data de registro do protocolo"
+    },
+    {
+      "nome": "hora_protocolo",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d{2}:\\d{2}(:\\d{2})?",
+      "exemplo": "14:30:45",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Hora de registro do protocolo"
+    },
+    {
+      "nome": "tipo_solicitacao",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "CERTIDAO DE INTEIRO TEOR",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Tipo de servico solicitado"
+    },
+    {
+      "nome": "cartorio_destino",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "1o OFICIAL DE REGISTRO DE IMOVEIS DE SAO PAULO",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Cartorio de destino da solicitacao"
+    },
+    {
+      "nome": "matricula_imovel",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d{1,6}",
+      "exemplo": "123456",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Numero da matricula do imovel (se aplicavel)"
+    },
+    {
+      "nome": "status_solicitacao",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "(PENDENTE|EM ANALISE|CONCLUIDO|CANCELADO|DEVOLVIDO)",
+      "exemplo": "CONCLUIDO",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Status atual da solicitacao"
+    },
+    {
+      "nome": "solicitante",
+      "tipo": "object",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": {"nome": "JOAO DA SILVA", "cpf": "123.456.789-00"},
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Dados do solicitante",
+      "campos_internos": [
+        {"nome": "nome", "tipo": "string"},
+        {"nome": "cpf_cnpj", "tipo": "string"},
+        {"nome": "email", "tipo": "string"}
+      ]
+    },
+    {
+      "nome": "codigo_verificacao",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-Z0-9-]+",
+      "exemplo": "ABC123DEF456",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Codigo para verificacao de autenticidade"
+    }
+  ],
+  "padroes_identificacao": [
+    "ONR",
+    "OPERADOR NACIONAL",
+    "REGISTRO ELETRONICO",
+    "PROTOCOLO",
+    "SAEC",
+    "SREI",
+    "CENTRAL DE SERVICOS"
+  ],
+  "validacoes": [
+    "cpf_cnpj_digito_verificador",
+    "data_protocolo_valida",
+    "matricula_valida"
+  ]
+}
