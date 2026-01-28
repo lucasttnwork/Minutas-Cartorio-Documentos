@@ -551,7 +551,7 @@ def map_rg_to_pessoa(dados: Dict, pessoa: PessoaNatural, source: str) -> None:
 
     Campos extraidos: nome, rg, orgao_expedidor, data_nascimento, filiacao, cpf, naturalidade
     """
-    dados_cat = dados.get('dados_catalogados', {})
+    dados_cat = dados.get('dados_catalogados') or {}
 
     pessoa.set_field('nome', dados_cat.get('nome_completo'), source)
     pessoa.set_field('rg', dados_cat.get('numero_rg'), source)
@@ -579,7 +579,7 @@ def map_certidao_nascimento_to_pessoa(dados: Dict, pessoa: PessoaNatural, source
 
     Campos extraidos: nome, data_nascimento, filiacao, naturalidade
     """
-    dados_cat = dados.get('dados_catalogados', {})
+    dados_cat = dados.get('dados_catalogados') or {}
 
     pessoa.set_field('nome', dados_cat.get('nome_completo'), source)
     pessoa.set_field('data_nascimento', dados_cat.get('data_nascimento'), source)
@@ -598,7 +598,7 @@ def map_certidao_casamento_to_pessoa(dados: Dict, pessoa: PessoaNatural, nome_pe
 
     Campos extraidos: estado_civil, conjuge, regime_bens, data_casamento, cpf
     """
-    dados_cat = dados.get('dados_catalogados', {})
+    dados_cat = dados.get('dados_catalogados') or {}
 
     # Identifica qual conjuge corresponde a pessoa
     conjuge1 = dados_cat.get('conjuge1', {})
@@ -650,7 +650,7 @@ def map_cndt_to_pessoa(dados: Dict, pessoa: PessoaNatural, source: str) -> None:
 
     Campos extraidos: cndt (numero, data_expedicao, hora_expedicao, validade, status)
     """
-    dados_cat = dados.get('dados_catalogados', {})
+    dados_cat = dados.get('dados_catalogados') or {}
 
     pessoa.set_field('cndt_numero', dados_cat.get('numero_certidao'), source)
     pessoa.set_field('cndt_data_expedicao', dados_cat.get('data_emissao'), source)
@@ -675,13 +675,13 @@ def map_compromisso_to_partes(dados: Dict, pessoas: Dict[str, PessoaNatural], im
     Returns:
         Tuple com (lista de CPFs dos vendedores, lista de CPFs dos compradores)
     """
-    dados_cat = dados.get('dados_catalogados', {})
+    dados_cat = dados.get('dados_catalogados') or {}
 
     cpfs_vendedores = []
     cpfs_compradores = []
 
     # Processa vendedores
-    for vendedor in dados_cat.get('vendedores', []):
+    for vendedor in (dados_cat.get('vendedores') or []):
         cpf = normalizar_cpf(vendedor.get('cpf'))
         if cpf:
             cpfs_vendedores.append(cpf)
@@ -710,7 +710,7 @@ def map_compromisso_to_partes(dados: Dict, pessoas: Dict[str, PessoaNatural], im
                 pessoa.set_field('fracao_ideal', f"{proporcao}%", source)
 
     # Processa compradores
-    for comprador in dados_cat.get('compradores', []):
+    for comprador in (dados_cat.get('compradores') or []):
         cpf = normalizar_cpf(comprador.get('cpf'))
         if cpf:
             cpfs_compradores.append(cpf)
@@ -733,7 +733,7 @@ def map_compromisso_to_partes(dados: Dict, pessoas: Dict[str, PessoaNatural], im
     imovel_dados = dados_cat.get('imovel', {})
     if imovel_dados:
         # Matriculas do compromisso
-        matriculas = imovel_dados.get('matriculas', [])
+        matriculas = imovel_dados.get('matriculas') or []
 
         if matriculas:
             # Processa cada matricula como um imovel separado
@@ -838,7 +838,7 @@ def map_matricula_to_imovel(dados: Dict, imovel: Imovel, source: str) -> List[Di
     Returns:
         Lista de proprietarios encontrados na matricula
     """
-    dados_cat = dados.get('dados_catalogados', {})
+    dados_cat = dados.get('dados_catalogados') or {}
 
     # Matricula
     imovel.set_field('matricula_numero', dados_cat.get('numero_matricula'), source)
@@ -881,7 +881,7 @@ def map_matricula_to_imovel(dados: Dict, imovel: Imovel, source: str) -> List[Di
 
     # Proprietarios atuais
     proprietarios = []
-    for prop in dados_cat.get('proprietarios_atuais', []):
+    for prop in (dados_cat.get('proprietarios_atuais') or []):
         proprietarios.append({
             'nome': prop.get('nome'),
             'cpf': normalizar_cpf(prop.get('cpf')),
@@ -896,7 +896,7 @@ def map_matricula_to_imovel(dados: Dict, imovel: Imovel, source: str) -> List[Di
         imovel.proprietarios = proprietarios
 
     # Onus - com lógica de prioridade para não sobrescrever imóvel livre com status desconhecido
-    onus_ativos = dados_cat.get('onus_ativos', [])
+    onus_ativos = dados_cat.get('onus_ativos') or []
 
     # Se já temos ônus definido, verifica prioridade
     onus_atual = imovel.onus
@@ -922,7 +922,7 @@ def map_matricula_to_imovel(dados: Dict, imovel: Imovel, source: str) -> List[Di
         imovel.set_field('onus', onus_ativos, source)
 
     # Onus historicos (cancelados)
-    onus_historicos = dados_cat.get('onus_historicos', [])
+    onus_historicos = dados_cat.get('onus_historicos') or []
     if onus_historicos:
         # Normaliza formato para output padronizado
         onus_hist_normalizados = []
@@ -946,7 +946,7 @@ def map_iptu_to_imovel(dados: Dict, imovel: Imovel, source: str) -> None:
 
     Campos extraidos: sql, endereco, valores_venais
     """
-    dados_cat = dados.get('dados_catalogados', {})
+    dados_cat = dados.get('dados_catalogados') or {}
 
     # Identificacao
     identificacao = dados_cat.get('identificacao_imovel', {})
@@ -973,7 +973,7 @@ def map_vvr_to_imovel(dados: Dict, imovel: Imovel, source: str) -> None:
 
     Campos extraidos: valor_venal_referencia
     """
-    dados_cat = dados.get('dados_catalogados', {})
+    dados_cat = dados.get('dados_catalogados') or {}
 
     imovel.set_field('sql', dados_cat.get('sql'), source)
     imovel.set_field('valor_venal_referencia', normalizar_valor(dados_cat.get('valor_venal_referencia')), source)
@@ -985,7 +985,7 @@ def map_cnd_municipal_to_imovel(dados: Dict, imovel: Imovel, source: str) -> Non
 
     Campos extraidos: certidao_municipal (numero, data_emissao, validade, status)
     """
-    dados_cat = dados.get('dados_catalogados', {})
+    dados_cat = dados.get('dados_catalogados') or {}
 
     imovel.set_field('sql', dados_cat.get('sql'), source)
     imovel.set_field('cnd_numero', dados_cat.get('numero_certidao'), source)
@@ -1001,7 +1001,7 @@ def map_itbi_to_negocio(dados: Dict, negocio: Negocio, source: str) -> None:
     Acumula multiplas guias de ITBI em vez de sobrescrever.
     Campos extraidos: numero_guia, base_calculo, valor, proporcao, fonte
     """
-    dados_cat = dados.get('dados_catalogados', {})
+    dados_cat = dados.get('dados_catalogados') or {}
 
     # Extrai dados da guia
     identificacao = dados_cat.get('identificacao', {})
@@ -1520,6 +1520,59 @@ def map_documents_to_fields(caso_id: str, verbose: bool = False) -> Dict[str, An
     return resultado
 
 
+def remove_sources_from_result(resultado: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Remove todas as informacoes de fontes (_fontes) do resultado,
+    gerando uma versao limpa apenas com os dados finais.
+
+    Args:
+        resultado: Resultado completo do mapeamento
+
+    Returns:
+        Copia do resultado sem os campos de fontes
+    """
+    import copy
+
+    # Faz copia profunda para nao alterar o original
+    clean = copy.deepcopy(resultado)
+
+    # Remove _fontes dos alienantes
+    for alienante in clean.get('alienantes', []):
+        if '_fontes' in alienante:
+            del alienante['_fontes']
+
+    # Remove _fontes dos adquirentes
+    for adquirente in clean.get('adquirentes', []):
+        if '_fontes' in adquirente:
+            del adquirente['_fontes']
+
+    # Remove _fontes e _matricula_key dos imoveis
+    for imovel in clean.get('imoveis', []):
+        if '_fontes' in imovel:
+            del imovel['_fontes']
+        if '_matricula_key' in imovel:
+            del imovel['_matricula_key']
+
+    # Remove _fontes do negocio
+    if '_fontes' in clean.get('negocio', {}):
+        del clean['negocio']['_fontes']
+
+    # Remove metadata interna (documentos_fonte, etc)
+    if 'metadata' in clean:
+        # Mantem apenas campos essenciais no metadata
+        metadata_clean = {
+            'caso_id': clean['metadata'].get('caso_id'),
+            'timestamp': clean['metadata'].get('timestamp'),
+            'documentos_processados': clean['metadata'].get('documentos_processados'),
+            'total_imoveis': clean['metadata'].get('total_imoveis'),
+            'campos_preenchidos': clean['metadata'].get('campos_preenchidos'),
+            'campos_faltantes': clean['metadata'].get('campos_faltantes', [])
+        }
+        clean['metadata'] = metadata_clean
+
+    return clean
+
+
 def run_mapping(caso_id: str, verbose: bool = False, output_format: str = 'json') -> Dict[str, Any]:
     """
     Executa o mapeamento completo de um caso.
@@ -1543,10 +1596,16 @@ def run_mapping(caso_id: str, verbose: bool = False, output_format: str = 'json'
     # Cria diretorio de saida
     MAPPED_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Salva resultado
+    # Salva resultado COMPLETO (com fontes)
     output_path = MAPPED_DIR / f"{caso_id}.json"
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(resultado, f, ensure_ascii=False, indent=2)
+
+    # Gera e salva versao LIMPA (sem fontes)
+    resultado_limpo = remove_sources_from_result(resultado)
+    output_path_clean = MAPPED_DIR / f"{caso_id}_clean.json"
+    with open(output_path_clean, 'w', encoding='utf-8') as f:
+        json.dump(resultado_limpo, f, ensure_ascii=False, indent=2)
 
     # Imprime resumo
     logger.info("=" * 60)
@@ -1557,7 +1616,8 @@ def run_mapping(caso_id: str, verbose: bool = False, output_format: str = 'json'
     logger.info(f"  Imoveis encontrados: {resultado['metadata']['total_imoveis']}")
     logger.info(f"  Campos preenchidos: {resultado['metadata']['campos_preenchidos']}")
     logger.info(f"  Campos faltantes: {len(resultado['metadata']['campos_faltantes'])}")
-    logger.info(f"  Saida: {output_path}")
+    logger.info(f"  Saida completa: {output_path}")
+    logger.info(f"  Saida limpa: {output_path_clean}")
     logger.info("=" * 60)
 
     # Resumo detalhado

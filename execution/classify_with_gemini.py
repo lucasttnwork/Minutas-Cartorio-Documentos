@@ -34,12 +34,15 @@ sys.path.insert(0, str(ROOT_DIR))
 # Bibliotecas externas
 try:
     from dotenv import load_dotenv
-    import google.generativeai as genai
+    from google import genai
+    from google.genai import types
     from PIL import Image
     import fitz  # PyMuPDF
+    import io
+    import base64
 except ImportError as e:
     print(f"Erro: Biblioteca não encontrada - {e}")
-    print("Instale as dependências: pip install python-dotenv google-generativeai Pillow PyMuPDF")
+    print("Instale as dependências: pip install python-dotenv google-genai Pillow PyMuPDF")
     sys.exit(1)
 
 # Configuração de logging
@@ -51,7 +54,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Constantes
-RATE_LIMIT_DELAY = 6  # 10 requests por minuto = 1 a cada 6 segundos
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3-flash-preview")  # Modelo Gemini configurado via .env
+GEMINI_MODEL_FALLBACK = os.getenv("GEMINI_MODEL_FALLBACK", "gemini-2.5-flash")  # Fallback configurado via .env
+RATE_LIMIT_DELAY = 4  # 15 requests por minuto = 1 a cada 4 segundos
 MAX_RETRIES = 3
 SAVE_PROGRESS_INTERVAL = 5  # Salvar a cada N arquivos
 SUPPORTED_IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'}
@@ -59,7 +64,7 @@ SUPPORTED_PDF_EXTENSION = '.pdf'
 SUPPORTED_DOCX_EXTENSIONS = {'.docx', '.doc'}
 
 # Constantes para processamento paralelo
-PARALLEL_WORKERS = 6  # Numero de workers para preparacao paralela
+PARALLEL_WORKERS = 10  # Numero de workers para preparacao paralela
 PARALLEL_BATCH_SIZE = 10  # Tamanho do lote de preparacao
 
 
@@ -302,26 +307,50 @@ def load_environment():
     return api_key
 
 
-def configure_gemini(api_key: str, mock_mode: bool = False):
-    """Configura o cliente Gemini"""
+def configure_gemini(api_key: str, mock_mode: bool = False) -> Optional[genai.Client]:
+    """
+    Configura o cliente Gemini usando o novo SDK google.genai.
+
+    Args:
+        api_key: Chave da API
+        mock_mode: Se True, retorna None (modo mock)
+
+    Returns:
+        Cliente Gemini configurado ou None em modo mock
+    """
     if mock_mode:
         logger.info("Modo MOCK ativado - não será feita conexão com a API")
         return None
 
-    genai.configure(api_key=api_key)
+    # Novo SDK usa Client centralizado
+    client = genai.Client(api_key=api_key)
+    logger.info(f"Modelo configurado: {GEMINI_MODEL}")
+    return client
 
-    # Tenta usar gemini-2.0-flash-exp, fallback para gemini-1.5-flash
-    model_names = ["gemini-2.0-flash-exp", "gemini-2.0-flash", "gemini-1.5-flash"]
 
-    for model_name in model_names:
-        try:
-            model = genai.GenerativeModel(model_name)
-            logger.info(f"Modelo configurado: {model_name}")
-            return model
-        except Exception as e:
-            logger.warning(f"Modelo {model_name} não disponível: {e}")
+def pil_image_to_part(image: Image.Image) -> types.Part:
+    """
+    Converte uma imagem PIL para Part do novo SDK google.genai.
 
-    raise RuntimeError("Nenhum modelo Gemini disponível")
+    Args:
+        image: Imagem PIL
+
+    Returns:
+        Part com dados da imagem em base64
+    """
+    # Converte para JPEG em memoria
+    buffer = io.BytesIO()
+    image.save(buffer, format='JPEG', quality=85)
+    buffer.seek(0)
+
+    # Codifica em base64
+    image_bytes = buffer.getvalue()
+
+    # Cria Part com inline_data
+    return types.Part.from_bytes(
+        data=image_bytes,
+        mime_type='image/jpeg'
+    )
 
 
 def extract_first_page_from_pdf(pdf_path: Path) -> Optional[Image.Image]:
@@ -792,8 +821,14 @@ def classify_document(model, file_info: dict, mock_mode: bool = False, caso_id: 
     # Retry com backoff exponencial
     for attempt in range(MAX_RETRIES):
         try:
-            # Envia para o Gemini
-            response = model.generate_content([CLASSIFICATION_PROMPT, image])
+            # Converte imagem para Part do novo SDK
+            image_part = pil_image_to_part(image)
+
+            # Envia para o Gemini usando novo SDK
+            response = model.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=[CLASSIFICATION_PROMPT, image_part]
+            )
 
             # Parse da resposta
             result = parse_gemini_response(response.text)
@@ -1042,8 +1077,14 @@ def classify_prepared_document(
     # Retry com backoff exponencial
     for attempt in range(MAX_RETRIES):
         try:
-            # Envia para o Gemini
-            response = model.generate_content([CLASSIFICATION_PROMPT, prepared.image])
+            # Converte imagem para Part do novo SDK
+            image_part = pil_image_to_part(prepared.image)
+
+            # Envia para o Gemini usando novo SDK
+            response = model.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=[CLASSIFICATION_PROMPT, image_part]
+            )
 
             # Parse da resposta
             result = parse_gemini_response(response.text)
@@ -1126,7 +1167,7 @@ def run_classification_parallel(
     if not mock_mode:
         api_key = load_environment()
         model = configure_gemini(api_key, mock_mode)
-        model_name = "gemini-2.0-flash-exp"
+        model_name = GEMINI_MODEL
     else:
         model = None
         model_name = "mock"
@@ -1559,7 +1600,7 @@ def run_classification(
     if not mock_mode:
         api_key = load_environment()
         model = configure_gemini(api_key, mock_mode)
-        model_name = "gemini-2.0-flash-exp"
+        model_name = GEMINI_MODEL
     else:
         model = None
         model_name = "mock"

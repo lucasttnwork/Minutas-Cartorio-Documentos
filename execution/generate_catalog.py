@@ -165,8 +165,7 @@ def fazer_join_arquivos(
                 "confianca": "N/A",
                 "pessoa_relacionada": None,
                 "observacao": "Classificacao pendente",
-                "papel_inferido": inferir_papel(arq.get("subpasta", ""), "PENDENTE"),
-                "status_ocr": "pendente"
+                "papel_inferido": inferir_papel(arq.get("subpasta", ""), "PENDENTE")
             }
             arquivos_para_revisao.append({
                 "id": arquivo_id,
@@ -186,8 +185,7 @@ def fazer_join_arquivos(
                 "papel_inferido": inferir_papel(
                     arq.get("subpasta", ""),
                     classificacao.get("tipo_documento", "ERRO")
-                ),
-                "status_ocr": "pendente"
+                )
             }
             arquivos_com_erro.append({
                 "id": arquivo_id,
@@ -211,8 +209,7 @@ def fazer_join_arquivos(
                 "confianca": confianca,
                 "pessoa_relacionada": classificacao.get("pessoa_relacionada"),
                 "observacao": classificacao.get("observacao", ""),
-                "papel_inferido": inferir_papel(arq.get("subpasta", ""), tipo_doc),
-                "status_ocr": "pendente"
+                "papel_inferido": inferir_papel(arq.get("subpasta", ""), tipo_doc)
             }
 
             # Verificar se precisa revisao (baixa confianca ou tipo desconhecido)
@@ -279,7 +276,7 @@ def contar_por_tipo(arquivos: List[Dict]) -> Dict[str, int]:
     """
     contagem = {}
     for arq in arquivos:
-        tipo = arq.get("tipo_documento", "DESCONHECIDO")
+        tipo = arq.get("tipo_documento") or "ERRO_CLASSIFICACAO"
         contagem[tipo] = contagem.get(tipo, 0) + 1
     return dict(sorted(contagem.items()))
 

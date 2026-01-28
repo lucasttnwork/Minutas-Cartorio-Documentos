@@ -91,7 +91,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Constantes
-GEMINI_MODEL = "gemini-3-flash-preview"  # Upgrade para Gemini 3 Flash
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3-flash-preview")  # Modelo Gemini configurado via .env
+GEMINI_MODEL_FALLBACK = os.getenv("GEMINI_MODEL_FALLBACK", "gemini-2.5-flash")  # Fallback configurado via .env
 PROMPTS_DIR = ROOT_DIR / 'execution' / 'prompts'
 TMP_DIR = ROOT_DIR / '.tmp'
 RATE_LIMIT_DELAY = 4  # Segundos entre requisicoes (15 RPM = 4s)
@@ -742,7 +743,7 @@ def call_gemini(
 
     # Envia para o Gemini usando o novo SDK
     # Tenta usar gemini-3-flash-preview com fallbacks
-    model_names = [GEMINI_MODEL, "gemini-2.5-flash", "gemini-2.0-flash"]
+    model_names = [GEMINI_MODEL, GEMINI_MODEL_FALLBACK, "gemini-2.0-flash"]
 
     last_error = None
     for model_name in model_names:
@@ -810,7 +811,7 @@ Analise o documento acima e forneca a resposta no formato solicitado."""
     )
 
     # Envia para o Gemini usando o novo SDK
-    model_names = [GEMINI_MODEL, "gemini-2.5-flash", "gemini-2.0-flash"]
+    model_names = [GEMINI_MODEL, GEMINI_MODEL_FALLBACK, "gemini-2.0-flash"]
 
     last_error = None
     for model_name in model_names:
@@ -1153,8 +1154,8 @@ def run_extraction(
     # Filtra arquivos
     arquivos = catalog.get('arquivos', [])
 
-    # Filtra apenas arquivos com OCR processado
-    arquivos = [a for a in arquivos if a.get('status_ocr') == 'processado']
+    # Filtra apenas arquivos classificados com sucesso (exclui erros de classificacao)
+    arquivos = [a for a in arquivos if a.get('tipo_documento') is not None]
 
     # Filtra por tipo se especificado
     if tipo_filtro:
@@ -1457,8 +1458,8 @@ def run_extraction_parallel(
     # Filtra arquivos
     arquivos = catalog.get('arquivos', [])
 
-    # Filtra apenas arquivos com OCR processado
-    arquivos = [a for a in arquivos if a.get('status_ocr') == 'processado']
+    # Filtra apenas arquivos classificados com sucesso (exclui erros de classificacao)
+    arquivos = [a for a in arquivos if a.get('tipo_documento') is not None]
 
     # Filtra por tipo se especificado
     if tipo_filtro:
