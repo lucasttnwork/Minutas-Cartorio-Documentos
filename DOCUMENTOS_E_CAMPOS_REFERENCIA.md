@@ -44,7 +44,7 @@ Os campos de dados estao organizados em **4 categorias principais**:
 | Codigo | Nome | Campos Principais |
 |--------|------|-------------------|
 | `RG` | Carteira de Identidade | Nome, CPF, RG, Orgao Emissor, Data Nascimento |
-| `CNH` | Carteira Nacional de Habilitacao | Nome, CPF, CNH, Data Nascimento |
+| `CNH` | Carteira Nacional de Habilitacao | Nome, CPF, RG (integrado), CNH, Data Nascimento |
 | `CPF` | Cadastro de Pessoa Fisica | Nome, CPF, Data Nascimento |
 | `CERTIDAO_NASCIMENTO` | Certidao de Nascimento | Nome, Data Nascimento |
 | `CERTIDAO_CASAMENTO` | Certidao de Casamento | Nome, Estado Civil, Regime de Bens, Data Casamento |
@@ -114,17 +114,38 @@ Os campos de dados estao organizados em **4 categorias principais**:
 
 ### 3.2 CNH - Carteira Nacional de Habilitacao
 
-**Descricao:** Documento que autoriza o condutor a dirigir veiculos automotores.
+**Descricao:** Documento que autoriza o condutor a dirigir veiculos automotores. Serve tambem como documento de identificacao valido em todo territorio nacional, contendo o RG integrado.
+
+**Caracteristicas Visuais:**
+- Formato cartao (modelo atual) ou papel dobrado (modelo antigo)
+- Foto 3x4 do condutor
+- Brasao da Republica Federativa do Brasil
+- Dados de identificacao pessoal e do RG integrado
+- Numero de registro da CNH (11 digitos)
+- Categoria de habilitacao (A, B, AB, C, D, E)
+- Data de validade e 1a habilitacao
+- QR Code no verso para validacao
 
 **Campos Extraiveis:**
 
-| Campo | Categoria | Exemplo |
+| Campo | Categoria | Exemplo (baseado em documento real) |
 |-------|-----------|---------|
-| NOME | Pessoa Natural | JOAO CARLOS MENDES |
-| CPF | Pessoa Natural | 987.654.321-00 |
-| CNH | Pessoa Natural | 04567891234 |
+| NOME | Pessoa Natural | FERNANDO FAEDO DA SILVA |
+| CPF | Pessoa Natural | 325.593.198-37 |
+| RG | Pessoa Natural | 30862491 |
+| ORGAO EMISSOR DO RG | Pessoa Natural | SSP |
+| ESTADO EMISSOR DO RG | Pessoa Natural | SP |
+| DATA DE NASCIMENTO | Pessoa Natural | 21/09/1984 |
+| CNH (No REGISTRO) | Pessoa Natural | 03547235790 |
 | ORGAO EMISSOR DA CNH | Pessoa Natural | DETRAN-SP |
-| DATA DE NASCIMENTO | Pessoa Natural | 12/08/1975 |
+
+**Observacoes Importantes:**
+- A CNH contem o RG integrado no campo "DOC. IDENTIDADE / ORG. EMISSOR / UF"
+- O numero de registro da CNH (No REGISTRO) e diferente do numero do RG
+- A CNH pode substituir o RG como documento de identificacao em escrituras
+- Campos como CATEGORIA, VALIDADE e 1a HABILITACAO nao fazem parte do mapeamento de campos uteis para minutas
+
+**Nao Confundir Com:** RG (formato diferente, nao tem categoria de habilitacao)
 
 ---
 
@@ -424,7 +445,33 @@ Pasta FC 515/
 
 ## 5. Exemplos Praticos de Extracao
 
-### 5.1 Extracao de RG
+### 5.1 Extracao de CNH
+
+**Input:** PDF da CNH de Fernando Faedo da Silva
+
+**Output (JSON):**
+
+```json
+{
+  "tipo_documento": "CNH",
+  "dados_extraidos": {
+    "pn_nome": "FERNANDO FAEDO DA SILVA",
+    "pn_cpf": "325.593.198-37",
+    "pn_rg": "30862491",
+    "pn_orgao_emissor_rg": "SSP",
+    "pn_estado_emissor_rg": "SP",
+    "pn_data_nascimento": "21/09/1984",
+    "pn_cnh": "03547235790",
+    "pn_orgao_emissor_cnh": "DETRAN-SP"
+  }
+}
+```
+
+> **Nota:** A CNH contem o RG integrado, portanto pode fornecer os campos de RG alem dos campos especificos da CNH.
+
+---
+
+### 5.2 Extracao de RG
 
 **Input:** Imagem do RG de Maria da Silva Santos
 
@@ -445,7 +492,7 @@ Pasta FC 515/
 }
 ```
 
-### 5.2 Extracao de Matricula de Imovel
+### 5.3 Extracao de Matricula de Imovel
 
 **Input:** PDF da Matricula 123.456
 
@@ -504,7 +551,7 @@ Pasta FC 515/
 }
 ```
 
-### 5.3 Extracao de CNDT (Pessoa Natural)
+### 5.4 Extracao de CNDT (Pessoa Natural)
 
 **Input:** PDF da CNDT de Maria
 
