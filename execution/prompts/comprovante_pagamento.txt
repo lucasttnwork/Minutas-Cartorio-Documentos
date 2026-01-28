@@ -2,7 +2,7 @@ Analise este comprovante de pagamento (recibo, transferencia, PIX, boleto, guia 
 
 ## REGRAS OBRIGATORIAS
 
-1. **CODIGO DE AUTENTICACAO**: Campo OBRIGATORIO - procurar em TODAS as paginas, especialmente pagina 2 e rodape. Exemplos: "AABC730D03463C802203182", "MBB35482864CEFF1715E6CA"
+1. **CODIGO DE AUTENTICACAO**: Campo OBRIGATORIO - procurar em TODAS as paginas, especialmente pagina 2 e rodape. Exemplos: "ABCD1234567890EXEMPLO01", "ABCD1234567890EXEMPLO02"
 2. **NUNCA INVENTAR DADOS**: Se ilegivel ou ausente, retorne null. Nao use "Nao Disponivel" - use null ou "Nao Informado no Documento"
 3. **PROCESSAR TODAS AS PAGINAS**: Documentos multi-pagina DEVEM ser lidos completamente. Procure dados em TODAS as paginas
 4. **TIPO LITERAL**: tipo_comprovante = texto EXATO do cabecalho (ex: "Comprovante do Pagamento", "Comprovante de Pagamento", nao simplifique para "Transferencia" ou "Boleto")
@@ -27,8 +27,8 @@ Analise os indicadores para classificar corretamente:
 - Se tem chave PIX = COMPROVANTE PIX
 
 TIPOS POSSIVEIS (use o texto EXATO do cabecalho quando possivel):
-- "Comprovante do Pagamento" (Santander)
-- "Comprovante de Pagamento" (outros bancos)
+- "Comprovante do Pagamento" (Banco Exemplo A)
+- "Comprovante de Pagamento" (Banco Exemplo B)
 - "Comprovante de Transferencia PIX"
 - "Comprovante de TED"
 - "Guia de Arrecadacao Municipal"
@@ -41,7 +41,7 @@ IMPORTANTE: Um BOLETO e um documento de COBRANCA. Um COMPROVANTE DE PAGAMENTO e 
 Para guias/tributos, identifique o tipo:
 1. Analise o NOME DO ARQUIVO (ex: "comprovante ITBI AP.jpg" indica ITBI)
 2. Analise o recebedor (PM = Prefeitura Municipal)
-3. Analise o valor (ITBI: R$ 5.000 - R$ 50.000; IPTU: R$ 500 - R$ 5.000)
+3. Analise o valor (ITBI: valores mais altos; IPTU: valores menores)
 4. Em contexto cartorial, valores altos para PM geralmente = ITBI
 
 TIPOS DE TRIBUTO: ITBI, IPTU, ISS, LAUDEMIO, TAXA_CARTORIO, CONTRIBUICAO_MELHORIA, OUTRO
@@ -97,52 +97,52 @@ Alertas sobre multiplos pagamentos, valores divergentes, datas proximas ao venci
   "metadados_documento": {
     "numero_paginas": 2,
     "total_pagamentos": 1,
-    "instituicao_emissora": "Santander"
+    "instituicao_emissora": "Banco Exemplo"
   },
 
   "tipo_comprovante": "Comprovante do Pagamento",
   "subtipo_cobranca": "Guia de Arrecadacao Municipal",
   "tipo_tributo": "ITBI",
   "confianca_tipo_tributo": "ALTA",
-  "justificativa_tipo_tributo": "Nome do arquivo menciona ITBI, recebedor e PM SAO PAULO",
+  "justificativa_tipo_tributo": "Nome do arquivo menciona ITBI, recebedor e PM CIDADE EXEMPLO",
 
-  "valor": 13817.21,
-  "valor_formatado": "R$ 13.817,21",
+  "valor": 10000.00,
+  "valor_formatado": "R$ 10.000,00",
   "moeda": "BRL",
 
   "datas": {
-    "transacao": "15/11/2023",
-    "pagamento_efetivo": "16/11/2023",
-    "vencimento": "16/11/2023"
+    "transacao": "DD/MM/AAAA",
+    "pagamento_efetivo": "DD/MM/AAAA",
+    "vencimento": "DD/MM/AAAA"
   },
-  "hora_transacao": "10:23:38",
+  "hora_transacao": "00:00:00",
   "status_pagamento": "SUCESSO",
   "canal_pagamento": "INTERNET_BANKING",
 
-  "codigo_autenticacao": "MBB35482864CEFF1715E6CA",
-  "codigo_transacao": "E9040088820231115132215705700434",
+  "codigo_autenticacao": "ABCD1234567890EXEMPLO01",
+  "codigo_transacao": "E00000000000000000000000000000000",
 
   "codigo_barras": {
-    "linha_digitavel_completa": "81890000138-4 17215701231-3 11659955114-6 44750079911-5",
-    "segmentos": ["81890000138-4", "17215701231-3", "11659955114-6", "44750079911-5"],
-    "codigo_identificacao": "818",
+    "linha_digitavel_completa": "00000000000-0 00000000000-0 00000000000-0 00000000000-0",
+    "segmentos": ["00000000000-0", "00000000000-0", "00000000000-0", "00000000000-0"],
+    "codigo_identificacao": "000",
     "tipo": "TRIBUTO_MUNICIPAL"
   },
 
-  "convenio_arrecadacao": "00336496000900003219",
+  "convenio_arrecadacao": "00000000000000000000",
 
   "pagador": {
-    "nome": "Marina Ayub",
-    "cpf_cnpj": "***.366.718-**",
-    "banco": "BCO SANTANDER (BRASIL) S.A.",
-    "agencia": "0986",
-    "conta": "1000260-0",
+    "nome": "FULANO DE TAL",
+    "cpf_cnpj": "***.000.000-**",
+    "banco": "BANCO EXEMPLO S.A.",
+    "agencia": "0000",
+    "conta": "00000-0",
     "observacao": null
   },
 
   "recebedor": {
-    "nome": "PM SAO PAULO",
-    "nome_completo": "Prefeitura Municipal de Sao Paulo",
+    "nome": "PM CIDADE EXEMPLO",
+    "nome_completo": "Prefeitura Municipal de Cidade Exemplo",
     "tipo_entidade": "PREFEITURA_MUNICIPAL",
     "cpf_cnpj": null,
     "chave_pix": null,
@@ -151,7 +151,7 @@ Alertas sobre multiplos pagamentos, valores divergentes, datas proximas ao venci
     "conta": null
   },
 
-  "descricao": "Pagamento de ITBI (Imposto de Transmissao de Bens Imoveis) para Prefeitura Municipal de Sao Paulo, no valor de R$ 13.817,21",
+  "descricao": "Pagamento de ITBI (Imposto de Transmissao de Bens Imoveis) para Prefeitura Municipal de Cidade Exemplo, no valor de R$ 10.000,00",
 
   "finalidade_cartorial": "Comprovante de pagamento de ITBI necessario para lavratura de escritura publica de compra e venda de imovel",
 
@@ -166,7 +166,7 @@ Alertas sobre multiplos pagamentos, valores divergentes, datas proximas ao venci
   },
 
   "observacoes": [
-    "Pagamento realizado com sucesso via Internet Banking Santander",
+    "Pagamento realizado com sucesso via Internet Banking Banco Exemplo",
     "Documento de 2 paginas - codigo de autenticacao na pagina 2"
   ]
 }
@@ -183,9 +183,9 @@ Se o documento contiver MAIS DE UM pagamento (comum em comprovantes de ITBI para
   "metadados_documento": {
     "numero_paginas": 2,
     "total_pagamentos": 2,
-    "instituicao_emissora": "Santander",
-    "valor_total": 18450.01,
-    "valor_total_formatado": "R$ 18.450,01"
+    "instituicao_emissora": "Banco Exemplo",
+    "valor_total": 15000.00,
+    "valor_total_formatado": "R$ 15.000,00"
   },
 
   "pagamentos": [
@@ -196,25 +196,25 @@ Se o documento contiver MAIS DE UM pagamento (comum em comprovantes de ITBI para
       "subtipo_cobranca": "Guia de Arrecadacao Municipal",
       "tipo_tributo": "ITBI",
       "objeto_tributo": "Apartamento",
-      "valor": 13817.21,
-      "valor_formatado": "R$ 13.817,21",
+      "valor": 10000.00,
+      "valor_formatado": "R$ 10.000,00",
       "datas": {
-        "transacao": "15/11/2023",
-        "pagamento_efetivo": "16/11/2023",
-        "vencimento": "16/11/2023"
+        "transacao": "DD/MM/AAAA",
+        "pagamento_efetivo": "DD/MM/AAAA",
+        "vencimento": "DD/MM/AAAA"
       },
-      "hora_transacao": "10:23:38",
-      "codigo_autenticacao": "MBB35482864CEFF1715E6CA",
+      "hora_transacao": "00:00:00",
+      "codigo_autenticacao": "ABCD1234567890EXEMPLO01",
       "codigo_barras": {
-        "linha_digitavel_completa": "81890000138-4 17215701231-3 11659955114-6 44750079911-5",
+        "linha_digitavel_completa": "00000000000-0 00000000000-0 00000000000-0 00000000000-0",
         "tipo": "TRIBUTO_MUNICIPAL"
       },
-      "convenio_arrecadacao": "00336496000900003219",
+      "convenio_arrecadacao": "00000000000000000000",
       "pagador": {
-        "banco": "Santander"
+        "banco": "Banco Exemplo"
       },
       "recebedor": {
-        "nome": "PM SAO PAULO",
+        "nome": "PM CIDADE EXEMPLO",
         "tipo_entidade": "PREFEITURA_MUNICIPAL"
       }
     },
@@ -225,25 +225,25 @@ Se o documento contiver MAIS DE UM pagamento (comum em comprovantes de ITBI para
       "subtipo_cobranca": "Guia de Arrecadacao Municipal",
       "tipo_tributo": "ITBI",
       "objeto_tributo": "Vaga de garagem",
-      "valor": 4632.80,
-      "valor_formatado": "R$ 4.632,80",
+      "valor": 5000.00,
+      "valor_formatado": "R$ 5.000,00",
       "datas": {
-        "transacao": "15/11/2023",
-        "pagamento_efetivo": "16/11/2023",
-        "vencimento": "16/11/2023"
+        "transacao": "DD/MM/AAAA",
+        "pagamento_efetivo": "DD/MM/AAAA",
+        "vencimento": "DD/MM/AAAA"
       },
-      "hora_transacao": "10:24:16",
-      "codigo_autenticacao": "MBB357D2F078204CF1206B5",
+      "hora_transacao": "00:00:00",
+      "codigo_autenticacao": "ABCD1234567890EXEMPLO02",
       "codigo_barras": {
-        "linha_digitavel_completa": "81860000046-3 32805701231-7 11659955114-6 45480079980-6",
+        "linha_digitavel_completa": "00000000000-0 00000000000-0 00000000000-0 00000000000-0",
         "tipo": "TRIBUTO_MUNICIPAL"
       },
-      "convenio_arrecadacao": "00336496000900003219",
+      "convenio_arrecadacao": "00000000000000000000",
       "pagador": {
-        "banco": "Santander"
+        "banco": "Banco Exemplo"
       },
       "recebedor": {
-        "nome": "PM SAO PAULO",
+        "nome": "PM CIDADE EXEMPLO",
         "tipo_entidade": "PREFEITURA_MUNICIPAL"
       }
     }
@@ -253,12 +253,12 @@ Se o documento contiver MAIS DE UM pagamento (comum em comprovantes de ITBI para
     "tipo_tributo": "ITBI",
     "descricao_tributo": "Imposto de Transmissao de Bens Imoveis",
     "contexto_negocio": "Transacao imobiliaria - Apartamento e vaga de garagem",
-    "beneficiario_unico": "PM SAO PAULO"
+    "beneficiario_unico": "PM CIDADE EXEMPLO"
   },
 
-  "descricao": "Pagamentos de ITBI (total R$ 18.450,01) referentes a apartamento (R$ 13.817,21) e vaga de garagem (R$ 4.632,80) para Prefeitura Municipal de Sao Paulo",
+  "descricao": "Pagamentos de ITBI (total R$ 15.000,00) referentes a apartamento (R$ 10.000,00) e vaga de garagem (R$ 5.000,00) para Prefeitura Municipal de Cidade Exemplo",
 
-  "explicacao_contextual": "Documento contem DOIS comprovantes de pagamento de ITBI a Prefeitura Municipal de Sao Paulo, totalizando R$ 18.450,01. Os pagamentos foram realizados em sequencia no dia 15/11/2023 via internet banking Santander, com vencimento para 16/11/2023. Pelo nome do arquivo ('ITBI AP E VAGA'), infere-se que os pagamentos referem-se a um apartamento (R$ 13.817,21) e uma vaga de garagem (R$ 4.632,80), em uma mesma transacao imobiliaria. Estes comprovantes sao documentos obrigatorios para apresentacao em cartorio de registro de imoveis como pre-requisito para lavratura de escritura de compra e venda, conforme exigencia legal de quitacao de ITBI antes do registro."
+  "explicacao_contextual": "Documento contem DOIS comprovantes de pagamento de ITBI a Prefeitura Municipal de Cidade Exemplo, totalizando R$ 15.000,00. Os pagamentos foram realizados em sequencia no dia DD/MM/AAAA via internet banking Banco Exemplo, com vencimento para DD/MM/AAAA. Pelo nome do arquivo ('ITBI AP E VAGA'), infere-se que os pagamentos referem-se a um apartamento (R$ 10.000,00) e uma vaga de garagem (R$ 5.000,00), em uma mesma transacao imobiliaria. Estes comprovantes sao documentos obrigatorios para apresentacao em cartorio de registro de imoveis como pre-requisito para lavratura de escritura de compra e venda, conforme exigencia legal de quitacao de ITBI antes do registro."
 }
 ```
 
@@ -294,13 +294,13 @@ Se o documento contiver MAIS DE UM pagamento (comum em comprovantes de ITBI para
 ## EXEMPLOS DE DESCRICOES CORRETAS VS INCORRETAS
 
 INCORRETO: "Pagamento de boleto bancario"
-CORRETO: "Pagamento de ITBI (Imposto de Transmissao de Bens Imoveis) para Prefeitura Municipal de Sao Paulo, no valor de R$ 13.817,21"
+CORRETO: "Pagamento de ITBI (Imposto de Transmissao de Bens Imoveis) para Prefeitura Municipal de Cidade Exemplo, no valor de R$ 10.000,00"
 
 INCORRETO: "Transferencia"
-CORRETO: "Comprovante do Pagamento de transferencia PIX para 2 Tabeliao De Notas, referente a custas cartorias"
+CORRETO: "Comprovante do Pagamento de transferencia PIX para Tabeliao De Notas Exemplo, referente a custas cartorias"
 
 INCORRETO: "#" ou vazio
-CORRETO: "Este documento comprova o pagamento de ITBI a Prefeitura Municipal de Sao Paulo em duas parcelas, totalizando R$ 18.450,01, referentes a um apartamento e uma vaga de garagem. Os pagamentos foram realizados em 15/11/2023 via internet banking Santander. Este comprovante e documento obrigatorio para apresentacao em cartorio como pre-requisito para lavrar escritura de compra e venda."
+CORRETO: "Este documento comprova o pagamento de ITBI a Prefeitura Municipal de Cidade Exemplo em duas parcelas, totalizando R$ 15.000,00, referentes a um apartamento e uma vaga de garagem. Os pagamentos foram realizados em DD/MM/AAAA via internet banking Banco Exemplo. Este comprovante e documento obrigatorio para apresentacao em cartorio como pre-requisito para lavrar escritura de compra e venda."
 
 ---
 
@@ -308,7 +308,7 @@ CORRETO: "Este documento comprova o pagamento de ITBI a Prefeitura Municipal de 
 
 Adicione alertas em "validacoes.alertas" quando:
 - Pagamento em atraso (data_pagamento > data_vencimento)
-- Valor muito alto (> R$ 100.000)
+- Valor muito alto (> R$ 0.000,00 - definir limite conforme contexto)
 - Datas inconsistentes (data_transacao > data_pagamento_efetivo)
 - codigo_autenticacao ausente (CRITICO)
 - Multiplos pagamentos detectados
@@ -341,7 +341,7 @@ O codigo de autenticacao pode estar em diferentes locais:
 SEMPRE procure em TODAS as paginas antes de retornar null.
 
 Exemplos de formatos de autenticacao:
-- Santander: "AABC730D03463C802203182", "MBB35482864CEFF1715E6CA"
-- Itau: combinacoes alfanumericas de 20-30 caracteres
-- Bradesco: similar ao Santander
-- PIX: codigo E2E (ex: "E9040088820231115132215705700434")
+- Banco Exemplo A: "ABCD1234567890EXEMPLO01", "ABCD1234567890EXEMPLO02"
+- Banco Exemplo B: combinacoes alfanumericas de 20-30 caracteres
+- Banco Exemplo C: similar ao Banco Exemplo A
+- PIX: codigo E2E (ex: "E00000000000000000000000000000000")

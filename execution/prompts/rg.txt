@@ -21,7 +21,7 @@ Voce e um especialista em extracao de dados de documentos de identidade brasilei
 
 ### Dados do Titular (OBRIGATORIOS)
 - **nome_completo**: Nome do TITULAR (dono do RG), NAO da autoridade emissora
-- **numero_rg**: Numero completo com digito verificador (ex: 35.540.462-X)
+- **numero_rg**: Numero completo com digito verificador (ex: 00.000.000-0)
 - **data_nascimento**: Formato DD/MM/AAAA
 - **naturalidade**: Preserve EXATAMENTE como esta no documento (ex: "S.PAULO - SP", nao expanda)
 - **filiacao**: Pai e mae separados
@@ -37,7 +37,7 @@ Voce e um especialista em extracao de dados de documentos de identidade brasilei
 
 ### Dados Adicionais (se presentes)
 - **cpf**: Formato XXX.XXX.XXX-XX (normalize se estiver com barra ou outro separador)
-- **documento_origem**: Referencia da certidao de nascimento (ex: "CN:LV.A133/FLS270/N80631")
+- **documento_origem**: Referencia da certidao de nascimento (ex: "CN:LV.A000/FLS000/N00000")
 - **titulo_eleitor**: Numero se presente
 - **cnh**: Numero se presente
 - **observacoes_legais**: Informacoes como "MAIOR DE 65 ANOS", deficiencias, etc
@@ -112,7 +112,7 @@ Extraia todos os campos no formato JSON especificado abaixo.
     "pai": "NOME DO PAI",
     "mae": "NOME DA MAE"
   },
-  "documento_origem": "CN:LV.A133/FLS270/N80631",
+  "documento_origem": "CN:LV.A000/FLS000/N00000",
   "documentos_complementares": {
     "titulo_eleitor": null,
     "cnh": null,
@@ -140,9 +140,9 @@ Extraia todos os campos no formato JSON especificado abaixo.
 
 ## VALIDACOES IMPORTANTES
 
-1. **NUMERO DO RG**: Pode ser numerico (35.540.462-X) ou alfanumerico (556D4169). Preserve formato exato.
+1. **NUMERO DO RG**: Pode ser numerico (00.000.000-0) ou alfanumerico (0000A0000). Preserve formato exato.
 
-2. **CPF**: Se estiver no formato 368366718/43, normalize para 368.366.718-43
+2. **CPF**: Se estiver no formato 000000000/00, normalize para 000.000.000-00
 
 3. **DATAS**: Sempre formato DD/MM/AAAA. Em RGs antigos, data_expedicao pode nao existir.
 

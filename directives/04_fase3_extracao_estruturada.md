@@ -2,13 +2,21 @@
 
 **Versao:** 3.0
 **Data:** 2026-01-27
-**Status:** EM PRODUCAO
+**Status:** COMPLETA - FUNCIONANDO
 **Modelo:** `gemini-3-flash-preview`
 **Dependencias:** Catalogo de documentos (Fase 1)
 
 ---
 
 ## Changelog
+
+### v3.1 (2026-01-27) - Correções de Processamento de Arquivos
+- **CORRIGIDO** processamento multipágina: nova função `extract_all_pages_from_pdf()`
+- **ADICIONADO** suporte DOCX: nova função `convert_docx_to_images()` via docx2pdf
+- Zoom adaptativo: 2.0 (≤10 páginas) / 1.5 (>10 páginas)
+- Qualidade JPEG adaptativa por megapixels totais
+- Teste validado: matrículas 4 páginas e escrituras DOCX 6 páginas
+- 37/39 documentos processados com sucesso (94.9%)
 
 ### v3.0 (2026-01-27) - Upgrade para Gemini 3 Flash + Melhorias Massivas
 
@@ -53,6 +61,19 @@
         v                        v                        v
    Arquivo PDF/IMG         Interpretacao            JSON + Markdown
    (Direto - sem OCR)      Contextual               Catalogado
+```
+
+**Processamento de Arquivos (v3.1):**
+```
++------------------+     +----------------------+     +------------------+
+|   Documento      | --> | Processamento        | --> | Imagem           |
+|   Original       |     | Inteligente          |     | Concatenada      |
++------------------+     +----------------------+     +------------------+
+        |                        |                        |
+        v                        v                        v
+   PDF multipágina          extract_all_pages()      1 imagem vertical
+   DOCX                    convert_docx_to_images()  (todas as páginas)
+   Imagem única            (passthrough)             Original
 ```
 
 **IMPORTANTE:** O OCR foi removido. Gemini 3 Flash processa diretamente:
@@ -225,7 +246,24 @@ O campo pessoa_relacionada deve conter APENAS o TITULAR do documento.
 
 ## 3. CONFIGURACAO DO GEMINI 3 FLASH
 
-### 3.1 Modelo e Parametros
+### 3.1 SDK Unificado
+
+**IMPORTANTE:** Migrado para o novo SDK `google.genai` (substituiu `google.generativeai`).
+
+```python
+# NOVO SDK (atual)
+from google import genai
+from google.genai import types
+
+client = genai.Client(api_key=API_KEY)
+response = client.models.generate_content(
+    model='gemini-3-flash-preview',
+    contents=[image_part, prompt],
+    config=types.GenerateContentConfig(temperature=0.1, max_output_tokens=16384)
+)
+```
+
+### 3.2 Modelo e Parametros
 
 | Parametro | Valor | Justificativa |
 |-----------|-------|---------------|
@@ -235,21 +273,21 @@ O campo pessoa_relacionada deve conter APENAS o TITULAR do documento.
 | **Thinking Level** | `medium` | Balanco qualidade/latencia |
 | **Media Resolution** | `high` | Melhor leitura de documentos |
 
-### 3.2 Fallback Chain
+### 3.3 Fallback Chain
 
 ```python
 MODEL_CHAIN = [
     "gemini-3-flash-preview",    # Preferido
     "gemini-2.5-flash",          # Fallback estavel
-    "gemini-2.0-flash-exp"       # Ultimo recurso
+    "gemini-2.0-flash"           # Ultimo recurso
 ]
 ```
 
-### 3.3 Rate Limiting
+### 3.4 Rate Limiting
 
 | Limite | Valor | Estrategia |
 |--------|-------|------------|
-| Requisicoes/minuto | 30 | Semaforo + delay 2s |
+| Requisicoes/minuto | 30 | Semaforo + delay 4s |
 | Tokens/minuto | 2.000.000 | Monitoramento |
 | Requisicoes/dia | 3.000 | Batch planning |
 
@@ -413,11 +451,11 @@ def validar_output(resultado):
 ### 7.1 Implementacao Imediata
 
 1. [x] Documentar novo modelo Gemini 3 Flash
-2. [ ] Atualizar script para usar `gemini-3-flash-preview`
-3. [ ] Remover dependencia de OCR
-4. [ ] Disparar subagentes Opus para melhorar cada prompt
-5. [ ] Testar com escritura FC_515_124_p280509
-6. [ ] Validar metricas atingem metas
+2. [x] Atualizar script para usar `gemini-3-flash-preview`
+3. [x] Remover dependencia de OCR
+4. [x] Disparar subagentes Opus para melhorar cada prompt
+5. [x] Testar com escritura FC_515_124_p280509
+6. [x] Validar metricas atingem metas
 
 ### 7.2 Subagentes para Melhoria de Prompts
 
@@ -429,19 +467,60 @@ Um subagente Opus sera disparado para CADA tipo de documento:
 
 ---
 
-## 8. REFERENCIAS
+## 8. FUNÇÕES DE PROCESSAMENTO DE ARQUIVOS (v3.1)
 
-### 8.1 APIs e Documentacao
+### 8.1 `extract_all_pages_from_pdf(pdf_path)`
+Extrai TODAS as páginas de um PDF e concatena verticalmente.
+
+**Parâmetros:**
+- `pdf_path`: Caminho para o arquivo PDF
+- `max_pages`: Limite de páginas (default: 50)
+
+**Comportamento:**
+- Zoom adaptativo: 2.0 para ≤10 páginas, 1.5 para >10 páginas
+- Margem de 5px entre páginas concatenadas
+- Qualidade JPEG: 95% (<20MP), 80% (20-50MP), 70% (>50MP)
+
+**Exemplo de saída:**
+- PDF 4 páginas → imagem 1190x6751 pixels (1.55MB)
+
+### 8.2 `convert_docx_to_images(docx_path)`
+Converte DOCX para imagem concatenada via PDF intermediário.
+
+**Pipeline:**
+1. DOCX → PDF (via docx2pdf)
+2. PDF → extract_all_pages_from_pdf()
+3. Retorna bytes JPEG + mime type
+
+**Exemplo de saída:**
+- DOCX 6 páginas → imagem 1224x9529 pixels (2.38MB)
+
+### 8.3 `load_original_file(file_path)`
+Carrega arquivo original e retorna bytes + mime type.
+
+**Tipos suportados:**
+| Extensão | Processamento |
+|----------|--------------|
+| .pdf | extract_all_pages_from_pdf() |
+| .docx | convert_docx_to_images() |
+| .jpg, .jpeg, .png | Leitura direta |
+| .tiff, .bmp | Conversão para JPEG |
+
+---
+
+## 9. REFERENCIAS
+
+### 9.1 APIs e Documentacao
 - Gemini 3 API: https://ai.google.dev/gemini-api/docs/gemini-3
 - Modelo: `gemini-3-flash-preview`
 - Context: 1M tokens
 
-### 8.2 Analises dos Subagentes
+### 9.2 Analises dos Subagentes
 - Diretorio: `.tmp/analise_subagentes/FC_515_124_p280509/`
 - Relatorio: `RELATORIO_CONSOLIDADO.json`
 - Total: 37 analises individuais
 
-### 8.3 Custos Gemini 3 Flash
+### 9.3 Custos Gemini 3 Flash
 
 | Metrica | Valor |
 |---------|-------|
@@ -450,6 +529,22 @@ Um subagente Opus sera disparado para CADA tipo de documento:
 | Documento medio | ~3K tokens in, ~2K tokens out |
 | Custo por documento | ~$0.008 |
 | Escritura (40 docs) | ~$0.32 |
+
+---
+
+## 10. ADENDO: DIRETIVAS DE PRODUÇÃO (FUTURO)
+
+> **NOTA PARA AGENTES FUTUROS**
+>
+> Esta diretiva foi escrita durante o DESENVOLVIMENTO da Fase 3, contendo
+> histórico de decisões, troubleshooting e detalhes técnicos de implementação.
+>
+> **Quando o sistema estiver em produção:**
+> - Criar diretiva simplificada focada em OPERAÇÃO
+> - Remover histórico de desenvolvimento e debugging
+> - Manter apenas instruções de uso e troubleshooting comum
+>
+> Esta diretiva deve ser mantida como REFERÊNCIA TÉCNICA para evolução futura.
 
 ---
 

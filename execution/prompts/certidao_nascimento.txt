@@ -59,13 +59,13 @@ Onde:
 - HHHHHHH (7 digitos): Numero do termo
 - II (2 digitos): Digito verificador
 
-EXEMPLO: 001883 01 55 1987 1 0003 050 0000533 31
-- Serventia: 001883
-- Ano: 1987
-- Tipo: Nascimento (1)
-- Livro: 0003
-- Folha: 050
-- Termo: 0000533
+EXEMPLO: SSSSSS AA 55 AAAA T LLLL FFF TTTTTTT VV
+- Serventia: SSSSSS (codigo de 6 digitos do cartorio)
+- Ano: AAAA (ano do registro, ex: 2020)
+- Tipo: T (1=Nascimento, 2=Casamento, 3=Obito)
+- Livro: LLLL (numero do livro, ex: 0001)
+- Folha: FFF (numero da folha, ex: 001)
+- Termo: TTTTTTT (numero do termo, ex: 0000001)
 
 ## TAREFAS OBRIGATORIAS
 
@@ -235,14 +235,14 @@ Se a imagem tiver qualidade muito baixa:
     "mae": null
   },
   "matricula": {
-    "numero_completo": "001883015519871000305000053331",
-    "codigo_serventia": "001883",
-    "ano": "1987",
+    "numero_completo": "SSSSSSAA55AAAA1LLLLFFFTTTTTTVV",
+    "codigo_serventia": "SSSSSS",
+    "ano": "AAAA",
     "tipo_livro": "1",
-    "livro": "0003",
-    "folha": "050",
-    "termo": "0000533",
-    "digito_verificador": "31"
+    "livro": "LLLL",
+    "folha": "FFF",
+    "termo": "TTTTTTT",
+    "digito_verificador": "VV"
   },
   "campos_legiveis": ["matricula", "ano_registro", "livro", "folha", "termo"],
   "campos_ilegiveis": ["nome_completo", "data_nascimento", "filiacao", "avos", "cartorio"],
@@ -254,7 +254,7 @@ Se a imagem tiver qualidade muito baixa:
 Explicacao contextual correspondente:
 "A imagem apresenta qualidade muito baixa devido a watermark intenso e texto embossado com contraste insuficiente. O padrao de seguranca do papel cria interferencia visual que impossibilita a leitura do texto principal.
 
-Consegui extrair com sucesso apenas os dados da etiqueta lateral: matricula completa (001883015519871000305000053331), da qual derivei codigo da serventia (001883), ano do registro (1987), tipo de livro (1 = Nascimento), numero do livro (0003), folha (050) e termo (0000533).
+Consegui extrair com sucesso apenas os dados da etiqueta lateral: matricula completa (formato SSSSSSAA55AAAA1LLLLFFFTTTTTTVV), da qual derivei codigo da serventia, ano do registro, tipo de livro (1 = Nascimento), numero do livro, folha e termo.
 
 Os seguintes campos estao ilegiveis devido ao watermark e baixo contraste: nome completo do registrado, data e hora de nascimento, local de nascimento, sexo, nomes dos pais, nomes dos avos, nome e endereco do cartorio. Todos estes campos foram retornados como null para evitar dados incorretos.
 

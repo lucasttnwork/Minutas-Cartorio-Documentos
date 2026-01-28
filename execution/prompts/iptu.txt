@@ -7,7 +7,7 @@ TAREFAS OBRIGATORIAS:
 
 REGRAS IMPORTANTES:
 - Se um campo nao existir no documento, use null (NAO use "Nao especificado" ou strings vazias)
-- Valores numericos devem ser numeros (ex: 1666.0), nao strings
+- Valores numericos devem ser numeros (ex: 100.0), nao strings
 - Datas devem estar no formato DD/MM/AAAA
 - CPF/CNPJ devem manter a formatacao original com pontuacao
 - Extraia TODOS os valores de m2 (terreno e construcao) - sao campos explicitos no documento
@@ -73,8 +73,8 @@ FORMATO DE SAIDA (use exatamente este formato):
     "endereco_completo": "R EXEMPLO, 123 - APTO 101 BL-A, Cidade - UF",
     "bairro": null,
     "cep": "00000-000",
-    "cidade": "Sao Paulo",
-    "estado": "SP",
+    "cidade": "Cidade",
+    "estado": "UF",
     "subdivisao_zona_urbana": "1a Subdivisao da Zona Urbana"
   },
   "endereco_notificacao": {
@@ -97,46 +97,46 @@ FORMATO DE SAIDA (use exatamente este formato):
     }
   ],
   "dados_terreno": {
-    "area_incorporada_m2": 1666.0,
-    "area_nao_incorporada_m2": 0.0,
-    "area_total_m2": 1666.0,
-    "testada_m": 32.50,
-    "fracao_ideal": 0.0089,
-    "fracao_ideal_formatado": "0,0089%"
+    "area_incorporada_m2": 0.00,
+    "area_nao_incorporada_m2": 0.00,
+    "area_total_m2": 0.00,
+    "testada_m": 0.00,
+    "fracao_ideal": 0.0000,
+    "fracao_ideal_formatado": "0,0000%"
   },
   "dados_construcao": {
-    "area_construida_m2": 112.0,
-    "area_ocupada_m2": 1332.0,
-    "ano_construcao_corrigido": 1974,
-    "padrao_construcao": "2-C",
+    "area_construida_m2": 0.00,
+    "area_ocupada_m2": 0.00,
+    "ano_construcao_corrigido": 0000,
+    "padrao_construcao": "0-X",
     "uso": "residencia",
     "tipo_imovel": "APARTAMENTO"
   },
   "valores_m2": {
-    "valor_m2_terreno": 4275.00,
-    "valor_m2_construcao": 3144.00,
+    "valor_m2_terreno": 0.00,
+    "valor_m2_construcao": 0.00,
     "moeda": "BRL"
   },
   "valores_venais": {
-    "ano_exercicio": 2023,
-    "valor_area_incorporada": 89818.00,
+    "ano_exercicio": 0000,
+    "valor_area_incorporada": 0.00,
     "valor_area_nao_incorporada": 0.00,
-    "valor_construcao": 144373.00,
-    "valor_venal_total": 234191.00,
-    "base_calculo_iptu": 234191.00
+    "valor_construcao": 0.00,
+    "valor_venal_total": 0.00,
+    "base_calculo_iptu": 0.00
   },
   "metadados_documento": {
-    "orgao_emissor": "PREFEITURA DE SAO PAULO - FAZENDA",
-    "titulo_documento": "Certidao de Dados Cadastrais do Imovel - IPTU 2023",
-    "data_emissao": "26/10/2023",
-    "numero_documento": "2.2023.022156977-1",
+    "orgao_emissor": "PREFEITURA MUNICIPAL - FAZENDA",
+    "titulo_documento": "Certidao de Dados Cadastrais do Imovel - IPTU",
+    "data_emissao": "DD/MM/AAAA",
+    "numero_documento": "0.0000.000000000-0",
     "solicitante_nome": "NOME DO SOLICITANTE",
     "solicitante_cpf": "000.000.000-00"
   },
   "validacao_documento": {
-    "portaria_expedicao": "Portaria SF no 008/2004, de 28/01/2004",
-    "url_autenticidade": "http://www.prefeitura.sp.gov.br/cidade/secretarias/financas/servicos/certidoes/",
-    "data_limite_verificacao": "24/01/2024",
+    "portaria_expedicao": "Portaria XX no 000/0000, de DD/MM/AAAA",
+    "url_autenticidade": "http://www.prefeitura.exemplo.gov.br/servicos/certidoes/",
+    "data_limite_verificacao": "DD/MM/AAAA",
     "meio_expedicao": "Internet"
   },
   "pessoa_relacionada": "NOME DO SOLICITANTE"

@@ -6,6 +6,7 @@ Analise este protocolo/comprovante do Operador Nacional do Registro (ONR/SAEC).
 2. **EXPLICACAO OBRIGATORIA**: O campo explicacao_contextual DEVE conter 3-5 paragrafos explicando o documento.
 3. **CAMPOS NULOS**: Preferimos null a dados fabricados. Na duvida, use null.
 4. **TIMESTAMP PRECISO**: Procure o timestamp mais preciso disponivel (pode estar em URLs ou parametros).
+5. **ACENTUACAO**: Mantenha acentuacao correta em portugues (protocolo, solicitacao, eletronico).
 
 ## CAMPOS CRITICOS A EXTRAIR
 
@@ -22,8 +23,8 @@ Campos opcionais (extrair se visiveis):
 ## DICA PARA TIMESTAMPS
 
 Em protocolos ONR/SAEC, ha frequentemente dois timestamps:
-1. Data/hora do cabecalho da pagina (ex: "14/11/2023, 13:17")
-2. Timestamp em URLs/parametros (ex: "VOID=14/11/2023 13:16:59")
+1. Data/hora do cabecalho da pagina (ex: "DD/MM/AAAA, HH:MM")
+2. Timestamp em URLs/parametros (ex: "VOID=DD/MM/AAAA HH:MM:SS")
 PRIORIZE o timestamp mais preciso (com segundos).
 
 ## TAREFAS OBRIGATORIAS
@@ -54,10 +55,10 @@ Paragrafo 5 (opcional): Informacoes de contato do suporte ONR, se disponiveis no
 ```json
 {
   "tipo_documento": "PROTOCOLO_ONR",
-  "numero_protocolo": "P23110224786D",
-  "data_protocolo": "14/11/2023",
-  "hora_protocolo": "13:16:59",
-  "timestamp_preciso": "14/11/2023 13:16:59",
+  "numero_protocolo": "P00000000000X",
+  "data_protocolo": "DD/MM/AAAA",
+  "hora_protocolo": "HH:MM:SS",
+  "timestamp_preciso": "DD/MM/AAAA HH:MM:SS",
   "tipo_solicitacao": "CERTIDAO DIGITAL",
   "status": "GERADO COM SUCESSO",
   "sistema_origem": {
@@ -77,12 +78,12 @@ Paragrafo 5 (opcional): Informacoes de contato do suporte ONR, se disponiveis no
   "valor_emolumentos": null,
   "codigo_verificacao": null,
   "informacoes_suporte": {
-    "telefone": "(11) 3195-2290",
-    "email": "servicedesk@onr.org.br",
-    "horario": "2a a 6a feira - das 9h as 16h30"
+    "telefone": "(00) 0000-0000",
+    "email": "exemplo@onr.org.br",
+    "horario": "Xa a Xa feira - das Xh as Xh"
   },
   "metadados_documento": {
-    "numero_paginas": 2,
+    "numero_paginas": 1,
     "paginas_com_conteudo": [1]
   }
 }

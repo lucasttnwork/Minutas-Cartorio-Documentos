@@ -6,6 +6,7 @@ Analise esta Certidao Negativa de Debitos Municipais / Certidao de Tributos Imob
 2. **EXPLICACAO OBRIGATORIA**: O campo explicacao_contextual DEVE conter 3-5 paragrafos explicando o documento.
 3. **CAMPOS NULOS**: Preferimos null a dados fabricados. Na duvida, use null.
 4. **ACENTUACAO**: Mantenha acentuacao correta em portugues (certidao, situacao, valida, Sao Paulo).
+5. **SEM DUPLICACAO**: Evite duplicar campos na reescrita (ex: CEP aparecer duas vezes).
 
 ## CAMPOS CRITICOS A EXTRAIR
 
@@ -45,7 +46,7 @@ Paragrafo 5 (opcional): Outras informacoes relevantes como base legal, condicoes
 {
   "tipo_certidao": "CND_MUNICIPAL",
   "nome_certidao_completo": "Certidao Conjunta de Debitos de Tributos Imobiliarios",
-  "orgao_emissor": "Prefeitura de Sao Paulo",
+  "orgao_emissor": "Prefeitura Municipal de Cidade",
   "secretaria_emissora": "Secretaria Municipal da Fazenda",
   "sql": "000.000.0000-0",
   "endereco_imovel": "Rua Exemplo, 123, Apto 101",
@@ -53,11 +54,11 @@ Paragrafo 5 (opcional): Outras informacoes relevantes como base legal, condicoes
   "contribuinte": "NOME DO CONTRIBUINTE",
   "cpf_cnpj_contribuinte": "000.000.000-00",
   "numero_certidao": "000000000-0000",
-  "data_liberacao": "01/01/2024",
-  "data_emissao": "05/01/2024",
-  "hora_emissao": "10:00:00",
+  "data_liberacao": "DD/MM/AAAA",
+  "data_emissao": "DD/MM/AAAA",
+  "hora_emissao": "HH:MM:SS",
   "fuso_horario": "hora e data de Brasilia",
-  "data_validade": "01/04/2024",
+  "data_validade": "DD/MM/AAAA",
   "status": "REGULAR",
   "tributos_cobertos": [
     "Imposto Predial e Territorial Urbano (IPTU)",
@@ -67,9 +68,9 @@ Paragrafo 5 (opcional): Outras informacoes relevantes como base legal, condicoes
     "Contribuicao de Melhoria"
   ],
   "debitos_pendentes": [],
-  "codigo_verificacao": "ABC123XYZ",
+  "codigo_verificacao": "ABCD1234567890",
   "urls_verificacao": [
-    "http://www.prefeitura.sp.gov.br/cidade/secretarias/fazenda/"
+    "http://www.prefeitura.cidade.gov.br/verificacao"
   ],
   "clausulas_legais": {
     "ressalva_fazenda": "Ressalvado o direito de a Fazenda Municipal cobrar...",
@@ -77,8 +78,8 @@ Paragrafo 5 (opcional): Outras informacoes relevantes como base legal, condicoes
     "clausula_invalidacao": "Qualquer rasura invalidara este documento"
   },
   "base_legal": [
-    "Portaria Conjunta SF/PGM n 4, de 12 de abril de 2017",
-    "Decreto 50.691, de 29 de junho de 2009"
+    "Portaria Municipal n XX, de DD de mes de AAAA",
+    "Decreto n XXXXX, de DD de mes de AAAA"
   ]
 }
 ```

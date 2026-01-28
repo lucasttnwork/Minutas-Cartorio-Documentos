@@ -1,13 +1,27 @@
 # Plano de Catalogacao e Extracao de Dados de Documentos
 
-**Versao:** 1.2
+**Versao:** 2.0
 **Data:** 2026-01-27
-**Status:** Fase 1 Completa - Iniciando Fase 2
-**Ultima Atualizacao:** Validacao completa da Fase 1 com 39 documentos (100% sucesso)
+**Status:** Fase 1 Completa - Fase 3 em Producao (OCR Deprecated)
+**Ultima Atualizacao:** Nova arquitetura com Gemini 3 Flash (sem OCR)
 
 ---
 
 ## Changelog
+
+### v2.1 (2026-01-27) - Correções Críticas de Processamento
+- **CORRIGIDO** processamento multipágina de PDFs - todas as páginas agora extraídas
+- **ADICIONADO** suporte a arquivos DOCX via conversão automática
+- Validação de qualidade com 37 subagentes (média 7.5/10)
+- 37/39 documentos extraídos com sucesso (94.9%)
+
+### v2.0 (2026-01-27) - Nova Arquitetura Gemini 3 Flash
+- **DEPRECATED** Fase 2 (OCR) - Gemini 3 Flash processa documentos diretamente
+- Migrado SDK de `google.generativeai` para `google.genai`
+- Fase 3 agora usa extração multimodal direta
+- Adicionada Fase 4 para mapeamento de campos finais
+- Prompts atualizados com exemplos genéricos (não específicos)
+- Implementadas regras anti-fabricação de dados
 
 ### v1.2 (2026-01-27) - Fase 1 Validada
 - Adicionados 2 novos tipos de documento: PROTOCOLO_ONR, ASSINATURA_DIGITAL
@@ -325,121 +339,126 @@ Responda APENAS em JSON valido.
 
 ---
 
-### FASE 2: OCR com Google Document AI - EM ANDAMENTO
-**Objetivo:** Extrair texto de cada documento.
+### FASE 2: OCR com Google Document AI - DEPRECATED
+**Status:** SUBSTITUÍDA pela extração direta com Gemini 3 Flash
 
-```
-ENTRADA: Arquivo (PDF/JPG/JPEG/PNG)
-SAIDA: Texto bruto + coordenadas (se disponivel)
-```
-
-**Tarefas:**
-- [ ] 2.1 Criar script `execution/ocr_document_ai.py`
-  - Configurar cliente Document AI
-  - Processar documento unico
-  - Retornar texto extraido
-  - Salvar resultado em `.tmp/ocr/{escritura_id}/{nome_arquivo}.txt`
-
-- [ ] 2.2 Criar script `execution/batch_ocr.py`
-  - Ler catalogo.json
-  - Processar todos arquivos pendentes
-  - Atualizar status no catalogo
-  - Implementar rate limiting e retry
-
-- [ ] 2.3 Estrutura de saida OCR
-  ```
-  .tmp/ocr/
-  ├── FC_515_124/
-  │   ├── RG_COMPRADORA.txt
-  │   ├── CNDT_ELIZETE.txt
-  │   └── ...
-  └── GS_357_11/
-      └── ...
-  ```
+> ⚠️ **Esta fase foi removida do pipeline.**
+>
+> O Gemini 3 Flash processa documentos (PDF/imagens) diretamente sem
+> necessidade de OCR intermediário. Veja `03_fase2_ocr_completa.md` para
+> documentação histórica.
 
 ---
 
-### FASE 3: Estruturacao de Dados
-**Objetivo:** Transformar texto bruto em dados estruturados por tipo de documento.
+### FASE 3: Extração Contextual com Gemini 3 Flash - COMPLETA
+**Objetivo:** Extrair dados estruturados diretamente de documentos visuais.
 
 ```
-ENTRADA: Texto OCR + Tipo de documento
-SAIDA: JSON com variaveis extraidas
+ENTRADA: Documento Original (PDF/imagem) + Tipo de documento (Fase 1)
+SAIDA: JSON estruturado + Explicação Contextual
 ```
 
-**Tarefas:**
-- [ ] 3.1 Criar templates de extracao por tipo de documento
-  - `execution/extractors/rg_extractor.py`
-  - `execution/extractors/cnh_extractor.py`
-  - `execution/extractors/cndt_extractor.py`
-  - `execution/extractors/matricula_extractor.py`
-  - `execution/extractors/itbi_extractor.py`
-  - (etc. para cada tipo)
+**Arquitetura:**
+```
++------------------+     +---------------------+     +------------------+
+|   Documento      | --> | Gemini 3 Flash      | --> | Saida            |
+|   Original       |     | (Prompt Espec.)     |     | Estruturada      |
++------------------+     +---------------------+     +------------------+
+        |                        |                        |
+        v                        v                        v
+   Arquivo PDF/IMG         Interpretacao            JSON + Markdown
+   (Direto - sem OCR)      Contextual               Catalogado
+```
 
-- [ ] 3.2 Implementar extratores usando regex + heuristicas
-  - Cada extrator conhece o layout tipico do documento
-  - Retorna JSON com campos encontrados + confianca
+**Implementação Completa (v2.1):**
+- [x] 3.1 Script `execution/extract_with_gemini.py` (SDK google.genai)
+- [x] 3.2 14 prompts especializados em `execution/prompts/`
+- [x] 3.3 Regras anti-fabricação de dados
+- [x] 3.4 Validação de valores financeiros (sinal + saldo = total)
+- [x] 3.5 Extração de códigos de autenticação
+- [x] 3.6 Cadeia dominial completa em matrículas
+- [x] 3.7 Processamento multipágina de PDFs (todas as páginas concatenadas)
+- [x] 3.8 Suporte a arquivos DOCX (conversão automática)
+- [x] 3.9 Zoom adaptativo (2.0 para ≤10 páginas, 1.5 para maiores)
+- [x] 3.10 Qualidade JPEG adaptativa por tamanho
+- [x] 3.11 Validação de qualidade com subagentes (7.5/10 média)
 
-- [ ] 3.3 Alternativa: Usar Gemini para extracao inteligente
-  - Script `execution/extract_with_gemini.py`
-  - Prompt template por tipo de documento
-  - Validacao de schema de saida
+**Resultados:**
+- 37/39 documentos extraídos com sucesso (94.9%)
+- Qualidade média: 7.5/10 (validada por 37 subagentes QA)
+- 2 falhas: documentos não-processáveis (custas/minuta internos)
 
-- [ ] 3.4 Salvar dados estruturados
-  ```
-  .tmp/structured/
-  ├── FC_515_124/
-  │   ├── RG_COMPRADORA.json
-  │   │   {
-  │   │     "tipo": "RG",
-  │   │     "nome": "FULANA DE TAL",
-  │   │     "rg": "00.000.000-0",
-  │   │     "orgao_emissor": "SSP",
-  │   │     "uf": "SP",
-  │   │     "data_emissao": "01/01/2020"
-  │   │   }
-  │   └── ...
-  ```
+**Saída:**
+```
+.tmp/contextual/
+├── FC_515_124_p280509/
+│   ├── 001_IPTU.json
+│   ├── 002_PROTOCOLO_ONR.json
+│   ├── ...
+│   └── relatorio_contextual.json
+```
+
+**Veja:** `04_fase3_extracao_estruturada.md` para detalhes completos.
 
 ---
 
-### FASE 4: Mapeamento para Campos da Minuta
-**Objetivo:** Relacionar dados extraidos com campos do sistema.
+### FASE 4: Mapeamento para Campos da Minuta - PLANEJADO
+**Objetivo:** Mapear dados extraídos (Fase 3) para os campos finais da minuta.
 
 ```
-ENTRADA: Dados estruturados de todos documentos
-SAIDA: Mapeamento documento -> campos preenchidos
+ENTRADA: JSONs estruturados da Fase 3 (.tmp/contextual/)
+SAIDA: Arquivos limpos com apenas campos mapeados para a minuta
 ```
+
+**Arquitetura:**
+```
++---------------------+     +------------------+     +------------------+
+| Dados Extraidos     | --> | Script de        | --> | Campos Finais    |
+| (Fase 3)            |     | Mapeamento       |     | Mapeados         |
++---------------------+     +------------------+     +------------------+
+        |                        |                        |
+        v                        v                        v
+   .tmp/contextual/        Guia-de-campos/           .tmp/mapped/
+   *.json                  *.md                      *.json
+```
+
+**Campos Alvo (180+ campos):**
+| Categoria | Campos | Arquivo de Referencia |
+|-----------|--------|----------------------|
+| Pessoa Natural | 39 | `Guia-de-campos-e-variaveis/campos-pessoa-natural.md` |
+| Pessoa Juridica | 76 | `Guia-de-campos-e-variaveis/campos-pessoa-juridica.md` |
+| Dados do Imovel | 33+ | `Guia-de-campos-e-variaveis/campos-dados-imovel.md` |
+| Negocio Juridico | 33+ | `Guia-de-campos-e-variaveis/campos-negocio-juridico.md` |
 
 **Tarefas:**
-- [ ] 4.1 Criar schema dos campos alvo
-  - `execution/schemas/pessoa_natural.json`
-  - `execution/schemas/pessoa_juridica.json`
-  - `execution/schemas/dados_imovel.json`
-  - `execution/schemas/negocio_juridico.json`
+- [ ] 4.1 Criar script `execution/map_to_fields.py`
+  - Ler JSONs da Fase 3
+  - Aplicar regras de mapeamento
+  - Resolver conflitos (prioridade por tipo de documento)
+  - Gerar arquivos finais mapeados
 
-- [ ] 4.2 Criar regras de mapeamento
-  - `execution/mapping_rules.py`
-  - Define qual campo de cada documento preenche qual campo da minuta
-  - Trata conflitos (mesmo campo em multiplos docs)
+- [ ] 4.2 Criar arquivo de regras de mapeamento
+  - `execution/mapping_rules.json`
+  - Define: documento.campo → minuta.campo
 
-- [ ] 4.3 Gerar relatorio de mapeamento por escritura
+- [ ] 4.3 Gerar relatório de mapeamento por escritura
   ```json
   {
-    "escritura_id": "FC 515 - 124",
-    "compradora": {
-      "nome": { "valor": "FULANA", "fonte": "RG.JPG", "confianca": 0.95 },
-      "cpf": { "valor": "000.000.000-00", "fonte": "COMPROMISSO.pdf", "confianca": 0.99 }
+    "escritura_id": "FC_515_124_p280509",
+    "pessoa_natural": {
+      "NOME": { "valor": "FULANO DE TAL", "fonte": "030_RG.json", "campo_origem": "dados_catalogados.nome_completo" },
+      "CPF": { "valor": "000.000.000-00", "fonte": "007_COMPROMISSO.json", "campo_origem": "dados_catalogados.compradores[0].cpf" }
     },
-    "vendedores": [...],
-    "imovel": {...},
-    "negocio": {...}
+    "dados_imovel": {...},
+    "negocio_juridico": {...},
+    "campos_faltantes": [...],
+    "campos_conflitantes": [...]
   }
   ```
 
-- [ ] 4.4 Criar documento de mapeamento (documento-campo)
-  - Para cada tipo de documento, listar quais campos ele pode preencher
-  - Gerar `directives/mapeamento_documento_campos.md`
+- [ ] 4.4 Criar diretiva `05_fase4_mapeamento_campos.md`
+
+**Veja:** `Guia-de-campos-e-variaveis/` para referência dos 180+ campos.
 
 ---
 
@@ -502,34 +521,39 @@ Minutas-Cartorio-Documentos/
 - [x] Validar classificacoes (100% sucesso)
 - [x] Documentar tipos de documentos encontrados
 
-### Sprint 2: OCR - EM ANDAMENTO
-- [ ] Validar credenciais Google Document AI
-- [ ] Criar `execution/ocr_document_ai.py` (documento unico)
-- [ ] Testar com 1 documento de cada tipo
-- [ ] Criar `execution/batch_ocr.py`
-- [ ] Processar todos documentos das 2 escrituras
-- [ ] Salvar outputs em `.tmp/ocr/`
+### Sprint 2: OCR - DEPRECATED
+> ⚠️ Esta sprint foi **SUBSTITUÍDA** pela Sprint 3 com Gemini 3 Flash direto.
+- [x] ~~Validar credenciais Google Document AI~~ (não mais necessário)
+- [x] ~~Criar `execution/ocr_document_ai.py`~~ (mantido apenas para referência)
+- [x] ~~Criar `execution/batch_ocr.py`~~ (mantido apenas para referência)
 
-### Sprint 3: Extracao Estruturada (Prioridade Media)
-- [ ] Analisar outputs OCR para identificar padroes
-- [ ] Criar extratores para documentos pessoais (RG, CNH, Certidoes)
-- [ ] Criar extratores para certidoes (CNDT, CND)
-- [ ] Criar extratores para docs do imovel (Matricula, ITBI)
-- [ ] Alternativa: Criar prompts Gemini para extracao
-- [ ] Processar todos documentos e gerar JSONs estruturados
+### Sprint 3: Extração com Gemini 3 Flash - COMPLETA
+- [x] Atualizar script para usar Gemini 3 Flash direto (sem OCR)
+- [x] Migrar SDK de `google.generativeai` para `google.genai`
+- [x] Criar 14 prompts especializados por tipo de documento
+- [x] Implementar regras anti-fabricação de dados
+- [x] Validação de valores financeiros (sinal + saldo = total)
+- [x] Exemplos genéricos em todos os prompts
+- [x] Testar com escritura FC_515_124_p280509
+- [x] Processar 37/39 documentos com sucesso (94.9%)
+- [x] Corrigir processamento multipágina de PDFs
+- [x] Adicionar suporte a arquivos DOCX
+- [x] Validação de qualidade com subagentes (7.5/10 média)
 
-### Sprint 4: Mapeamento (Prioridade Media)
-- [ ] Criar schemas JSON dos campos alvo
-- [ ] Definir regras de mapeamento documento -> campo
-- [ ] Gerar relatorio de mapeamento para cada escritura
-- [ ] Criar `directives/03_mapeamento_documento_campos.md`
-- [ ] Validar com dados reais
+### Sprint 4: Mapeamento para Campos da Minuta - PRÓXIMA
+- [ ] Criar script `execution/map_to_fields.py`
+- [ ] Criar arquivo de regras `execution/mapping_rules.json`
+- [ ] Mapear dados extraídos → campos da minuta (180+ campos)
+- [ ] Resolver conflitos (mesmo dado em múltiplos documentos)
+- [ ] Gerar relatório de mapeamento com campos faltantes
+- [ ] Criar `directives/05_fase4_mapeamento_campos.md`
 
-### Sprint 5: Refinamento (Prioridade Baixa)
-- [ ] Tratar casos especiais (documentos ruins, OCR com erros)
-- [ ] Implementar validacao de dados (CPF valido, datas consistentes)
-- [ ] Criar relatorio de campos faltantes
-- [ ] Documentar limitacoes e melhorias futuras
+### Sprint 5: Refinamento e Validação
+- [ ] Tratar casos especiais (documentos ruins, extração falha)
+- [ ] Implementar validação de dados (CPF válido, datas consistentes)
+- [ ] Criar relatório de campos faltantes por escritura
+- [ ] Testar com segunda escritura (GS 357 - 11)
+- [ ] Documentar limitações e melhorias futuras
 
 ---
 
@@ -601,11 +625,14 @@ Arquivo -> Gemini Vision -> Tipo identificado -> Catalogo
 
 ### 7.1 Bibliotecas Python
 ```
-google-cloud-documentai    # OCR na Fase 2
-google-generativeai        # Classificacao (Fase 1) e Extracao (Fase 3)
+google-genai               # Novo SDK unificado (Fase 1 e Fase 3)
 python-dotenv              # Carregar .env
 Pillow                     # Manipulacao de imagens
 PyMuPDF (fitz)             # Converter PDF para imagem
+
+# DEPRECATED (mantido para referência histórica):
+# google-cloud-documentai  # OCR na Fase 2 (não mais usado)
+# google-generativeai      # SDK antigo (substituído por google-genai)
 ```
 
 ### 7.2 Credenciais Necessarias
@@ -653,22 +680,33 @@ PyMuPDF (fitz)             # Converter PDF para imagem
 
 ## 10. PROXIMOS PASSOS
 
-### Fase 1 - CONCLUIDA
+### Fase 1 - CONCLUÍDA ✅
 1. ~~Revisar este plano~~
 2. ~~Criar estrutura de pastas~~
 3. ~~Implementar Fase 1~~
 4. ~~Validar com escritura real~~
 
-### Fase 2 - EM ANDAMENTO
-1. **Configurar Document AI** - Validar processador e credenciais
-2. **Implementar OCR** - Script para documento unico
-3. **Processar lote** - Todos os 39 documentos catalogados
-4. **Validar qualidade** - Verificar texto extraido vs documento original
+### Fase 2 - DEPRECATED ⚠️
+> Substituída pela extração direta com Gemini 3 Flash.
+
+### Fase 3 - COMPLETA ✅
+1. ~~Atualizar script para Gemini 3 Flash~~
+2. ~~Migrar para SDK google.genai~~
+3. ~~Criar 14 prompts especializados~~
+4. ~~Implementar regras anti-fabricação~~
+5. ~~Corrigir processamento multipágina de PDFs~~
+6. ~~Adicionar suporte a arquivos DOCX~~
+7. ~~Executar extração completa (37/39 documentos - 94.9%)~~
+8. ~~Validação de qualidade com subagentes (média 7.5/10)~~
+
+### Fase 4 - PRÓXIMA 🔜
+1. Criar script de mapeamento para campos da minuta
+2. Mapear dados extraídos → 180+ campos
+3. Gerar arquivos limpos com campos finais
 
 ### Futuro
-- Fase 3: Extracao estruturada
-- Fase 4: Mapeamento para campos da minuta
-- Fase 5: Integracao com sistema de minutas
+- Fase 5: Integração com sistema de minutas
+- Fase 6: Pipeline automatizado
 
 ---
 
@@ -706,6 +744,30 @@ Documentos que foram para revisao manual:
 2. **Deteccao de duplicatas** - Mesmo documento em formatos diferentes
 3. **OCR preventivo** - Fazer OCR durante classificacao para documentos suspeitos
 4. **Feedback loop** - Correcoes manuais melhoram prompts futuros
+
+---
+
+## 12. ADENDO: DIRETIVAS DE PRODUÇÃO (FUTURO)
+
+> **IMPORTANTE PARA AGENTES FUTUROS**
+>
+> Este documento e as demais diretivas do projeto foram escritas durante a fase de
+> DESENVOLVIMENTO, contendo detalhes técnicos, decisões de design, troubleshooting
+> e histórico que foram úteis para construir o sistema.
+>
+> **Quando todas as fases estiverem completas e funcionando:**
+> - Deverá ser criada uma nova diretiva (ou conjunto de diretivas) simplificada
+> - Foco em OPERAÇÃO/PRODUÇÃO, não em desenvolvimento
+> - Instruções claras de "como usar" sem o histórico de "como foi construído"
+> - Remoção de tokens desnecessários para agentes operacionais
+>
+> **Estrutura sugerida para diretivas de produção:**
+> - `PRODUCAO_01_como_processar_escritura.md` - Passo a passo operacional
+> - `PRODUCAO_02_resolucao_problemas.md` - Troubleshooting comum
+> - `PRODUCAO_03_manutencao.md` - Como atualizar prompts, adicionar tipos
+>
+> As diretivas atuais (01-04) devem ser mantidas como REFERÊNCIA TÉCNICA
+> para futuras evoluções do sistema.
 
 ---
 

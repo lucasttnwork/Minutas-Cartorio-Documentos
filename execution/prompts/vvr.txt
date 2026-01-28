@@ -5,7 +5,8 @@ Analise esta consulta de Valor Venal de Referencia (VVR) do imovel.
 1. **NUNCA INVENTAR DADOS**: Se um campo estiver ilegivel ou ausente, retorne null. NUNCA fabrique informacoes.
 2. **EXPLICACAO OBRIGATORIA**: O campo explicacao_contextual DEVE conter 3-5 paragrafos explicando o documento.
 3. **CAMPOS NULOS**: Preferimos null a dados fabricados. Na duvida, use null.
-4. **CONVERSAO MONETARIA**: Converta valores de "301.147,00" (formato brasileiro) para 301147.00 (float).
+4. **CONVERSAO MONETARIA**: Converta valores de "000.000,00" (formato brasileiro) para 000000.00 (float).
+5. **ACENTUACAO**: Mantenha acentuacao correta em portugues (imovel, referencia, calculo).
 
 ## CAMPOS CRITICOS A EXTRAIR
 
@@ -49,8 +50,8 @@ Paragrafo 5 (opcional): Outras informacoes relevantes sobre o sistema de consult
   "tipo_documento": "VVR",
   "sql": "000.000.0000.0",
   "endereco_completo": "Rua Exemplo, 00123 Apto 101 BL-A 00000-000",
-  "valor_venal_referencia": 500000.00,
-  "data_consulta": "01/01/2024",
+  "valor_venal_referencia": 0.00,
+  "data_consulta": "DD/MM/AAAA",
   "hora_consulta": "10:00",
   "orgao_emissor": "Secretaria Municipal da Fazenda (SF)",
   "url_sistema_origem": "https://itbi.prefeitura.sp.gov.br/valorreferencia/",
@@ -65,7 +66,7 @@ Paragrafo 5 (opcional): Outras informacoes relevantes sobre o sistema de consult
 
 ## NOTAS IMPORTANTES
 
-- O formato SQL pode variar: "039 080 0244 3" (entrada) vs "039.080.0244.3" (resultado) - use o formato com pontos
-- SEMPRE converta o valor monetario para float: "301.147,00" -> 301147.00
+- O formato SQL pode variar: "000 000 0000 0" (entrada) vs "000.000.0000.0" (resultado) - use o formato com pontos
+- SEMPRE converta o valor monetario para float: "000.000,00" -> 000000.00
 - Se o documento tiver paginas em branco, ignore-as mas documente na estrutura
 - Codigo de verificacao geralmente NAO existe em consultas VVR - use null

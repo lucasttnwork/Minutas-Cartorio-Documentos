@@ -1,9 +1,29 @@
-# Fase 2: OCR com Google Document AI - COMPLETA
+# Fase 2: OCR com Google Document AI - DEPRECATED
 
-**Versao:** 1.0
+**Versao:** 1.1
 **Data:** 2026-01-27
-**Status:** COMPLETA
-**Resultado:** 39 documentos processados, 93.36% confianca media, 0 erros
+**Status:** DEPRECATED (substituida por Gemini 3 Flash multimodal)
+**Resultado Historico:** 39 documentos processados, 93.36% confianca media, 0 erros
+
+---
+
+> ## ⚠️ AVISO: FASE DEPRECATED
+>
+> Esta fase foi **SUBSTITUÍDA** pela extração direta com Gemini 3 Flash.
+>
+> O Gemini 3 Flash processa documentos (PDF/imagens) diretamente sem necessidade
+> de OCR intermediário, resultando em:
+> - Menos etapas no pipeline
+> - Melhor compreensão contextual
+> - Extração de dados visuais (layouts, logos, carimbos)
+>
+> **Nova arquitetura:**
+> ```
+> Fase 1 → Fase 3 (direta)
+> Catálogo → Gemini 3 Flash → Dados Estruturados
+> ```
+>
+> **Veja:** `04_fase3_extracao_estruturada.md` para a nova implementação.
 
 ---
 

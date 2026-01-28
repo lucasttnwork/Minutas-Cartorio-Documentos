@@ -6,6 +6,7 @@ Analise este documento brasileiro.
 2. **EXPLICACAO OBRIGATORIA**: O campo explicacao_contextual DEVE conter 3-5 paragrafos explicando o documento.
 3. **CAMPOS NULOS**: Preferimos null a dados fabricados. Na duvida, use null.
 4. **IDENTIFICACAO DO TIPO**: Tente identificar o tipo especifico do documento para melhor catalogacao.
+5. **VALIDACAO**: Verifique se os dados extraidos fazem sentido no contexto do documento.
 
 ## TIPOS DE DOCUMENTOS CONHECIDOS
 
@@ -21,6 +22,7 @@ Se identificar um destes tipos, mencione na explicacao:
 - **PROCURACAO**: Procuracao Publica ou Particular
 - **CONTRATO**: Contrato de Compra e Venda, Locacao, etc.
 - **ESCRITURA**: Escritura Publica
+- **COMPROMISSO_COMPRA_VENDA**: Compromisso de Compra e Venda
 
 ## TAREFAS OBRIGATORIAS
 
@@ -55,27 +57,38 @@ Paragrafo 5 (opcional): Informacoes ADICIONAIS que possam ser uteis para o usuar
   "data_emissao": "DD/MM/AAAA",
   "hora_emissao": "HH:MM:SS",
   "data_validade": null,
-  "pessoas_mencionadas": [
+  "explicacao_contextual": "OBRIGATORIO: 3-5 paragrafos explicando o documento, sua finalidade, partes envolvidas e informacoes relevantes",
+  "partes": [
     {
+      "tipo": "OUTORGANTE/OUTORGADO/COMPRADOR/VENDEDOR/etc",
       "nome": "NOME COMPLETO DA PESSOA",
       "cpf": "000.000.000-00",
       "cnpj": null,
-      "papel": "descricao do papel no documento (ex: outorgante, outorgado, comprador, vendedor)"
+      "rg": "00.000.000-0 SSP/UF",
+      "estado_civil": null,
+      "endereco": null,
+      "papel_no_documento": "descricao do papel"
     }
   ],
   "imovel": {
     "endereco": "Endereco completo se mencionado",
     "matricula": "Numero da matricula se mencionado",
     "cartorio": "Nome do cartorio se mencionado",
-    "sql": "Numero de cadastro municipal se mencionado"
+    "sql": "Numero de cadastro municipal se mencionado",
+    "area_m2": null,
+    "descricao": null
   },
-  "valores_monetarios": [
-    {
-      "descricao": "Descricao do valor",
-      "valor": 0.00,
-      "moeda": "BRL"
-    }
-  ],
+  "valores": {
+    "valor_principal": null,
+    "moeda": "BRL",
+    "forma_pagamento": null,
+    "valores_adicionais": [
+      {
+        "descricao": "Descricao do valor",
+        "valor": 0.00
+      }
+    ]
+  },
   "datas_importantes": [
     {
       "descricao": "Descricao da data",
@@ -103,3 +116,4 @@ Paragrafo 5 (opcional): Informacoes ADICIONAIS que possam ser uteis para o usuar
 - Valores monetarios devem ser convertidos para float (300.000,00 -> 300000.00)
 - Datas devem manter o formato brasileiro DD/MM/AAAA
 - Use o campo "observacoes" para informacoes que nao se encaixam em outros campos
+- O campo "explicacao_contextual" e OBRIGATORIO e deve ter no minimo 3 paragrafos

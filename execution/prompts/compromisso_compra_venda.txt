@@ -36,7 +36,7 @@ ANTES de qualquer extracao, identifique o tipo exato:
 
 ### 1.2 Data do Contrato
 - Procure ao FINAL do documento, antes das assinaturas
-- Formato comum: "Sao Paulo, 10 de outubro de 2023"
+- Formato comum: "Sao Paulo, DD de mes de AAAA"
 - Esta data e ESSENCIAL para calcular todos os prazos contratuais
 - Se nao encontrar data explicita, busque por timestamps de assinatura digital
 
@@ -72,10 +72,10 @@ Se nao bater, revise os valores extraidos!
 ```json
 {
   "valores_financeiros": {
-    "preco_total": 615000.00,
-    "sinal_entrada": 36900.00,
-    "saldo": 578100.00,
-    "sinal_percentual_calculado": 6.0,
+    "preco_total": 500000.00,
+    "sinal_entrada": 50000.00,
+    "saldo": 450000.00,
+    "sinal_percentual_calculado": 10.0,
     "validacao_valores_ok": true
   }
 }
@@ -106,9 +106,9 @@ Quando o documento mencionar dados bancarios, extraia:
 ```json
 {
   "dados_bancarios": {
-    "banco": "Santander",
-    "agencia": "0167",
-    "conta_corrente": "010296387",
+    "banco": "Nome do Banco",
+    "agencia": "0000",
+    "conta_corrente": "000000000",
     "tipo_conta": "corrente",
     "titular": "Nome do Titular",
     "pix": "chave PIX se houver"
@@ -121,9 +121,9 @@ Se houver plataforma ou imobiliaria intermediando:
 ```json
 {
   "intermediador": {
-    "nome": "QuintoAndar",
-    "razao_social": "GRPQA Ltda",
-    "cnpj": "16.788.643/0001-81",
+    "nome": "Nome da Plataforma/Imobiliaria",
+    "razao_social": "Razao Social Ltda",
+    "cnpj": "00.000.000/0000-00",
     "tipo": "plataforma_digital"
   }
 }
@@ -140,17 +140,17 @@ Varredura completa por TODAS as matriculas mencionadas:
 {
   "matriculas": [
     {
-      "numero": "46511",
+      "numero": "00000",
       "tipo_unidade": "apartamento",
-      "cartorio": "1o Oficial de Registro de Imoveis de Sao Paulo",
-      "cidade_cartorio": "Sao Paulo",
+      "cartorio": "1o Oficial de Registro de Imoveis",
+      "cidade_cartorio": "Cidade",
       "status": "principal"
     },
     {
-      "numero": "84897",
+      "numero": "00001",
       "tipo_unidade": "vaga_garagem",
-      "cartorio": "3o Oficial de Registro de Imoveis de Sao Paulo",
-      "cidade_cartorio": "Sao Paulo",
+      "cartorio": "1o Oficial de Registro de Imoveis",
+      "cidade_cartorio": "Cidade",
       "status": "adicional_por_aditivo"
     }
   ]
@@ -164,10 +164,10 @@ Diferencie SEMPRE:
 ```json
 {
   "areas": {
-    "area_privativa_m2": 70.83,
-    "area_comum_m2": 12.66,
-    "area_total_m2": 83.49,
-    "fracao_ideal_terreno": "0,65228%"
+    "area_privativa_m2": 70.00,
+    "area_comum_m2": 10.00,
+    "area_total_m2": 80.00,
+    "fracao_ideal_terreno": "0,50000%"
   }
 }
 ```
@@ -216,7 +216,7 @@ Capture condicoes como "desde que", "apos", "condicionado a":
 {
   "penalidades": {
     "multa_rescisoria_percentual": 10.0,
-    "multa_rescisoria_valor_calculado": 61500.00,
+    "multa_rescisoria_valor_calculado": 50000.00,
     "multa_moratoria_percentual_dia": 0.1,
     "juros_mora_percentual_mes": 1.0
   }
@@ -271,9 +271,9 @@ ESTAS CLAUSULAS SE SOBREPOEM aos termos gerais do contrato!
     "debitos_anteriores": "vendedor",
     "comissao_corretagem": {
       "percentual": 6.0,
-      "valor": 36900.00,
+      "valor": 30000.00,
       "responsavel": "vendedor",
-      "beneficiario": "QuintoAndar"
+      "beneficiario": "Nome da Imobiliaria/Plataforma"
     }
   }
 }
@@ -289,10 +289,10 @@ Identifique: DocuSign, ClickSign, D4Sign, Adobe Sign
 ```json
 {
   "assinatura_digital": {
-    "plataforma": "DocuSign",
-    "envelope_id": "BBD017A3-24AB-414E-8D29-269736F25BD7",
+    "plataforma": "Nome da Plataforma",
+    "envelope_id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
     "status": "completo",
-    "data_assinatura": "10/10/2023"
+    "data_assinatura": "DD/MM/AAAA"
   }
 }
 ```
@@ -322,11 +322,11 @@ Se o documento for um ADITIVO, inclua:
   "numero_aditivo": 1,
   "documento_referenciado": {
     "tipo": "COMPROMISSO_COMPRA_VENDA",
-    "envelope_id": "bbd017a3-24ab-414c-8d29-26973bf25bd7",
-    "data": "12/10/2023",
-    "imovel_id": "894066473"
+    "envelope_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "data": "DD/MM/AAAA",
+    "imovel_id": "000000000"
   },
-  "motivo_aditivo": "Inclusao de matricula adicional de vaga de garagem"
+  "motivo_aditivo": "Descricao do motivo do aditivo"
 }
 ```
 
@@ -408,8 +408,8 @@ Descreva quaisquer condicoes especificas ou clausulas particulares.
 {
   "tipo_documento": "COMPROMISSO_COMPRA_VENDA",
   "eh_aditivo": false,
-  "data_contrato": "2023-10-10",
-  "local_assinatura": "Sao Paulo",
+  "data_contrato": "AAAA-MM-DD",
+  "local_assinatura": "Cidade",
 
   "vendedores": [
     {
@@ -466,7 +466,7 @@ Descreva quaisquer condicoes especificas ou clausulas particulares.
         "numero": "00000",
         "tipo_unidade": "apartamento",
         "cartorio": "1o Oficial de Registro de Imoveis",
-        "cidade_cartorio": "Sao Paulo",
+        "cidade_cartorio": "Cidade",
         "status": "principal"
       }
     ],
@@ -528,10 +528,10 @@ Descreva quaisquer condicoes especificas ou clausulas particulares.
   ],
 
   "assinatura_digital": {
-    "plataforma": "DocuSign",
+    "plataforma": "Nome da Plataforma",
     "envelope_id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
     "status": "completo",
-    "data_assinatura": "2023-10-10"
+    "data_assinatura": "AAAA-MM-DD"
   },
 
   "testemunhas": [
@@ -541,7 +541,7 @@ Descreva quaisquer condicoes especificas ou clausulas particulares.
     }
   ],
 
-  "foro_eleito": "Comarca de Sao Paulo",
+  "foro_eleito": "Comarca de Cidade",
 
   "instrucoes_importantes": [
     "Conferir dados bancarios antes do pagamento",
