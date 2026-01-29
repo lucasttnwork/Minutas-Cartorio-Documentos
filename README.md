@@ -11,10 +11,14 @@ Sistema de catalogacao e extracao de dados de documentos para escrituras de comp
 - `Test-Docs/`: Documentos de teste para validacao do sistema.
 - `Guia-de-campos-e-variaveis/`: Referencia dos 180+ campos de minutas.
 - `documentacao/`: Documentacao tecnica detalhada do sistema.
+- `BENCHMARK/`: Escrituras de referencia para validacao do pipeline (ver secao abaixo).
+- `Minutas-Padrao/`: Templates e padroes de minuta que definem o formato esperado de saida.
+- `output-final-minuta/`: Output final do pipeline para comparacao com benchmark.
 
 ## Diretrizes de Operacao
 
 O sistema opera atraves de uma arquitetura de 3 camadas:
+
 1. **Layer 1: Diretiva** (O que fazer) - `directives/`
 2. **Layer 2: Orquestracao** (Como coordenar) - Agente IA
 3. **Layer 3: Execucao** (Acao tecnica) - `execution/`
@@ -54,6 +58,7 @@ SAIDA: Dados estruturados prontos para preencher minuta (180+ campos)
 ## Pre-requisitos
 
 ### Ambiente Python
+
 ```bash
 # Verificar Python
 python --version  # Requer 3.8+
@@ -65,6 +70,7 @@ pip install -r execution/requirements.txt
 ### Configuracao de Credenciais
 
 Copie `.env.example` para `.env` e preencha:
+
 ```env
 GEMINI_API_KEY=[SUA_GEMINI_API_KEY]
 GEMINI_MODEL=gemini-3-flash-preview
@@ -127,14 +133,14 @@ python execution/classify_with_gemini.py FC_515_124_p280509 --limit 5
 
 **Flags disponiveis:**
 
-| Flag | Descricao | Default |
-|------|-----------|---------|
-| `--parallel` / `-p` | Modo paralelo otimizado | False |
-| `--api-workers N` | Workers para chamadas API | 5 |
-| `--batch-size N` | Imagens por request | 4 |
-| `--mock` / `-m` | Teste sem API | False |
-| `--limit N` | Processar apenas N arquivos | Todos |
-| `--verbose` / `-v` | Log detalhado | False |
+| Flag                | Descricao                   | Default |
+| ------------------- | --------------------------- | ------- |
+| `--parallel` / `-p` | Modo paralelo otimizado     | False   |
+| `--api-workers N`   | Workers para chamadas API   | 5       |
+| `--batch-size N`    | Imagens por request         | 4       |
+| `--mock` / `-m`     | Teste sem API               | False   |
+| `--limit N`         | Processar apenas N arquivos | Todos   |
+| `--verbose` / `-v`  | Log detalhado               | False   |
 
 #### Etapa 1.3: Geracao do Catalogo Final
 
@@ -165,16 +171,17 @@ python execution/extract_with_gemini.py FC_515_124_p280509 --limit 5 --verbose
 
 **Flags disponiveis:**
 
-| Flag | Descricao | Default |
-|------|-----------|---------|
-| `--parallel` / `-p` | Modo paralelo | False |
-| `--workers N` | Numero de workers | 5 |
-| `--rpm N` | Rate limit (req/min) | 150 |
-| `--type TIPO` | Filtrar por tipo | Todos |
-| `--limit N` | Limitar quantidade | Todos |
-| `--verbose` | Log detalhado | False |
+| Flag                | Descricao            | Default |
+| ------------------- | -------------------- | ------- |
+| `--parallel` / `-p` | Modo paralelo        | False   |
+| `--workers N`       | Numero de workers    | 5       |
+| `--rpm N`           | Rate limit (req/min) | 150     |
+| `--type TIPO`       | Filtrar por tipo     | Todos   |
+| `--limit N`         | Limitar quantidade   | Todos   |
+| `--verbose`         | Log detalhado        | False   |
 
 **Caracteristicas:**
+
 - Processa PDFs e imagens diretamente (sem OCR intermediario)
 - Usa prompts especializados por tipo de documento (20 prompts)
 - Selecao automatica de prompt compacto para matriculas grandes (>2MB)
@@ -197,6 +204,7 @@ python execution/map_to_fields.py FC_515_124_p280509 --verbose
 **Saida:** `.tmp/mapped/FC_515_124_p280509.json`
 
 **Estrutura da saida:**
+
 ```json
 {
   "metadata": {
@@ -214,6 +222,7 @@ python execution/map_to_fields.py FC_515_124_p280509 --verbose
 ```
 
 **Funcionalidades:**
+
 - Identifica automaticamente alienantes (vendedores) e adquirentes (compradores)
 - Resolve conflitos entre fontes usando sistema de prioridades
 - Consolida pessoas com CPFs divergentes (erros de OCR)
@@ -226,13 +235,13 @@ python execution/map_to_fields.py FC_515_124_p280509 --verbose
 
 O sistema reconhece **26 tipos** de documentos:
 
-| Categoria | Tipos |
-|-----------|-------|
-| **Pessoais (7)** | RG, CNH, CPF, CERTIDAO_NASCIMENTO, CERTIDAO_CASAMENTO, CERTIDAO_OBITO, COMPROVANTE_RESIDENCIA |
-| **Certidoes (7)** | CNDT, CND_FEDERAL, CND_ESTADUAL, CND_MUNICIPAL, CND_IMOVEL, CND_CONDOMINIO, CONTRATO_SOCIAL |
-| **Imovel (6)** | MATRICULA_IMOVEL, ITBI, VVR, IPTU, DADOS_CADASTRAIS, ESCRITURA |
-| **Negocio (3)** | COMPROMISSO_COMPRA_VENDA, PROCURACAO, COMPROVANTE_PAGAMENTO |
-| **Administrativos (3)** | PROTOCOLO_ONR, ASSINATURA_DIGITAL, OUTRO |
+| Categoria               | Tipos                                                                                         |
+| ----------------------- | --------------------------------------------------------------------------------------------- |
+| **Pessoais (7)**        | RG, CNH, CPF, CERTIDAO_NASCIMENTO, CERTIDAO_CASAMENTO, CERTIDAO_OBITO, COMPROVANTE_RESIDENCIA |
+| **Certidoes (7)**       | CNDT, CND_FEDERAL, CND_ESTADUAL, CND_MUNICIPAL, CND_IMOVEL, CND_CONDOMINIO, CONTRATO_SOCIAL   |
+| **Imovel (6)**          | MATRICULA_IMOVEL, ITBI, VVR, IPTU, DADOS_CADASTRAIS, ESCRITURA                                |
+| **Negocio (3)**         | COMPROMISSO_COMPRA_VENDA, PROCURACAO, COMPROVANTE_PAGAMENTO                                   |
+| **Administrativos (3)** | PROTOCOLO_ONR, ASSINATURA_DIGITAL, OUTRO                                                      |
 
 Para detalhes de cada tipo, consulte `directives/02_tipos_documentos.md`.
 
@@ -240,22 +249,22 @@ Para detalhes de cada tipo, consulte `directives/02_tipos_documentos.md`.
 
 ## Tempos de Processamento
 
-| Fase | Configuracao | Tempo (40 docs) |
-|------|--------------|-----------------|
-| 1.2 Classificacao | Paralelo + Batch | ~2.5 min |
-| 3 Extracao | 10 workers | ~4 min |
-| 4 Mapeamento | - | ~1 seg |
-| **TOTAL** | Otimizado | **~7 min** |
+| Fase              | Configuracao     | Tempo (40 docs) |
+| ----------------- | ---------------- | --------------- |
+| 1.2 Classificacao | Paralelo + Batch | ~2.5 min        |
+| 3 Extracao        | 10 workers       | ~4 min          |
+| 4 Mapeamento      | -                | ~1 seg          |
+| **TOTAL**         | Otimizado        | **~7 min**      |
 
 ---
 
 ## Status do Projeto
 
-| Fase | Status | Descricao |
-|------|--------|-----------|
-| Fase 1 | **COMPLETA** | Catalogacao e classificacao visual |
+| Fase   | Status       | Descricao                               |
+| ------ | ------------ | --------------------------------------- |
+| Fase 1 | **COMPLETA** | Catalogacao e classificacao visual      |
 | Fase 3 | **COMPLETA** | Extracao estruturada com Gemini 3 Flash |
-| Fase 4 | **COMPLETA** | Mapeamento para 180+ campos da minuta |
+| Fase 4 | **COMPLETA** | Mapeamento para 180+ campos da minuta   |
 
 ---
 
@@ -268,6 +277,7 @@ Matriculas de imovel grandes (>2MB) usam automaticamente um prompt compacto otim
 ### Consolidacao de Pessoas com CPFs Duplicados
 
 O sistema detecta e consolida automaticamente registros duplicados causados por erros de leitura:
+
 1. CPF com digito verificador valido tem prioridade
 2. CPF mais frequente e o correto
 3. Em empate, fonte de maior prioridade vence (RG > CNH > Compromisso)
@@ -305,31 +315,34 @@ Conjuges que anuem na venda sao separados em campo proprio (`anuentes`), vincula
 
 ## Documentacao
 
-| Documento | Descricao |
-|-----------|-----------|
-| `directives/01_arquitetura_sistema.md` | Arquitetura de 3 camadas e self-annealing |
-| `directives/02_tipos_documentos.md` | Referencia dos 26 tipos de documentos |
-| `directives/03_pipeline_processamento.md` | Detalhes tecnicos das fases |
-| `directives/04_manual_operacao.md` | Manual completo de operacao |
-| `documentacao/FONTE_DE_VERDADE.md` | Referencia central autoritativa |
-| `documentacao/DOCUMENTACAO_SCHEMAS_PROMPTS.md` | Schemas e prompts detalhados |
-| `Guia-de-campos-e-variaveis/` | Campos de minutas (180+) |
+| Documento                                      | Descricao                                 |
+| ---------------------------------------------- | ----------------------------------------- |
+| `directives/01_arquitetura_sistema.md`         | Arquitetura de 3 camadas e self-annealing |
+| `directives/02_tipos_documentos.md`            | Referencia dos 26 tipos de documentos     |
+| `directives/03_pipeline_processamento.md`      | Detalhes tecnicos das fases               |
+| `directives/04_manual_operacao.md`             | Manual completo de operacao               |
+| `documentacao/FONTE_DE_VERDADE.md`             | Referencia central autoritativa           |
+| `documentacao/DOCUMENTACAO_SCHEMAS_PROMPTS.md` | Schemas e prompts detalhados              |
+| `Guia-de-campos-e-variaveis/`                  | Campos de minutas (180+)                  |
 
 ---
 
 ## Utilitarios
 
 ### Limpeza de Arquivos Temporarios
+
 ```bash
 python execution/clean_temp_files.py --execute
 ```
 
 ### Verificar Catalogo
+
 ```bash
 python -c "import json; d = json.load(open('.tmp/catalogos/{caso_id}.json')); print(json.dumps(d['estatisticas'], indent=2))"
 ```
 
 ### Verificar Mapeamento
+
 ```bash
 python -c "
 import json
@@ -342,12 +355,44 @@ print('Campos faltantes:', len(d.get('metadata', {}).get('campos_faltantes', [])
 
 ---
 
+## BENCHMARK - Validacao do Pipeline
+
+A pasta `BENCHMARK/` contem escrituras de compra e venda organizadas em diferentes formatos para servir como **referencia de comparacao** com o output do pipeline.
+
+### Estrutura do BENCHMARK
+
+| Subpasta                                    | Conteudo                                                |
+| ------------------------------------------- | ------------------------------------------------------- |
+| `Escrituras-Finais-PDF/`                    | Arquivos originais das escrituras finalizadas           |
+| `Escrituras-Finais-Reescrita-Simplificada/` | Transcricao simplificada para facil compreensao         |
+| `Escrituras-Finais-Analise/`                | Versao analitica com dados organizados e parametrizados |
+| `Escrituras-Finais-Padrao-Minuta/`          | Versao no padrao de minuta (template `Minutas-Padrao/`) |
+
+### Como Usar para Validacao
+
+1. **Processar** os documentos originais, usados para gerar as escrituras, pelo pipeline completo
+2. **Comparar** o output gerado em formato de dados .json com a versao correspondente daqueles dados em `BENCHMARK/Escrituras-Finais-Analise/`
+3. **Identificar** diferencas e pontos que precisam de ajustes
+4. **Ajustar** prompts, mapeamentos ou logica do pipeline conforme necessario
+
+### Proposito
+
+- **Medir acertividade**: Verificar se o pipeline gera outputs corretos
+- **Identificar melhorias**: Encontrar campos ou formatacoes que precisam de ajustes
+- **Testes de regressao**: Garantir que mudancas nao degradem a qualidade
+- **Ground truth**: Referencia autoritativa do formato esperado
+
+Para mais detalhes, consulte `BENCHMARK/README.md`.
+
+---
+
 ## Creditos
 
 Desenvolvido com:
+
 - **Google Gemini 3 Flash** (classificacao e extracao multimodal)
 - Arquitetura 3-Layer para sistemas agentivos
 
 ---
 
-*Versao 2.0 - 2026-01-29*
+_Versao 2.0 - 2026-01-29_
