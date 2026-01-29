@@ -237,14 +237,19 @@ O sistema reconhece **26 tipos de documentos** organizados em 5 categorias:
 ### 6.1 Variáveis de Ambiente (.env)
 
 ```env
-# Google Cloud - Document AI (DEPRECATED mas mantido)
-GOOGLE_APPLICATION_CREDENTIALS=./credentials/sua-credencial.json
-GOOGLE_PROJECT_ID=ia-cartorio-fluxo-minutas
-DOCUMENT_AI_PROCESSOR_ID=9bc0134de4126073
+# Veja .env.example para a lista completa de variaveis
+# NUNCA commite o arquivo .env com valores reais!
+
+# Google Cloud - Document AI
+GOOGLE_APPLICATION_CREDENTIALS=credentials/[SEU_ARQUIVO_CREDENCIAIS].json
+GOOGLE_PROJECT_ID=[SEU_PROJECT_ID]
+DOCUMENT_AI_PROCESSOR_ID=[SEU_PROCESSOR_ID]
 DOCUMENT_AI_LOCATION=us
 
 # Google Gemini (PRINCIPAL)
-GEMINI_API_KEY=sua-api-key-aqui
+GEMINI_API_KEY=[SUA_GEMINI_API_KEY]
+GEMINI_MODEL=gemini-3-flash-preview
+GEMINI_MODEL_FALLBACK=gemini-2.5-flash
 ```
 
 ### 6.2 Dependências Python

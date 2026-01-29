@@ -1,0 +1,121 @@
+# PROMPT COMPACTO PARA MATRICULA DE IMOVEL - v1.0
+# Otimizado para documentos grandes (>2MB) que excedem limite de tokens
+
+## OBJETIVO
+Extrair dados estruturados de matricula de imovel de forma COMPACTA.
+NAO faca reescrita completa do documento. Foque no JSON estruturado.
+
+## REGRAS CRITICAS
+1. PRIORIZE o JSON estruturado - ele DEVE ser gerado PRIMEIRO
+2. Explicacao contextual: MAXIMO 2 paragrafos resumidos
+3. NUNCA invente dados - use null para campos ausentes/ilegiveis
+4. Distinga OFICIAL DO CARTORIO (certifica) de PARTE (vendedor/comprador)
+5. Verifique CANCELAMENTOS antes de classificar onus como ativo
+
+---
+
+## FORMATO DE SAIDA (ORDEM OBRIGATORIA)
+
+```
+## DADOS CATALOGADOS
+```json
+{
+  "tipo_documento": "MATRICULA_IMOVEL",
+  "numero_matricula": "00.000",
+  "cartorio": "1o Registro de Imoveis de Cidade",
+  "data_abertura_matricula": "DD/MM/AAAA",
+
+  "imovel": {
+    "tipo_unidade": "apartamento|vaga_garagem|casa|sala_comercial|terreno|outro",
+    "descricao_resumida": "Unidade 000, Ed. Exemplo, Bloco A",
+    "endereco": {
+      "logradouro": "Rua Exemplo",
+      "numero": "000",
+      "complemento": "Apto 000",
+      "bairro": "Bairro",
+      "cidade": "Cidade",
+      "uf": "UF"
+    },
+    "sql": "000.000.0000-0",
+    "area_util_m2": 00.00,
+    "area_total_m2": 00.00,
+    "fracao_ideal": "0,00000%"
+  },
+
+  "proprietarios_atuais": [
+    {
+      "nome": "NOME COMPLETO",
+      "cpf": "000.000.000-00",
+      "estado_civil": "casado|solteiro|divorciado|viuvo|separado",
+      "conjuge": "NOME DO CONJUGE ou null",
+      "registro_aquisicao": "R-X/00.000",
+      "data_aquisicao": "DD/MM/AAAA"
+    }
+  ],
+
+  "onus_ativos": [
+    {
+      "tipo": "HIPOTECA|ALIENACAO_FIDUCIARIA|PENHORA|USUFRUTO|OUTRO",
+      "registro": "R-X/00.000",
+      "beneficiario": "Nome do credor/beneficiario",
+      "valor": "R$ 0,00 ou null",
+      "status": "ATIVO"
+    }
+  ],
+
+  "onus_historicos": [
+    {
+      "tipo": "HIPOTECA",
+      "registro": "R-X/00.000",
+      "status": "CANCELADO",
+      "averbacao_cancelamento": "AV-X/00.000"
+    }
+  ],
+
+  "alertas": [
+    {
+      "gravidade": "ALTA|MEDIA|INFO",
+      "tipo": "IMOVEL_LIVRE|ONUS_ATIVO|DOCUMENTO_INCOMPLETO|PENDENCIA",
+      "mensagem": "Descricao breve do alerta"
+    }
+  ]
+}
+```
+
+---
+
+## RESUMO CONTEXTUAL
+
+[Paragrafo 1: Identificacao do imovel e proprietarios atuais em 2-3 frases]
+
+[Paragrafo 2: Status de onus e alertas importantes em 2-3 frases]
+
+```
+
+---
+
+## INSTRUCOES DE ANALISE
+
+### Identificar Proprietarios Atuais
+1. Localize o ULTIMO registro de transmissao (R-X) de propriedade
+2. Se nao houver transmissao, o proprietario original e o atual
+3. NAO confunda constituicao de onus com transmissao de propriedade
+
+### Classificar Onus
+1. ATIVO: Sem averbacao de cancelamento encontrada
+2. CANCELADO: Possui AV-X com "CANCELADA", "QUITADA", "BAIXADA"
+3. DESCONHECIDO: Documento truncado/incompleto
+
+### Alertas Obrigatorios
+- IMOVEL_LIVRE: Se nao ha onus ativos
+- ONUS_ATIVO: Se ha hipoteca/alienacao/penhora ativa
+- DOCUMENTO_INCOMPLETO: Se indica "continua no verso" ou truncado
+
+---
+
+## VALIDACOES ANTES DE RETORNAR
+
+1. [ ] proprietarios_atuais NAO esta vazio
+2. [ ] Onus cancelados estao em onus_historicos (NAO em onus_ativos)
+3. [ ] JSON e valido e completo
+4. [ ] Alertas refletem situacao real do imovel

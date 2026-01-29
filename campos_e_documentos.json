@@ -459,10 +459,24 @@
       }
     },
     "CNH": {
-      "descricao": "Carteira Nacional de Habilitacao",
+      "descricao": "Carteira Nacional de Habilitacao - documento que autoriza o condutor a dirigir veiculos automotores e serve como documento de identificacao",
       "campos_extraiveis": {
-        "pessoa_natural": ["pn_nome", "pn_cpf", "pn_cnh", "pn_orgao_emissor_cnh", "pn_data_nascimento"]
-      }
+        "pessoa_natural": [
+          "pn_nome",
+          "pn_cpf",
+          "pn_rg",
+          "pn_orgao_emissor_rg",
+          "pn_estado_emissor_rg",
+          "pn_data_nascimento",
+          "pn_cnh",
+          "pn_orgao_emissor_cnh"
+        ]
+      },
+      "observacoes": [
+        "A CNH contem o RG integrado no campo 'DOC. IDENTIDADE / ORG. EMISSOR / UF'",
+        "O numero de registro da CNH e diferente do numero do RG",
+        "A CNH pode substituir o RG como documento de identificacao"
+      ]
     },
     "CPF": {
       "descricao": "Cadastro de Pessoa Fisica (documento avulso)",

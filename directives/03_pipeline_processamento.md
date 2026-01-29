@@ -55,15 +55,49 @@ Nomes de arquivos frequentemente NÃO refletem o conteúdo real:
 
 **Função:**
 - Lê inventário bruto
-- Para cada arquivo: carrega imagem/PDF e envia ao Gemini 2.0 Flash
+- Pré-classifica documentos com nomes óbvios (sem usar API)
+- Para arquivos que precisam de API: carrega imagem/PDF e envia ao Gemini
 - Recebe: tipo de documento, confiança, pessoa relacionada, observação
 
-**Modos de Execução:**
-- `--parallel`: Preparação em paralelo, envio serial (rate limiting)
-- `--mock`: Teste sem API
-- `--limit N`: Limitar quantidade para testes
+**Otimizações de Performance (Padrão - Plano Pago 150 RPM):**
 
-**Rate Limiting:** 6 segundos entre requests (10 RPM do Gemini API free tier)
+> **NOTA:** Este projeto utiliza exclusivamente o plano pago do Gemini.
+> Todas as configurações abaixo já são o PADRÃO do script.
+
+1. **Pré-classificação por Nome de Arquivo:**
+   - Documentos com nomes óbvios (RG_, CNDT_, ITBI_, etc.) são classificados localmente
+   - Reduz chamadas à API em ~30-50%
+   - Só usa pré-classificação quando confiança é Alta
+
+2. **Workers Paralelos para API (padrão: 5):**
+   - Múltiplos workers fazem chamadas simultâneas ao Gemini
+   - Rate limit global de 0.5s entre requests (150 RPM)
+   - Configurável via `--api-workers` se necessário
+
+3. **Batch Processing (padrão: 4 imagens):**
+   - Agrupa múltiplas imagens em um único request
+   - Reduz overhead de conexão e acelera processamento
+   - Configurável via `--batch-size` se necessário
+
+**Modos de Execução:**
+```bash
+# Modo padrão (já otimizado para plano pago)
+python classify_with_gemini.py --parallel FC_515_124
+
+# Teste sem API (classifica por nome de arquivo)
+python classify_with_gemini.py --mock FC_515_124
+
+# Limitar quantidade para testes
+python classify_with_gemini.py --parallel --limit N FC_515_124
+```
+
+**Tempos Estimados (39 documentos):**
+
+| Configuração | Tempo Estimado |
+|--------------|----------------|
+| Serial (antigo) | ~6 minutos |
+| Paralelo + Batch | ~1-2 minutos |
+| Com pré-classificação | ~40-60 segundos |
 
 **Saída:** `.tmp/classificacoes/{caso_id}_classificacao.json`
 
@@ -257,8 +291,10 @@ Procurar em: página 2, rodapé, área de validação.
 | Tipo de Documento | Arquivo de Prompt |
 |-------------------|-------------------|
 | RG | `execution/prompts/rg.txt` |
+| CNH | `execution/prompts/cnh.txt` |
 | CNDT | `execution/prompts/cndt.txt` |
 | MATRICULA_IMOVEL | `execution/prompts/matricula_imovel.txt` |
+| MATRICULA_IMOVEL (>2MB) | `execution/prompts/matricula_imovel_compact.txt` |
 | COMPROMISSO_COMPRA_VENDA | `execution/prompts/compromisso_compra_venda.txt` |
 | IPTU | `execution/prompts/iptu.txt` |
 | ITBI | `execution/prompts/itbi.txt` |
@@ -360,6 +396,81 @@ O script identifica quem vende (alienante) e quem compra (adquirente):
 **Estratégia 2: Catálogo (Fallback)**
 - Campo `papel_inferido` baseado na subpasta (VENDEDORES/, COMPRADORA/)
 
+### 4.8 Regras Avançadas de Mapeamento (CRÍTICO)
+
+Estas regras foram aprendidas através de auditorias e correções de bugs:
+
+#### REGRA #1: Merge de Proprietários por Imóvel
+Quando há múltiplas fontes de proprietários para o mesmo imóvel:
+- **NÃO sobrescrever** - fazer merge por CPF ou nome
+- Evitar duplicatas usando CPF como chave única
+- Quando CPF não disponível, usar nome em maiúsculas
+- Se proprietário já existe, apenas atualizar campos vazios
+
+```python
+# ERRADO: sobrescreve proprietários
+imovel.proprietarios = proprietarios_novos
+
+# CORRETO: merge inteligente
+for prop_novo in proprietarios_novos:
+    if prop_novo['cpf'] not in cpfs_existentes:
+        imovel.proprietarios.append(prop_novo)
+```
+
+#### REGRA #2: Priorização Temporal de RGs
+Quando há múltiplos RGs para a mesma pessoa:
+- Priorizar o RG com `data_expedicao` mais recente
+- Se RG atual tem data e novo não tem, manter atual
+- Usar atribuição direta (não `set_field`) para forçar atualização quando priorização temporal indica
+
+#### REGRA #3: Tipo de Imóvel Específico vs Genérico
+Para o campo `tipo_imovel`, aplicar lógica especial:
+- Valores específicos (`apartamento`, `vaga_garagem`) têm prioridade sobre genéricos (`outro`, `desconhecido`)
+- MATRICULA_IMOVEL é a fonte mais confiável para tipo de imóvel
+- Se compromisso diz "outro" e matrícula diz "vaga_garagem", usar "vaga_garagem"
+
+#### REGRA #4: Estado Civil Atual vs Histórico
+Quando há múltiplas certidões de casamento:
+- Priorizar casamento mais recente por `data_casamento`
+- Casamento de 2022 sobrepõe casamento de 1978
+- Gerar **ALERTA JURÍDICO** quando detectar múltiplos casamentos
+
+#### REGRA #5: Data de Pagamento do ITBI
+Extrair data de pagamento dos comprovantes (`COMPROVANTE_PAGAMENTO`):
+- Campo: `datas.pagamento_efetivo` ou `datas.transacao`
+- Vincular ao guia ITBI correspondente pelo valor
+- Incluir código de autenticação bancária
+
+#### REGRA #6: Extração do Andar
+Quando `andar` não existe como campo direto:
+- Extrair de `descricao_completa` usando regex
+- Padrões: "no 12º andar", "12o andar do Edifício"
+- Retornar no formato "12º"
+
+### 4.9 Alertas Jurídicos
+
+O sistema gera alertas automáticos para situações que requerem atenção:
+
+| Tipo de Alerta | Severidade | Descrição |
+|----------------|------------|-----------|
+| `MULTIPLOS_CASAMENTOS` | ALTA | Pessoa com 2+ certidões de casamento |
+| `ONUS_NAO_CANCELADO` | ALTA | Hipoteca ou outro ônus ainda ativo |
+| `CPF_DIVERGENTE` | MÉDIA | CPF diferente entre documentos |
+| `DATA_INVALIDA` | MÉDIA | Data de casamento posterior a documento |
+
+Os alertas são incluídos no JSON de saída:
+```json
+{
+  "alertas_juridicos": [{
+    "tipo": "MULTIPLOS_CASAMENTOS",
+    "severidade": "ALTA",
+    "pessoa": "FULANO DE TAL",
+    "mensagem": "Detectados 2 casamentos...",
+    "recomendacao": "Solicitar certidão de averbação..."
+  }]
+}
+```
+
 ---
 
 ## Campos Mapeados por Categoria
@@ -428,12 +539,28 @@ O script identifica quem vende (alienante) e quem compra (adquirente):
 | Temperature | 0.1 | Respostas determinísticas |
 | Max Output Tokens | 16384 | Documentos longos + explicações |
 
-### Rate Limiting por Tier
+### Rate Limiting
 
-| Tier | RPM | Workers Recomendados |
-|------|-----|---------------------|
-| Free | 15 | 3 |
-| Paid | 150 | 10 |
+> **IMPORTANTE:** Este projeto utiliza exclusivamente o **PLANO PAGO** do Gemini API.
+> Todas as configurações padrão estão otimizadas para 150 RPM (plano pago).
+
+| Parâmetro | Valor Padrão | Descrição |
+|-----------|--------------|-----------|
+| RPM | 150 | Requests por minuto (plano pago) |
+| Intervalo | 0.5s | Delay entre requests |
+| API Workers | 5 | Workers para chamadas API paralelas |
+| Batch Size | 4 | Imagens por request |
+| Prep Workers | 10 | Workers para preparação de documentos |
+
+**Comando Padrão (já otimizado para plano pago):**
+```bash
+python classify_with_gemini.py --parallel FC_515_124
+```
+
+**Comando com configurações explícitas:**
+```bash
+python classify_with_gemini.py --parallel --api-workers 5 --batch-size 4 FC_515_124
+```
 
 ### Custos Estimados
 
@@ -444,3 +571,67 @@ O script identifica quem vende (alienante) e quem compra (adquirente):
 | Documento médio | ~3K tokens in, ~2K tokens out |
 | Custo por documento | ~$0.008 |
 | Escritura (40 docs) | ~$0.32 |
+
+---
+
+## Melhorias e Aprendizados (Janeiro 2026)
+
+### Tratamento de Matrículas Grandes (>2MB)
+
+**Problema Identificado:**
+Matrículas de imóvel com muitos registros geram arquivos grandes (>2MB). O prompt padrão solicita reescrita completa + explicação + JSON, o que pode esgotar o limite de tokens de saída (16384) antes de gerar o JSON estruturado.
+
+**Solução Implementada:**
+1. Criado prompt compacto `matricula_imovel_compact.txt` que:
+   - NÃO solicita reescrita completa
+   - PRIORIZA o JSON estruturado como output principal
+   - Limita explicação contextual a 2 parágrafos
+
+2. Adicionada função `select_prompt()` em `extract_with_gemini.py`:
+   - Se arquivo > 2MB e tipo = MATRICULA_IMOVEL → usa prompt compacto
+   - Caso contrário → usa prompt padrão
+
+### Consolidação de Pessoas com CPFs Divergentes
+
+**Problema Identificado:**
+Erros de OCR podem gerar CPFs levemente diferentes para a mesma pessoa em documentos distintos, criando registros duplicados.
+
+**Solução Implementada:**
+Função `consolidar_pessoas_por_nome()` em `map_to_fields.py` com:
+1. **Validação de dígito verificador**: CPF válido tem prioridade
+2. **Votação por frequência**: CPF que aparece mais vezes é o correto
+3. **Prioridade de fonte**: RG > CNH > Compromisso em empate
+
+### Processamento de CNH
+
+**Problema Identificado:**
+Documentos CNH eram classificados mas não processados - RG e data_nascimento extraídos da CNH não eram mapeados.
+
+**Solução Implementada:**
+1. Criado prompt `execution/prompts/cnh.txt` com estrutura padronizada
+2. Adicionada função `map_cnh_to_pessoa()` em `map_to_fields.py`
+3. Prioridade CNH = 90 (menor que RG direto = 100, mas útil como fonte secundária)
+
+### Cônjuges Anuentes
+
+**Problema Identificado:**
+Cônjuges que anuem na venda têm documentos próprios (RG, Certidão Casamento) mas apareciam apenas como referência no campo "cônjuge" dos alienantes.
+
+**Solução Implementada:**
+1. Criado campo separado `anuentes` na estrutura de saída
+2. Função `identificar_anuentes()` separa cônjuges dos alienantes
+3. Cada anuente tem estrutura completa de PessoaNatural
+4. Campo `anuente_de` indica a qual alienante está vinculado
+
+### Estrutura de Saída Atualizada
+
+```json
+{
+  "metadata": {...},
+  "alienantes": [...],
+  "anuentes": [...],  // NOVO - cônjuges que anuem na venda
+  "adquirentes": [...],
+  "imovel": {...},
+  "negocio": {...}
+}
+```
