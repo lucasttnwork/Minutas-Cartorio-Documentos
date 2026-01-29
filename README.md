@@ -10,6 +10,7 @@ Sistema de catalogacao e extracao de dados de documentos para escrituras de comp
 - `.env`: Variaveis de ambiente e segredos (nao versionados).
 - `Test-Docs/`: Documentos de teste para validacao do sistema.
 - `Guia-de-campos-e-variaveis/`: Referencia dos 180+ campos de minutas.
+- `documentacao/`: Documentacao tecnica detalhada do sistema.
 
 ## Diretrizes de Operacao
 
@@ -18,28 +19,84 @@ O sistema opera atraves de uma arquitetura de 3 camadas:
 2. **Layer 2: Orquestracao** (Como coordenar) - Agente IA
 3. **Layer 3: Execucao** (Acao tecnica) - `execution/`
 
-Para mais detalhes, consulte `directives/00_system_architecture.md`.
+Para mais detalhes, consulte `directives/01_arquitetura_sistema.md`.
+
+---
+
+## Pipeline de Processamento
+
+O sistema processa documentos em 3 fases principais:
+
+```
+ENTRADA: Pasta com documentos de uma escritura
+
+    | FASE 1: CATALOGACAO E CLASSIFICACAO
+    |   Scripts: inventory_files.py, classify_with_gemini.py, generate_catalog.py
+    |   Saida: .tmp/catalogos/{caso_id}.json
+    |
+    v
+    | FASE 3: EXTRACAO ESTRUTURADA (Gemini 3 Flash - Multimodal)
+    |   Script: extract_with_gemini.py
+    |   Saida: .tmp/contextual/{caso_id}/*.json
+    |
+    v
+    | FASE 4: MAPEAMENTO PARA MINUTA
+    |   Script: map_to_fields.py
+    |   Saida: .tmp/mapped/{caso_id}.json
+
+SAIDA: Dados estruturados prontos para preencher minuta (180+ campos)
+```
+
+> **IMPORTANTE:** O sistema utiliza **Gemini 3 Flash** para processar documentos diretamente (multimodal), sem necessidade de OCR intermediario.
+
+---
+
+## Pre-requisitos
+
+### Ambiente Python
+```bash
+# Verificar Python
+python --version  # Requer 3.8+
+
+# Instalar dependencias
+pip install -r execution/requirements.txt
+```
+
+### Configuracao de Credenciais
+
+Copie `.env.example` para `.env` e preencha:
+```env
+GEMINI_API_KEY=[SUA_GEMINI_API_KEY]
+GEMINI_MODEL=gemini-3-flash-preview
+GEMINI_MODEL_FALLBACK=gemini-2.5-flash
+GOOGLE_APPLICATION_CREDENTIALS=credentials/[SEU_ARQUIVO].json
+GOOGLE_PROJECT_ID=[SEU_PROJECT_ID]
+```
 
 ---
 
 ## Uso
 
-### Fase 1: Catalogacao de Documentos
+### Pipeline Completo (Recomendado)
 
-A Fase 1 consiste em 3 etapas para catalogar e classificar documentos de uma escritura.
+> **NOTA:** Este projeto usa exclusivamente o plano pago do Gemini (150 RPM).
+> Os scripts ja vem com configuracoes otimizadas. Basta usar `--parallel`.
 
-#### Pre-requisitos
-
-1. Configure o arquivo `.env` com as credenciais:
-```env
-GEMINI_API_KEY=sua_chave_api
-GOOGLE_APPLICATION_CREDENTIALS=caminho/para/credentials.json
-```
-
-2. Instale as dependencias:
 ```bash
-pip install python-dotenv google-generativeai Pillow PyMuPDF
+# Defina o caso
+CASO="FC_515_124_p280509"
+
+# Pipeline completo em uma linha
+python execution/inventory_files.py "Test-Docs/FC 515 - 124 p280509" && \
+python execution/classify_with_gemini.py $CASO --parallel && \
+python execution/generate_catalog.py $CASO && \
+python execution/extract_with_gemini.py $CASO --parallel && \
+python execution/map_to_fields.py $CASO
 ```
+
+---
+
+### Fase 1: Catalogacao e Classificacao
 
 #### Etapa 1.1: Inventario de Arquivos
 
@@ -53,33 +110,33 @@ python execution/inventory_files.py "Test-Docs/FC 515 - 124 p280509"
 
 #### Etapa 1.2: Classificacao Visual
 
-Classifica cada documento usando Gemini Vision.
+Classifica cada documento usando Gemini Vision (26 tipos reconhecidos).
 
-**Modo Serial (padrao):**
 ```bash
-python execution/classify_with_gemini.py FC_515_124_p280509
-```
-
-**Modo Paralelo (recomendado para >10 arquivos):**
-```bash
+# Modo paralelo (recomendado)
 python execution/classify_with_gemini.py FC_515_124_p280509 --parallel
-```
 
-**Modo Mock (teste sem API):**
-```bash
+# Modo mock (teste sem API)
 python execution/classify_with_gemini.py FC_515_124_p280509 --mock
-```
 
-**Limitar quantidade (para testes):**
-```bash
+# Limitar quantidade (para testes)
 python execution/classify_with_gemini.py FC_515_124_p280509 --limit 5
 ```
 
 **Saida:** `.tmp/classificacoes/FC_515_124_p280509_classificacao.json`
 
-#### Etapa 1.3: Geracao do Catalogo Final
+**Flags disponiveis:**
 
-Combina inventario e classificacao em um catalogo estruturado.
+| Flag | Descricao | Default |
+|------|-----------|---------|
+| `--parallel` / `-p` | Modo paralelo otimizado | False |
+| `--api-workers N` | Workers para chamadas API | 5 |
+| `--batch-size N` | Imagens por request | 4 |
+| `--mock` / `-m` | Teste sem API | False |
+| `--limit N` | Processar apenas N arquivos | Todos |
+| `--verbose` / `-v` | Log detalhado | False |
+
+#### Etapa 1.3: Geracao do Catalogo Final
 
 ```bash
 python execution/generate_catalog.py FC_515_124_p280509
@@ -89,132 +146,106 @@ python execution/generate_catalog.py FC_515_124_p280509
 
 ---
 
-### Flags Disponiveis
+### Fase 3: Extracao Estruturada
 
-| Flag | Descricao | Uso |
-|------|-----------|-----|
-| `--parallel` | Preparacao de imagens em paralelo | Reduz tempo em ~40% para >10 arquivos |
-| `--mock` | Classificacao por heuristica de nome | Testes sem consumir API |
-| `--limit N` | Processa apenas N arquivos | Testes rapidos |
-| `--verbose` | Saida detalhada | Debug |
-| `--input` | Caminho customizado para inventario | Uso avancado |
-| `--output` | Caminho customizado para saida | Uso avancado |
+Extrai dados estruturados diretamente dos documentos usando Gemini 3 Flash (multimodal).
+
+```bash
+# Modo paralelo (recomendado)
+python execution/extract_with_gemini.py FC_515_124_p280509 --parallel
+
+# Com filtro de tipo
+python execution/extract_with_gemini.py FC_515_124_p280509 --type MATRICULA_IMOVEL
+
+# Com limite (para testes)
+python execution/extract_with_gemini.py FC_515_124_p280509 --limit 5 --verbose
+```
+
+**Saida:** `.tmp/contextual/FC_515_124_p280509/*.json`
+
+**Flags disponiveis:**
+
+| Flag | Descricao | Default |
+|------|-----------|---------|
+| `--parallel` / `-p` | Modo paralelo | False |
+| `--workers N` | Numero de workers | 5 |
+| `--rpm N` | Rate limit (req/min) | 150 |
+| `--type TIPO` | Filtrar por tipo | Todos |
+| `--limit N` | Limitar quantidade | Todos |
+| `--verbose` | Log detalhado | False |
+
+**Caracteristicas:**
+- Processa PDFs e imagens diretamente (sem OCR intermediario)
+- Usa prompts especializados por tipo de documento (20 prompts)
+- Selecao automatica de prompt compacto para matriculas grandes (>2MB)
+- Gera JSON estruturado + explicacao contextual
 
 ---
 
-### Tempos de Processamento
+### Fase 4: Mapeamento para Minuta
 
-| Arquivos | Modo Serial | Modo Paralelo |
-|----------|-------------|---------------|
-| 10 | ~1 min | ~40s |
-| 39 | ~4 min | ~2.5 min |
-| 100 | ~10 min | ~6 min |
+Mapeia dados extraidos para os 180+ campos padronizados da minuta.
 
-**Nota:** Tempos estimados. Variam com conexao e tamanho dos arquivos.
+```bash
+# Mapeamento basico
+python execution/map_to_fields.py FC_515_124_p280509
+
+# Com log verbose
+python execution/map_to_fields.py FC_515_124_p280509 --verbose
+```
+
+**Saida:** `.tmp/mapped/FC_515_124_p280509.json`
+
+**Estrutura da saida:**
+```json
+{
+  "metadata": {
+    "caso_id": "FC_515_124_p280509",
+    "documentos_processados": 37,
+    "campos_preenchidos": 85,
+    "campos_faltantes": [...]
+  },
+  "alienantes": [...],
+  "anuentes": [...],
+  "adquirentes": [...],
+  "imovel": {...},
+  "negocio": {...}
+}
+```
+
+**Funcionalidades:**
+- Identifica automaticamente alienantes (vendedores) e adquirentes (compradores)
+- Resolve conflitos entre fontes usando sistema de prioridades
+- Consolida pessoas com CPFs divergentes (erros de OCR)
+- Separa conjuge anuentes dos alienantes
+- Rastreia origem de cada campo
 
 ---
 
-### Tipos de Documentos Reconhecidos
+## Tipos de Documentos Reconhecidos
 
-O sistema reconhece 26 tipos de documentos:
+O sistema reconhece **26 tipos** de documentos:
 
-**Documentos Pessoais (7):** RG, CNH, CPF, CERTIDAO_NASCIMENTO, CERTIDAO_CASAMENTO, CERTIDAO_OBITO, COMPROVANTE_RESIDENCIA
+| Categoria | Tipos |
+|-----------|-------|
+| **Pessoais (7)** | RG, CNH, CPF, CERTIDAO_NASCIMENTO, CERTIDAO_CASAMENTO, CERTIDAO_OBITO, COMPROVANTE_RESIDENCIA |
+| **Certidoes (7)** | CNDT, CND_FEDERAL, CND_ESTADUAL, CND_MUNICIPAL, CND_IMOVEL, CND_CONDOMINIO, CONTRATO_SOCIAL |
+| **Imovel (6)** | MATRICULA_IMOVEL, ITBI, VVR, IPTU, DADOS_CADASTRAIS, ESCRITURA |
+| **Negocio (3)** | COMPROMISSO_COMPRA_VENDA, PROCURACAO, COMPROVANTE_PAGAMENTO |
+| **Administrativos (3)** | PROTOCOLO_ONR, ASSINATURA_DIGITAL, OUTRO |
 
-**Certidoes (7):** CNDT, CND_FEDERAL, CND_ESTADUAL, CND_MUNICIPAL, CND_IMOVEL, CND_CONDOMINIO, CONTRATO_SOCIAL
-
-**Documentos do Imovel (6):** MATRICULA_IMOVEL, ITBI, VVR, IPTU, DADOS_CADASTRAIS, ESCRITURA
-
-**Documentos do Negocio (3):** COMPROMISSO_COMPRA_VENDA, PROCURACAO, COMPROVANTE_PAGAMENTO
-
-**Documentos Administrativos (3):** PROTOCOLO_ONR, ASSINATURA_DIGITAL, OUTRO
-
-Para detalhes de cada tipo, consulte `directives/02_tipos_documentos_completo.md`.
+Para detalhes de cada tipo, consulte `directives/02_tipos_documentos.md`.
 
 ---
 
-### Exemplo Completo
+## Tempos de Processamento
 
-```bash
-# 1. Inventario
-python execution/inventory_files.py "Test-Docs/FC 515 - 124 p280509"
-
-# 2. Classificacao (modo paralelo)
-python execution/classify_with_gemini.py FC_515_124_p280509 --parallel
-
-# 3. Catalogo final
-python execution/generate_catalog.py FC_515_124_p280509
-
-# Ver resultado
-cat .tmp/catalogos/FC_515_124_p280509.json
-```
-
----
-
-### Fase 2: OCR com Document AI
-
-A Fase 2 extrai texto de cada documento catalogado usando Google Document AI.
-
-#### Pre-requisitos
-
-1. Configure as credenciais do Document AI no `.env`:
-```env
-GOOGLE_APPLICATION_CREDENTIALS=caminho/para/credentials.json
-PROJECT_ID=seu-projeto-gcp
-PROCESSOR_ID=seu-processador-document-ai
-```
-
-2. Instale dependencias adicionais:
-```bash
-pip install google-cloud-documentai pywin32
-```
-
-#### Uso Basico
-
-**Processar documento unico:**
-```bash
-python execution/ocr_document_ai.py "Test-Docs/FC 515 - 124 p280509/COMPRADORA/RG.jpg"
-```
-
-**Processar em lote (recomendado):**
-```bash
-python execution/batch_ocr.py FC_515_124_p280509
-```
-
-**Modo paralelo (mais rapido):**
-```bash
-python execution/batch_ocr.py FC_515_124_p280509 --parallel --workers 4
-```
-
-**Modo mock (teste sem API):**
-```bash
-python execution/batch_ocr.py FC_515_124_p280509 --mock
-```
-
-**Reprocessar documentos:**
-```bash
-python execution/batch_ocr.py FC_515_124_p280509 --force
-```
-
-#### Flags Disponiveis (Fase 2)
-
-| Flag | Descricao | Uso |
-|------|-----------|-----|
-| `--parallel` | Processamento em paralelo | Reduz tempo em ~60% |
-| `--workers N` | Numero de workers paralelos | Padrao: 4 |
-| `--force` | Reprocessa documentos ja processados | Corrigir erros |
-| `--mock` | OCR simulado sem API | Testes rapidos |
-
-#### Saidas
-
-- `.tmp/ocr/{escritura_id}/` - Arquivos `.txt` com texto extraido
-- `.tmp/ocr/{escritura_id}_relatorio.json` - Relatorio de processamento
-- Catalogo atualizado com campos `status_ocr`, `data_ocr`, `confianca_ocr`
-
-#### Limpeza de Arquivos Temporarios
-
-```bash
-python execution/clean_temp_files.py
-```
+| Fase | Configuracao | Tempo (40 docs) |
+|------|--------------|-----------------|
+| 1.2 Classificacao | Paralelo + Batch | ~2.5 min |
+| 3 Extracao | 10 workers | ~4 min |
+| 4 Mapeamento | - | ~1 seg |
+| **TOTAL** | Otimizado | **~7 min** |
 
 ---
 
@@ -222,65 +253,53 @@ python execution/clean_temp_files.py
 
 | Fase | Status | Descricao |
 |------|--------|-----------|
-| Fase 1 | COMPLETA | Catalogacao e classificacao visual |
-| Fase 2 | COMPLETA | OCR com Google Document AI |
-| Fase 3 | COMPLETA | Extracao de dados estruturados |
-| Fase 4 | PLANEJADA | Mapeamento para campos da minuta |
-
-### Resultados da Validacao (Fase 1)
-
-- **39 documentos** processados
-- **100%** taxa de sucesso
-- **100%** classificados com alta confianca
-- **0** erros de processamento
-- **4** arquivos para revisao manual (tipo OUTRO)
-
-### Resultados da Validacao (Fase 2)
-
-- **39 documentos** processados via OCR
-- **93.36%** confianca media
-- **0** erros de processamento
-- **~1m 40s** tempo total (paralelo, 4 workers)
-- **2 DOCX** convertidos para PDF automaticamente
-
-**Qualidade por tipo de documento:**
-| Tipo | Confianca | Observacao |
-|------|-----------|------------|
-| COMPROVANTE_PAGAMENTO | 97.7% | Melhor qualidade |
-| VVR | 97.1% | Excelente |
-| ITBI | 96.6% | Excelente |
-| CERTIDAO_NASCIMENTO | 84.1% | Ainda aceitavel |
-
-### Resultados da Validacao (Fase 3)
-
-- **39 documentos** processados
-- **38 com campos extraidos** (97.4%)
-- **81.35%** confianca media
-- **0.06s** tempo total
+| Fase 1 | **COMPLETA** | Catalogacao e classificacao visual |
+| Fase 3 | **COMPLETA** | Extracao estruturada com Gemini 3 Flash |
+| Fase 4 | **COMPLETA** | Mapeamento para 180+ campos da minuta |
 
 ---
 
-### Fase 3: Extracao Estruturada
+## Funcionalidades Avancadas
 
-A Fase 3 extrai campos estruturados de cada documento usando os textos OCR.
+### Selecao Automatica de Prompt para Matriculas Grandes
 
-#### Uso Basico
+Matriculas de imovel grandes (>2MB) usam automaticamente um prompt compacto otimizado para evitar estouro de tokens.
 
-```bash
-python execution/extract_structured.py FC_515_124_p280509
+### Consolidacao de Pessoas com CPFs Duplicados
+
+O sistema detecta e consolida automaticamente registros duplicados causados por erros de leitura:
+1. CPF com digito verificador valido tem prioridade
+2. CPF mais frequente e o correto
+3. Em empate, fonte de maior prioridade vence (RG > CNH > Compromisso)
+
+### Processamento de CNH
+
+Documentos CNH sao processados e extraem: nome, CPF, RG, data de nascimento, filiacao.
+
+### Tratamento de Anuentes
+
+Conjuges que anuem na venda sao separados em campo proprio (`anuentes`), vinculados ao alienante correspondente.
+
+---
+
+## Estrutura de Saida
+
 ```
-
-#### Flags Disponiveis (Fase 3)
-
-| Flag | Descricao | Uso |
-|------|-----------|-----|
-| `--type TIPO` | Filtra por tipo de documento | Processar apenas RG, CNH, etc |
-| `--limit N` | Processa apenas N documentos | Testes rapidos |
-| `--verbose` | Saida detalhada | Debug |
-
-#### Saida
-
-- `.tmp/structured/{escritura_id}/*.json` - Arquivos JSON com campos extraidos por documento
+.tmp/
+├── inventarios/
+│   └── {caso_id}_bruto.json        # Fase 1.1
+├── classificacoes/
+│   └── {caso_id}_classificacao.json # Fase 1.2
+├── catalogos/
+│   └── {caso_id}.json              # Fase 1.3
+├── contextual/
+│   └── {caso_id}/
+│       ├── 001_RG.json             # Fase 3
+│       ├── 002_MATRICULA_IMOVEL.json
+│       └── ...
+└── mapped/
+    └── {caso_id}.json              # Fase 4
+```
 
 ---
 
@@ -288,21 +307,47 @@ python execution/extract_structured.py FC_515_124_p280509
 
 | Documento | Descricao |
 |-----------|-----------|
-| `directives/00_system_architecture.md` | Arquitetura de 3 camadas |
-| `directives/01_plano_catalogacao_documentos.md` | Plano completo do projeto |
-| `directives/02_tipos_documentos_completo.md` | Referencia dos 26 tipos de documentos |
-| `directives/03_fase2_ocr_completa.md` | Documentacao da Fase 2 (OCR) |
+| `directives/01_arquitetura_sistema.md` | Arquitetura de 3 camadas e self-annealing |
+| `directives/02_tipos_documentos.md` | Referencia dos 26 tipos de documentos |
+| `directives/03_pipeline_processamento.md` | Detalhes tecnicos das fases |
+| `directives/04_manual_operacao.md` | Manual completo de operacao |
+| `documentacao/FONTE_DE_VERDADE.md` | Referencia central autoritativa |
+| `documentacao/DOCUMENTACAO_SCHEMAS_PROMPTS.md` | Schemas e prompts detalhados |
 | `Guia-de-campos-e-variaveis/` | Campos de minutas (180+) |
+
+---
+
+## Utilitarios
+
+### Limpeza de Arquivos Temporarios
+```bash
+python execution/clean_temp_files.py --execute
+```
+
+### Verificar Catalogo
+```bash
+python -c "import json; d = json.load(open('.tmp/catalogos/{caso_id}.json')); print(json.dumps(d['estatisticas'], indent=2))"
+```
+
+### Verificar Mapeamento
+```bash
+python -c "
+import json
+d = json.load(open('.tmp/mapped/{caso_id}.json'))
+print('Alienantes:', len(d.get('alienantes', [])))
+print('Adquirentes:', len(d.get('adquirentes', [])))
+print('Campos faltantes:', len(d.get('metadata', {}).get('campos_faltantes', [])))
+"
+```
 
 ---
 
 ## Creditos
 
 Desenvolvido com:
-- Google Gemini Vision (classificacao)
-- Google Document AI (OCR - Fase 2)
+- **Google Gemini 3 Flash** (classificacao e extracao multimodal)
 - Arquitetura 3-Layer para sistemas agentivos
 
 ---
 
-*Versao 1.4 - 2026-01-27*
+*Versao 2.0 - 2026-01-29*
