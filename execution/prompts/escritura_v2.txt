@@ -1,0 +1,501 @@
+Analise esta Escritura Publica e extraia TODOS os dados estruturados.
+
+## REGRAS OBRIGATORIAS
+
+1. **NUNCA INVENTAR DADOS**: Se um campo estiver ilegivel ou ausente, retorne null. NUNCA fabrique informacoes.
+2. **CAMPOS NULOS**: Preferimos null a dados fabricados. Na duvida, use null.
+3. **QUALIFICACAO COMPLETA**: Extraia TODOS os dados de qualificacao das partes.
+4. **VALORES EXATOS**: Extraia valores monetarios exatamente como constam (convertidos para float).
+5. **CAPTURAR TUDO**: Este prompt e focado em extracao maxima de dados - capture cada detalhe possivel.
+
+## FORMATO DE SAIDA
+
+Retorne APENAS o JSON estruturado abaixo. NAO inclua transcricao do documento.
+
+```json
+{
+  "documento": {
+    "tipo": "ESCRITURA DE VENDA E COMPRA",
+    "subtipo": "Compra e Venda de Imovel Urbano / Doacao / Permuta / etc",
+    "formato": "DOCUMENTO ELETRONICO ou FISICO",
+    "modalidade_lavratura": "PRESENCIAL ou VIDEOCONFERENCIA",
+    "fundamentacao_legal_videoconferencia": "Provimento CNJ no XXX/XXXX (se aplicavel)"
+  },
+  "identificacao": {
+    "protocolo": "000.000",
+    "livro": "0000",
+    "folhas": "000/000",
+    "traslado": "1o",
+    "selo_digital": "codigo do selo se houver",
+    "valor_selo": 0.00,
+    "codigo_validacao": "codigo para validacao online",
+    "matricula_notarial_eletronica": "numero da MNE se houver",
+    "url_validacao": "URL para validar documento online"
+  },
+  "cartorio": {
+    "nome_completo": "Xo Tabeliao de Notas de Cidade - UF",
+    "tabeliao_titular": "NOME DO TABELIAO",
+    "substituto_atuante": "NOME DO SUBSTITUTO (se aplicavel)",
+    "escrevente": "NOME DO ESCREVENTE (se mencionado)",
+    "endereco": {
+      "logradouro": "Avenida/Rua",
+      "numero": "000",
+      "bairro": "Bairro",
+      "cidade": "Cidade",
+      "estado": "UF",
+      "cep": "00000-000"
+    },
+    "telefone": "00 0000-0000",
+    "website": "www.exemplo.com.br",
+    "comarca": "Cidade - UF"
+  },
+  "datas": {
+    "lavratura": "AAAA-MM-DD",
+    "lavratura_extenso": "DD de mes de AAAA",
+    "compromisso_anterior": "AAAA-MM-DD (se houver)",
+    "aquisicao_original_vendedor": "AAAA-MM-DD",
+    "casamento_vendedores": "AAAA-MM-DD (se aplicavel)",
+    "expedicao_matriculas": "AAAA-MM-DD",
+    "recolhimento_itbi": "AAAA-MM-DD",
+    "assinatura_traslado": "AAAA-MM-DD"
+  },
+  "explicacao_contextual": "OBRIGATORIO: 3-5 paragrafos explicando: (1) tipo de escritura, cartorio, data; (2) partes envolvidas e seus papeis; (3) imovel objeto da transacao; (4) valores e condicoes de pagamento; (5) certidoes e clausulas especiais.",
+  "partes": {
+    "outorgantes_vendedores": [
+      {
+        "ordem": 1,
+        "tipo_participacao": "VENDEDOR / DOADOR / PERMUTANTE / etc",
+        "tipo_propriedade": "PLENA / NUA PROPRIEDADE / USUFRUTO",
+        "nome_completo": "NOME COMPLETO",
+        "nacionalidade": "BRASILEIRO(A)",
+        "profissao": "Profissao",
+        "documentos": {
+          "rg": {
+            "numero": "00.000.000-0",
+            "orgao_emissor": "SSP/UF"
+          },
+          "cpf": "000.000.000-00"
+        },
+        "contato": {
+          "email": "email@exemplo.com",
+          "telefone": "00 00000-0000"
+        },
+        "estado_civil": "CASADO / SOLTEIRO / DIVORCIADO / VIUVO / UNIAO ESTAVEL",
+        "regime_bens": "COMUNHAO PARCIAL / COMUNHAO UNIVERSAL / SEPARACAO TOTAL / PARTICIPACAO FINAL NOS AQUESTOS",
+        "dados_casamento": {
+          "data": "AAAA-MM-DD",
+          "certidao_cartorio": "Nome do Cartorio de Registro Civil",
+          "certidao_cidade": "Cidade",
+          "certidao_estado": "UF",
+          "certidao_matricula": "numero da matricula"
+        },
+        "conjuge": {
+          "nome": "NOME DO CONJUGE",
+          "cpf": "000.000.000-00",
+          "rg": "00.000.000-0 SSP/UF"
+        },
+        "endereco": {
+          "logradouro": "Rua/Avenida",
+          "numero": "000",
+          "complemento": "apartamento 00",
+          "bairro": "Bairro",
+          "cidade": "Cidade",
+          "estado": "UF",
+          "cep": "00000-000"
+        },
+        "dados_bancarios": {
+          "banco": "Nome do Banco",
+          "agencia": "0000",
+          "conta_corrente": "00000000-0"
+        }
+      }
+    ],
+    "outorgados_compradores": [
+      {
+        "ordem": 1,
+        "tipo_participacao": "COMPRADOR / DONATARIO / PERMUTANTE / etc",
+        "nome_completo": "NOME COMPLETO",
+        "nacionalidade": "BRASILEIRO(A)",
+        "profissao": "Profissao",
+        "documentos": {
+          "rg": {
+            "numero": "00.000.000-0",
+            "orgao_emissor": "SSP/UF"
+          },
+          "cpf": "000.000.000-00"
+        },
+        "contato": {
+          "email": "email@exemplo.com",
+          "telefone": "00 00000-0000"
+        },
+        "estado_civil": "SOLTEIRO",
+        "estado_civil_comprovacao": {
+          "tipo": "CERTIDAO DE NASCIMENTO / CERTIDAO DE CASAMENTO COM AVERBACAO",
+          "cartorio": "Nome do Cartorio",
+          "cidade": "Cidade",
+          "estado": "UF",
+          "livro": "A-000",
+          "folha": "000",
+          "numero": "00000"
+        },
+        "regime_bens": null,
+        "conjuge": null,
+        "endereco": {
+          "logradouro": "Rua/Avenida",
+          "numero": "000",
+          "complemento": "apartamento 00",
+          "bairro": "Bairro",
+          "cidade": "Cidade",
+          "estado": "UF",
+          "cep": "00000-000"
+        }
+      }
+    ],
+    "procuradores": [
+      {
+        "nome": "NOME DO PROCURADOR",
+        "cpf": "000.000.000-00",
+        "representa": "Nome de quem representa",
+        "procuracao": {
+          "tipo": "PUBLICA / PARTICULAR",
+          "cartorio": "Nome do Cartorio",
+          "livro": "000",
+          "folhas": "000",
+          "data": "AAAA-MM-DD"
+        }
+      }
+    ],
+    "intervenientes_anuentes": [
+      {
+        "nome": "NOME",
+        "cpf_cnpj": "000.000.000-00",
+        "qualificacao": "ANUENTE / INTERVENIENTE",
+        "motivo": "Descricao do motivo da interveniencia"
+      }
+    ],
+    "intermediario": {
+      "nome": "Nome da Imobiliaria ou Corretor",
+      "cnpj": "00.000.000/0001-00",
+      "creci": "00000-J",
+      "funcao": "INTERMEDIACAO IMOBILIARIA",
+      "valor_comissao": 0.00,
+      "percentual_comissao": 0.0
+    }
+  },
+  "imoveis": [
+    {
+      "ordem": 1,
+      "tipo": "APARTAMENTO / CASA / TERRENO / SALA COMERCIAL / VAGA DE GARAGEM / etc",
+      "descricao": "Descricao completa do imovel",
+      "unidade": "000",
+      "andar": "0",
+      "bloco_torre": "A",
+      "edificio_condominio": "Nome do Edificio ou Condominio",
+      "endereco": {
+        "logradouro": "Rua/Avenida",
+        "numero": "000",
+        "complemento": "Apto 00",
+        "bairro": "Bairro",
+        "subdistrito": "Xo Subdistrito",
+        "cidade": "Cidade",
+        "estado": "UF",
+        "cep": "00000-000"
+      },
+      "areas": {
+        "privativa_m2": 0.00,
+        "comum_m2": 0.00,
+        "total_m2": 0.00,
+        "terreno_m2": 0.00,
+        "construida_m2": 0.00
+      },
+      "fracao_ideal": "0,0000%",
+      "registro": {
+        "matricula": "00000",
+        "cartorio_ri": "Xo Oficial de Registro de Imoveis",
+        "cidade_ri": "Cidade",
+        "registro_aquisicao_anterior": "R.00",
+        "data_aquisicao_anterior": "AAAA-MM-DD",
+        "forma_aquisicao_anterior": "Compra e Venda / Doacao / Heranca / etc"
+      },
+      "cadastro_municipal": {
+        "sql_inscricao": "000.000.0000-0",
+        "contribuinte": "000.000.0000-0"
+      },
+      "restricoes_onus": {
+        "existem": false,
+        "descricao": null,
+        "clausulas_especiais": []
+      },
+      "valor_atribuido": 0.00,
+      "valor_venal_referencia": 0.00
+    }
+  ],
+  "transacao": {
+    "tipo": "VENDA E COMPRA / DOACAO / PERMUTA",
+    "valor_total": 0.00,
+    "valor_extenso": "valor por extenso",
+    "moeda": "BRL",
+    "compromisso_anterior": {
+      "existe": false,
+      "data": null,
+      "registrado": false,
+      "status": "CUMPRIDO E LIQUIDADO"
+    },
+    "pagamento": {
+      "forma": "A VISTA / PARCELADO / FINANCIADO",
+      "parcelas": [
+        {
+          "ordem": 1,
+          "tipo": "SINAL / ENTRADA / PARCELA / SALDO",
+          "valor": 0.00,
+          "percentual": 0.0,
+          "meio_pagamento": "TED / PIX / QR CODE / CHEQUE / DINHEIRO",
+          "data_pagamento": "AAAA-MM-DD",
+          "beneficiario": "Nome do beneficiario",
+          "dados_bancarios": {
+            "banco": "Nome do Banco",
+            "agencia": "0000",
+            "conta": "00000000-0"
+          },
+          "observacao": "Detalhes adicionais"
+        }
+      ],
+      "financiamento": {
+        "existe": false,
+        "banco": null,
+        "valor_financiado": null,
+        "prazo_meses": null,
+        "numero_contrato": null
+      },
+      "fgts": {
+        "utilizado": false,
+        "valor": null,
+        "conta_vinculada": null
+      }
+    },
+    "quitacao": {
+      "status": "PLENA QUITACAO CONCEDIDA / PENDENTE",
+      "transferencia": "Propriedade, posse, dominio, direitos e acoes"
+    }
+  },
+  "tributos": {
+    "itbi": {
+      "data_recolhimento": "AAAA-MM-DD",
+      "aliquota_percentual": 0.0,
+      "base_calculo": 0.00,
+      "valor_total": 0.00,
+      "guias": [
+        {
+          "numero_damsp": "00000000-0",
+          "imovel_referente": "Apartamento / Vaga",
+          "valor": 0.00
+        }
+      ],
+      "declaracao_transacao_imobiliaria": true
+    },
+    "custas_emolumentos": {
+      "valor_total": 0.00,
+      "detalhamento": [
+        {
+          "destinatario": "CARTORIO",
+          "valor": 0.00
+        },
+        {
+          "destinatario": "ESTADO",
+          "valor": 0.00
+        },
+        {
+          "destinatario": "MUNICIPIO",
+          "valor": 0.00
+        },
+        {
+          "destinatario": "TRIBUNAL DE JUSTICA",
+          "valor": 0.00
+        },
+        {
+          "destinatario": "SANTA CASA",
+          "valor": 0.00
+        },
+        {
+          "destinatario": "REGISTRO CIVIL",
+          "valor": 0.00
+        },
+        {
+          "destinatario": "MINISTERIO PUBLICO",
+          "valor": 0.00
+        },
+        {
+          "destinatario": "SECRETARIA DA FAZENDA",
+          "valor": 0.00
+        }
+      ]
+    },
+    "doi_receita_federal": {
+      "emitida": true,
+      "fundamentacao": "Instrucao Normativa SRF"
+    }
+  },
+  "certidoes": {
+    "matriculas_imoveis": {
+      "tipo": "CERTIDAO DE INTEIRO TEOR",
+      "data_expedicao": "AAAA-MM-DD",
+      "cartorio": "Xo Oficial de Registro de Imoveis",
+      "matriculas_consultadas": ["00000", "00001"],
+      "arquivada": true
+    },
+    "tributos_imobiliarios": {
+      "tipo": "CERTIDAO DE TRIBUTOS IMOBILIARIOS",
+      "resultado": "SITUACAO REGULAR / DEBITOS EXISTENTES",
+      "data_emissao": "AAAA-MM-DD",
+      "validade": "AAAA-MM-DD",
+      "meio_obtencao": "INTERNET / CARTORIO",
+      "arquivada": true
+    },
+    "cndt_trabalhista": [
+      {
+        "numero": "00000000/AAAA",
+        "titular": "Nome do titular",
+        "cpf_cnpj": "000.000.000-00",
+        "resultado": "NEGATIVA / POSITIVA COM EFEITOS DE NEGATIVA",
+        "validade": "AAAA-MM-DD",
+        "meio_obtencao": "INTERNET",
+        "arquivada": true
+      }
+    ],
+    "cnd_federal": [
+      {
+        "numero": "00000000000000000000",
+        "titular": "Nome do titular",
+        "cpf_cnpj": "000.000.000-00",
+        "resultado": "NEGATIVA",
+        "validade": "AAAA-MM-DD",
+        "meio_obtencao": "INTERNET",
+        "arquivada": true
+      }
+    ],
+    "indisponibilidade_bens": {
+      "tipo": "RELATORIO CENTRAL NACIONAL INDISPONIBILIDADE",
+      "resultado": "NEGATIVO / POSITIVO",
+      "hash_consulta": "codigo hash se disponivel",
+      "arquivada": true
+    },
+    "feitos_ajuizados": {
+      "apresentada": true,
+      "resultado": "NEGATIVA / POSITIVA",
+      "arquivada": false,
+      "motivo_dispensa_arquivamento": "Compradora examinou, aceitou e dispensou"
+    },
+    "inss_previdencia": {
+      "apresentada": false,
+      "motivo_dispensa": "Vendedores declararam nao ser empregadores nem devedores",
+      "arquivada": false
+    },
+    "outras_certidoes": []
+  },
+  "declaracoes": {
+    "vendedores": {
+      "previdencia_social": {
+        "vinculado_inss": false,
+        "empregador": false,
+        "devedor": false
+      },
+      "feitos_ajuizados": {
+        "existem_acoes": false,
+        "tipo": "Acoes reais ou pessoais reipersecutorias"
+      },
+      "posse_imovel": {
+        "legitima": true,
+        "justa": true,
+        "mansa": true,
+        "pacifica": true,
+        "continua": true,
+        "boa_fe": true,
+        "sem_oposicao": true
+      },
+      "desapropriacao": {
+        "conhecimento_projeto": false,
+        "utilidade_publica": false,
+        "interesse_social": false
+      },
+      "debitos": {
+        "tributos_pendentes": false,
+        "taxas_pendentes": false,
+        "condominio_pendente": false
+      },
+      "pessoa_politicamente_exposta": false,
+      "compromisso_indenizacao": {
+        "aceito": true,
+        "abrangencia": "Debitos, dividas, responsabilidades, tributos, processos anteriores a data"
+      }
+    },
+    "compradores": {
+      "certidoes_examinadas": true,
+      "certidoes_aceitas": true,
+      "dispensa_arquivamento_certidoes": true
+    }
+  },
+  "garantias": {
+    "eviccao": {
+      "responsavel": "VENDEDORES",
+      "forma": "NA FORMA DA LEI"
+    }
+  },
+  "clausulas_especiais": [
+    {
+      "tipo": "INCOMUNICABILIDADE / IMPENHORABILIDADE / INALIENABILIDADE / USUFRUTO / OUTRA",
+      "descricao": "Descricao da clausula",
+      "vigencia": "VITALICIA / TEMPORARIA / EXTINTA",
+      "beneficiario": "Nome do beneficiario"
+    }
+  ],
+  "assinaturas": {
+    "formato": "DIGITAL / FISICA",
+    "certificacao": "ICP-BRASIL (se digital)",
+    "signatarios": [
+      {
+        "nome": "NOME",
+        "tipo": "VENDEDOR / COMPRADOR / TABELIAO",
+        "data_hora": "AAAA-MM-DDTHH:MM:SS"
+      }
+    ],
+    "traslado": {
+      "signatario": "Nome do signatario",
+      "funcao": "TABELIAO / SUBSTITUTO",
+      "cpf": "000.000.000-00",
+      "certificado_emissor": "AC Certisign / etc",
+      "data_hora": "AAAA-MM-DDTHH:MM:SS-03:00"
+    }
+  },
+  "arquivamento": {
+    "documentos_digitais": true,
+    "gravacao_videoconferencia": true,
+    "prazo": "PRAZO LEGAL",
+    "local": "Nome do Tabelionato"
+  },
+  "observacoes_gerais": [
+    "Observacao relevante 1",
+    "Observacao relevante 2"
+  ],
+  "campos_nao_encontrados": [
+    "Lista de campos solicitados mas nao localizados no documento"
+  ]
+}
+```
+
+## INSTRUCOES FINAIS
+
+1. **IMOVEIS SEPARADOS**: Se houver mais de um imovel (ex: apartamento + vaga), liste cada um separadamente no array "imoveis" com seus valores individuais.
+
+2. **PARTES COMPLETAS**: Capture TODOS os dados de cada parte - emails, telefones, dados bancarios, certidoes de estado civil.
+
+3. **CUSTAS DETALHADAS**: Se o documento discriminar custas por destinatario, preencha o detalhamento.
+
+4. **DATAS PRECISAS**: Use formato ISO (AAAA-MM-DD) para datas. Capture todas as datas mencionadas.
+
+5. **VALORES FLOAT**: Converta valores monetarios para float (615.000,00 -> 615000.00).
+
+6. **CAMPOS AUSENTES**: Liste no final quais campos importantes nao foram encontrados no documento.
+
+7. **NAO TRANSCREVA**: Este prompt NAO pede transcricao. Foque apenas no JSON estruturado.
+
+8. **EXPLICACAO OBRIGATORIA**: O campo "explicacao_contextual" deve conter 3-5 paragrafos resumindo a escritura.

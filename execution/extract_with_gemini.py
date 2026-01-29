@@ -179,12 +179,56 @@ def configure_gemini(api_key: str) -> genai.Client:
 # FUNCOES DE CARREGAMENTO DE PROMPTS
 # =============================================================================
 
-def load_prompt(tipo_documento: str) -> str:
+# Threshold para usar prompt compacto em matriculas grandes (2MB)
+LARGE_FILE_THRESHOLD_BYTES = 2_000_000
+
+
+def select_prompt(tipo_documento: str, file_size_bytes: int) -> str:
     """
-    Carrega prompt especifico para o tipo de documento.
+    Seleciona o arquivo de prompt apropriado baseado no tipo e tamanho do documento.
+
+    Para matriculas de imovel grandes (>2MB), usa o prompt compacto que prioriza
+    o JSON estruturado e evita esgotar tokens de saida com reescrita completa.
 
     Args:
         tipo_documento: Tipo do documento (ex: MATRICULA_IMOVEL, RG)
+        file_size_bytes: Tamanho do arquivo em bytes
+
+    Returns:
+        Nome do arquivo de prompt (ex: "matricula_imovel.txt" ou "matricula_imovel_compact.txt")
+    """
+    tipo_upper = tipo_documento.upper()
+
+    # Para matriculas de imovel grandes, usa prompt compacto
+    if tipo_upper == "MATRICULA_IMOVEL" and file_size_bytes > LARGE_FILE_THRESHOLD_BYTES:
+        compact_prompt = "matricula_imovel_compact.txt"
+        compact_path = PROMPTS_DIR / compact_prompt
+        if compact_path.exists():
+            logger.info(
+                f"Arquivo grande ({file_size_bytes / 1_000_000:.2f}MB > 2MB), "
+                f"usando prompt compacto: {compact_prompt}"
+            )
+            return compact_prompt
+        else:
+            logger.warning(
+                f"Prompt compacto nao encontrado ({compact_prompt}), "
+                f"usando prompt padrao para matricula grande"
+            )
+
+    # Caso padrao: usa nome do tipo em minusculo
+    return f"{tipo_documento.lower()}.txt"
+
+
+def load_prompt(tipo_documento: str, file_size_bytes: int = 0) -> str:
+    """
+    Carrega prompt especifico para o tipo de documento.
+
+    Para documentos grandes (>2MB), pode selecionar prompts compactos
+    quando disponiveis (ex: matricula_imovel_compact.txt).
+
+    Args:
+        tipo_documento: Tipo do documento (ex: MATRICULA_IMOVEL, RG)
+        file_size_bytes: Tamanho do arquivo em bytes (para selecao de prompt compacto)
 
     Returns:
         Texto do prompt
@@ -192,9 +236,9 @@ def load_prompt(tipo_documento: str) -> str:
     Raises:
         PromptNotFoundError: Se prompt nao existir e generic tambem nao
     """
-    # Normaliza o nome do arquivo
-    prompt_name = tipo_documento.lower()
-    prompt_file = PROMPTS_DIR / f"{prompt_name}.txt"
+    # Seleciona o nome do arquivo de prompt (pode ser compacto para arquivos grandes)
+    prompt_filename = select_prompt(tipo_documento, file_size_bytes)
+    prompt_file = PROMPTS_DIR / prompt_filename
 
     if prompt_file.exists():
         content = prompt_file.read_text(encoding='utf-8')
@@ -1039,9 +1083,10 @@ def process_document(
         if doc_info.get('arquivo_ocr'):
             ocr_text = load_ocr_text(doc_info['arquivo_ocr'])
 
-        # 3. Carrega prompt especifico
+        # 3. Carrega prompt especifico (considera tamanho do arquivo para prompts compactos)
         tipo = doc_info.get('tipo_documento', 'OUTRO')
-        prompt = load_prompt(tipo)
+        file_size_bytes = file_path.stat().st_size if file_path.exists() else 0
+        prompt = load_prompt(tipo, file_size_bytes)
 
         # 4. Chama Gemini (modo texto ou imagem dependendo do mime_type)
         if mime_type == 'text/plain':

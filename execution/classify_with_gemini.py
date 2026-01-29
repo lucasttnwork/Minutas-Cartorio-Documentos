@@ -56,7 +56,7 @@ logger = logging.getLogger(__name__)
 # Constantes
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3-flash-preview")  # Modelo Gemini configurado via .env
 GEMINI_MODEL_FALLBACK = os.getenv("GEMINI_MODEL_FALLBACK", "gemini-2.5-flash")  # Fallback configurado via .env
-RATE_LIMIT_DELAY = 4  # 15 requests por minuto = 1 a cada 4 segundos
+RATE_LIMIT_DELAY = 0.5  # Plano PAGO: 150 RPM = 2.5 req/s, usamos 0.5s por seguranca
 MAX_RETRIES = 3
 SAVE_PROGRESS_INTERVAL = 5  # Salvar a cada N arquivos
 SUPPORTED_IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'}
@@ -66,6 +66,9 @@ SUPPORTED_DOCX_EXTENSIONS = {'.docx', '.doc'}
 # Constantes para processamento paralelo
 PARALLEL_WORKERS = 10  # Numero de workers para preparacao paralela
 PARALLEL_BATCH_SIZE = 10  # Tamanho do lote de preparacao
+CLASSIFICATION_BATCH_SIZE = 4  # Numero de imagens por request de classificacao
+API_WORKERS = 5  # Numero de workers para chamadas API paralelas
+MIN_API_INTERVAL = 0.5  # Intervalo minimo entre requests em segundos (150 RPM = 0.4s, usamos 0.5s por seguranca)
 
 
 # =============================================================================
@@ -289,6 +292,56 @@ Exemplo para documento CONHECIDO:
 
 Exemplo para documento DESCONHECIDO:
 {"tipo_documento": "DESCONHECIDO", "confianca": "Alta", "pessoa_relacionada": null, "observacao": "Certidão ambiental do IBAMA", "tipo_sugerido": "CERTIDAO_AMBIENTAL", "descricao": "Certidão de regularidade ambiental emitida pelo IBAMA", "categoria_recomendada": "CERTIDOES", "caracteristicas_identificadoras": ["Logo do IBAMA", "Título Certidão Ambiental", "Número de protocolo", "QR Code de validação"], "campos_principais": ["numero_certidao", "cpf_cnpj", "nome_requerente", "data_emissao", "data_validade", "situacao_ambiental"]}"""
+
+# Prompt para classificacao em batch (multiplas imagens por request)
+BATCH_CLASSIFICATION_PROMPT = """Você é um especialista em documentos brasileiros de cartório e registro de imóveis.
+
+Você receberá {num_docs} imagens de documentos para classificar. Analise CADA imagem e retorne um array JSON com a classificação de cada uma, na MESMA ORDEM em que foram enviadas.
+
+Para cada documento, identifique:
+1. TIPO_DOCUMENTO: Qual o tipo exato? Escolha APENAS uma opção:
+   - RG (Registro Geral / Carteira de Identidade)
+   - CNH (Carteira Nacional de Habilitação)
+   - CPF (Cadastro de Pessoa Física - documento avulso)
+   - CERTIDAO_NASCIMENTO
+   - CERTIDAO_CASAMENTO
+   - CERTIDAO_OBITO
+   - CNDT (Certidão Negativa de Débitos Trabalhistas)
+   - CND_FEDERAL (Certidão da Receita Federal / PGFN)
+   - CND_ESTADUAL
+   - CND_MUNICIPAL (Certidão de Tributos Municipais / IPTU)
+   - CND_CONDOMINIO (Declaração de quitação condominial)
+   - MATRICULA_IMOVEL (Certidão de Matrícula do Registro de Imóveis)
+   - ITBI (Guia de ITBI ou comprovante)
+   - VVR (Valor Venal de Referência)
+   - IPTU (Carnê ou certidão de IPTU)
+   - DADOS_CADASTRAIS (Ficha cadastral do imóvel)
+   - COMPROMISSO_COMPRA_VENDA (Contrato particular)
+   - ESCRITURA (Escritura pública)
+   - PROCURACAO
+   - COMPROVANTE_RESIDENCIA
+   - COMPROVANTE_PAGAMENTO (Recibo, transferência, etc)
+   - CONTRATO_SOCIAL (Pessoa Jurídica)
+   - PROTOCOLO_ONR (Protocolo/comprovante do Operador Nacional do Registro)
+   - ASSINATURA_DIGITAL (Certificado de assinatura eletrônica)
+   - OUTRO (documento reconhecido mas não se encaixa nas categorias)
+   - ILEGIVEL (documento muito ruim para identificar)
+   - DESCONHECIDO (documento identificável mas tipo não existe na lista)
+
+2. CONFIANCA: Alta, Media ou Baixa
+
+3. PESSOA_RELACIONADA: Nome da pessoa no documento (ou null)
+
+4. OBSERVACAO: Breve descrição (máximo 100 caracteres)
+
+Responda APENAS com um array JSON válido, sem markdown:
+[
+  {{"tipo_documento": "RG", "confianca": "Alta", "pessoa_relacionada": "JOAO SILVA", "observacao": "RG do estado de SP"}},
+  {{"tipo_documento": "CNDT", "confianca": "Alta", "pessoa_relacionada": "MARIA SANTOS", "observacao": "Certidao negativa trabalhista"}},
+  ...
+]
+
+IMPORTANTE: O array DEVE ter exatamente {num_docs} elementos, um para cada imagem enviada, na mesma ordem."""
 
 
 def load_environment():
@@ -733,6 +786,204 @@ def classify_with_mock(file_info: dict) -> dict:
     }
 
 
+def pre_classify_by_filename(file_info: dict) -> Optional[dict]:
+    """
+    Tenta pré-classificar um documento baseado APENAS no nome do arquivo.
+    Retorna resultado apenas para nomes MUITO óbvios (alta confiança).
+    Retorna None se não tiver certeza suficiente para pular a API.
+
+    Args:
+        file_info: Informacoes do arquivo do inventario
+
+    Returns:
+        Resultado da classificacao ou None se deve usar API
+    """
+    import re
+    nome = file_info['nome'].upper()
+
+    # ==========================================================================
+    # PADROES DE ALTA CONFIANCA - Prefixos específicos
+    # ==========================================================================
+
+    # Documentos que começam com tipo específico (padrão: TIPO_)
+    prefix_patterns = {
+        'RG_': {'tipo': 'RG', 'obs': 'RG identificado por prefixo no nome'},
+        'CNH_': {'tipo': 'CNH', 'obs': 'CNH identificada por prefixo no nome'},
+        'CPF_': {'tipo': 'CPF', 'obs': 'CPF identificado por prefixo no nome'},
+        'CNDT_': {'tipo': 'CNDT', 'obs': 'CNDT identificada por prefixo no nome'},
+        'ITBI_': {'tipo': 'ITBI', 'obs': 'ITBI identificado por prefixo no nome'},
+        'IPTU_': {'tipo': 'IPTU', 'obs': 'IPTU identificado por prefixo no nome'},
+        'VVR_': {'tipo': 'VVR', 'obs': 'VVR identificado por prefixo no nome'},
+        'MATRICULA_': {'tipo': 'MATRICULA_IMOVEL', 'obs': 'Matricula identificada por prefixo no nome'},
+        'MATRÍCULA_': {'tipo': 'MATRICULA_IMOVEL', 'obs': 'Matricula identificada por prefixo no nome'},
+        'ESCRITURA_': {'tipo': 'ESCRITURA', 'obs': 'Escritura identificada por prefixo no nome'},
+        'PROCURACAO_': {'tipo': 'PROCURACAO', 'obs': 'Procuracao identificada por prefixo no nome'},
+        'PROCURAÇÃO_': {'tipo': 'PROCURACAO', 'obs': 'Procuracao identificada por prefixo no nome'},
+    }
+
+    for prefix, result in prefix_patterns.items():
+        if nome.startswith(prefix):
+            return {
+                'tipo_documento': result['tipo'],
+                'confianca': 'Alta',
+                'pessoa_relacionada': None,
+                'observacao': f'[PRE-CLASS] {result["obs"]}'
+            }
+
+    # ==========================================================================
+    # PADROES DE ALTA CONFIANCA - Combinações de palavras-chave
+    # ==========================================================================
+
+    # Certidões - requerem CERTIDAO/CERTIDÃO + tipo específico
+    if 'CERTID' in nome:  # Captura CERTIDAO e CERTIDÃO
+        if 'NASCIMENTO' in nome or 'NASC' in nome:
+            return {
+                'tipo_documento': 'CERTIDAO_NASCIMENTO',
+                'confianca': 'Alta',
+                'pessoa_relacionada': None,
+                'observacao': '[PRE-CLASS] Certidao de nascimento por combinacao de palavras'
+            }
+        if 'CASAMENTO' in nome or 'CASAM' in nome:
+            return {
+                'tipo_documento': 'CERTIDAO_CASAMENTO',
+                'confianca': 'Alta',
+                'pessoa_relacionada': None,
+                'observacao': '[PRE-CLASS] Certidao de casamento por combinacao de palavras'
+            }
+        if 'OBITO' in nome or 'ÓBITO' in nome:
+            return {
+                'tipo_documento': 'CERTIDAO_OBITO',
+                'confianca': 'Alta',
+                'pessoa_relacionada': None,
+                'observacao': '[PRE-CLASS] Certidao de obito por combinacao de palavras'
+            }
+
+    # Matrícula com número (ex: MATRICULA_46511, MATRICULA 46511)
+    if re.search(r'MATR[IÍ]CULA[_\s-]?\d+', nome):
+        return {
+            'tipo_documento': 'MATRICULA_IMOVEL',
+            'confianca': 'Alta',
+            'pessoa_relacionada': None,
+            'observacao': '[PRE-CLASS] Matricula com numero identificada no nome'
+        }
+
+    # ==========================================================================
+    # PADROES DE ALTA CONFIANCA - Protocolos ONR/SAEC
+    # ==========================================================================
+
+    # Protocolos ONR - termos muito específicos
+    if 'SAEC' in nome:
+        return {
+            'tipo_documento': 'PROTOCOLO_ONR',
+            'confianca': 'Alta',
+            'pessoa_relacionada': None,
+            'observacao': '[PRE-CLASS] Protocolo SAEC identificado no nome'
+        }
+
+    if 'PROTOCOLO_ONR' in nome or 'PROTOCOLO ONR' in nome:
+        return {
+            'tipo_documento': 'PROTOCOLO_ONR',
+            'confianca': 'Alta',
+            'pessoa_relacionada': None,
+            'observacao': '[PRE-CLASS] Protocolo ONR identificado no nome'
+        }
+
+    # ONR sozinho pode ser ambíguo, só aceita se muito específico
+    if nome.startswith('ONR_') or nome.startswith('ONR '):
+        return {
+            'tipo_documento': 'PROTOCOLO_ONR',
+            'confianca': 'Alta',
+            'pessoa_relacionada': None,
+            'observacao': '[PRE-CLASS] Documento ONR identificado por prefixo'
+        }
+
+    # ==========================================================================
+    # PADROES DE ALTA CONFIANCA - Assinaturas digitais
+    # ==========================================================================
+
+    # DocuSign - muito específico
+    if 'DOCUSIGN' in nome:
+        return {
+            'tipo_documento': 'ASSINATURA_DIGITAL',
+            'confianca': 'Alta',
+            'pessoa_relacionada': None,
+            'observacao': '[PRE-CLASS] Certificado DocuSign identificado no nome'
+        }
+
+    # Certificate of Completion - termo específico de assinatura digital
+    if 'CERTIFICATE_OF_COMPLETION' in nome or 'CERTIFICATE OF COMPLETION' in nome:
+        return {
+            'tipo_documento': 'ASSINATURA_DIGITAL',
+            'confianca': 'Alta',
+            'pessoa_relacionada': None,
+            'observacao': '[PRE-CLASS] Certificate of Completion identificado no nome'
+        }
+
+    # Certificado de assinatura/assinatura digital
+    if ('CERTIFICADO' in nome or 'CERTIFICATE' in nome) and ('ASSINATURA' in nome or 'SIGNATURE' in nome):
+        return {
+            'tipo_documento': 'ASSINATURA_DIGITAL',
+            'confianca': 'Alta',
+            'pessoa_relacionada': None,
+            'observacao': '[PRE-CLASS] Certificado de assinatura identificado no nome'
+        }
+
+    # ASSINATURA_DIGITAL como prefixo explícito
+    if nome.startswith('ASSINATURA_DIGITAL') or nome.startswith('ASSINATURA DIGITAL'):
+        return {
+            'tipo_documento': 'ASSINATURA_DIGITAL',
+            'confianca': 'Alta',
+            'pessoa_relacionada': None,
+            'observacao': '[PRE-CLASS] Assinatura digital identificada por prefixo'
+        }
+
+    # ==========================================================================
+    # PADROES DE ALTA CONFIANCA - CNDs específicas
+    # ==========================================================================
+
+    # CND Federal com termos específicos
+    if 'CND' in nome and ('FEDERAL' in nome or 'RECEITA' in nome or 'PGFN' in nome):
+        return {
+            'tipo_documento': 'CND_FEDERAL',
+            'confianca': 'Alta',
+            'pessoa_relacionada': None,
+            'observacao': '[PRE-CLASS] CND Federal identificada no nome'
+        }
+
+    # CND Estadual
+    if 'CND' in nome and 'ESTADUAL' in nome:
+        return {
+            'tipo_documento': 'CND_ESTADUAL',
+            'confianca': 'Alta',
+            'pessoa_relacionada': None,
+            'observacao': '[PRE-CLASS] CND Estadual identificada no nome'
+        }
+
+    # CND Municipal
+    if 'CND' in nome and ('MUNICIPAL' in nome or 'PREFEITURA' in nome):
+        return {
+            'tipo_documento': 'CND_MUNICIPAL',
+            'confianca': 'Alta',
+            'pessoa_relacionada': None,
+            'observacao': '[PRE-CLASS] CND Municipal identificada no nome'
+        }
+
+    # CND Condomínio
+    if ('CND' in nome or 'QUITACAO' in nome or 'QUITAÇÃO' in nome) and 'CONDOMIN' in nome:
+        return {
+            'tipo_documento': 'CND_CONDOMINIO',
+            'confianca': 'Alta',
+            'pessoa_relacionada': None,
+            'observacao': '[PRE-CLASS] CND Condominio identificada no nome'
+        }
+
+    # ==========================================================================
+    # NAO TEM CERTEZA SUFICIENTE - Retorna None para usar API
+    # ==========================================================================
+
+    return None
+
+
 def classify_document(model, file_info: dict, mock_mode: bool = False, caso_id: str = 'unknown') -> dict:
     """
     Classifica um único documento usando o Gemini.
@@ -980,6 +1231,29 @@ def prepare_document(file_info: Dict[str, Any], mock_mode: bool = False) -> Prep
             error=None
         )
 
+    # ==========================================================================
+    # PRE-CLASSIFICACAO POR NOME - Evita carregar imagem para nomes muito obvios
+    # ==========================================================================
+    pre_class_result = pre_classify_by_filename(file_info)
+    if pre_class_result is not None:
+        logger.debug(f"Pre-classificado por nome: {file_info['nome']} -> {pre_class_result['tipo_documento']}")
+        return PreparedDocument(
+            file_info=file_info,
+            image=None,
+            pre_result={
+                'id': file_info['id'],
+                'nome': file_info['nome'],
+                'tipo_documento': pre_class_result['tipo_documento'],
+                'confianca': pre_class_result['confianca'],
+                'pessoa_relacionada': pre_class_result['pessoa_relacionada'],
+                'observacao': pre_class_result['observacao'],
+                'status': 'sucesso',
+                'pre_classified': True  # Flag para rastreamento
+            },
+            preparation_time=time.time() - start_time,
+            error=None
+        )
+
     # Carrega a imagem (I/O pesado - beneficia de paralelismo)
     try:
         image = load_image(file_path)
@@ -1134,22 +1408,274 @@ def classify_prepared_document(
     }
 
 
+def parse_batch_response(response_text: str, num_expected: int) -> List[Dict[str, Any]]:
+    """
+    Faz o parsing da resposta de batch do Gemini.
+
+    Args:
+        response_text: Texto de resposta do Gemini (array JSON)
+        num_expected: Numero esperado de resultados
+
+    Returns:
+        Lista de dicionarios com os campos extraidos
+    """
+    # Remove possiveis marcadores de codigo markdown
+    cleaned = response_text.strip()
+    if cleaned.startswith('```json'):
+        cleaned = cleaned[7:]
+    if cleaned.startswith('```'):
+        cleaned = cleaned[3:]
+    if cleaned.endswith('```'):
+        cleaned = cleaned[:-3]
+    cleaned = cleaned.strip()
+
+    try:
+        data = json.loads(cleaned)
+
+        # Deve ser uma lista
+        if not isinstance(data, list):
+            logger.error(f"Resposta batch não é uma lista: {type(data)}")
+            return []
+
+        # Processa cada item
+        results = []
+        for item in data:
+            if not isinstance(item, dict):
+                results.append({
+                    'tipo_documento': 'OUTRO',
+                    'confianca': 'Baixa',
+                    'pessoa_relacionada': None,
+                    'observacao': 'Erro: item não é dicionário'
+                })
+                continue
+
+            # Normaliza campos
+            item['tipo_documento'] = normalize_document_type(item.get('tipo_documento'))
+            item['pessoa_relacionada'] = normalize_pessoa_relacionada(item.get('pessoa_relacionada'))
+
+            # Normaliza confianca
+            confianca = item.get('confianca', '').strip().title() if item.get('confianca') else 'Baixa'
+            if confianca not in ('Alta', 'Media', 'Baixa'):
+                confianca = 'Media'
+            item['confianca'] = confianca
+
+            # Trunca observacao se necessario
+            if item.get('observacao') and len(item['observacao']) > 100:
+                item['observacao'] = item['observacao'][:97] + '...'
+
+            results.append(item)
+
+        return results
+
+    except json.JSONDecodeError as e:
+        logger.error(f"Erro ao fazer parsing do JSON de batch: {e}")
+        logger.debug(f"Resposta original: {response_text}")
+        return []
+
+
+def classify_batch(
+    model,
+    prepared_docs: List[PreparedDocument],
+    rate_limiter: RateLimiter,
+    caso_id: str = 'unknown'
+) -> List[Dict[str, Any]]:
+    """
+    Classifica multiplos documentos em uma unica chamada a API.
+
+    Envia ate CLASSIFICATION_BATCH_SIZE imagens em um unico request,
+    reduzindo o numero total de chamadas a API.
+
+    Args:
+        model: Cliente Gemini
+        prepared_docs: Lista de documentos preparados (maximo CLASSIFICATION_BATCH_SIZE)
+        rate_limiter: Rate limiter
+        caso_id: ID do caso
+
+    Returns:
+        Lista de resultados de classificacao na mesma ordem dos documentos
+    """
+    if not prepared_docs:
+        return []
+
+    num_docs = len(prepared_docs)
+    doc_names = [p.file_info['nome'] for p in prepared_docs]
+    logger.info(f"Classificando batch de {num_docs} documentos: {doc_names}")
+
+    # Aguarda rate limit
+    wait_time = rate_limiter.wait()
+    if wait_time > 0:
+        logger.debug(f"Rate limit: aguardou {wait_time:.2f}s para batch")
+
+    # Retry com backoff exponencial
+    for attempt in range(MAX_RETRIES):
+        try:
+            # Monta o prompt com o numero correto de documentos
+            prompt = BATCH_CLASSIFICATION_PROMPT.format(num_docs=num_docs)
+
+            # Cria lista de contents: prompt + todas as imagens
+            contents = [prompt]
+            for prepared in prepared_docs:
+                if prepared.image is not None:
+                    image_part = pil_image_to_part(prepared.image)
+                    contents.append(image_part)
+
+            # Envia para o Gemini
+            response = model.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=contents
+            )
+
+            # Parse da resposta (array JSON)
+            parsed_results = parse_batch_response(response.text, num_docs)
+
+            # Valida que recebeu o numero correto de resultados
+            if len(parsed_results) != num_docs:
+                logger.warning(
+                    f"Batch retornou {len(parsed_results)} resultados, esperado {num_docs}. "
+                    f"Usando fallback para classificacao individual."
+                )
+                raise ValueError(f"Numero incorreto de resultados: {len(parsed_results)} vs {num_docs}")
+
+            # Monta resultados finais
+            results = []
+            for i, (prepared, parsed) in enumerate(zip(prepared_docs, parsed_results)):
+                classification = {
+                    'id': prepared.file_info['id'],
+                    'nome': prepared.file_info['nome'],
+                    'tipo_documento': parsed.get('tipo_documento'),
+                    'confianca': parsed.get('confianca'),
+                    'pessoa_relacionada': parsed.get('pessoa_relacionada'),
+                    'observacao': parsed.get('observacao'),
+                    'status': 'sucesso'
+                }
+
+                # Se for DESCONHECIDO, salva descoberta (sem campos extras no batch)
+                if parsed.get('tipo_documento') == 'DESCONHECIDO':
+                    save_discovery(caso_id, prepared.file_info['nome'], classification)
+
+                results.append(classification)
+
+            logger.info(f"Batch classificado com sucesso: {num_docs} documentos")
+            return results
+
+        except Exception as e:
+            wait_time_retry = (2 ** attempt) * 2  # 2, 4, 8 segundos
+            logger.warning(f"Tentativa batch {attempt + 1}/{MAX_RETRIES} falhou: {e}")
+
+            if attempt < MAX_RETRIES - 1:
+                logger.info(f"Aguardando {wait_time_retry}s antes de retry...")
+                time.sleep(wait_time_retry)
+
+    # Todas as tentativas falharam - fallback para classificacao individual
+    logger.warning(f"Batch falhou apos {MAX_RETRIES} tentativas. Usando fallback individual.")
+    results = []
+    for prepared in prepared_docs:
+        result = classify_prepared_document(model, prepared, rate_limiter, caso_id)
+        results.append(result)
+
+    return results
+
+
+def classify_documents_parallel_api(
+    model,
+    prepared_docs: List[PreparedDocument],
+    rate_limiter: RateLimiter,
+    caso_id: str,
+    num_api_workers: int = API_WORKERS
+) -> List[Dict[str, Any]]:
+    """
+    Classifica documentos preparados usando multiplos workers API em paralelo.
+
+    Esta funcao usa ThreadPoolExecutor para fazer chamadas API simultaneas,
+    respeitando o rate limiter global para evitar erros 429.
+
+    Com 5 workers e intervalo de 0.5s, conseguimos ~2 requests/s efetivos,
+    o que e seguro para o limite de 150 RPM do plano pago.
+
+    Args:
+        model: Cliente Gemini configurado
+        prepared_docs: Lista de documentos preparados (apenas os que precisam de API)
+        rate_limiter: Instancia do rate limiter global
+        caso_id: ID do caso/escritura
+        num_api_workers: Numero de workers para chamadas API paralelas
+
+    Returns:
+        Lista de resultados de classificacao na mesma ordem de entrada
+    """
+    if not prepared_docs:
+        return []
+
+    total = len(prepared_docs)
+    results: Dict[int, Dict[str, Any]] = {}
+    completed = 0
+    completed_lock = threading.Lock()
+
+    def classify_single(idx: int, prepared: PreparedDocument) -> Tuple[int, Dict[str, Any]]:
+        """Worker que classifica um documento."""
+        nonlocal completed
+        result = classify_prepared_document(model, prepared, rate_limiter, caso_id)
+
+        with completed_lock:
+            completed += 1
+            logger.info(f"[API] Classificado {completed}/{total}: {prepared.file_info['nome']}")
+
+        return idx, result
+
+    logger.info(f"[API PARALELA] Iniciando {total} chamadas com {num_api_workers} workers...")
+
+    with ThreadPoolExecutor(max_workers=num_api_workers) as executor:
+        # Submete todas as tarefas
+        futures = {
+            executor.submit(classify_single, idx, doc): idx
+            for idx, doc in enumerate(prepared_docs)
+        }
+
+        # Coleta resultados
+        for future in as_completed(futures):
+            try:
+                idx, result = future.result()
+                results[idx] = result
+            except Exception as e:
+                idx = futures[future]
+                doc = prepared_docs[idx]
+                logger.error(f"Erro ao classificar {doc.file_info['nome']}: {e}")
+                results[idx] = {
+                    'id': doc.file_info['id'],
+                    'nome': doc.file_info['nome'],
+                    'tipo_documento': None,
+                    'confianca': None,
+                    'pessoa_relacionada': None,
+                    'observacao': None,
+                    'status': 'erro',
+                    'erro_mensagem': f'Erro de worker: {str(e)[:50]}'
+                }
+
+    # Retorna na ordem original
+    return [results[i] for i in range(total)]
+
+
 def run_classification_parallel(
     input_path: Path,
     output_path: Path,
     mock_mode: bool = False,
     limit: Optional[int] = None,
-    num_workers: int = PARALLEL_WORKERS
+    num_workers: int = PARALLEL_WORKERS,
+    num_api_workers: int = API_WORKERS,
+    batch_size: int = CLASSIFICATION_BATCH_SIZE
 ) -> Dict[str, Any]:
     """
     Executa o pipeline de classificacao com processamento paralelo.
 
     Estrategia de 2 estagios:
     1. Preparacao paralela: Carrega imagens/PDFs em paralelo (I/O bound)
-    2. Envio sequencial: Envia ao Gemini respeitando rate limit (6s entre requests)
+    2. Classificacao paralela: Multiplos workers fazem chamadas API simultaneas
+       respeitando rate limit global (150 RPM no plano pago)
 
-    A preparacao paralela economiza tempo de I/O enquanto o rate limit da API
-    garante que nao excedemos 10 requests/minuto.
+    A preparacao paralela economiza tempo de I/O e a classificacao paralela
+    maximiza throughput dentro do limite de rate da API.
+
+    Se batch_size > 1, agrupa documentos em batches para enviar multiplas
+    imagens por request, reduzindo o numero total de chamadas a API.
 
     Args:
         input_path: Caminho do inventario de entrada
@@ -1157,6 +1683,8 @@ def run_classification_parallel(
         mock_mode: Se True, usa classificacao mock sem API
         limit: Limita o numero de arquivos processados (para testes)
         num_workers: Numero de workers para preparacao paralela
+        num_api_workers: Numero de workers para chamadas API paralelas
+        batch_size: Numero de imagens por request (1 = desabilitado)
 
     Returns:
         Resultado completo da classificacao
@@ -1185,9 +1713,12 @@ def run_classification_parallel(
         logger.info(f"Limitando processamento a {limit} arquivos (modo teste)")
 
     total = len(files_to_process)
+    use_batch = batch_size > 1 and not mock_mode
     logger.info(f"=" * 60)
     logger.info(f"MODO PARALELO ATIVADO")
     logger.info(f"  Workers de preparacao: {num_workers}")
+    logger.info(f"  Workers de API: {num_api_workers}")
+    logger.info(f"  Batch size: {batch_size} {'(ATIVADO)' if use_batch else '(desativado)'}")
     logger.info(f"  Total de arquivos: {total}")
     logger.info(f"  Rate limit: {RATE_LIMIT_DELAY}s entre requests")
     logger.info(f"=" * 60)
@@ -1199,6 +1730,8 @@ def run_classification_parallel(
         'modelo_utilizado': model_name,
         'modo_processamento': 'paralelo',
         'workers_preparacao': num_workers,
+        'workers_api': num_api_workers,
+        'batch_size': batch_size,
         'total_processados': 0,
         'total_sucesso': 0,
         'total_erro': 0,
@@ -1261,38 +1794,101 @@ def run_classification_parallel(
     # Estatisticas de preparacao
     docs_need_api = sum(1 for p in prepared_docs if p.needs_api_call)
     docs_pre_computed = sum(1 for p in prepared_docs if p.pre_result is not None)
+    docs_pre_classified = sum(1 for p in prepared_docs if p.pre_result is not None and p.pre_result.get('pre_classified'))
     avg_prep_time = sum(p.preparation_time for p in prepared_docs) / len(prepared_docs) if prepared_docs else 0
 
     logger.info(f"[ESTAGIO 1] Preparacao concluida em {prep_time:.2f}s")
     logger.info(f"  - Documentos que precisam de API: {docs_need_api}")
     logger.info(f"  - Documentos pre-computados: {docs_pre_computed}")
+    logger.info(f"    - Pre-classificados por nome: {docs_pre_classified}")
+    logger.info(f"    - Outros (DOCX, mock, erros): {docs_pre_computed - docs_pre_classified}")
     logger.info(f"  - Tempo medio de preparacao: {avg_prep_time:.3f}s")
 
     # ==========================================================================
-    # ESTAGIO 2: Classificacao com rate limit
+    # ESTAGIO 2: Classificacao com API paralela
     # ==========================================================================
     logger.info(f"[ESTAGIO 2] Classificando {total} documentos...")
     class_start = time.time()
 
-    for idx, prepared in enumerate(prepared_docs, 1):
-        logger.info(f"Classificando {idx}/{total}: {prepared.file_info['nome']}")
+    # Separa documentos pre-computados dos que precisam de API
+    docs_pre_computed_list = [p for p in prepared_docs if p.pre_result is not None]
+    docs_need_api_list = [p for p in prepared_docs if p.needs_api_call]
 
-        # Classifica (respeitando rate limit se necessario)
-        classification = classify_prepared_document(model, prepared, rate_limiter, escritura_id)
-        result['classificacoes'].append(classification)
-
-        # Atualiza contadores
-        result['total_processados'] = idx
-        if classification['status'] == 'sucesso':
+    # Processa documentos pre-computados (DOCX, mock, erros) - instantaneo
+    for prepared in docs_pre_computed_list:
+        result['classificacoes'].append(prepared.pre_result)
+        if prepared.pre_result['status'] == 'sucesso':
             result['total_sucesso'] += 1
         else:
             result['total_erro'] += 1
-            logger.warning(f"  Erro: {classification.get('erro_mensagem', 'desconhecido')}")
 
-        # Salva progresso parcial
-        if idx % SAVE_PROGRESS_INTERVAL == 0:
-            save_progress(output_path, result)
-            logger.info(f"Progresso salvo ({idx}/{total})")
+    logger.info(f"  - Pre-computados processados: {len(docs_pre_computed_list)}")
+
+    # Processa documentos que precisam de API
+    if docs_need_api_list:
+        if mock_mode:
+            # Em modo mock, processa sequencialmente (rapido, sem API)
+            for prepared in docs_need_api_list:
+                classification = classify_prepared_document(model, prepared, rate_limiter, escritura_id)
+                result['classificacoes'].append(classification)
+                if classification['status'] == 'sucesso':
+                    result['total_sucesso'] += 1
+                else:
+                    result['total_erro'] += 1
+        elif use_batch:
+            # Em modo batch, agrupa documentos e envia multiplas imagens por request
+            num_batches = (len(docs_need_api_list) + batch_size - 1) // batch_size
+            logger.info(f"  - Iniciando classificacao em BATCH de {len(docs_need_api_list)} documentos em {num_batches} batches de ate {batch_size} imagens...")
+
+            for batch_idx in range(num_batches):
+                start_idx = batch_idx * batch_size
+                end_idx = min(start_idx + batch_size, len(docs_need_api_list))
+                batch_docs = docs_need_api_list[start_idx:end_idx]
+
+                logger.info(f"  - Processando batch {batch_idx + 1}/{num_batches} ({len(batch_docs)} documentos)...")
+
+                # Classifica o batch
+                batch_results = classify_batch(
+                    model=model,
+                    prepared_docs=batch_docs,
+                    rate_limiter=rate_limiter,
+                    caso_id=escritura_id
+                )
+
+                # Adiciona resultados e atualiza contadores
+                for classification in batch_results:
+                    result['classificacoes'].append(classification)
+                    if classification['status'] == 'sucesso':
+                        result['total_sucesso'] += 1
+                    else:
+                        result['total_erro'] += 1
+                        logger.warning(f"  Erro: {classification.get('erro_mensagem', 'desconhecido')}")
+
+                # Salva progresso parcial a cada batch
+                save_progress(output_path, result)
+        else:
+            # Em modo real sem batch, usa workers paralelos para maximizar throughput
+            logger.info(f"  - Iniciando classificacao paralela de {len(docs_need_api_list)} documentos com {num_api_workers} workers...")
+            api_results = classify_documents_parallel_api(
+                model=model,
+                prepared_docs=docs_need_api_list,
+                rate_limiter=rate_limiter,
+                caso_id=escritura_id,
+                num_api_workers=num_api_workers
+            )
+
+            # Adiciona resultados e atualiza contadores
+            for classification in api_results:
+                result['classificacoes'].append(classification)
+                if classification['status'] == 'sucesso':
+                    result['total_sucesso'] += 1
+                else:
+                    result['total_erro'] += 1
+                    logger.warning(f"  Erro: {classification.get('erro_mensagem', 'desconhecido')}")
+
+    # Ordena classificacoes por ID para manter consistencia
+    result['classificacoes'].sort(key=lambda x: x['id'])
+    result['total_processados'] = len(result['classificacoes'])
 
     class_time = time.time() - class_start
     result['tempo_classificacao_total'] = class_time
@@ -1301,6 +1897,8 @@ def run_classification_parallel(
     total_time = time.time() - start_time
     result['data_classificacao'] = datetime.now().isoformat()
     result['tempo_total'] = total_time
+    result['docs_pre_classificados'] = docs_pre_classified
+    result['docs_enviados_api'] = docs_need_api
     save_progress(output_path, result)
 
     # Resumo
@@ -1310,6 +1908,8 @@ def run_classification_parallel(
     logger.info(f"  Total processados: {result['total_processados']}")
     logger.info(f"  Sucesso: {result['total_sucesso']}")
     logger.info(f"  Erros: {result['total_erro']}")
+    logger.info(f"  Pre-classificados por nome: {docs_pre_classified} (economizou {docs_pre_classified} chamadas API)")
+    logger.info(f"  Enviados a API: {docs_need_api}")
     logger.info(f"  Tempo de preparacao: {prep_time:.2f}s")
     logger.info(f"  Tempo de classificacao: {class_time:.2f}s")
     logger.info(f"  Tempo total: {total_time:.2f}s")
@@ -1686,21 +2286,35 @@ Exemplos:
   python classify_with_gemini.py --mock FC_515_124
   python classify_with_gemini.py --mock --limit 5 FC_515_124
 
-Modo Paralelo (recomendado para lotes grandes):
+Modo Paralelo (recomendado - plano PAGO do Gemini):
   python classify_with_gemini.py --parallel FC_515_124
-  python classify_with_gemini.py --parallel --workers 8 FC_515_124
+  python classify_with_gemini.py --parallel --workers 8 --api-workers 5 FC_515_124
   python classify_with_gemini.py --parallel --mock FC_515_124
+
+Batch Processing (multiplas imagens por request):
+  python classify_with_gemini.py --parallel --batch-size 4 FC_515_124
+  python classify_with_gemini.py --parallel -b 1 FC_515_124  # Desabilita batch
 
 Consolidar Descobertas (documentos DESCONHECIDO):
   python classify_with_gemini.py --consolidar-descobertas
 
-O modo paralelo prepara documentos (carrega imagens/PDFs) em paralelo
-enquanto mantém o rate limit de 6s entre chamadas à API Gemini.
+O modo paralelo usa duas estrategias:
+  1. Preparacao paralela: carrega imagens/PDFs em paralelo (I/O bound)
+  2. API paralela: multiplos workers fazem chamadas simultaneas ao Gemini
+     respeitando o rate limit global (150 RPM no plano pago = 0.5s entre requests)
+
+Batch Processing:
+  Com --batch-size > 1, agrupa documentos e envia multiplas imagens em um
+  unico request, pedindo classificacao de todas de uma vez. Isso reduz o
+  numero total de chamadas a API. Use --batch-size 1 para desabilitar.
+
+Com 5 API workers e rate limit de 0.5s, conseguimos ~2 req/s efetivos,
+reduzindo o tempo de classificacao de ~6 min para ~1 min (39 documentos).
 
 Documentos DESCONHECIDO:
-  Quando o Gemini identifica um documento que não se encaixa nos tipos
-  conhecidos, ele sugere um novo tipo com descrição, categoria e campos.
-  Essas descobertas são salvas em .tmp/descobertas/ para análise posterior.
+  Quando o Gemini identifica um documento que nao se encaixa nos tipos
+  conhecidos, ele sugere um novo tipo com descricao, categoria e campos.
+  Essas descobertas sao salvas em .tmp/descobertas/ para analise posterior.
   Use --consolidar-descobertas para ver um resumo agrupado por tipo sugerido.
         """
     )
@@ -1751,7 +2365,21 @@ Documentos DESCONHECIDO:
         '--workers', '-w',
         type=int,
         default=PARALLEL_WORKERS,
-        help=f'Número de workers para preparação paralela (default: {PARALLEL_WORKERS})'
+        help=f'Numero de workers para preparacao paralela (default: {PARALLEL_WORKERS})'
+    )
+
+    parser.add_argument(
+        '--api-workers',
+        type=int,
+        default=API_WORKERS,
+        help=f'Numero de workers para chamadas API paralelas (default: {API_WORKERS})'
+    )
+
+    parser.add_argument(
+        '--batch-size', '-b',
+        type=int,
+        default=CLASSIFICATION_BATCH_SIZE,
+        help=f'Numero de imagens por request de classificacao (default: {CLASSIFICATION_BATCH_SIZE}). Use 1 para desabilitar batch.'
     )
 
     parser.add_argument(
@@ -1813,14 +2441,16 @@ Documentos DESCONHECIDO:
     # Executa classificação
     try:
         if args.parallel:
-            # Modo paralelo: prepara documentos em paralelo, envia com rate limit
-            logger.info("Usando modo PARALELO para classificação")
+            # Modo paralelo: prepara documentos em paralelo, classifica com API paralela
+            logger.info("Usando modo PARALELO para classificacao")
             result = run_classification_parallel(
                 input_path=input_path,
                 output_path=output_path,
                 mock_mode=args.mock,
                 limit=args.limit,
-                num_workers=args.workers
+                num_workers=args.workers,
+                num_api_workers=args.api_workers,
+                batch_size=args.batch_size
             )
         else:
             # Modo serial: processamento tradicional sequencial

@@ -55,6 +55,9 @@ Test-Docs/
 
 ### 2.1 Pipeline Completo
 
+> **NOTA:** Este projeto usa exclusivamente o plano pago do Gemini (150 RPM).
+> Os scripts já vêm com configurações otimizadas. Basta usar `--parallel`.
+
 Execute as fases na ordem:
 
 ```bash
@@ -67,9 +70,20 @@ python execution/classify_with_gemini.py $CASO --parallel
 python execution/generate_catalog.py $CASO
 
 # Fase 3: Extração
-python execution/extract_with_gemini.py $CASO --parallel --workers 10
+python execution/extract_with_gemini.py $CASO --parallel
 
 # Fase 4: Mapeamento
+python execution/map_to_fields.py $CASO
+```
+
+**Pipeline Completo em Uma Linha:**
+```bash
+CASO="FC_515_124_p280509"
+
+python execution/inventory_files.py "Test-Docs/FC 515 - 124 p280509" && \
+python execution/classify_with_gemini.py $CASO --parallel && \
+python execution/generate_catalog.py $CASO && \
+python execution/extract_with_gemini.py $CASO --parallel && \
 python execution/map_to_fields.py $CASO
 ```
 
@@ -80,7 +94,7 @@ python execution/map_to_fields.py $CASO
 python execution/inventory_files.py "Test-Docs/{pasta_escritura}"
 # Saída: .tmp/inventarios/{caso_id}_bruto.json
 
-# 1.2 Classificação visual (modo paralelo recomendado)
+# 1.2 Classificação visual (já otimizado para plano pago)
 python execution/classify_with_gemini.py {caso_id} --parallel
 # Saída: .tmp/classificacoes/{caso_id}_classificacao.json
 
@@ -89,14 +103,24 @@ python execution/generate_catalog.py {caso_id}
 # Saída: .tmp/catalogos/{caso_id}.json
 ```
 
-**Flags úteis para classify_with_gemini.py:**
+**Flags disponíveis para classify_with_gemini.py:**
 
-| Flag | Descrição |
-|------|-----------|
-| `--parallel` | Preparação em paralelo (recomendado) |
-| `--mock` | Teste sem API (classifica tudo como OUTRO) |
-| `--limit N` | Processar apenas N arquivos |
-| `--workers N` | Número de workers (default: 6) |
+| Flag | Descrição | Default |
+|------|-----------|---------|
+| `--parallel` / `-p` | Ativa modo paralelo otimizado | False |
+| `--api-workers N` | Workers para chamadas API paralelas | 5 |
+| `--batch-size N` / `-b N` | Imagens por request (1=desabilita batch) | 4 |
+| `--workers N` / `-w N` | Workers para preparação de documentos | 10 |
+| `--mock` / `-m` | Teste sem API (classifica por nome) | False |
+| `--limit N` / `-l N` | Processar apenas N arquivos | Todos |
+| `--verbose` / `-v` | Log detalhado | False |
+| `--consolidar-descobertas` | Agrupa documentos DESCONHECIDO | - |
+
+**Otimizações de Performance:**
+
+1. **Pré-classificação por Nome:** Documentos com nomes óbvios (RG_, CNDT_, ITBI_) são classificados localmente sem API
+2. **Batch Processing:** Múltiplas imagens enviadas em um único request (--batch-size 4)
+3. **API Workers Paralelos:** Múltiplas chamadas simultâneas respeitando rate limit global
 
 ### 2.3 Fase 3: Extração
 
@@ -190,11 +214,26 @@ python execution/inventory_files.py "Test-Docs/FC 515 - 124 p280509"
 
 **Sintoma:** API retorna erro 429.
 
-**Causa:** Muitas requisições simultâneas.
+**Causa:** Muitas requisições simultâneas ou tier incorreto.
 
-**Solução:**
+**Solução para Classificação:**
+- Reduzir workers API: `--api-workers 2`
+- Desabilitar batch: `--batch-size 1`
+- Para free tier: editar `RATE_LIMIT_DELAY = 4.0` no script
+
+**Solução para Extração:**
 - Reduzir workers: `--workers 3`
 - Para free tier: `--rpm 15 --workers 3`
+
+### 4.2.1 Erro: "503 Service Unavailable" / "Model is overloaded"
+
+**Sintoma:** API retorna erro 503 com mensagem de modelo sobrecarregado.
+
+**Causa:** Modelo Gemini temporariamente indisponível.
+
+**Solução:** O script já implementa retry automático com backoff exponencial. Se persistir:
+- Reduzir batch size: `--batch-size 2`
+- Usar modelo fallback: editar `GEMINI_MODEL` no .env para `gemini-2.5-flash`
 
 ### 4.3 Erro: "Catálogo não encontrado"
 
@@ -365,25 +404,75 @@ O `caso_id` é derivado do nome da pasta:
 
 ## 7. Dicas de Performance
 
-### 7.1 Para Free Tier (15 RPM)
+> **IMPORTANTE:** Este projeto utiliza exclusivamente o **PLANO PAGO** do Gemini API (150 RPM).
+> Todas as configurações padrão já estão otimizadas. Não é necessário especificar flags extras.
+
+### 7.1 Configuração Padrão (Plano Pago - 150 RPM)
+
+Os scripts já vêm configurados com valores otimizados para o plano pago:
+
 ```bash
-python execution/classify_with_gemini.py {caso_id} --parallel --workers 3
-python execution/extract_with_gemini.py {caso_id} --parallel --workers 3 --rpm 15
+# Classificação - basta usar --parallel (valores padrão já são otimizados)
+python execution/classify_with_gemini.py {caso_id} --parallel
+
+# Extração - basta usar --parallel
+python execution/extract_with_gemini.py {caso_id} --parallel
 ```
 
-### 7.2 Para Paid Tier (150 RPM)
+**Valores padrão no código:**
+- `RATE_LIMIT_DELAY = 0.5s` (150 RPM)
+- `API_WORKERS = 5`
+- `CLASSIFICATION_BATCH_SIZE = 4`
+- `PARALLEL_WORKERS = 10`
+
+### 7.2 Configurações Explícitas (opcional)
+
+Se precisar ajustar manualmente:
+
 ```bash
-python execution/classify_with_gemini.py {caso_id} --parallel --workers 6
+# Classificação com configuração explícita
+python execution/classify_with_gemini.py {caso_id} --parallel --api-workers 5 --batch-size 4
+
+# Extração com configuração explícita
 python execution/extract_with_gemini.py {caso_id} --parallel --workers 10 --rpm 150
 ```
 
 ### 7.3 Tempos Estimados (40 documentos)
 
-| Configuração | Tempo Estimado |
-|--------------|----------------|
-| Serial | ~25 minutos |
-| Paralelo (3 workers, free) | ~10 minutos |
-| Paralelo (10 workers, paid) | ~5 minutos |
+| Fase | Configuração | Tempo Anterior | Tempo Otimizado | Melhoria |
+|------|--------------|----------------|-----------------|----------|
+| **1.2 Classificação** | Serial (antigo) | ~6 min | - | - |
+| **1.2 Classificação** | Paralelo + Batch | - | ~2.5 min | **~58%** |
+| **3 Extração** | 10 workers | ~3.5 min | ~4.3 min | - |
+| **TOTAL Pipeline** | Otimizado | ~10 min | ~7 min | **~30%** |
+
+### 7.4 Configurações Padrão (Plano Pago)
+
+| Parâmetro | Valor Padrão | Descrição |
+|-----------|--------------|-----------|
+| Rate Limit Classificação | 0.5s | Intervalo entre requests |
+| API Workers Classificação | 5 | Workers para chamadas paralelas |
+| Batch Size | 4 | Imagens por request |
+| Prep Workers | 10 | Workers para preparação I/O |
+| Workers Extração | 10 | Workers para extração paralela |
+| RPM Extração | 150 | Rate limit da extração |
+
+### 7.5 Como as Otimizações Funcionam
+
+**1. Pré-classificação por Nome de Arquivo:**
+- Documentos com prefixos óbvios (RG_, CNDT_, ITBI_, etc.) são classificados localmente
+- Economia: ~5-10% das chamadas API
+- Confiança: Só aplica quando tem certeza Alta
+
+**2. Batch Processing:**
+- Agrupa 4 imagens por request ao invés de 1
+- Economia: ~75% das chamadas API (39 docs → 9 batches)
+- Prompt especial pede array JSON de respostas
+
+**3. Workers API Paralelos:**
+- Múltiplas chamadas simultâneas ao Gemini
+- Rate limit global de 0.5s entre requests
+- Throughput: ~2 requests/segundo (vs 0.25/s antes)
 
 ---
 
@@ -661,4 +750,84 @@ python execution/extract_with_gemini.py {caso_id} --file {arquivo}
 
 # Verificar
 cat .tmp/contextual/{caso_id}/{arquivo}.json | python -m json.tool
+```
+
+---
+
+## 9. Novas Funcionalidades (Janeiro 2026)
+
+### 9.1 Seleção Automática de Prompt para Matrículas Grandes
+
+O sistema agora detecta automaticamente matrículas de imóvel grandes (>2MB) e usa um prompt compacto otimizado para evitar estouro de tokens.
+
+**Comportamento:**
+- Arquivo < 2MB → `matricula_imovel.txt` (prompt completo com reescrita)
+- Arquivo ≥ 2MB → `matricula_imovel_compact.txt` (prioriza JSON estruturado)
+
+**Não requer ação do operador** - a seleção é automática.
+
+### 9.2 Consolidação de Pessoas com CPFs Duplicados
+
+O sistema agora detecta e consolida automaticamente registros de pessoas duplicadas causados por erros de OCR em CPFs.
+
+**Critérios de consolidação (em ordem):**
+1. CPF com dígito verificador válido tem prioridade
+2. CPF que aparece mais vezes (votação) é o correto
+3. Em empate, fonte de maior prioridade vence (RG > CNH > Compromisso)
+
+**Verificar consolidação:**
+```bash
+# Ver pessoas consolidadas no mapeamento
+python -c "
+import json
+d = json.load(open('.tmp/mapped/{caso_id}.json'))
+for tipo in ['alienantes', 'adquirentes']:
+    for p in d.get(tipo, []):
+        if p.get('_consolidado'):
+            print(f'{tipo}: {p[\"nome\"]}')
+            print(f'  CPFs encontrados: {p.get(\"_cpfs_encontrados\", [])}')
+"
+```
+
+### 9.3 Processamento de CNH
+
+O sistema agora processa documentos CNH e extrai:
+- Nome, CPF, RG, Data de nascimento
+- Filiação (pai e mãe)
+- Dados da habilitação (categoria, validade, etc.)
+
+**Prioridade CNH = 90** (menor que RG direto = 100, mas útil como fonte secundária quando não há RG disponível)
+
+### 9.4 Campo Anuentes na Saída
+
+A estrutura de saída agora inclui um campo `anuentes` separado para cônjuges que anuem na venda:
+
+```json
+{
+  "metadata": {...},
+  "alienantes": [...],
+  "anuentes": [
+    {
+      "nome": "CÍNTIA VIANA DE ARAÚJO SILVA",
+      "cpf": "...",
+      "anuente_de": "FERNANDO FAEDO DA SILVA",
+      ...
+    }
+  ],
+  "adquirentes": [...],
+  "imovel": {...},
+  "negocio": {...}
+}
+```
+
+**Verificar anuentes:**
+```bash
+python -c "
+import json
+d = json.load(open('.tmp/mapped/{caso_id}.json'))
+print(f'Alienantes: {len(d.get(\"alienantes\", []))}')
+print(f'Anuentes: {len(d.get(\"anuentes\", []))}')
+for a in d.get('anuentes', []):
+    print(f'  - {a[\"nome\"]} (anuente de {a.get(\"anuente_de\", \"?\")})')
+"
 ```

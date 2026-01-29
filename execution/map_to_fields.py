@@ -71,6 +71,7 @@ SOURCE_PRIORITY = {
     'IPTU': 65,
     'VVR': 60,
     'CND_MUNICIPAL': 55,
+    'CND_CONDOMINIO': 54,
     'ESCRITURA': 50,
     'COMPROVANTE_PAGAMENTO': 40,
     'PROTOCOLO_ONR': 30,
@@ -268,6 +269,12 @@ class Imovel:
         self.cnd_validade: Optional[str] = None
         self.cnd_status: Optional[str] = None
 
+        # CND Condomínio
+        self.cnd_condominio_status: Optional[str] = None
+        self.cnd_condominio_data_emissao: Optional[str] = None
+        self.cnd_condominio_validade: Optional[str] = None
+        self.cnd_condominio_codigo: Optional[str] = None
+
         # Proprietarios atuais (antes da venda)
         self.proprietarios: List[Dict] = []
 
@@ -399,6 +406,12 @@ class Imovel:
                 "data_emissao": self.cnd_data_emissao,
                 "validade": self.cnd_validade,
                 "status": self.cnd_status
+            },
+            "certidao_negativa_condominio": {
+                "status": self.cnd_condominio_status,
+                "data_emissao": self.cnd_condominio_data_emissao,
+                "validade": self.cnd_condominio_validade,
+                "codigo_verificacao": self.cnd_condominio_codigo
             },
             "proprietarios": self.proprietarios,
             "onus": self.onus,
@@ -649,6 +662,139 @@ def parse_date_br(date_str: Optional[str]) -> Optional[datetime]:
             return None
 
 
+def normalizar_matricula(numero: str) -> str:
+    """
+    Normaliza numero de matricula para uso como chave de dicionario.
+
+    Remove pontos, espacos e outros caracteres para garantir consistencia
+    entre diferentes fontes (CCV pode ter "116239" enquanto matricula tem "116.239").
+    """
+    if not numero:
+        return ""
+    # Remove pontos, espacos, tracos e outros caracteres nao-numericos
+    return re.sub(r'[^\d]', '', str(numero).strip())
+
+
+def parse_endereco(endereco_completo: str) -> Dict[str, Optional[str]]:
+    """
+    Parseia endereco completo em componentes individuais.
+
+    Exemplo de entrada: "Rua Mil Oitocentos e Vinte e Dois - 1453 - 94 - Ipiranga - CEP 04216-001 - Sao Paulo - SP"
+
+    Retorna dicionario com: logradouro, numero, complemento, bairro, cidade, estado, cep
+    """
+    resultado = {
+        "logradouro": None,
+        "numero": None,
+        "complemento": None,
+        "bairro": None,
+        "cidade": None,
+        "estado": None,
+        "cep": None
+    }
+
+    if not endereco_completo or not isinstance(endereco_completo, str):
+        return resultado
+
+    endereco_completo = endereco_completo.strip()
+
+    # Extrai CEP (formato: CEP 12345-678 ou CEP: 12345678)
+    cep_match = re.search(r'CEP[:\s]*(\d{5}-?\d{3})', endereco_completo, re.IGNORECASE)
+    if cep_match:
+        resultado['cep'] = cep_match.group(1)
+        # Remove o CEP do endereco para facilitar parsing
+        endereco_completo = re.sub(r'\s*-?\s*CEP[:\s]*\d{5}-?\d{3}\s*-?\s*', ' - ', endereco_completo, flags=re.IGNORECASE)
+
+    # Extrai UF (2 letras maiusculas no final ou isoladas)
+    uf_match = re.search(r'\b([A-Z]{2})\s*$', endereco_completo)
+    if uf_match:
+        uf = uf_match.group(1)
+        # Valida se e uma UF valida do Brasil
+        ufs_validas = {'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS',
+                       'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC',
+                       'SP', 'SE', 'TO'}
+        if uf in ufs_validas:
+            resultado['estado'] = uf
+            # Remove a UF do endereco
+            endereco_completo = endereco_completo[:uf_match.start()].strip().rstrip('-').strip()
+
+    # Divide por separadores comuns (-, –, ,)
+    partes = re.split(r'\s*[-–,]\s*', endereco_completo)
+    partes = [p.strip() for p in partes if p.strip()]
+
+    if not partes:
+        return resultado
+
+    # Primeira parte geralmente e logradouro (pode incluir numero no final)
+    primeira = partes[0]
+
+    # Tenta extrair numero do final do logradouro
+    num_match = re.search(r'\b(\d+)\s*$', primeira)
+    if num_match:
+        resultado['numero'] = num_match.group(1)
+        resultado['logradouro'] = primeira[:num_match.start()].strip()
+    else:
+        resultado['logradouro'] = primeira
+
+    # Processa partes restantes
+    partes_restantes = []
+    for i, parte in enumerate(partes[1:], 1):
+        parte = parte.strip()
+        if not parte:
+            continue
+
+        # Se e puramente numerico, pode ser numero ou complemento
+        if parte.isdigit():
+            if not resultado['numero']:
+                resultado['numero'] = parte
+            elif not resultado['complemento']:
+                resultado['complemento'] = parte
+        # Se comeca com indicador de complemento
+        elif re.match(r'^(Apto?\.?|Ap\.?|Sala|Bloco|Loja|Casa|Lote|Quadra|Conjunto|Conj\.?|Bl\.?)\s*\d*', parte, re.IGNORECASE):
+            if resultado['complemento']:
+                resultado['complemento'] = f"{resultado['complemento']} - {parte}"
+            else:
+                resultado['complemento'] = parte
+        else:
+            partes_restantes.append(parte)
+
+    # Das partes restantes, atribui bairro e cidade
+    for parte in partes_restantes:
+        if not resultado['bairro']:
+            resultado['bairro'] = parte
+        elif not resultado['cidade']:
+            resultado['cidade'] = parte
+
+    return resultado
+
+
+def apply_parsed_endereco(pessoa: 'PessoaNatural', endereco_completo: str, source: str) -> None:
+    """
+    Aplica os componentes de endereco parseado aos campos de domicilio da pessoa.
+
+    Args:
+        pessoa: Instancia de PessoaNatural
+        endereco_completo: String com endereco completo
+        source: Nome do arquivo fonte
+    """
+    parsed = parse_endereco(endereco_completo)
+
+    if parsed['logradouro']:
+        pessoa.set_field('domicilio_logradouro', parsed['logradouro'], source)
+    if parsed['numero']:
+        pessoa.set_field('domicilio_numero', parsed['numero'], source)
+    if parsed['complemento']:
+        pessoa.set_field('domicilio_complemento', parsed['complemento'], source)
+    if parsed['bairro']:
+        pessoa.set_field('domicilio_bairro', parsed['bairro'], source)
+    if parsed['cidade']:
+        pessoa.set_field('domicilio_cidade', parsed['cidade'], source)
+    if parsed['estado']:
+        pessoa.set_field('domicilio_estado', parsed['estado'], source)
+    if parsed['cep']:
+        pessoa.set_field('domicilio_cep', parsed['cep'], source)
+
+
 def map_rg_to_pessoa(dados: Dict, pessoa: PessoaNatural, source: str) -> None:
     """
     Mapeia dados de RG para pessoa.
@@ -861,11 +1007,11 @@ def map_cndt_to_pessoa(dados: Dict, pessoa: PessoaNatural, source: str) -> None:
     pessoa.set_field('cndt_status', dados_cat.get('resultado_certidao'), source)
 
 
-def map_compromisso_to_partes(dados: Dict, pessoas: Dict[str, PessoaNatural], imoveis: Dict[str, Imovel], negocio: Negocio, source: str) -> Tuple[List[str], List[str]]:
+def map_compromisso_to_partes(dados: Dict, pessoas: Dict[str, PessoaNatural], imoveis: Dict[str, Imovel], negocio: Negocio, source: str) -> Tuple[List[str], List[str], List[str]]:
     """
     Mapeia dados do Compromisso de Compra e Venda.
 
-    Campos extraidos: dados das partes, imovel, valores, forma_pagamento
+    Campos extraidos: dados das partes (vendedores, compradores, usufrutuarios), imovel, valores, forma_pagamento
 
     Args:
         dados: Dados do documento
@@ -875,12 +1021,13 @@ def map_compromisso_to_partes(dados: Dict, pessoas: Dict[str, PessoaNatural], im
         source: Nome do arquivo fonte
 
     Returns:
-        Tuple com (lista de CPFs dos vendedores, lista de CPFs dos compradores)
+        Tuple com (lista de CPFs dos vendedores, lista de CPFs dos compradores, lista de CPFs dos usufrutuarios)
     """
     dados_cat = dados.get('dados_catalogados') or {}
 
     cpfs_vendedores = []
     cpfs_compradores = []
+    cpfs_usufrutuarios = []
 
     # Processa vendedores
     for vendedor in (dados_cat.get('vendedores') or []):
@@ -900,11 +1047,10 @@ def map_compromisso_to_partes(dados: Dict, pessoas: Dict[str, PessoaNatural], im
             pessoa.set_field('regime_bens', vendedor.get('regime_casamento'), source)
             pessoa.set_field('conjuge', vendedor.get('conjuge'), source)
 
-            # Endereco
+            # Endereco - usa parser para separar componentes
             endereco = vendedor.get('endereco', '')
             if endereco:
-                # Tenta parsear endereco
-                pessoa.set_field('domicilio_logradouro', endereco, source)
+                apply_parsed_endereco(pessoa, endereco, source)
 
             # Proporcao
             proporcao = vendedor.get('proporcao_venda_percentual')
@@ -927,9 +1073,33 @@ def map_compromisso_to_partes(dados: Dict, pessoas: Dict[str, PessoaNatural], im
             pessoa.set_field('profissao', comprador.get('profissao'), source)
             pessoa.set_field('estado_civil', comprador.get('estado_civil'), source)
 
+            # Endereco - usa parser para separar componentes
             endereco = comprador.get('endereco', '')
             if endereco:
-                pessoa.set_field('domicilio_logradouro', endereco, source)
+                apply_parsed_endereco(pessoa, endereco, source)
+
+    # Processa usufrutuarios
+    for usufrutuario in (dados_cat.get('usufrutuarios') or []):
+        cpf = normalizar_cpf(usufrutuario.get('cpf'))
+        if cpf:
+            cpfs_usufrutuarios.append(cpf)
+
+            if cpf not in pessoas:
+                pessoas[cpf] = PessoaNatural()
+
+            pessoa = pessoas[cpf]
+            pessoa.set_field('nome', usufrutuario.get('nome'), source)
+            pessoa.set_field('cpf', cpf, source)
+            pessoa.set_field('nacionalidade', usufrutuario.get('nacionalidade'), source)
+            pessoa.set_field('profissao', usufrutuario.get('profissao'), source)
+            pessoa.set_field('estado_civil', usufrutuario.get('estado_civil'), source)
+            pessoa.set_field('regime_bens', usufrutuario.get('regime_casamento'), source)
+            pessoa.set_field('conjuge', usufrutuario.get('conjuge'), source)
+
+            # Endereco - usa parser para separar componentes
+            endereco = usufrutuario.get('endereco', '')
+            if endereco:
+                apply_parsed_endereco(pessoa, endereco, source)
 
     # Dados do imovel - processa todas as matriculas do compromisso
     imovel_dados = dados_cat.get('imovel', {})
@@ -940,7 +1110,7 @@ def map_compromisso_to_partes(dados: Dict, pessoas: Dict[str, PessoaNatural], im
         if matriculas:
             # Processa cada matricula como um imovel separado
             for mat in matriculas:
-                matricula_num = str(mat.get('numero', '')).strip()
+                matricula_num = normalizar_matricula(mat.get('numero', ''))
                 if not matricula_num:
                     matricula_num = f"_compromisso_{source}"
 
@@ -1028,7 +1198,7 @@ def map_compromisso_to_partes(dados: Dict, pessoas: Dict[str, PessoaNatural], im
     if intermediador:
         negocio.set_field('intermediador', intermediador.get('nome'), source)
 
-    return cpfs_vendedores, cpfs_compradores
+    return cpfs_vendedores, cpfs_compradores, cpfs_usufrutuarios
 
 
 def map_matricula_to_imovel(dados: Dict, imovel: Imovel, source: str) -> List[Dict]:
@@ -1072,6 +1242,23 @@ def map_matricula_to_imovel(dados: Dict, imovel: Imovel, source: str) -> List[Di
             # Mapeia UF para matricula_estado (estado do cartorio)
             imovel.set_field('matricula_estado', endereco.get('uf'), source)
             imovel.set_field('matricula_cidade', endereco.get('cidade'), source)
+
+        # Fallback: tenta extrair CEP de campos de texto se nao foi encontrado
+        if not imovel.cep:
+            # Tenta de endereco_completo do imovel
+            endereco_completo = imovel_dados.get('endereco_completo', '') or ''
+            if not endereco_completo:
+                # Tenta da descricao_completa
+                endereco_completo = imovel_dados.get('descricao_completa', '') or ''
+            if endereco_completo:
+                cep_match = re.search(r'CEP[:\s]*(\d{5}-?\d{3})', endereco_completo, re.IGNORECASE)
+                if cep_match:
+                    imovel.set_field('cep', cep_match.group(1), source)
+                else:
+                    # Tenta padrao CEP sem prefixo (ex: 05074-010)
+                    cep_match = re.search(r'\b(\d{5}-\d{3})\b', endereco_completo)
+                    if cep_match:
+                        imovel.set_field('cep', cep_match.group(1), source)
 
             # Extrai unidade e andar - primeiro tenta campos diretos, depois do complemento/descrição
             # Campo andar direto (prioridade)
@@ -1230,19 +1417,38 @@ def map_vvr_to_imovel(dados: Dict, imovel: Imovel, source: str) -> None:
     """
     Mapeia dados do VVR.
 
-    Campos extraidos: valor_venal_referencia
+    Campos extraidos: valor_venal_referencia, cep
     """
     dados_cat = dados.get('dados_catalogados') or {}
 
     imovel.set_field('sql', dados_cat.get('sql'), source)
     imovel.set_field('valor_venal_referencia', normalizar_valor(dados_cat.get('valor_venal_referencia')), source)
 
+    # Tenta extrair CEP do VVR se ainda nao definido
+    if not imovel.cep:
+        # Tenta do campo cep direto
+        cep = dados_cat.get('cep')
+        if cep:
+            imovel.set_field('cep', cep, source)
+        else:
+            # Tenta do endereco ou endereco_completo
+            endereco = dados_cat.get('endereco') or dados_cat.get('endereco_completo') or ''
+            if endereco:
+                cep_match = re.search(r'CEP[:\s]*(\d{5}-?\d{3})', endereco, re.IGNORECASE)
+                if cep_match:
+                    imovel.set_field('cep', cep_match.group(1), source)
+                else:
+                    # Tenta padrao CEP sem prefixo (ex: 05074-010)
+                    cep_match = re.search(r'\b(\d{5}-\d{3})\b', endereco)
+                    if cep_match:
+                        imovel.set_field('cep', cep_match.group(1), source)
+
 
 def map_cnd_municipal_to_imovel(dados: Dict, imovel: Imovel, source: str) -> None:
     """
     Mapeia dados da CND Municipal.
 
-    Campos extraidos: certidao_municipal (numero, data_emissao, validade, status)
+    Campos extraidos: certidao_municipal (numero, data_emissao, validade, status), cep
     """
     dados_cat = dados.get('dados_catalogados') or {}
 
@@ -1251,6 +1457,49 @@ def map_cnd_municipal_to_imovel(dados: Dict, imovel: Imovel, source: str) -> Non
     imovel.set_field('cnd_data_emissao', dados_cat.get('data_emissao'), source)
     imovel.set_field('cnd_validade', dados_cat.get('data_validade'), source)
     imovel.set_field('cnd_status', dados_cat.get('status'), source)
+
+    # Tenta extrair CEP do endereco se presente na CND Municipal
+    if not imovel.cep:
+        # Tenta do campo cep direto
+        cep = dados_cat.get('cep')
+        if cep:
+            imovel.set_field('cep', cep, source)
+        else:
+            # Tenta do endereco ou endereco_completo
+            endereco = dados_cat.get('endereco') or dados_cat.get('endereco_completo') or ''
+            if endereco:
+                cep_match = re.search(r'CEP[:\s]*(\d{5}-?\d{3})', endereco, re.IGNORECASE)
+                if cep_match:
+                    imovel.set_field('cep', cep_match.group(1), source)
+                else:
+                    # Tenta padrao CEP sem prefixo (ex: 05074-010)
+                    cep_match = re.search(r'\b(\d{5}-\d{3})\b', endereco)
+                    if cep_match:
+                        imovel.set_field('cep', cep_match.group(1), source)
+
+
+def map_cnd_condominio_to_imovel(dados: Dict, imovel: Imovel, source: str) -> None:
+    """
+    Mapeia dados da CND de Condomínio para o imóvel.
+
+    Campos extraídos: status, data_emissao, validade, codigo_verificacao
+    """
+    dados_cat = dados.get('dados_catalogados') or {}
+
+    imovel.set_field('cnd_condominio_status', dados_cat.get('status'), source)
+    imovel.set_field('cnd_condominio_data_emissao', dados_cat.get('data_emissao'), source)
+
+    # Validade pode estar em diferentes locais
+    validade = dados_cat.get('validade') or dados_cat.get('data_validade')
+    if not validade:
+        datas = dados_cat.get('datas_importantes', [])
+        for d in datas:
+            if isinstance(d, dict) and 'validade' in d.get('tipo', '').lower():
+                validade = d.get('data')
+                break
+
+    imovel.set_field('cnd_condominio_validade', validade, source)
+    imovel.set_field('cnd_condominio_codigo', dados_cat.get('codigo_verificacao'), source)
 
 
 def map_itbi_to_negocio(dados: Dict, negocio: Negocio, source: str) -> None:
@@ -1426,6 +1675,7 @@ def map_documents_to_fields(caso_id: str, verbose: bool = False) -> Dict[str, An
     # Listas para rastrear papeis
     cpfs_vendedores: Set[str] = set()
     cpfs_compradores: Set[str] = set()
+    cpfs_usufrutuarios: Set[str] = set()
 
     # Estrutura para rastrear múltiplos casamentos e alertas jurídicos
     casamentos_por_pessoa: Dict[str, List[Dict]] = {}  # CPF -> lista de casamentos detectados
@@ -1435,10 +1685,11 @@ def map_documents_to_fields(caso_id: str, verbose: bool = False) -> Dict[str, An
     for doc in documentos:
         if doc.get('tipo_documento') == 'COMPROMISSO_COMPRA_VENDA':
             source = doc.get('_source_file', 'unknown')
-            vendedores, compradores = map_compromisso_to_partes(doc, pessoas, imoveis, negocio, source)
+            vendedores, compradores, usufrutuarios = map_compromisso_to_partes(doc, pessoas, imoveis, negocio, source)
             cpfs_vendedores.update(vendedores)
             cpfs_compradores.update(compradores)
-            logger.info(f"Compromisso processado: {len(vendedores)} vendedores, {len(compradores)} compradores")
+            cpfs_usufrutuarios.update(usufrutuarios)
+            logger.info(f"Compromisso processado: {len(vendedores)} vendedores, {len(compradores)} compradores, {len(usufrutuarios)} usufrutuarios")
 
     # Segunda passagem: demais documentos
     for doc in documentos:
@@ -1522,31 +1773,48 @@ def map_documents_to_fields(caso_id: str, verbose: bool = False) -> Dict[str, An
 
             for conj in [conjuge1, conjuge2]:
                 cpf = normalizar_cpf(conj.get('cpf'))
+                nome_conj = conj.get('nome_completo', '')
+                nome_conj_upper = nome_conj.upper() if nome_conj else ''
+
+                # Tenta encontrar pessoa por CPF primeiro
+                pessoa_key = None
                 if cpf and cpf in pessoas:
-                    casamento_info = map_certidao_casamento_to_pessoa(doc, pessoas[cpf], conj.get('nome_completo', ''), source)
+                    pessoa_key = cpf
+                # Se nao tem CPF, tenta encontrar por nome
+                elif nome_conj_upper:
+                    for key, pessoa in pessoas.items():
+                        pessoa_nome = (pessoa.nome or '').upper()
+                        # Match exato ou nome contido (ex: nome de solteira vs casada)
+                        if pessoa_nome == nome_conj_upper or nome_conj_upper in pessoa_nome or pessoa_nome in nome_conj_upper:
+                            pessoa_key = key
+                            logger.debug(f"Certidao casamento: vinculado por nome '{nome_conj}' -> pessoa '{pessoa.nome}' (CPF: {key})")
+                            break
+
+                if pessoa_key:
+                    casamento_info = map_certidao_casamento_to_pessoa(doc, pessoas[pessoa_key], nome_conj, source)
 
                     # Rastreia múltiplos casamentos
-                    if cpf not in casamentos_por_pessoa:
-                        casamentos_por_pessoa[cpf] = []
-                    casamentos_por_pessoa[cpf].append(casamento_info)
+                    if pessoa_key not in casamentos_por_pessoa:
+                        casamentos_por_pessoa[pessoa_key] = []
+                    casamentos_por_pessoa[pessoa_key].append(casamento_info)
 
                     # Se detectou mais de um casamento para mesma pessoa, gera alerta
-                    if len(casamentos_por_pessoa[cpf]) > 1:
-                        nome_pessoa = pessoas[cpf].nome or cpf
+                    if len(casamentos_por_pessoa[pessoa_key]) > 1:
+                        nome_pessoa = pessoas[pessoa_key].nome or pessoa_key
                         alerta = {
                             'tipo': 'MULTIPLOS_CASAMENTOS',
                             'severidade': 'ALTA',
                             'pessoa': nome_pessoa,
-                            'cpf': cpf,
-                            'casamentos': casamentos_por_pessoa[cpf],
-                            'mensagem': f"Detectados {len(casamentos_por_pessoa[cpf])} casamentos para {nome_pessoa}. Verificar situação de dissolução do(s) casamento(s) anterior(es).",
+                            'cpf': pessoa_key,
+                            'casamentos': casamentos_por_pessoa[pessoa_key],
+                            'mensagem': f"Detectados {len(casamentos_por_pessoa[pessoa_key])} casamentos para {nome_pessoa}. Verificar situação de dissolução do(s) casamento(s) anterior(es).",
                             'recomendacao': "Solicitar certidão de averbação de divórcio ou óbito do cônjuge anterior."
                         }
                         # Evita duplicatas de alertas
-                        alertas_existentes = [a for a in alertas_juridicos if a.get('cpf') == cpf and a.get('tipo') == 'MULTIPLOS_CASAMENTOS']
+                        alertas_existentes = [a for a in alertas_juridicos if a.get('cpf') == pessoa_key and a.get('tipo') == 'MULTIPLOS_CASAMENTOS']
                         if alertas_existentes:
                             # Atualiza alerta existente
-                            alertas_existentes[0]['casamentos'] = casamentos_por_pessoa[cpf]
+                            alertas_existentes[0]['casamentos'] = casamentos_por_pessoa[pessoa_key]
                             alertas_existentes[0]['mensagem'] = alerta['mensagem']
                         else:
                             alertas_juridicos.append(alerta)
@@ -1559,7 +1827,7 @@ def map_documents_to_fields(caso_id: str, verbose: bool = False) -> Dict[str, An
 
         elif tipo == 'MATRICULA_IMOVEL':
             dados_cat = doc.get('dados_catalogados', {})
-            matricula_num = str(dados_cat.get('numero_matricula', '')).strip()
+            matricula_num = normalizar_matricula(dados_cat.get('numero_matricula', ''))
 
             # Se nao tem numero de matricula, usa chave generica
             if not matricula_num:
@@ -1595,6 +1863,13 @@ def map_documents_to_fields(caso_id: str, verbose: bool = False) -> Dict[str, An
                 imoveis['_temp_cnd'] = Imovel()
                 map_cnd_municipal_to_imovel(doc, imoveis['_temp_cnd'], source)
 
+        elif tipo == 'CND_CONDOMINIO':
+            for imovel in imoveis.values():
+                map_cnd_condominio_to_imovel(doc, imovel, source)
+            if not imoveis:
+                imoveis['_temp_cnd_cond'] = Imovel()
+                map_cnd_condominio_to_imovel(doc, imoveis['_temp_cnd_cond'], source)
+
         elif tipo == 'ITBI':
             map_itbi_to_negocio(doc, negocio, source)
 
@@ -1619,9 +1894,10 @@ def map_documents_to_fields(caso_id: str, verbose: bool = False) -> Dict[str, An
         if found:
             del pessoas[temp_id]
 
-    # Separa alienantes e adquirentes (evitando duplicatas)
+    # Separa alienantes, adquirentes e usufrutuarios (evitando duplicatas)
     alienantes_dict: Dict[str, Dict] = {}  # CPF -> dados
     adquirentes_dict: Dict[str, Dict] = {}  # CPF -> dados
+    usufrutuarios_dict: Dict[str, Dict] = {}  # CPF -> dados
 
     for cpf, pessoa in pessoas.items():
         if cpf.startswith('_TEMP_'):
@@ -1670,7 +1946,17 @@ def map_documents_to_fields(caso_id: str, verbose: bool = False) -> Dict[str, An
                 # Usa nome como chave
                 nome = pessoa_dict.get('nome', '').upper()
                 adquirentes_dict[f"_nome_{nome}"] = pessoa_dict
-        else:
+
+        # Processa usufrutuarios (pode ser usufrutuario E vendedor/comprador, entao nao eh elif)
+        if cpf in cpfs_usufrutuarios:
+            if cpf_valido:
+                usufrutuarios_dict[cpf] = pessoa_dict
+            else:
+                nome = pessoa_dict.get('nome', '').upper()
+                usufrutuarios_dict[f"_nome_{nome}"] = pessoa_dict
+
+        # Se nao eh vendedor, comprador nem usufrutuario, tenta determinar pelo catalogo
+        if cpf not in cpfs_vendedores and cpf not in cpfs_compradores and cpf not in cpfs_usufrutuarios:
             # Tenta determinar pelo papel_inferido do catalogo
             for arq in catalog.get('arquivos', []):
                 if arq.get('pessoa_relacionada', '').upper() == (pessoa.nome or '').upper():
@@ -1688,6 +1974,7 @@ def map_documents_to_fields(caso_id: str, verbose: bool = False) -> Dict[str, An
     # Converte dicts para listas, filtrando entradas invalidas
     alienantes = [p for p in alienantes_dict.values() if p.get('cpf') and p.get('cpf') != 'NAO_INFORMADO']
     adquirentes = [p for p in adquirentes_dict.values() if p.get('cpf') and p.get('cpf') != 'NAO_INFORMADO']
+    usufrutuarios = [p for p in usufrutuarios_dict.values() if p.get('cpf') and p.get('cpf') != 'NAO_INFORMADO']
 
     # Funcao de consolidacao de imoveis
     def consolidar_imoveis(imoveis_dict: Dict[str, Imovel]) -> List[Dict]:
@@ -1832,10 +2119,14 @@ def map_documents_to_fields(caso_id: str, verbose: bool = False) -> Dict[str, An
             "campos_preenchidos": campos_preenchidos,
             "campos_faltantes": campos_faltantes,
             "total_imoveis": len(imoveis_list),
+            "total_alienantes": len(alienantes),
+            "total_adquirentes": len(adquirentes),
+            "total_usufrutuarios": len(usufrutuarios),
             "total_alertas": len(alertas_juridicos)
         },
         "alienantes": alienantes,
         "adquirentes": adquirentes,
+        "usufrutuarios": usufrutuarios,
         "imoveis": imoveis_list,  # LISTA de imoveis em vez de objeto unico
         "negocio": negocio_dict,
         "certidoes": {
@@ -1846,6 +2137,14 @@ def map_documents_to_fields(caso_id: str, verbose: bool = False) -> Dict[str, An
                     "cndt": a.get('cndt')
                 }
                 for a in alienantes if a.get('cndt', {}).get('numero')
+            ],
+            "cndt_usufrutuarios": [
+                {
+                    "nome": u.get('nome'),
+                    "cpf": u.get('cpf'),
+                    "cndt": u.get('cndt')
+                }
+                for u in usufrutuarios if u.get('cndt', {}).get('numero')
             ],
             "cnd_municipal": {
                 "numero": primeiro_imovel_dict.get('certidao_negativa_municipal', {}).get('numero'),
@@ -1888,6 +2187,11 @@ def remove_sources_from_result(resultado: Dict[str, Any]) -> Dict[str, Any]:
     for adquirente in clean.get('adquirentes', []):
         if '_fontes' in adquirente:
             del adquirente['_fontes']
+
+    # Remove _fontes dos usufrutuarios
+    for usufrutuario in clean.get('usufrutuarios', []):
+        if '_fontes' in usufrutuario:
+            del usufrutuario['_fontes']
 
     # Remove _fontes e _matricula_key dos imoveis
     for imovel in clean.get('imoveis', []):
