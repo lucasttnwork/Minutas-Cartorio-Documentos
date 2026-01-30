@@ -68,17 +68,17 @@ A matricula e **unica em todo o territorio brasileiro**, eliminando ambiguidades
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome completo do registrado | "MARINA AYUB" | SIM |
-| data_nascimento | Data de nascimento | "06/09/1991" | SIM |
-| naturalidade | Local de nascimento (cidade/estado) | "Sao Paulo - SP" | SIM |
-| sexo | Sexo do registrado | "FEMININO" | Condicional |
-| filiacao_pai | Nome completo do pai | "MUNIR AKAR AYUB" | Condicional |
-| filiacao_mae | Nome completo da mae | "ELOISA BASILE SIQUEIRA AYUB" | SIM |
-| certidao_nascimento_livro | Livro do registro (modelo antigo) | "A-133" | Condicional |
-| certidao_nascimento_folha | Folha do registro (modelo antigo) | "270" | Condicional |
-| certidao_nascimento_termo | Termo do registro (modelo antigo) | "80631" | Condicional |
-| certidao_nascimento_cartorio | Cartorio emissor | "28o Subdistrito - Jardim Paulista" | Condicional |
-| certidao_nascimento_matricula | Matricula nacional (modelo novo) | "122044 01 55 2022 1 00133 270 0080631-44" | Condicional |
+| NOME | Nome completo do registrado | "MARINA AYUB" | SIM |
+| DATA DE NASCIMENTO | Data de nascimento | "06/09/1991" | SIM |
+| NATURALIDADE | Local de nascimento (cidade/estado) | "Sao Paulo - SP" | SIM |
+| SEXO | Sexo do registrado | "FEMININO" | Condicional |
+| FILIACAO PAI | Nome completo do pai | "MUNIR AKAR AYUB" | Condicional |
+| FILIACAO MAE | Nome completo da mae | "ELOISA BASILE SIQUEIRA AYUB" | SIM |
+| LIVRO | Livro do registro (modelo antigo) | "A-133" | Condicional |
+| FOLHA | Folha do registro (modelo antigo) | "270" | Condicional |
+| TERMO | Termo do registro (modelo antigo) | "80631" | Condicional |
+| CARTORIO | Cartorio emissor | "28o Subdistrito - Jardim Paulista" | Condicional |
+| MATRICULA | Matricula nacional (modelo novo) | "122044 01 55 2022 1 00133 270 0080631-44" | Condicional |
 
 **Notas:**
 - `filiacao_pai` pode estar ausente em casos de paternidade nao reconhecida
@@ -96,17 +96,17 @@ A CERTIDAO_NASCIMENTO nao alimenta campos de Pessoa Juridica, Imovel ou Negocio 
 
 | Campo no Schema | Campo Util Mapeado | Categoria |
 |-----------------|-------------------|-----------|
-| nome_registrado | nome | pessoa_natural |
-| data_nascimento | data_nascimento | pessoa_natural |
-| local_nascimento (cidade/estado) | naturalidade | pessoa_natural |
-| sexo | sexo | pessoa_natural |
-| nome_pai | filiacao_pai | pessoa_natural |
-| nome_mae | filiacao_mae | pessoa_natural |
-| livro | certidao_nascimento_livro | pessoa_natural |
-| folha | certidao_nascimento_folha | pessoa_natural |
-| termo | certidao_nascimento_termo | pessoa_natural |
-| cartorio | certidao_nascimento_cartorio | pessoa_natural |
-| matricula | certidao_nascimento_matricula | pessoa_natural |
+| nome_registrado | NOME | pessoa_natural |
+| data_nascimento | DATA DE NASCIMENTO | pessoa_natural |
+| local_nascimento (cidade/estado) | NATURALIDADE | pessoa_natural |
+| sexo | SEXO | pessoa_natural |
+| nome_pai | FILIACAO PAI | pessoa_natural |
+| nome_mae | FILIACAO MAE | pessoa_natural |
+| livro | LIVRO | pessoa_natural |
+| folha | FOLHA | pessoa_natural |
+| termo | TERMO | pessoa_natural |
+| cartorio | CARTORIO | pessoa_natural |
+| matricula | MATRICULA | pessoa_natural |
 
 ---
 

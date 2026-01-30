@@ -201,8 +201,8 @@ Array obrigatorio contendo a lista de contribuintes (proprietarios ou responsave
 
 | Campo no Schema | Campo Mapeado | Descricao Mapeada | Usado em Minutas? |
 |-----------------|---------------|-------------------|-------------------|
-| contribuintes[].nome (se PF) | nome | Nome completo da pessoa | SIM |
-| contribuintes[].cpf | cpf | Cadastro de Pessoa Fisica | SIM |
+| contribuintes[].nome (se PF) | NOME | Nome completo da pessoa | SIM |
+| contribuintes[].cpf | CPF | Cadastro de Pessoa Fisica | SIM |
 
 **Observacao**: A Certidao de Dados Cadastrais fornece dados basicos de identificacao (nome e CPF). Dados complementares como RG, profissao, estado civil e endereco domiciliar devem ser obtidos de outros documentos (RG, Certidao de Casamento, Comprovante de Residencia).
 
@@ -210,8 +210,8 @@ Array obrigatorio contendo a lista de contribuintes (proprietarios ou responsave
 
 | Campo no Schema | Campo Mapeado | Descricao Mapeada | Usado em Minutas? |
 |-----------------|---------------|-------------------|-------------------|
-| contribuintes[].nome (se PJ) | pj_denominacao | Razao social ou denominacao | SIM |
-| contribuintes[].cnpj | pj_cnpj | CNPJ da pessoa juridica | SIM |
+| contribuintes[].nome (se PJ) | DENOMINACAO | Razao social ou denominacao | SIM |
+| contribuintes[].cnpj | CNPJ | CNPJ da pessoa juridica | SIM |
 
 **Observacao**: A certidao pode conter contribuintes PF e PJ no mesmo imovel. A identificacao e feita pelo tipo de documento (CPF = PF, CNPJ = PJ).
 
@@ -219,16 +219,16 @@ Array obrigatorio contendo a lista de contribuintes (proprietarios ou responsave
 
 | Campo no Schema | Campo Mapeado | Descricao Mapeada | Usado em Minutas? |
 |-----------------|---------------|-------------------|-------------------|
-| cadastro_imovel | imovel_sql | Cadastro Municipal (SQL) | SIM |
-| endereco_imovel.logradouro | imovel_logradouro | Logradouro do imovel | SIM |
-| endereco_imovel.numero | imovel_numero | Numero do imovel | SIM |
-| endereco_imovel.complemento | imovel_complemento | Complemento do imovel | SIM |
-| endereco_imovel.bairro | imovel_bairro | Bairro do imovel | SIM |
-| endereco_imovel.cidade | imovel_cidade | Cidade do imovel | SIM |
-| endereco_imovel.estado | imovel_estado | Estado do imovel | SIM |
-| endereco_imovel.cep | imovel_cep | CEP do imovel | SIM |
-| dados_construcao.area | imovel_area_construida | Area construida em m2 | SIM |
-| valor_venal_total | imovel_valor_venal_iptu | Valor venal para IPTU | SIM |
+| cadastro_imovel | SQL | Cadastro Municipal (SQL) | SIM |
+| endereco_imovel.logradouro | LOGRADOURO | Logradouro do imovel | SIM |
+| endereco_imovel.numero | NUMERO | Numero do imovel | SIM |
+| endereco_imovel.complemento | COMPLEMENTO | Complemento do imovel | SIM |
+| endereco_imovel.bairro | BAIRRO | Bairro do imovel | SIM |
+| endereco_imovel.cidade | CIDADE | Cidade do imovel | SIM |
+| endereco_imovel.estado | ESTADO | Estado do imovel | SIM |
+| endereco_imovel.cep | CEP | CEP do imovel | SIM |
+| dados_construcao.area | AREA CONSTRUIDA EM M2 | Area construida em m2 | SIM |
+| valor_venal_total | VALOR VENAL DO IPTU | Valor venal para IPTU | SIM |
 
 ### 3.4 Campos Nao Mapeados
 

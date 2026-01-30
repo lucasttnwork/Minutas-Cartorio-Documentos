@@ -31,20 +31,20 @@ Dados do outorgante (pessoa que confere os poderes).
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome completo do outorgante | "JOAO CARLOS MENDES" | SIM |
-| cpf | CPF do outorgante | "987.654.321-00" | SIM |
-| rg | Numero do RG | "45.678.901-2" | NAO |
-| orgao_emissor_rg | Orgao emissor do RG | "SSP" | NAO |
-| estado_emissor_rg | Estado emissor do RG | "SP" | NAO |
-| nacionalidade | Nacionalidade | "BRASILEIRO" | NAO |
-| profissao | Profissao ou ocupacao | "EMPRESARIO" | NAO |
-| estado_civil | Estado civil | "CASADO" | NAO |
-| domicilio_logradouro | Logradouro do domicilio | "RUA DAS ACACIAS" | NAO |
-| domicilio_numero | Numero do domicilio | "250" | NAO |
-| domicilio_bairro | Bairro do domicilio | "VILA MARIANA" | NAO |
-| domicilio_cidade | Cidade do domicilio | "SAO PAULO" | NAO |
-| domicilio_estado | Estado do domicilio | "SP" | NAO |
-| domicilio_cep | CEP do domicilio | "04101-050" | NAO |
+| NOME | Nome completo do outorgante | "JOAO CARLOS MENDES" | SIM |
+| CPF | CPF do outorgante | "987.654.321-00" | SIM |
+| RG | Numero do RG | "45.678.901-2" | NAO |
+| ORGAO EMISSOR DO RG | Orgao emissor do RG | "SSP" | NAO |
+| ESTADO EMISSOR DO RG | Estado emissor do RG | "SP" | NAO |
+| NACIONALIDADE | Nacionalidade | "BRASILEIRO" | NAO |
+| PROFISSAO | Profissao ou ocupacao | "EMPRESARIO" | NAO |
+| ESTADO CIVIL | Estado civil | "CASADO" | NAO |
+| LOGRADOURO | Logradouro do domicilio | "RUA DAS ACACIAS" | NAO |
+| NUMERO | Numero do domicilio | "250" | NAO |
+| BAIRRO | Bairro do domicilio | "VILA MARIANA" | NAO |
+| CIDADE | Cidade do domicilio | "SAO PAULO" | NAO |
+| ESTADO | Estado do domicilio | "SP" | NAO |
+| CEP | CEP do domicilio | "04101-050" | NAO |
 
 **Notas:**
 - Estes campos qualificam o outorgante (quem da os poderes)
@@ -61,8 +61,8 @@ Quando a outorgante e Pessoa Juridica.
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| pj_denominacao | Razao social da PJ outorgante | "CONSTRUTORA ALPHA LTDA" | PJ: SIM |
-| pj_cnpj | CNPJ da PJ outorgante | "12.345.678/0001-90" | PJ: SIM |
+| DENOMINACAO | Razao social da PJ outorgante | "CONSTRUTORA ALPHA LTDA" | PJ: SIM |
+| CNPJ | CNPJ da PJ outorgante | "12.345.678/0001-90" | PJ: SIM |
 
 ---
 
@@ -72,21 +72,21 @@ Qualificacao completa de quem recebe os poderes (o mandatario).
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| pj_procurador_nome | Nome completo do procurador | "MARIA DA SILVA SANTOS" | SIM |
-| pj_procurador_cpf | CPF do procurador | "123.456.789-00" | SIM |
-| pj_procurador_rg | RG do procurador | "12.345.678-9" | NAO |
-| pj_procurador_orgao_emissor_rg | Orgao emissor RG | "SSP" | NAO |
-| pj_procurador_estado_emissor_rg | Estado emissor RG | "SP" | NAO |
-| pj_procurador_data_nascimento | Data de nascimento | "20/03/1980" | NAO |
-| pj_procurador_estado_civil | Estado civil | "SOLTEIRA" | NAO |
-| pj_procurador_profissao | Profissao | "ADVOGADA" | NAO |
-| pj_procurador_nacionalidade | Nacionalidade | "BRASILEIRA" | NAO |
-| pj_procurador_domicilio_logradouro | Logradouro | "AVENIDA PAULISTA" | NAO |
-| pj_procurador_domicilio_numero | Numero | "1000" | NAO |
-| pj_procurador_domicilio_bairro | Bairro | "BELA VISTA" | NAO |
-| pj_procurador_domicilio_cidade | Cidade | "SAO PAULO" | NAO |
-| pj_procurador_domicilio_estado | Estado | "SP" | NAO |
-| pj_procurador_domicilio_cep | CEP | "01310-100" | NAO |
+| NOME DO PROCURADOR | Nome completo do procurador | "MARIA DA SILVA SANTOS" | SIM |
+| CPF DO PROCURADOR | CPF do procurador | "123.456.789-00" | SIM |
+| RG DO PROCURADOR | RG do procurador | "12.345.678-9" | NAO |
+| ORGAO EMISSOR DO RG DO PROCURADOR | Orgao emissor RG | "SSP" | NAO |
+| ESTADO EMISSOR DO RG DO PROCURADOR | Estado emissor RG | "SP" | NAO |
+| DATA DE NASCIMENTO DO PROCURADOR | Data de nascimento | "20/03/1980" | NAO |
+| ESTADO CIVIL DO PROCURADOR | Estado civil | "SOLTEIRA" | NAO |
+| PROFISSAO DO PROCURADOR | Profissao | "ADVOGADA" | NAO |
+| NACIONALIDADE DO PROCURADOR | Nacionalidade | "BRASILEIRA" | NAO |
+| LOGRADOURO DO PROCURADOR | Logradouro | "AVENIDA PAULISTA" | NAO |
+| NUMERO DO PROCURADOR | Numero | "1000" | NAO |
+| BAIRRO DO PROCURADOR | Bairro | "BELA VISTA" | NAO |
+| CIDADE DO PROCURADOR | Cidade | "SAO PAULO" | NAO |
+| ESTADO DO PROCURADOR | Estado | "SP" | NAO |
+| CEP DO PROCURADOR | CEP | "01310-100" | NAO |
 
 **Notas:**
 - Estes campos sao prefixados com `pj_procurador_` para distinguir do outorgante
@@ -100,10 +100,10 @@ Dados especificos do documento de procuracao (quando publica).
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| pj_tabelionato_procuracao | Tabelionato onde foi lavrada | "2o TABELIAO DE NOTAS DE SAO PAULO" | Publica: SIM |
-| pj_data_procuracao | Data de lavratura | "15/01/2026" | SIM |
-| pj_livro_procuracao | Numero do livro | "1234" | Publica: SIM |
-| pj_paginas_procuracao | Paginas/Folhas | "456/458" | Publica: SIM |
+| TABELIONATO DA PROCURACAO | Tabelionato onde foi lavrada | "2o TABELIAO DE NOTAS DE SAO PAULO" | Publica: SIM |
+| DATA DA PROCURACAO | Data de lavratura | "15/01/2026" | SIM |
+| LIVRO DA PROCURACAO | Numero do livro | "1234" | Publica: SIM |
+| PAGINAS DA PROCURACAO | Paginas/Folhas | "456/458" | Publica: SIM |
 
 **Notas:**
 - Campos obrigatorios apenas para procuracoes publicas (lavradas em tabelionato)

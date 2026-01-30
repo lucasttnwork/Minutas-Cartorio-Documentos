@@ -24,8 +24,8 @@ O IPTU e a fonte primaria para dados cadastrais do imovel no municipio, incluind
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome do contribuinte/proprietario | "RODOLFO WOLFGANG ORTRIWANO" | SIM |
-| cpf | CPF do contribuinte | "585.096.668-49" | Condicional |
+| NOME | Nome do contribuinte/proprietario | "RODOLFO WOLFGANG ORTRIWANO" | SIM |
+| CPF | CPF do contribuinte | "585.096.668-49" | Condicional |
 
 **Notas**:
 - O CPF pode nao estar presente em carnes antigos
@@ -35,18 +35,18 @@ O IPTU e a fonte primaria para dados cadastrais do imovel no municipio, incluind
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| matricula_numero | Numero da matricula (se disponivel) | "46.511" | NAO |
-| imovel_sql | Cadastro Municipal (SQL) | "039.080.0244-3" | SIM - CRITICO |
-| imovel_logradouro | Logradouro do imovel | "R FRANCISCO CRUZ" | SIM |
-| imovel_numero | Numero do imovel | "515" | SIM |
-| imovel_complemento | Complemento (apto, bloco) | "APTO 124 BL-B" | Condicional |
-| imovel_bairro | Bairro do imovel | "VILA MARIANA" | Condicional |
-| imovel_cidade | Cidade do imovel | "Sao Paulo" | SIM (inferido) |
-| imovel_estado | Estado do imovel | "SP" | SIM (inferido) |
-| imovel_cep | CEP do imovel | "04117-902" | SIM |
-| imovel_area_total | Area total do terreno em m2 | "1666.00" | Condicional |
-| imovel_area_construida | Area construida em m2 | "112.00" | Condicional |
-| imovel_valor_venal_iptu | Valor venal para IPTU | "234191.00" | SIM - CRITICO |
+| NUMERO DA MATRICULA | Numero da matricula (se disponivel) | "46.511" | NAO |
+| SQL | Cadastro Municipal (SQL) | "039.080.0244-3" | SIM - CRITICO |
+| LOGRADOURO | Logradouro do imovel | "R FRANCISCO CRUZ" | SIM |
+| NUMERO | Numero do imovel | "515" | SIM |
+| COMPLEMENTO | Complemento (apto, bloco) | "APTO 124 BL-B" | Condicional |
+| BAIRRO | Bairro do imovel | "VILA MARIANA" | Condicional |
+| CIDADE | Cidade do imovel | "Sao Paulo" | SIM (inferido) |
+| ESTADO | Estado do imovel | "SP" | SIM (inferido) |
+| CEP | CEP do imovel | "04117-902" | SIM |
+| AREA TOTAL EM M2 | Area total do terreno em m2 | "1666.00" | Condicional |
+| AREA CONSTRUIDA EM M2 | Area construida em m2 | "112.00" | Condicional |
+| VALOR VENAL DO IPTU | Valor venal para IPTU | "234191.00" | SIM - CRITICO |
 
 **Notas**:
 - O SQL e o identificador unico do imovel no cadastro municipal
@@ -60,19 +60,19 @@ O IPTU e a fonte primaria para dados cadastrais do imovel no municipio, incluind
 
 | Campo no Schema | Campo Util Mapeado | Categoria |
 |-----------------|-------------------|-----------|
-| contribuintes[].nome | nome | pessoa_natural |
-| contribuintes[].cpf | cpf | pessoa_natural |
-| cadastro_imovel | imovel_sql | imovel |
-| endereco_imovel.logradouro | imovel_logradouro | imovel |
-| endereco_imovel.numero | imovel_numero | imovel |
-| endereco_imovel.complemento | imovel_complemento | imovel |
-| endereco_imovel.bairro | imovel_bairro | imovel |
-| (inferido do emissor) | imovel_cidade | imovel |
-| (inferido do emissor) | imovel_estado | imovel |
-| endereco_imovel.cep | imovel_cep | imovel |
-| dados_terreno.area | imovel_area_total | imovel |
-| dados_construcao.area | imovel_area_construida | imovel |
-| valor_venal_total | imovel_valor_venal_iptu | imovel |
+| contribuintes[].nome | NOME | pessoa_natural |
+| contribuintes[].cpf | CPF | pessoa_natural |
+| cadastro_imovel | SQL | imovel |
+| endereco_imovel.logradouro | LOGRADOURO | imovel |
+| endereco_imovel.numero | NUMERO | imovel |
+| endereco_imovel.complemento | COMPLEMENTO | imovel |
+| endereco_imovel.bairro | BAIRRO | imovel |
+| (inferido do emissor) | CIDADE | imovel |
+| (inferido do emissor) | ESTADO | imovel |
+| endereco_imovel.cep | CEP | imovel |
+| dados_terreno.area | AREA TOTAL EM M2 | imovel |
+| dados_construcao.area | AREA CONSTRUIDA EM M2 | imovel |
+| valor_venal_total | VALOR VENAL DO IPTU | imovel |
 
 ---
 
@@ -81,21 +81,21 @@ O IPTU e a fonte primaria para dados cadastrais do imovel no municipio, incluind
 ```json
 {
   "pessoa_natural": {
-    "nome": "RODOLFO WOLFGANG ORTRIWANO",
-    "cpf": "585.096.668-49"
+    "NOME": "RODOLFO WOLFGANG ORTRIWANO",
+    "CPF": "585.096.668-49"
   },
   "imovel": {
-    "imovel_sql": "039.080.0244-3",
-    "imovel_logradouro": "R FRANCISCO CRUZ",
-    "imovel_numero": "515",
-    "imovel_complemento": "APTO 124 BL-B",
-    "imovel_bairro": "VILA MARIANA",
-    "imovel_cidade": "Sao Paulo",
-    "imovel_estado": "SP",
-    "imovel_cep": "04117-902",
-    "imovel_area_total": "1666.00",
-    "imovel_area_construida": "112.00",
-    "imovel_valor_venal_iptu": "234191.00"
+    "SQL": "039.080.0244-3",
+    "LOGRADOURO": "R FRANCISCO CRUZ",
+    "NUMERO": "515",
+    "COMPLEMENTO": "APTO 124 BL-B",
+    "BAIRRO": "VILA MARIANA",
+    "CIDADE": "Sao Paulo",
+    "ESTADO": "SP",
+    "CEP": "04117-902",
+    "AREA TOTAL EM M2": "1666.00",
+    "AREA CONSTRUIDA EM M2": "112.00",
+    "VALOR VENAL DO IPTU": "234191.00"
   }
 }
 ```
@@ -105,9 +105,9 @@ O IPTU e a fonte primaria para dados cadastrais do imovel no municipio, incluind
 ## 5. USO EM MINUTAS
 
 ### 5.1 Escritura de Compra e Venda
-- `imovel_sql` -> Identificacao do imovel no cadastro municipal
-- `imovel_valor_venal_iptu` -> Referencia de valor (diferente do VVR usado no ITBI)
-- `imovel_logradouro/numero/complemento/bairro/cidade/estado/cep` -> Endereco completo do imovel
+- `SQL` -> Identificacao do imovel no cadastro municipal
+- `VALOR VENAL DO IPTU` -> Referencia de valor (diferente do VVR usado no ITBI)
+- `LOGRADOURO/NUMERO/COMPLEMENTO/BAIRRO/CIDADE/ESTADO/CEP` -> Endereco completo do imovel
 
 ### 5.2 Validacoes em Minutas
 - O SQL do IPTU deve coincidir com o SQL da Matricula (quando presente)
@@ -133,13 +133,13 @@ O IPTU e a fonte primaria para dados cadastrais do imovel no municipio, incluind
 
 | Campo Util | Tambem Util Em | Finalidade |
 |------------|---------------|------------|
-| imovel_sql | VVR, CND_MUNICIPAL, CND_IMOVEL, ITBI, DADOS_CADASTRAIS, MATRICULA_IMOVEL | Identificador PRIMARIO do imovel |
-| imovel_logradouro | MATRICULA_IMOVEL, ITBI, ESCRITURA, COMPROMISSO, VVR | Validar endereco |
-| imovel_numero | MATRICULA_IMOVEL, ITBI, ESCRITURA, COMPROMISSO, VVR | Validar endereco |
-| imovel_bairro | MATRICULA_IMOVEL, ITBI, ESCRITURA, CND_MUNICIPAL | Validar endereco |
-| imovel_area_construida | MATRICULA_IMOVEL, VVR, DADOS_CADASTRAIS | Validar caracteristicas |
-| nome | RG, CNH, MATRICULA_IMOVEL, ESCRITURA, COMPROMISSO | Validar proprietario |
-| cpf | RG, CNH, CERTIDAO_CASAMENTO, CNDT, CND_FEDERAL | Validar identidade |
+| SQL | VVR, CND_MUNICIPAL, CND_IMOVEL, ITBI, DADOS_CADASTRAIS, MATRICULA_IMOVEL | Identificador PRIMARIO do imovel |
+| LOGRADOURO | MATRICULA_IMOVEL, ITBI, ESCRITURA, COMPROMISSO, VVR | Validar endereco |
+| NUMERO | MATRICULA_IMOVEL, ITBI, ESCRITURA, COMPROMISSO, VVR | Validar endereco |
+| BAIRRO | MATRICULA_IMOVEL, ITBI, ESCRITURA, CND_MUNICIPAL | Validar endereco |
+| AREA CONSTRUIDA EM M2 | MATRICULA_IMOVEL, VVR, DADOS_CADASTRAIS | Validar caracteristicas |
+| NOME | RG, CNH, MATRICULA_IMOVEL, ESCRITURA, COMPROMISSO | Validar proprietario |
+| CPF | RG, CNH, CERTIDAO_CASAMENTO, CNDT, CND_FEDERAL | Validar identidade |
 
 ---
 
@@ -148,21 +148,21 @@ O IPTU e a fonte primaria para dados cadastrais do imovel no municipio, incluind
 Campos uteis para minutas que NAO vem do IPTU:
 
 **Pessoa Natural (precisa de outros documentos)**:
-- `rg`, `orgao_emissor_rg`, `estado_emissor_rg` -> RG ou CNH
-- `estado_civil`, `regime_bens` -> CERTIDAO_CASAMENTO
-- `profissao`, `nacionalidade` -> RG, CNH ou declaracao
+- `RG`, `ORGAO EMISSOR DO RG`, `ESTADO EMISSOR DO RG` -> RG ou CNH
+- `ESTADO CIVIL`, `REGIME DE BENS` -> CERTIDAO_CASAMENTO
+- `PROFISSAO`, `NACIONALIDADE` -> RG, CNH ou declaracao
 - `data_nascimento` -> RG, CNH ou CERTIDAO_NASCIMENTO
-- `domicilio_*` (endereco residencial) -> COMPROVANTE_RESIDENCIA
+- `LOGRADOURO`, `NUMERO`, `COMPLEMENTO`, `BAIRRO`, `CIDADE`, `ESTADO`, `CEP` (endereco residencial) -> COMPROVANTE_RESIDENCIA
 - `filiacao_pai`, `filiacao_mae` -> RG ou CERTIDAO_NASCIMENTO
 
 **Imovel (precisa de outros documentos)**:
-- `matricula_numero`, `matricula_cartorio_*` -> MATRICULA_IMOVEL
-- `imovel_descricao_conforme_matricula` -> MATRICULA_IMOVEL
+- `NUMERO DA MATRICULA`, `NUMERO DO REGISTRO DE IMOVEIS`, `CIDADE DO REGISTRO DE IMOVEIS` -> MATRICULA_IMOVEL
+- `DESCRICAO CONFORME MATRICULA` -> MATRICULA_IMOVEL
 - `imovel_valor_venal_referencia` (VVR para ITBI) -> VVR
 - `proprietario_*` (dados de registro) -> MATRICULA_IMOVEL
 
 **Negocio**:
-- `negocio_valor_total`, `alienante_nome`, `adquirente_nome` -> ITBI, COMPROMISSO, ESCRITURA
+- `VALOR TOTAL`, `NOME DO ALIENANTE`, `NOME DO ADQUIRENTE` -> ITBI, COMPROMISSO, ESCRITURA
 - `itbi_*` (dados do imposto de transmissao) -> ITBI
 
 ---
@@ -171,11 +171,11 @@ Campos uteis para minutas que NAO vem do IPTU:
 
 | Validacao | Documento Comparado | Regra |
 |-----------|-------------------|-------|
-| SQL consistente | VVR, CND_MUNICIPAL, ITBI | IPTU.sql == outro.sql |
-| Endereco consistente | MATRICULA_IMOVEL, ITBI | Logradouro + numero devem coincidir |
+| SQL consistente | VVR, CND_MUNICIPAL, ITBI | SQL == SQL de outro documento |
+| Endereco consistente | MATRICULA_IMOVEL, ITBI | LOGRADOURO + NUMERO devem coincidir |
 | Contribuinte = Proprietario | MATRICULA_IMOVEL | Contribuinte IPTU deve ser proprietario atual |
-| Area consistente | MATRICULA_IMOVEL | Areas devem ser compativeis (tolerancia de arredondamento) |
-| Valor venal IPTU < VVR | VVR | Normalmente IPTU < VVR (VVR mais proximo do mercado) |
+| Area consistente | MATRICULA_IMOVEL | AREA TOTAL EM M2 e AREA CONSTRUIDA EM M2 devem ser compativeis (tolerancia) |
+| Valor venal IPTU < VVR | VVR | VALOR VENAL DO IPTU < VVR (VVR mais proximo do mercado) |
 
 ---
 

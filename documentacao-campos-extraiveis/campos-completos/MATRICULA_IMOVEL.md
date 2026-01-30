@@ -280,15 +280,15 @@ Indisponibilidades judiciais registradas no CNIB (Central Nacional de Indisponib
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Observacao |
 |-----------------|---------------|-------------------|------------|
-| proprietarios[].nome | nome | SIM | Nome completo do proprietario |
-| proprietarios[].cpf | cpf | SIM | CPF do proprietario |
-| proprietarios[].rg | rg | SIM | Numero do RG |
-| proprietarios[].rg (inferido) | orgao_emissor_rg | SIM | Inferido do formato (ex: "-SP" = SSP-SP) |
-| proprietarios[].rg (inferido) | estado_emissor_rg | SIM | Inferido do formato |
-| proprietarios[].estado_civil | estado_civil | SIM | Estado civil |
+| proprietarios[].nome | NOME | SIM | Nome completo do proprietario |
+| proprietarios[].cpf | CPF | SIM | CPF do proprietario |
+| proprietarios[].rg | RG | SIM | Numero do RG |
+| proprietarios[].rg (inferido) | ORGAO EMISSOR DO RG | SIM | Inferido do formato (ex: "-SP" = SSP-SP) |
+| proprietarios[].rg (inferido) | ESTADO EMISSOR DO RG | SIM | Inferido do formato |
+| proprietarios[].estado_civil | ESTADO CIVIL | SIM | Estado civil |
 | proprietarios[].regime_bens | regime_bens | SIM | Se casado |
-| proprietarios[].profissao | profissao | SIM | Profissao declarada |
-| proprietarios[].nacionalidade | nacionalidade | SIM | Nacionalidade |
+| proprietarios[].profissao | PROFISSAO | SIM | Profissao declarada |
+| proprietarios[].nacionalidade | NACIONALIDADE | SIM | Nacionalidade |
 | proprietarios[].conjuge.nome | (dados do conjuge) | SIM | Nome do conjuge |
 | proprietarios[].conjuge.cpf | (dados do conjuge) | SIM | CPF do conjuge |
 | proprietarios[].conjuge.rg | (dados do conjuge) | SIM | RG do conjuge |
@@ -297,46 +297,46 @@ Indisponibilidades judiciais registradas no CNIB (Central Nacional de Indisponib
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Observacao |
 |-----------------|---------------|-------------------|------------|
-| proprietarios[].nome (se PJ) | pj_denominacao | SIM | Razao social |
-| proprietarios[].cpf (se CNPJ) | pj_cnpj | SIM | CNPJ da empresa |
+| proprietarios[].nome (se PJ) | DENOMINACAO | SIM | Razao social |
+| proprietarios[].cpf (se CNPJ) | CNPJ | SIM | CNPJ da empresa |
 
 ### 3.3 Campos que Alimentam "Dados do Imovel"
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Observacao |
 |-----------------|---------------|-------------------|------------|
-| numero_matricula | matricula_numero | SIM | Numero principal da matricula |
-| cartorio | matricula_cartorio_numero | SIM | Identificacao do cartorio |
-| endereco.municipio | matricula_cartorio_cidade | SIM | Cidade do cartorio |
-| endereco.uf | matricula_cartorio_estado | SIM | Estado do cartorio |
-| (numero nacional) | matricula_numero_nacional | SIM | Quando disponivel |
-| descricao_imovel.tipo | imovel_denominacao | SIM | Tipo do imovel |
-| contribuinte_municipal | imovel_sql | SIM | SQL - Setor Quadra Lote |
-| areas.total | imovel_area_total | SIM | Area total em m2 |
-| areas.privativa | imovel_area_privativa | SIM | Area privativa em m2 |
-| areas.construida | imovel_area_construida | SIM | Area construida em m2 |
-| endereco.logradouro | imovel_logradouro | SIM | Logradouro do imovel |
-| endereco.numero | imovel_numero | SIM | Numero do imovel |
-| endereco.complemento | imovel_complemento | SIM | Complemento |
-| endereco.bairro | imovel_bairro | SIM | Bairro |
-| endereco.municipio | imovel_cidade | SIM | Cidade do imovel |
-| endereco.uf | imovel_estado | SIM | Estado do imovel |
-| endereco.cep | imovel_cep | SIM | CEP |
-| descricao_imovel.descricao_completa | imovel_descricao_conforme_matricula | SIM | Descricao literal |
-| metadados_certidao.selo_digital | imovel_certidao_matricula_numero | SIM | Numero/selo da certidao |
-| metadados_certidao.data_emissao | imovel_certidao_matricula_data | SIM | Data de emissao |
-| proprietarios[].nome | proprietario_nome | SIM | Nome do proprietario |
-| proprietarios[].percentual | proprietario_fracao_ideal | SIM | Percentual de propriedade |
-| registros[].numero | proprietario_registro_aquisicao | SIM | Ex: R-1/46.511 |
-| registros[].data | proprietario_data_registro | SIM | Data do registro |
-| registros[].tipo_ato | proprietario_titulo_aquisicao | SIM | Tipo de aquisicao |
-| onus[].tipo | onus_titulo | SIM | Tipo do onus |
-| onus[].registro | onus_registro | SIM | Numero do registro |
-| onus[].data_constituicao | onus_data_registro | SIM | Data de constituicao |
-| onus[].texto_completo | onus_descricao | SIM | Descricao completa |
-| onus[].credor | onus_titular_nome | SIM | Nome do credor |
-| (fracao do onus) | onus_titular_fracao | SIM | Fracao do onus |
-| (existencia ressalva) | ressalva_existencia | SIM | Sim/Nao |
-| (descricao ressalva) | ressalva_descricao | SIM | Texto da ressalva |
+| numero_matricula | NUMERO DA MATRICULA | SIM | Numero principal da matricula |
+| cartorio | NUMERO DO REGISTRO DE IMOVEIS | SIM | Identificacao do cartorio |
+| endereco.municipio | CIDADE DO REGISTRO DE IMOVEIS | SIM | Cidade do cartorio |
+| endereco.uf | ESTADO DO REGISTRO DE IMOVEIS | SIM | Estado do cartorio |
+| (numero nacional) | NUMERO NACIONAL DA MATRICULA | SIM | Quando disponivel |
+| descricao_imovel.tipo | DENOMINACAO DO IMOVEL | SIM | Tipo do imovel |
+| contribuinte_municipal | SQL | SIM | SQL - Setor Quadra Lote |
+| areas.total | AREA TOTAL EM M2 | SIM | Area total em m2 |
+| areas.privativa | AREA PRIVATIVA EM M2 | SIM | Area privativa em m2 |
+| areas.construida | AREA CONSTRUIDA EM M2 | SIM | Area construida em m2 |
+| endereco.logradouro | LOGRADOURO | SIM | Logradouro do imovel |
+| endereco.numero | NUMERO | SIM | Numero do imovel |
+| endereco.complemento | COMPLEMENTO | SIM | Complemento |
+| endereco.bairro | BAIRRO | SIM | Bairro |
+| endereco.municipio | CIDADE | SIM | Cidade do imovel |
+| endereco.uf | ESTADO | SIM | Estado do imovel |
+| endereco.cep | CEP | SIM | CEP |
+| descricao_imovel.descricao_completa | DESCRICAO CONFORME MATRICULA | SIM | Descricao literal |
+| metadados_certidao.selo_digital | NUMERO DA CERTIDAO DA MATRICULA | SIM | Numero/selo da certidao |
+| metadados_certidao.data_emissao | DATA DA CERTIDAO DA MATRICULA | SIM | Data de emissao |
+| proprietarios[].nome | NOME DO PROPRIETARIO | SIM | Nome do proprietario |
+| proprietarios[].percentual | FRACAO IDEAL DO PROPRIETARIO | SIM | Percentual de propriedade |
+| registros[].numero | REGISTRO DE AQUISICAO | SIM | Ex: R-1/46.511 |
+| registros[].data | DATA DO REGISTRO | SIM | Data do registro |
+| registros[].tipo_ato | TITULO DE AQUISICAO | SIM | Tipo de aquisicao |
+| onus[].tipo | TITULO DO ONUS | SIM | Tipo do onus |
+| onus[].registro | REGISTRO DO ONUS | SIM | Numero do registro |
+| onus[].data_constituicao | DATA DO REGISTRO DO ONUS | SIM | Data de constituicao |
+| onus[].texto_completo | DESCRICAO DO ONUS | SIM | Descricao completa |
+| onus[].credor | NOME DO TITULAR DO ONUS | SIM | Nome do credor |
+| (fracao do onus) | FRACAO DO TITULAR DO ONUS | SIM | Fracao do onus |
+| (existencia ressalva) | EXISTENCIA DE RESSALVA | SIM | Sim/Nao |
+| (descricao ressalva) | DESCRICAO DA RESSALVA | SIM | Texto da ressalva |
 
 ### 3.4 Campos que Alimentam "Negocio Juridico"
 

@@ -300,46 +300,46 @@ constitui sua bastante procuradora MARIA DA SILVA SANTOS..."
 
 | Campo no Schema | Campo Mapeado | Descricao | Usado em Minutas? |
 |-----------------|---------------|-----------|-------------------|
-| outorgante.nome | nome | Nome do outorgante | SIM |
-| outorgante.cpf | cpf | CPF do outorgante | SIM |
-| outorgante.rg | rg | RG do outorgante | SIM |
-| outorgante.orgao_rg | orgao_emissor_rg | Orgao emissor | SIM |
-| outorgante.estado_rg | estado_emissor_rg | Estado do RG | SIM |
-| outorgante.nacionalidade | nacionalidade | Nacionalidade | SIM |
-| outorgante.profissao | profissao | Profissao | SIM |
-| outorgante.estado_civil | estado_civil | Estado civil | SIM |
-| outorgante.endereco.logradouro | domicilio_logradouro | Logradouro | SIM |
-| outorgante.endereco.numero | domicilio_numero | Numero | SIM |
-| outorgante.endereco.bairro | domicilio_bairro | Bairro | SIM |
-| outorgante.endereco.cidade | domicilio_cidade | Cidade | SIM |
-| outorgante.endereco.estado | domicilio_estado | Estado | SIM |
-| outorgante.endereco.cep | domicilio_cep | CEP | SIM |
+| outorgante.nome | NOME | Nome do outorgante | SIM |
+| outorgante.cpf | CPF | CPF do outorgante | SIM |
+| outorgante.rg | RG | RG do outorgante | SIM |
+| outorgante.orgao_rg | ORGAO EMISSOR DO RG | Orgao emissor | SIM |
+| outorgante.estado_rg | ESTADO EMISSOR DO RG | Estado do RG | SIM |
+| outorgante.nacionalidade | NACIONALIDADE | Nacionalidade | SIM |
+| outorgante.profissao | PROFISSAO | Profissao | SIM |
+| outorgante.estado_civil | ESTADO CIVIL | Estado civil | SIM |
+| outorgante.endereco.logradouro | LOGRADOURO | Logradouro | SIM |
+| outorgante.endereco.numero | NUMERO | Numero | SIM |
+| outorgante.endereco.bairro | BAIRRO | Bairro | SIM |
+| outorgante.endereco.cidade | CIDADE | Cidade | SIM |
+| outorgante.endereco.estado | ESTADO | Estado | SIM |
+| outorgante.endereco.cep | CEP | CEP | SIM |
 
 ### 6.2 Campos que Alimentam "Pessoa Juridica" (21 campos)
 
 | Campo no Schema | Campo Mapeado | Descricao | Usado em Minutas? |
 |-----------------|---------------|-----------|-------------------|
-| outorgante.denominacao | pj_denominacao | Razao social (se PJ) | SIM |
-| outorgante.cnpj | pj_cnpj | CNPJ (se PJ) | SIM |
-| procurador.nome | pj_procurador_nome | Nome do procurador | SIM |
-| procurador.cpf | pj_procurador_cpf | CPF do procurador | SIM |
-| procurador.rg | pj_procurador_rg | RG do procurador | SIM |
-| procurador.orgao_rg | pj_procurador_orgao_emissor_rg | Orgao emissor | SIM |
-| procurador.estado_rg | pj_procurador_estado_emissor_rg | Estado do RG | SIM |
-| procurador.data_emissao_rg | pj_procurador_data_emissao_rg | Data emissao RG | NAO |
-| procurador.cnh | pj_procurador_cnh | CNH | NAO |
-| procurador.orgao_cnh | pj_procurador_orgao_emissor_cnh | Orgao CNH | NAO |
-| procurador.data_nascimento | pj_procurador_data_nascimento | Data nascimento | SIM |
-| procurador.estado_civil | pj_procurador_estado_civil | Estado civil | SIM |
-| procurador.profissao | pj_procurador_profissao | Profissao | SIM |
-| procurador.nacionalidade | pj_procurador_nacionalidade | Nacionalidade | SIM |
-| procurador.endereco.* | pj_procurador_domicilio_* | Endereco (7 campos) | SIM |
-| procurador.email | pj_procurador_email | E-mail | NAO |
-| procurador.telefone | pj_procurador_telefone | Telefone | NAO |
-| procuracao.tabelionato | pj_tabelionato_procuracao | Tabelionato | SIM |
-| procuracao.data | pj_data_procuracao | Data lavratura | SIM |
-| procuracao.livro | pj_livro_procuracao | Livro | SIM |
-| procuracao.folhas | pj_paginas_procuracao | Paginas | SIM |
+| outorgante.denominacao | DENOMINACAO | Razao social (se PJ) | SIM |
+| outorgante.cnpj | CNPJ | CNPJ (se PJ) | SIM |
+| procurador.nome | NOME DO PROCURADOR | Nome do procurador | SIM |
+| procurador.cpf | CPF DO PROCURADOR | CPF do procurador | SIM |
+| procurador.rg | RG DO PROCURADOR | RG do procurador | SIM |
+| procurador.orgao_rg | ORGAO EMISSOR DO RG DO PROCURADOR | Orgao emissor | SIM |
+| procurador.estado_rg | ESTADO EMISSOR DO RG DO PROCURADOR | Estado do RG | SIM |
+| procurador.data_emissao_rg | DATA DE EMISSAO DO RG DO PROCURADOR | Data emissao RG | NAO |
+| procurador.cnh | CNH DO PROCURADOR | CNH | NAO |
+| procurador.orgao_cnh | ORGAO EMISSOR DA CNH DO PROCURADOR | Orgao CNH | NAO |
+| procurador.data_nascimento | DATA DE NASCIMENTO DO PROCURADOR | Data nascimento | SIM |
+| procurador.estado_civil | ESTADO CIVIL DO PROCURADOR | Estado civil | SIM |
+| procurador.profissao | PROFISSAO DO PROCURADOR | Profissao | SIM |
+| procurador.nacionalidade | NACIONALIDADE DO PROCURADOR | Nacionalidade | SIM |
+| procurador.endereco.* | LOGRADOURO DO PROCURADOR, NUMERO DO PROCURADOR, BAIRRO DO PROCURADOR, CIDADE DO PROCURADOR, ESTADO DO PROCURADOR, CEP DO PROCURADOR | Endereco (6 campos) | SIM |
+| procurador.email | E-MAIL DO PROCURADOR | E-mail | NAO |
+| procurador.telefone | TELEFONE DO PROCURADOR | Telefone | NAO |
+| procuracao.tabelionato | TABELIONATO DA PROCURACAO | Tabelionato | SIM |
+| procuracao.data | DATA DA PROCURACAO | Data lavratura | SIM |
+| procuracao.livro | LIVRO DA PROCURACAO | Livro | SIM |
+| procuracao.folhas | PAGINAS DA PROCURACAO | Paginas | SIM |
 
 ### 6.3 Campos que NAO Alimentam o Modelo de Dados
 

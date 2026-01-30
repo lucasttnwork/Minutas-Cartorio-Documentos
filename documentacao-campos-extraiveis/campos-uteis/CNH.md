@@ -20,16 +20,16 @@ A CNH e alternativa ao RG para identificacao pessoal, sendo a fonte primaria par
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome completo | "MARIA DA SILVA" | SIM |
-| cpf | CPF | "123.456.789-00" | SIM |
-| rg | RG (impresso na CNH) | "12.345.678-9" | SIM |
-| orgao_emissor_rg | Orgao emissor RG | "SSP" | SIM |
-| estado_emissor_rg | UF do RG | "SP" | SIM |
-| cnh | Numero da CNH | "12345678901" | SIM |
-| orgao_emissor_cnh | DETRAN emissor | "DETRAN-SP" | SIM |
-| data_nascimento | Data de nascimento | "10/05/1985" | SIM |
-| filiacao_pai | Nome do pai | "JOSE DA SILVA" | Condicional |
-| filiacao_mae | Nome da mae | "ANA DA SILVA" | SIM |
+| NOME | Nome completo | "MARIA DA SILVA" | SIM |
+| CPF | CPF | "123.456.789-00" | SIM |
+| RG | RG (impresso na CNH) | "12.345.678-9" | SIM |
+| ORGAO EMISSOR DO RG | Orgao emissor RG | "SSP" | SIM |
+| ESTADO EMISSOR DO RG | UF do RG | "SP" | SIM |
+| CNH | Numero da CNH | "12345678901" | SIM |
+| ORGAO EMISSOR DA CNH | DETRAN emissor | "DETRAN-SP" | SIM |
+| DATA DE NASCIMENTO | Data de nascimento | "10/05/1985" | SIM |
+| FILIACAO PAI | Nome do pai | "JOSE DA SILVA" | Condicional |
+| FILIACAO MAE | Nome da mae | "ANA DA SILVA" | SIM |
 
 **Notas:**
 - A CNH contem tanto o numero da CNH quanto o RG
@@ -66,16 +66,16 @@ A CNH nao alimenta campos de Pessoa Juridica, Imovel ou Negocio Juridico.
 ```json
 {
   "pessoa_natural": {
-    "nome": "MARIA DA SILVA",
-    "cpf": "123.456.789-00",
-    "rg": "12.345.678-9",
-    "orgao_emissor_rg": "SSP",
-    "estado_emissor_rg": "SP",
-    "cnh": "12345678901",
-    "orgao_emissor_cnh": "DETRAN-SP",
-    "data_nascimento": "10/05/1985",
-    "filiacao_pai": "JOSE DA SILVA",
-    "filiacao_mae": "ANA DA SILVA"
+    "NOME": "MARIA DA SILVA",
+    "CPF": "123.456.789-00",
+    "RG": "12.345.678-9",
+    "ORGAO EMISSOR DO RG": "SSP",
+    "ESTADO EMISSOR DO RG": "SP",
+    "CNH": "12345678901",
+    "ORGAO EMISSOR DA CNH": "DETRAN-SP",
+    "DATA DE NASCIMENTO": "10/05/1985",
+    "FILIACAO PAI": "JOSE DA SILVA",
+    "FILIACAO MAE": "ANA DA SILVA"
   },
   "pessoa_juridica": {},
   "imovel": {},
@@ -88,9 +88,9 @@ A CNH nao alimenta campos de Pessoa Juridica, Imovel ou Negocio Juridico.
 ## 5. USO EM MINUTAS
 
 ### 5.1 Qualificacao das Partes
-- `nome` -> Nome completo na qualificacao
-- `cpf` -> CPF na qualificacao
-- `rg`, `orgao_emissor_rg`, `estado_emissor_rg` -> RG formatado (ex: "12.345.678-9 SSP-SP")
+- `NOME` -> Nome completo na qualificacao
+- `CPF` -> CPF na qualificacao
+- `RG`, `ORGAO EMISSOR DO RG`, `ESTADO EMISSOR DO RG` -> RG formatado (ex: "12.345.678-9 SSP-SP")
 
 ### 5.2 Documento Alternativo ao RG
 A CNH pode ser usada como identificacao quando o RG nao esta disponivel.
@@ -104,11 +104,11 @@ Em alguns casos, a CNH pode ser citada como documento adicional de identificacao
 
 | Campo Util | Tambem Util Em | Finalidade |
 |------------|---------------|------------|
-| nome | RG, CERTIDAO_CASAMENTO, CNDT, etc. (20 docs) | Identificar pessoa |
-| cpf | RG, CERTIDAO_CASAMENTO, CNDT, etc. (17 docs) | Identificar pessoa |
-| rg | RG, CERTIDAO_CASAMENTO, MATRICULA_IMOVEL (8 docs) | Identificar pessoa |
-| data_nascimento | RG, CERTIDAO_NASCIMENTO (7 docs) | Validar idade |
-| filiacao_* | RG, CERTIDAO_NASCIMENTO | Confirmar identidade |
+| NOME | RG, CERTIDAO_CASAMENTO, CNDT, etc. (20 docs) | Identificar pessoa |
+| CPF | RG, CERTIDAO_CASAMENTO, CNDT, etc. (17 docs) | Identificar pessoa |
+| RG | RG, CERTIDAO_CASAMENTO, MATRICULA_IMOVEL (8 docs) | Identificar pessoa |
+| DATA DE NASCIMENTO | RG, CERTIDAO_NASCIMENTO (7 docs) | Validar idade |
+| FILIACAO PAI / FILIACAO MAE | RG, CERTIDAO_NASCIMENTO | Confirmar identidade |
 
 ### 6.1 Hierarquia de Fontes
 1. **RG**: Fonte primaria para numero do RG

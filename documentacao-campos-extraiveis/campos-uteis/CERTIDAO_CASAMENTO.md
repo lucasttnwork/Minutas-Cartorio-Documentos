@@ -28,18 +28,18 @@ Dados de cada conjuge extraidos da certidao.
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome do conjuge | "JOAO DA SILVA" | SIM |
-| cpf | CPF do conjuge | "123.456.789-00" | Condicional |
-| rg | RG do conjuge | "12.345.678-9" | Condicional |
-| orgao_emissor_rg | Orgao emissor RG | "SSP" | Condicional |
-| estado_emissor_rg | UF do RG | "SP" | Condicional |
-| data_nascimento | Data de nascimento | "10/05/1980" | Condicional |
-| estado_civil | Estado civil | "casado" | SIM |
-| regime_bens | Regime de bens | "comunhao parcial de bens" | SIM |
-| data_casamento | Data do casamento | "20/11/2010" | SIM |
-| filiacao_pai | Nome do pai | "ANTONIO DA SILVA" | Condicional |
-| filiacao_mae | Nome da mae | "ROSA DA SILVA" | Condicional |
-| nacionalidade | Nacionalidade | "brasileiro" | Condicional |
+| NOME | Nome do conjuge | "JOAO DA SILVA" | SIM |
+| CPF | CPF do conjuge | "123.456.789-00" | Condicional |
+| RG | RG do conjuge | "12.345.678-9" | Condicional |
+| ORGAO EMISSOR DO RG | Orgao emissor RG | "SSP" | Condicional |
+| ESTADO EMISSOR DO RG | UF do RG | "SP" | Condicional |
+| DATA DE NASCIMENTO | Data de nascimento | "10/05/1980" | Condicional |
+| ESTADO CIVIL | Estado civil | "casado" | SIM |
+| REGIME DE BENS | Regime de bens | "comunhao parcial de bens" | SIM |
+| DATA DO CASAMENTO | Data do casamento | "20/11/2010" | SIM |
+| FILIACAO PAI | Nome do pai | "ANTONIO DA SILVA" | Condicional |
+| FILIACAO MAE | Nome da mae | "ROSA DA SILVA" | Condicional |
+| NACIONALIDADE | Nacionalidade | "brasileiro" | Condicional |
 
 **Notas:**
 - Os dados sao extraidos para AMBOS os conjuges
@@ -58,7 +58,7 @@ A certidao de casamento nao alimenta dados de imovel.
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| alienante_conjuge | Nome do conjuge do vendedor | "MARIA DA SILVA" | Se alienante casado |
+| CONJUGE | Nome do conjuge do vendedor | "MARIA DA SILVA" | Se alienante casado |
 
 **IMPORTANTE:** O nome do conjuge e extraido para que este compareca na escritura quando o alienante for casado em regime de comunhao.
 
@@ -68,17 +68,17 @@ A certidao de casamento nao alimenta dados de imovel.
 
 | Campo no Schema | Campo Util Mapeado | Categoria |
 |-----------------|-------------------|-----------|
-| nome_conjuge_1 / nome_conjuge_2 | nome | pessoa_natural |
-| cpf_conjuge_1 / cpf_conjuge_2 | cpf | pessoa_natural |
-| (rg se presente) | rg | pessoa_natural |
-| data_nascimento_conjuge_1/2 | data_nascimento | pessoa_natural |
-| (inferido "casado") | estado_civil | pessoa_natural |
-| regime_bens | regime_bens | pessoa_natural |
-| data_casamento | data_casamento | pessoa_natural |
-| pai_conjuge_1/2 | filiacao_pai | pessoa_natural |
-| mae_conjuge_1/2 | filiacao_mae | pessoa_natural |
-| (inferido "brasileiro") | nacionalidade | pessoa_natural |
-| nome_conjuge_1 ou nome_conjuge_2 | alienante_conjuge | negocio |
+| nome_conjuge_1 / nome_conjuge_2 | NOME | pessoa_natural |
+| cpf_conjuge_1 / cpf_conjuge_2 | CPF | pessoa_natural |
+| (rg se presente) | RG | pessoa_natural |
+| data_nascimento_conjuge_1/2 | DATA DE NASCIMENTO | pessoa_natural |
+| (inferido "casado") | ESTADO CIVIL | pessoa_natural |
+| regime_bens | REGIME DE BENS | pessoa_natural |
+| data_casamento | DATA DO CASAMENTO | pessoa_natural |
+| pai_conjuge_1/2 | FILIACAO PAI | pessoa_natural |
+| mae_conjuge_1/2 | FILIACAO MAE | pessoa_natural |
+| (inferido "brasileiro") | NACIONALIDADE | pessoa_natural |
+| nome_conjuge_1 ou nome_conjuge_2 | CONJUGE | negocio |
 
 ---
 

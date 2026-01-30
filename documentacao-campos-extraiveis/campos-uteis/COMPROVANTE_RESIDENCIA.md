@@ -26,15 +26,15 @@ O Comprovante de Residencia e a **fonte primaria** para dados de domicilio em mi
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome do titular da conta | "JOAO DA SILVA" | SIM |
-| cpf | CPF do titular | "123.456.789-00" | Condicional |
-| domicilio_logradouro | Rua, Avenida, etc. | "RUA DAS FLORES" | SIM |
-| domicilio_numero | Numero do imovel | "123" | SIM |
-| domicilio_complemento | Apartamento, bloco, sala | "APTO 42 BLOCO B" | Condicional |
-| domicilio_bairro | Nome do bairro | "JARDIM PAULISTA" | Condicional |
-| domicilio_cidade | Nome da cidade | "SAO PAULO" | SIM |
-| domicilio_estado | UF do estado | "SP" | SIM |
-| domicilio_cep | CEP do endereco | "01234-567" | Condicional |
+| NOME | Nome do titular da conta | "JOAO DA SILVA" | SIM |
+| CPF | CPF do titular | "123.456.789-00" | Condicional |
+| LOGRADOURO | Rua, Avenida, etc. | "RUA DAS FLORES" | SIM |
+| NUMERO | Numero do imovel | "123" | SIM |
+| COMPLEMENTO | Apartamento, bloco, sala | "APTO 42 BLOCO B" | Condicional |
+| BAIRRO | Nome do bairro | "JARDIM PAULISTA" | Condicional |
+| CIDADE | Nome da cidade | "SAO PAULO" | SIM |
+| ESTADO | UF do estado | "SP" | SIM |
+| CEP | CEP do endereco | "01234-567" | Condicional |
 
 **Notas:**
 - O CPF pode nao estar presente em ~40% das faturas
@@ -56,15 +56,15 @@ O Comprovante de Residencia nao alimenta campos de Pessoa Juridica, Imovel ou Ne
 
 | Campo no Schema | Campo Util Mapeado | Categoria |
 |-----------------|-------------------|-----------|
-| nome_titular | nome | pessoa_natural |
-| cpf_titular | cpf | pessoa_natural |
-| logradouro | domicilio_logradouro | pessoa_natural |
-| numero | domicilio_numero | pessoa_natural |
-| complemento | domicilio_complemento | pessoa_natural |
-| bairro | domicilio_bairro | pessoa_natural |
-| cidade | domicilio_cidade | pessoa_natural |
-| estado | domicilio_estado | pessoa_natural |
-| cep | domicilio_cep | pessoa_natural |
+| nome_titular | NOME | pessoa_natural |
+| cpf_titular | CPF | pessoa_natural |
+| logradouro | LOGRADOURO | pessoa_natural |
+| numero | NUMERO | pessoa_natural |
+| complemento | COMPLEMENTO | pessoa_natural |
+| bairro | BAIRRO | pessoa_natural |
+| cidade | CIDADE | pessoa_natural |
+| estado | ESTADO | pessoa_natural |
+| cep | CEP | pessoa_natural |
 
 ---
 
@@ -73,15 +73,15 @@ O Comprovante de Residencia nao alimenta campos de Pessoa Juridica, Imovel ou Ne
 ```json
 {
   "pessoa_natural": {
-    "nome": "JOAO DA SILVA",
-    "cpf": "123.456.789-00",
-    "domicilio_logradouro": "RUA DAS FLORES",
-    "domicilio_numero": "123",
-    "domicilio_complemento": "APTO 42 BLOCO B",
-    "domicilio_bairro": "JARDIM PAULISTA",
-    "domicilio_cidade": "SAO PAULO",
-    "domicilio_estado": "SP",
-    "domicilio_cep": "01234-567"
+    "NOME": "JOAO DA SILVA",
+    "CPF": "123.456.789-00",
+    "LOGRADOURO": "RUA DAS FLORES",
+    "NUMERO": "123",
+    "COMPLEMENTO": "APTO 42 BLOCO B",
+    "BAIRRO": "JARDIM PAULISTA",
+    "CIDADE": "SAO PAULO",
+    "ESTADO": "SP",
+    "CEP": "01234-567"
   },
   "pessoa_juridica": {},
   "imovel": {},
@@ -98,9 +98,9 @@ O Comprovante de Residencia nao alimenta campos de Pessoa Juridica, Imovel ou Ne
 O endereco completo e usado na qualificacao das partes em escrituras publicas:
 
 ```
-"..., residente e domiciliado(a) na [domicilio_logradouro], numero [domicilio_numero],
-[domicilio_complemento], [domicilio_bairro], [domicilio_cidade]/[domicilio_estado],
-CEP [domicilio_cep]..."
+"..., residente e domiciliado(a) na [LOGRADOURO], numero [NUMERO],
+[COMPLEMENTO], [BAIRRO], [CIDADE]/[ESTADO],
+CEP [CEP]..."
 ```
 
 **Exemplo Preenchido:**
@@ -120,9 +120,9 @@ JARDIM PAULISTA, SAO PAULO/SP, CEP 01234-567..."
 
 | Campo Util | Tambem Util Em | Finalidade |
 |------------|---------------|------------|
-| nome | RG, CNH, CPF, CERTIDAO_CASAMENTO, etc. | Identificar pessoa e vincular ao endereco |
-| cpf | RG, CNH, CPF, CNDT, CND_FEDERAL, etc. | Identificador unico para correlacao |
-| domicilio_* | ESCRITURA, COMPROMISSO_COMPRA_VENDA, PROCURACAO | Validar domicilio declarado |
+| NOME | RG, CNH, CPF, CERTIDAO_CASAMENTO, etc. | Identificar pessoa e vincular ao endereco |
+| CPF | RG, CNH, CPF, CNDT, CND_FEDERAL, etc. | Identificador unico para correlacao |
+| LOGRADOURO, NUMERO, COMPLEMENTO, BAIRRO, CIDADE, ESTADO, CEP | ESCRITURA, COMPROMISSO_COMPRA_VENDA, PROCURACAO | Validar domicilio declarado |
 
 ### 6.1 Hierarquia de Fontes para Endereco de Domicilio
 
@@ -139,13 +139,13 @@ Para dados de domicilio pessoal, a prioridade de extracao e:
 
 Campos de pessoa_natural que NAO vem do Comprovante de Residencia:
 
-- `rg`, `orgao_emissor_rg`, `estado_emissor_rg`: Obter de RG
-- `cnh`, `orgao_emissor_cnh`, `estado_emissor_cnh`: Obter de CNH
-- `data_nascimento`, `naturalidade`: Obter de RG, CNH, CERTIDAO_NASCIMENTO
-- `filiacao_pai`, `filiacao_mae`: Obter de RG, CERTIDAO_NASCIMENTO
-- `profissao`: Obter de CERTIDAO_CASAMENTO, ESCRITURA
-- `estado_civil`, `regime_bens`: Obter de CERTIDAO_CASAMENTO
-- `email`, `telefone`: Obter de COMPROMISSO_COMPRA_VENDA
+- `RG`, `ORGAO EMISSOR RG`, `ESTADO EMISSOR RG`: Obter de RG
+- `CNH`, `ORGAO EMISSOR CNH`, `ESTADO EMISSOR CNH`: Obter de CNH
+- `DATA DE NASCIMENTO`, `NATURALIDADE`: Obter de RG, CNH, CERTIDAO_NASCIMENTO
+- `FILIACAO PAI`, `FILIACAO MAE`: Obter de RG, CERTIDAO_NASCIMENTO
+- `PROFISSAO`: Obter de CERTIDAO_CASAMENTO, ESCRITURA
+- `ESTADO CIVIL`, `REGIME BENS`: Obter de CERTIDAO_CASAMENTO
+- `EMAIL`, `TELEFONE`: Obter de COMPROMISSO_COMPRA_VENDA
 - Campos de certidoes (cndt_*, certidao_uniao_*): Obter de CNDT, CND_FEDERAL
 
 ---

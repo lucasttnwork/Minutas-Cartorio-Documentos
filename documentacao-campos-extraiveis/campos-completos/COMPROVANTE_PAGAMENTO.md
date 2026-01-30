@@ -160,10 +160,10 @@ Objeto com diferentes datas relacionadas a transacao.
 
 | Campo no Schema | Campo Mapeado | Descricao Mapeada | Usado em Minutas? |
 |-----------------|---------------|-------------------|-------------------|
-| pagador.nome | nome | Nome completo da pessoa | SIM |
-| pagador.cpf_cnpj (se CPF) | cpf | Cadastro de Pessoa Fisica | SIM |
-| beneficiario.nome (se PF) | nome | Nome completo do recebedor | SIM |
-| beneficiario.cpf_cnpj (se CPF) | cpf | CPF do recebedor | SIM |
+| pagador.nome | NOME | Nome completo da pessoa | SIM |
+| pagador.cpf_cnpj (se CPF) | CPF | Cadastro de Pessoa Fisica | SIM |
+| beneficiario.nome (se PF) | NOME | Nome completo do recebedor | SIM |
+| beneficiario.cpf_cnpj (se CPF) | CPF | CPF do recebedor | SIM |
 
 **Observacao**: O comprovante de pagamento fornece identificacao basica das partes (nome e CPF). Dados complementares como RG, profissao, estado civil devem ser obtidos de outros documentos (RG, CNH, Certidao de Casamento).
 
@@ -171,10 +171,10 @@ Objeto com diferentes datas relacionadas a transacao.
 
 | Campo no Schema | Campo Mapeado | Descricao Mapeada | Usado em Minutas? |
 |-----------------|---------------|-------------------|-------------------|
-| beneficiario.nome (se PJ) | pj_denominacao | Razao social | SIM |
-| beneficiario.cpf_cnpj (se CNPJ) | pj_cnpj | CNPJ da empresa | SIM |
-| pagador.nome (se PJ) | pj_denominacao | Razao social | SIM |
-| pagador.cpf_cnpj (se CNPJ) | pj_cnpj | CNPJ da empresa | SIM |
+| beneficiario.nome (se PJ) | DENOMINACAO | Razao social | SIM |
+| beneficiario.cpf_cnpj (se CNPJ) | CNPJ | CNPJ da empresa | SIM |
+| pagador.nome (se PJ) | DENOMINACAO | Razao social | SIM |
+| pagador.cpf_cnpj (se CNPJ) | CNPJ | CNPJ da empresa | SIM |
 
 **Observacao**: A identificacao de PJ vs PF e feita pelo formato do documento (CPF = 11 digitos, CNPJ = 14 digitos).
 
@@ -193,16 +193,16 @@ Estes dados sao informativos e nao sao mapeados automaticamente.
 
 | Campo no Schema | Campo Mapeado | Descricao Mapeada | Usado em Minutas? |
 |-----------------|---------------|-------------------|-------------------|
-| valor_pago | negocio_valor_total | Valor total da transacao | SIM (se pagamento do imovel) |
-| tipo_transacao | pagamento_tipo | Tipo de pagamento | SIM |
-| tipo_transacao | pagamento_modo | Modo de pagamento (PIX, TED, etc) | SIM |
-| data_pagamento | pagamento_data | Data do pagamento | SIM |
-| pagador.banco | pagamento_banco_origem | Banco de origem | SIM |
-| pagador.agencia | pagamento_agencia_origem | Agencia de origem | SIM |
-| pagador.conta | pagamento_conta_origem | Conta de origem | SIM |
-| beneficiario.banco | pagamento_banco_destino | Banco de destino | SIM |
-| beneficiario.agencia | pagamento_agencia_destino | Agencia de destino | SIM |
-| beneficiario.conta | pagamento_conta_destino | Conta de destino | SIM |
+| valor_pago | VALOR TOTAL | Valor total da transacao | SIM (se pagamento do imovel) |
+| tipo_transacao | TIPO DE PAGAMENTO | Tipo de pagamento | SIM |
+| tipo_transacao | MODO DE PAGAMENTO | Modo de pagamento (PIX, TED, etc) | SIM |
+| data_pagamento | DATA DO PAGAMENTO | Data do pagamento | SIM |
+| pagador.banco | BANCO DE ORIGEM | Banco de origem | SIM |
+| pagador.agencia | AGENCIA DE ORIGEM | Agencia de origem | SIM |
+| pagador.conta | CONTA DE ORIGEM | Conta de origem | SIM |
+| beneficiario.banco | BANCO DE DESTINO | Banco de destino | SIM |
+| beneficiario.agencia | AGENCIA DE DESTINO | Agencia de destino | SIM |
+| beneficiario.conta | CONTA DE DESTINO | Conta de destino | SIM |
 
 ### 3.5 Campos Nao Mapeados
 

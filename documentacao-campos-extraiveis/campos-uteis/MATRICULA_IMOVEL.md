@@ -28,14 +28,14 @@ Dados dos proprietarios extraidos da matricula.
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome do proprietario | "ELIZETE APARECIDA SILVA" | SIM |
-| cpf | CPF do proprietario | "949.735.638-20" | Condicional |
-| rg | RG do proprietario | "7.878.936-SP" | Condicional |
-| orgao_emissor_rg | Orgao emissor do RG | "SSP" | Condicional |
-| estado_emissor_rg | UF do orgao emissor | "SP" | Condicional |
-| estado_civil | Estado civil | "solteira" | Condicional |
-| profissao | Profissao | "bancaria" | Condicional |
-| nacionalidade | Nacionalidade | "brasileira" | Condicional |
+| NOME | Nome do proprietario | "ELIZETE APARECIDA SILVA" | SIM |
+| CPF | CPF do proprietario | "949.735.638-20" | Condicional |
+| RG | RG do proprietario | "7.878.936-SP" | Condicional |
+| ORGAO EMISSOR DO RG | Orgao emissor do RG | "SSP" | Condicional |
+| ESTADO EMISSOR DO RG | UF do orgao emissor | "SP" | Condicional |
+| ESTADO CIVIL | Estado civil | "solteira" | Condicional |
+| PROFISSAO | Profissao | "bancaria" | Condicional |
+| NACIONALIDADE | Nacionalidade | "brasileira" | Condicional |
 
 **Notas:**
 - Esses dados vem dos proprietarios atuais registrados na matricula
@@ -50,8 +50,8 @@ Dados de empresas proprietarias.
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| pj_denominacao | Razao social | "XYZ EMPREENDIMENTOS LTDA" | SIM (se PJ) |
-| pj_cnpj | CNPJ | "12.345.678/0001-90" | SIM (se PJ) |
+| DENOMINACAO | Razao social | "XYZ EMPREENDIMENTOS LTDA" | SIM (se PJ) |
+| CNPJ | CNPJ | "12.345.678/0001-90" | SIM (se PJ) |
 
 ---
 
@@ -63,69 +63,69 @@ Esta e a categoria principal alimentada pela matricula.
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| matricula_numero | Numero da matricula | "46.511" | SIM |
-| matricula_cartorio_numero | Numero do cartorio | "1o OFICIAL DE RI" | SIM |
-| matricula_cartorio_cidade | Cidade do cartorio | "Sao Paulo" | SIM |
-| matricula_cartorio_estado | Estado do cartorio | "SP" | SIM |
-| matricula_numero_nacional | Numero nacional | "0001234..." | Condicional |
+| NUMERO DA MATRICULA | Numero da matricula | "46.511" | SIM |
+| NUMERO DO REGISTRO DE IMOVEIS | Numero do cartorio | "1o OFICIAL DE RI" | SIM |
+| CIDADE DO REGISTRO DE IMOVEIS | Cidade do cartorio | "Sao Paulo" | SIM |
+| ESTADO DO REGISTRO DE IMOVEIS | Estado do cartorio | "SP" | SIM |
+| NUMERO NACIONAL DA MATRICULA | Numero nacional | "0001234..." | Condicional |
 
 #### Descricao do Imovel
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| imovel_denominacao | Tipo do imovel | "apartamento" | SIM |
-| imovel_descricao_conforme_matricula | Descricao completa | "Unidade autonoma no 124..." | SIM |
-| imovel_sql | Cadastro municipal (SQL) | "039.080.0244-3" | Condicional |
-| imovel_area_total | Area total m2 | "83.49" | SIM |
-| imovel_area_privativa | Area privativa m2 | "70.83" | Condicional |
-| imovel_area_construida | Area construida m2 | "70.83" | Condicional |
+| DENOMINACAO DO IMOVEL | Tipo do imovel | "apartamento" | SIM |
+| DESCRICAO CONFORME MATRICULA | Descricao completa | "Unidade autonoma no 124..." | SIM |
+| SQL | Cadastro municipal (SQL) | "039.080.0244-3" | Condicional |
+| AREA TOTAL EM M2 | Area total m2 | "83.49" | SIM |
+| AREA PRIVATIVA EM M2 | Area privativa m2 | "70.83" | Condicional |
+| AREA CONSTRUIDA EM M2 | Area construida m2 | "70.83" | Condicional |
 
 #### Endereco do Imovel
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| imovel_logradouro | Logradouro | "Rua Francisco Cruz" | SIM |
-| imovel_numero | Numero | "515" | SIM |
-| imovel_complemento | Complemento | "Apto 124, Bloco B" | Condicional |
-| imovel_bairro | Bairro | "Vila Mariana" | SIM |
-| imovel_cidade | Cidade | "Sao Paulo" | SIM |
-| imovel_estado | Estado | "SP" | SIM |
-| imovel_cep | CEP | "04117-040" | Condicional |
+| LOGRADOURO | Logradouro | "Rua Francisco Cruz" | SIM |
+| NUMERO | Numero | "515" | SIM |
+| COMPLEMENTO | Complemento | "Apto 124, Bloco B" | Condicional |
+| BAIRRO | Bairro | "Vila Mariana" | SIM |
+| CIDADE | Cidade | "Sao Paulo" | SIM |
+| ESTADO | Estado | "SP" | SIM |
+| CEP | CEP | "04117-040" | Condicional |
 
 #### Certidao da Matricula
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| imovel_certidao_matricula_numero | Numero/selo da certidao | "1114503C300..." | Condicional |
-| imovel_certidao_matricula_data | Data de emissao | "14/11/2023" | SIM |
+| NUMERO DA CERTIDAO DA MATRICULA | Numero/selo da certidao | "1114503C300..." | Condicional |
+| DATA DA CERTIDAO DA MATRICULA | Data de emissao | "14/11/2023" | SIM |
 
 #### Dados do Proprietario
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| proprietario_nome | Nome do proprietario | "ELIZETE APARECIDA SILVA" | SIM |
-| proprietario_fracao_ideal | Fracao ideal | "50%" | Condicional |
-| proprietario_registro_aquisicao | Numero do registro (R.X) | "R-1/46.511" | SIM |
-| proprietario_data_registro | Data do registro | "17/07/1984" | SIM |
-| proprietario_titulo_aquisicao | Titulo de aquisicao | "COMPRA E VENDA" | SIM |
+| NOME DO PROPRIETARIO | Nome do proprietario | "ELIZETE APARECIDA SILVA" | SIM |
+| FRACAO IDEAL DO PROPRIETARIO | Fracao ideal | "50%" | Condicional |
+| REGISTRO DE AQUISICAO | Numero do registro (R.X) | "R-1/46.511" | SIM |
+| DATA DO REGISTRO | Data do registro | "17/07/1984" | SIM |
+| TITULO DE AQUISICAO | Titulo de aquisicao | "COMPRA E VENDA" | SIM |
 
 #### Onus e Gravames
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| onus_titulo | Tipo do onus | "HIPOTECA" | Se houver |
-| onus_registro | Numero do registro do onus | "R-2/46.511" | Se houver |
-| onus_data_registro | Data do registro do onus | "17/07/1984" | Se houver |
-| onus_descricao | Descricao do onus | "Hipoteca em favor de..." | Se houver |
-| onus_titular_nome | Nome do titular do onus | "BANCO ITAU S/A" | Se houver |
-| onus_titular_fracao | Fracao do onus | "100%" | Se houver |
+| TITULO DO ONUS | Tipo do onus | "HIPOTECA" | Se houver |
+| REGISTRO DO ONUS | Numero do registro do onus | "R-2/46.511" | Se houver |
+| DATA DO REGISTRO DO ONUS | Data do registro do onus | "17/07/1984" | Se houver |
+| DESCRICAO DO ONUS | Descricao do onus | "Hipoteca em favor de..." | Se houver |
+| NOME DO TITULAR DO ONUS | Nome do titular do onus | "BANCO ITAU S/A" | Se houver |
+| FRACAO DO TITULAR DO ONUS | Fracao do onus | "100%" | Se houver |
 
 #### Ressalvas
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| ressalva_existencia | Existe ressalva? | "sim" ou "nao" | SIM |
-| ressalva_descricao | Descricao da ressalva | "..." | Se houver |
+| EXISTENCIA DE RESSALVA | Existe ressalva? | "sim" ou "nao" | SIM |
+| DESCRICAO DA RESSALVA | Descricao da ressalva | "..." | Se houver |
 
 ---
 

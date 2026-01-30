@@ -26,8 +26,8 @@ A CND Estadual e usada principalmente para **validacao de regularidade fiscal es
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome do contribuinte | "JOAO DA SILVA" | SIM |
-| cpf | CPF do contribuinte | "123.456.789-00" | SIM |
+| NOME | Nome do contribuinte | "JOAO DA SILVA" | SIM |
+| CPF | CPF do contribuinte | "123.456.789-00" | SIM |
 
 **Notas:**
 - Estes campos sao usados para validacao, nao para composicao da minuta
@@ -40,8 +40,8 @@ A CND Estadual e usada principalmente para **validacao de regularidade fiscal es
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| pj_denominacao | Razao social da empresa | "EMPRESA EXEMPLO LTDA" | SIM |
-| pj_cnpj | CNPJ da empresa | "12.345.678/0001-90" | SIM |
+| DENOMINACAO | Razao social da empresa | "EMPRESA EXEMPLO LTDA" | SIM |
+| CNPJ | CNPJ da empresa | "12.345.678/0001-90" | SIM |
 
 **Notas:**
 - Usados quando a CND e de pessoa juridica (vendedor empresa)

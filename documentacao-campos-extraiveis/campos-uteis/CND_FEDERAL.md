@@ -29,13 +29,13 @@ Campos mapeados quando a CND Federal e de uma **pessoa fisica (CPF)**.
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome completo do contribuinte | "JOAO DA SILVA" | SIM (validacao) |
-| cpf | CPF do contribuinte | "123.456.789-00" | SIM (validacao) |
-| certidao_uniao_tipo | Tipo da certidao | "NEGATIVA" ou "POSITIVA COM EFEITOS DE NEGATIVA" | SIM |
-| certidao_uniao_data_emissao | Data de emissao | "27/01/2026" | SIM |
-| certidao_uniao_hora_emissao | Hora de emissao | "10:30:45" | Condicional |
-| certidao_uniao_validade | Data de validade (180 dias) | "26/07/2026" | SIM |
-| certidao_uniao_codigo_controle | Codigo para verificacao online | "ABCD.1234.EFGH.5678" | Condicional |
+| NOME | Nome completo do contribuinte | "JOAO DA SILVA" | SIM (validacao) |
+| CPF | CPF do contribuinte | "123.456.789-00" | SIM (validacao) |
+| TIPO | Tipo da certidao | "NEGATIVA" ou "POSITIVA COM EFEITOS DE NEGATIVA" | SIM |
+| DATA DE EMISSAO | Data de emissao | "27/01/2026" | SIM |
+| HORA DE EMISSAO | Hora de emissao | "10:30:45" | Condicional |
+| VALIDADE | Data de validade (180 dias) | "26/07/2026" | SIM |
+| CODIGO DE CONTROLE | Codigo para verificacao online | "ABCD.1234.EFGH.5678" | Condicional |
 
 **Notas:**
 - Os campos `nome` e `cpf` sao usados apenas para **validacao/correlacao**, nao vao para a minuta
@@ -51,13 +51,13 @@ Campos mapeados quando a CND Federal e de uma **pessoa juridica (CNPJ)**.
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| pj_denominacao | Razao social da empresa | "EMPRESA EXEMPLO LTDA" | SIM (validacao) |
-| pj_cnpj | CNPJ da empresa | "12.345.678/0001-90" | SIM (validacao) |
-| pj_certidao_uniao_tipo | Tipo da certidao | "NEGATIVA" ou "POSITIVA COM EFEITOS DE NEGATIVA" | SIM |
-| pj_certidao_uniao_data_emissao | Data de emissao | "27/01/2026" | SIM |
-| pj_certidao_uniao_hora_emissao | Hora de emissao | "14:22:10" | Condicional |
-| pj_certidao_uniao_validade | Data de validade (180 dias) | "26/07/2026" | SIM |
-| pj_certidao_uniao_codigo_controle | Codigo para verificacao online | "WXYZ.9876.ABCD.5432" | Condicional |
+| DENOMINACAO | Razao social da empresa | "EMPRESA EXEMPLO LTDA" | SIM (validacao) |
+| CNPJ | CNPJ da empresa | "12.345.678/0001-90" | SIM (validacao) |
+| TIPO | Tipo da certidao | "NEGATIVA" ou "POSITIVA COM EFEITOS DE NEGATIVA" | SIM |
+| DATA DE EMISSAO | Data de emissao | "27/01/2026" | SIM |
+| HORA DE EMISSAO | Hora de emissao | "14:22:10" | Condicional |
+| VALIDADE | Data de validade (180 dias) | "26/07/2026" | SIM |
+| CODIGO DE CONTROLE | Codigo para verificacao online | "WXYZ.9876.ABCD.5432" | Condicional |
 
 **Notas:**
 - Os campos `pj_denominacao` e `pj_cnpj` sao usados apenas para **validacao/correlacao**

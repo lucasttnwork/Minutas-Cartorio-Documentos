@@ -24,16 +24,16 @@ O RG e fonte primaria para identificacao pessoal, alimentando 10 dos 47 campos d
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome completo | "MARINA AYUB" | SIM |
-| cpf | CPF (modelos novos) | "368.366.718-43" | Condicional |
-| rg | Numero do RG | "35.540.462-X" | SIM |
-| orgao_emissor_rg | Orgao emissor | "SSP" | SIM |
-| estado_emissor_rg | UF do emissor | "SP" | SIM |
-| data_emissao_rg | Data de emissao | "12/06/2017" | Condicional |
-| data_nascimento | Data de nascimento | "06/09/1991" | SIM |
-| naturalidade | Local de nascimento | "S.PAULO - SP" | Condicional |
-| filiacao_pai | Nome do pai | "MUNIR AKAR AYUB" | Condicional |
-| filiacao_mae | Nome da mae | "ELOISA BASILE SIQUEIRA AYUB" | Condicional |
+| NOME | Nome completo | "MARINA AYUB" | SIM |
+| CPF | CPF (modelos novos) | "368.366.718-43" | Condicional |
+| RG | Numero do RG | "35.540.462-X" | SIM |
+| ORGAO EMISSOR DO RG | Orgao emissor | "SSP" | SIM |
+| ESTADO EMISSOR DO RG | UF do emissor | "SP" | SIM |
+| DATA DE EMISSAO DO RG | Data de emissao | "12/06/2017" | Condicional |
+| DATA DE NASCIMENTO | Data de nascimento | "06/09/1991" | SIM |
+| NATURALIDADE | Local de nascimento | "S.PAULO - SP" | Condicional |
+| FILIACAO PAI | Nome do pai | "MUNIR AKAR AYUB" | Condicional |
+| FILIACAO MAE | Nome da mae | "ELOISA BASILE SIQUEIRA AYUB" | Condicional |
 
 **Notas:**
 - O CPF pode nao estar presente em RGs antigos
@@ -70,16 +70,16 @@ O RG nao alimenta campos de Pessoa Juridica, Imovel ou Negocio Juridico.
 ```json
 {
   "pessoa_natural": {
-    "nome": "MARINA AYUB",
-    "cpf": "368.366.718-43",
-    "rg": "35.540.462-X",
-    "orgao_emissor_rg": "SSP",
-    "estado_emissor_rg": "SP",
-    "data_emissao_rg": "12/06/2017",
-    "data_nascimento": "06/09/1991",
-    "naturalidade": "S.PAULO - SP",
-    "filiacao_pai": "MUNIR AKAR AYUB",
-    "filiacao_mae": "ELOISA BASILE SIQUEIRA AYUB"
+    "NOME": "MARINA AYUB",
+    "CPF": "368.366.718-43",
+    "RG": "35.540.462-X",
+    "ORGAO EMISSOR DO RG": "SSP",
+    "ESTADO EMISSOR DO RG": "SP",
+    "DATA DE EMISSAO DO RG": "12/06/2017",
+    "DATA DE NASCIMENTO": "06/09/1991",
+    "NATURALIDADE": "S.PAULO - SP",
+    "FILIACAO PAI": "MUNIR AKAR AYUB",
+    "FILIACAO MAE": "ELOISA BASILE SIQUEIRA AYUB"
   },
   "pessoa_juridica": {},
   "imovel": {},
@@ -92,14 +92,14 @@ O RG nao alimenta campos de Pessoa Juridica, Imovel ou Negocio Juridico.
 ## 5. USO EM MINUTAS
 
 ### 5.1 Qualificacao das Partes (Escritura)
-- `nome` -> Nome completo na qualificacao
-- `cpf` -> CPF na qualificacao
-- `rg`, `orgao_emissor_rg`, `estado_emissor_rg` -> RG formatado (ex: "35.540.462-X SSP-SP")
-- `data_nascimento` -> Pode ser usada em qualificacoes completas
+- `NOME` -> Nome completo na qualificacao
+- `CPF` -> CPF na qualificacao
+- `RG`, `ORGAO EMISSOR DO RG`, `ESTADO EMISSOR DO RG` -> RG formatado (ex: "35.540.462-X SSP-SP")
+- `DATA DE NASCIMENTO` -> Pode ser usada em qualificacoes completas
 
 ### 5.2 Verificacao de Identidade
-- `filiacao_pai`, `filiacao_mae` -> Conferencia com certidao de nascimento
-- `naturalidade` -> Conferencia com outros documentos
+- `FILIACAO PAI`, `FILIACAO MAE` -> Conferencia com certidao de nascimento
+- `NATURALIDADE` -> Conferencia com outros documentos
 
 ---
 
@@ -107,11 +107,11 @@ O RG nao alimenta campos de Pessoa Juridica, Imovel ou Negocio Juridico.
 
 | Campo Util | Tambem Util Em | Finalidade |
 |------------|---------------|------------|
-| nome | CNH, CERTIDAO_CASAMENTO, CNDT, etc. (20 docs) | Identificar pessoa |
-| cpf | CNH, CERTIDAO_CASAMENTO, CNDT, etc. (17 docs) | Identificar pessoa |
-| rg | CNH, CERTIDAO_CASAMENTO, MATRICULA_IMOVEL (8 docs) | Identificar pessoa |
-| data_nascimento | CNH, CERTIDAO_NASCIMENTO, CERTIDAO_CASAMENTO (7 docs) | Validar idade |
-| filiacao_* | CNH, CERTIDAO_NASCIMENTO | Confirmar identidade |
+| NOME | CNH, CERTIDAO_CASAMENTO, CNDT, etc. (20 docs) | Identificar pessoa |
+| CPF | CNH, CERTIDAO_CASAMENTO, CNDT, etc. (17 docs) | Identificar pessoa |
+| RG | CNH, CERTIDAO_CASAMENTO, MATRICULA_IMOVEL (8 docs) | Identificar pessoa |
+| DATA DE NASCIMENTO | CNH, CERTIDAO_NASCIMENTO, CERTIDAO_CASAMENTO (7 docs) | Validar idade |
+| FILIACAO PAI / FILIACAO MAE | CNH, CERTIDAO_NASCIMENTO | Confirmar identidade |
 
 ---
 

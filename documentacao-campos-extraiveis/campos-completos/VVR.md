@@ -82,11 +82,11 @@ Alem dos campos do schema, extracoes reais podem conter:
 
 | Campo no Schema | Campo Mapeado | Descricao Mapeada | Usado em Minutas? |
 |-----------------|---------------|-------------------|-------------------|
-| cadastro_imovel | imovel_sql | Cadastro Municipal (SQL) | SIM |
-| valor_venal_referencia | imovel_valor_venal_referencia | Valor venal de referencia para ITBI | SIM |
-| endereco_completo | imovel_logradouro | Logradouro do imovel | SIM (parseado) |
-| endereco_completo | imovel_numero | Numero do imovel | SIM (parseado) |
-| endereco_completo | imovel_complemento | Complemento do imovel | SIM (parseado) |
+| cadastro_imovel | SQL | Cadastro Municipal (SQL) | SIM |
+| valor_venal_referencia | VALOR VENAL DE REFERENCIA | Valor venal de referencia para ITBI | SIM |
+| endereco_completo | LOGRADOURO | Logradouro do imovel | SIM (parseado) |
+| endereco_completo | NUMERO | Numero do imovel | SIM (parseado) |
+| endereco_completo | COMPLEMENTO | Complemento do imovel | SIM (parseado) |
 
 **Observacao**: O campo `endereco_completo` e um texto unico que precisa ser parseado para extrair logradouro, numero e complemento separadamente.
 
@@ -96,12 +96,12 @@ O VVR mapeia para **6 campos** na categoria `imovel`:
 
 | Campo Mapeado | Descricao |
 |---------------|-----------|
-| matricula_numero | Numero da matricula (se disponivel) |
-| imovel_sql | Cadastro Municipal (SQL) |
-| imovel_valor_venal_referencia | Valor venal de referencia para ITBI |
-| imovel_logradouro | Logradouro do imovel |
-| imovel_numero | Numero do imovel |
-| imovel_area_construida | Area construida em m2 (se disponivel) |
+| NUMERO DA MATRICULA | Numero da matricula (se disponivel) |
+| SQL | Cadastro Municipal (SQL) |
+| VALOR VENAL DE REFERENCIA | Valor venal de referencia para ITBI |
+| LOGRADOURO | Logradouro do imovel |
+| NUMERO | Numero do imovel |
+| AREA CONSTRUIDA EM M2 | Area construida em m2 (se disponivel) |
 
 ### 3.3 Campos Nao Mapeados
 

@@ -28,13 +28,13 @@ A Certidao de Obito e fonte **UNICA e autoritativa** para comprovacao de falecim
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome completo do falecido | "JOSE ANTONIO DA SILVA" | SIM |
-| cpf | CPF do falecido | "123.456.789-00" | Condicional |
-| rg | RG do falecido | "12.345.678-9" | Condicional |
-| data_nascimento | Data de nascimento do falecido | "10/03/1950" | Condicional |
-| data_obito | Data do obito/falecimento | "15/05/2020" | SIM |
-| estado_civil | Estado civil ao falecer | "CASADO" | Condicional |
-| data_falecimento_conjuge | Data de obito (para atualizar estado civil do conjuge) | "15/05/2020" | SIM |
+| NOME | Nome completo do falecido | "JOSE ANTONIO DA SILVA" | SIM |
+| CPF | CPF do falecido | "123.456.789-00" | Condicional |
+| RG | RG do falecido | "12.345.678-9" | Condicional |
+| DATA DE NASCIMENTO | Data de nascimento do falecido | "10/03/1950" | Condicional |
+| DATA DO OBITO | Data do obito/falecimento | "15/05/2020" | SIM |
+| ESTADO CIVIL | Estado civil ao falecer | "CASADO" | Condicional |
+| DATA DE FALECIMENTO DO CONJUGE | Data de obito (para atualizar estado civil do conjuge) | "15/05/2020" | SIM |
 
 **Notas Importantes:**
 - O campo `data_obito` e **CRITICO** pois:
@@ -68,13 +68,13 @@ A Certidao de Obito nao alimenta campos de Pessoa Juridica, Imovel ou Negocio Ju
 
 | Campo no Schema | Campo Util Mapeado | Categoria |
 |-----------------|-------------------|-----------|
-| nome_falecido | nome | pessoa_natural |
-| cpf_falecido | cpf | pessoa_natural |
-| rg_falecido | rg | pessoa_natural |
-| data_nascimento | data_nascimento | pessoa_natural |
-| data_obito | data_obito | pessoa_natural |
-| estado_civil | estado_civil | pessoa_natural |
-| data_obito (alias) | data_falecimento_conjuge | pessoa_natural |
+| nome_falecido | NOME | pessoa_natural |
+| cpf_falecido | CPF | pessoa_natural |
+| rg_falecido | RG | pessoa_natural |
+| data_nascimento | DATA DE NASCIMENTO | pessoa_natural |
+| data_obito | DATA DO OBITO | pessoa_natural |
+| estado_civil | ESTADO CIVIL | pessoa_natural |
+| data_obito (alias) | DATA DE FALECIMENTO DO CONJUGE | pessoa_natural |
 
 ---
 

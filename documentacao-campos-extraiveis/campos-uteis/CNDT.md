@@ -20,21 +20,21 @@ A CNDT e uma das certidoes obrigatorias para escrituras, comprovando que o alien
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome do titular | "JOAO DA SILVA" | SIM |
-| cpf | CPF do titular | "123.456.789-00" | SIM |
-| cndt_numero | Numero da certidao | "12345678901234567890" | SIM |
-| cndt_data_expedicao | Data de emissao | "27/01/2026" | SIM |
-| cndt_hora_expedicao | Hora de emissao | "10:30:45" | SIM |
+| NOME | Nome do titular | "JOAO DA SILVA" | SIM |
+| CPF | CPF do titular | "123.456.789-00" | SIM |
+| NUMERO DA CNDT | Numero da certidao | "12345678901234567890" | SIM |
+| DATA DE EXPEDICAO DA CNDT | Data de emissao | "27/01/2026" | SIM |
+| HORA DE EXPEDICAO DA CNDT | Hora de emissao | "10:30:45" | SIM |
 
 ### 2.2 Pessoa Juridica (5 campos)
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| pj_denominacao | Razao social | "XYZ EMPREENDIMENTOS LTDA" | SIM (se PJ) |
-| pj_cnpj | CNPJ | "12.345.678/0001-90" | SIM (se PJ) |
-| pj_cndt_numero | Numero da certidao PJ | "98765432109876543210" | SIM (se PJ) |
-| pj_cndt_data_expedicao | Data de emissao PJ | "27/01/2026" | SIM (se PJ) |
-| pj_cndt_hora_expedicao | Hora de emissao PJ | "11:15:30" | SIM (se PJ) |
+| DENOMINACAO | Razao social | "XYZ EMPREENDIMENTOS LTDA" | SIM (se PJ) |
+| CNPJ | CNPJ | "12.345.678/0001-90" | SIM (se PJ) |
+| NUMERO DA CNDT | Numero da certidao PJ | "98765432109876543210" | SIM (se PJ) |
+| DATA DE EXPEDICAO DA CNDT | Data de emissao PJ | "27/01/2026" | SIM (se PJ) |
+| HORA DE EXPEDICAO DA CNDT | Hora de emissao PJ | "11:15:30" | SIM (se PJ) |
 
 ### 2.3-2.4 Imovel e Negocio
 

@@ -275,33 +275,33 @@ Para determinar os dados atuais da empresa:
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Observacao |
 |-----------------|---------------|-------------------|------------|
-| razao_social / denominacao | pj_denominacao | SIM | Nome oficial da empresa |
-| cnpj | pj_cnpj | SIM | CNPJ formatado |
-| nire | pj_nire | SIM | NIRE da Junta Comercial |
-| sede.logradouro | pj_sede_logradouro | SIM | Logradouro da sede |
-| sede.numero | pj_sede_numero | SIM | Numero da sede |
-| sede.complemento | pj_sede_complemento | SIM | Complemento |
-| sede.bairro | pj_sede_bairro | SIM | Bairro |
-| sede.cidade | pj_sede_cidade | SIM | Cidade |
-| sede.estado | pj_sede_estado | SIM | UF |
-| sede.cep | pj_sede_cep | SIM | CEP |
-| instrumento_constitutivo | pj_instrumento_constitutivo | SIM | Tipo de instrumento |
-| junta_comercial | pj_junta_comercial | SIM | Sigla da JC |
-| numero_registro | pj_numero_registro_contrato | SIM | Numero na JC |
-| data_sessao | pj_data_sessao_registro | SIM | Data da sessao |
-| administrador.nome | pj_admin_nome | SIM | Nome do administrador |
-| administrador.cpf | pj_admin_cpf | SIM | CPF do administrador |
-| administrador.rg | pj_admin_rg | SIM | RG do administrador |
-| administrador.orgao_rg | pj_admin_orgao_emissor_rg | SIM | Orgao emissor |
-| administrador.estado_rg | pj_admin_estado_emissor_rg | SIM | Estado do RG |
-| administrador.data_nascimento | pj_admin_data_nascimento | SIM | Data de nascimento |
-| administrador.estado_civil | pj_admin_estado_civil | SIM | Estado civil |
-| administrador.profissao | pj_admin_profissao | SIM | Profissao |
-| administrador.nacionalidade | pj_admin_nacionalidade | SIM | Nacionalidade |
-| administrador.endereco.* | pj_admin_domicilio_* | SIM | Endereco completo (7 campos) |
-| tipo_representacao | pj_tipo_representacao | SIM | Tipo de representacao |
-| clausula_administrador | pj_clausula_indica_admin | SIM | Clausula que indica o admin |
-| clausula_poderes | pj_clausula_poderes_admin | SIM | Clausula sobre poderes |
+| razao_social / denominacao | DENOMINACAO | SIM | Nome oficial da empresa |
+| cnpj | CNPJ | SIM | CNPJ formatado |
+| nire | NIRE | SIM | NIRE da Junta Comercial |
+| sede.logradouro | LOGRADOURO DA SEDE | SIM | Logradouro da sede |
+| sede.numero | NUMERO DA SEDE | SIM | Numero da sede |
+| sede.complemento | COMPLEMENTO DA SEDE | SIM | Complemento |
+| sede.bairro | BAIRRO DA SEDE | SIM | Bairro |
+| sede.cidade | CIDADE DA SEDE | SIM | Cidade |
+| sede.estado | ESTADO DA SEDE | SIM | UF |
+| sede.cep | CEP DA SEDE | SIM | CEP |
+| instrumento_constitutivo | INSTRUMENTO CONSTITUTIVO | SIM | Tipo de instrumento |
+| junta_comercial | JUNTA COMERCIAL | SIM | Sigla da JC |
+| numero_registro | NUMERO DO REGISTRO DO CONTRATO SOCIAL | SIM | Numero na JC |
+| data_sessao | DATA DA SESSAO DO REGISTRO | SIM | Data da sessao |
+| administrador.nome | NOME DO ADMINISTRADOR | SIM | Nome do administrador |
+| administrador.cpf | CPF DO ADMINISTRADOR | SIM | CPF do administrador |
+| administrador.rg | RG DO ADMINISTRADOR | SIM | RG do administrador |
+| administrador.orgao_rg | ORGAO EMISSOR DO RG DO ADMINISTRADOR | SIM | Orgao emissor |
+| administrador.estado_rg | ESTADO EMISSOR DO RG DO ADMINISTRADOR | SIM | Estado do RG |
+| administrador.data_nascimento | DATA DE NASCIMENTO DO ADMINISTRADOR | SIM | Data de nascimento |
+| administrador.estado_civil | ESTADO CIVIL DO ADMINISTRADOR | SIM | Estado civil |
+| administrador.profissao | PROFISSAO DO ADMINISTRADOR | SIM | Profissao |
+| administrador.nacionalidade | NACIONALIDADE DO ADMINISTRADOR | SIM | Nacionalidade |
+| administrador.endereco.* | ENDERECO DO ADMINISTRADOR | SIM | Endereco completo (7 campos) |
+| tipo_representacao | TIPO DE REPRESENTACAO | SIM | Tipo de representacao |
+| clausula_administrador | CLAUSULA QUE INDICA O ADMINISTRADOR | SIM | Clausula que indica o admin |
+| clausula_poderes | CLAUSULA SOBRE PODERES DO ADMINISTRADOR | SIM | Clausula sobre poderes |
 
 ### 6.2 Campos que NAO Alimentam o Modelo de Dados
 

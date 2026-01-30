@@ -40,21 +40,21 @@ A CND de Imovel **nao alimenta** campos de Pessoa Juridica.
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| imovel_sql | Cadastro Municipal (SQL/Contribuinte) | "039.080.0244-3" | Condicional |
-| matricula_numero | Numero da matricula do imovel | "46.511" | SIM |
-| imovel_logradouro | Logradouro do imovel | "Rua Francisco Cruz" | SIM |
-| imovel_numero | Numero do imovel | "515" | SIM |
-| imovel_complemento | Complemento (apto, bloco) | "Apto 124, Bloco B" | Condicional |
-| imovel_bairro | Bairro do imovel | "Vila Mariana" | SIM |
-| imovel_cidade | Cidade do imovel | "Sao Paulo" | SIM |
-| imovel_estado | Estado do imovel | "SP" | SIM |
-| imovel_cnd_iptu_numero | Numero/referencia da certidao | "2026/123456" | SIM |
-| imovel_cnd_iptu_data | Data de emissao da certidao | "28/01/2026" | SIM |
-| imovel_cnd_iptu_valida | Certidao valida (imovel livre) | true/false | SIM |
+| SQL | Cadastro Municipal (SQL/Contribuinte) | "039.080.0244-3" | Condicional |
+| NUMERO DA MATRICULA | Numero da matricula do imovel | "46.511" | SIM |
+| LOGRADOURO | Logradouro do imovel | "Rua Francisco Cruz" | SIM |
+| NUMERO | Numero do imovel | "515" | SIM |
+| COMPLEMENTO | Complemento (apto, bloco) | "Apto 124, Bloco B" | Condicional |
+| BAIRRO | Bairro do imovel | "Vila Mariana" | SIM |
+| CIDADE | Cidade do imovel | "Sao Paulo" | SIM |
+| ESTADO | Estado do imovel | "SP" | SIM |
+| NUMERO DA CERTIDAO | Numero/referencia da certidao | "2026/123456" | SIM |
+| DATA DE EMISSAO | Data de emissao da certidao | "28/01/2026" | SIM |
+| VALIDADE | Certidao valida (imovel livre) | true/false | SIM |
 
 **Notas:**
 - O endereco na CND pode vir como campo unico que precisa ser parseado
-- O campo `imovel_cnd_iptu_valida` e derivado da situacao de onus (true se "LIVRE E DESEMBARACADO")
+- O campo `VALIDADE` e derivado da situacao de onus (true se "LIVRE E DESEMBARACADO")
 - O SQL (contribuinte_municipal) pode nao estar presente em todas as certidoes
 - A matricula e o identificador principal e unico do imovel
 
@@ -72,17 +72,17 @@ A certidao e usada para validacao da situacao do imovel, sendo mencionada na esc
 
 | Campo no Documento | Campo Util Mapeado | Categoria |
 |--------------------|-------------------|-----------|
-| contribuinte_municipal | imovel_sql | imovel |
-| matricula_numero | matricula_numero | imovel |
-| endereco_imovel (logradouro) | imovel_logradouro | imovel |
-| endereco_imovel (numero) | imovel_numero | imovel |
-| endereco_imovel (complemento) | imovel_complemento | imovel |
-| endereco_imovel (bairro) | imovel_bairro | imovel |
-| endereco_imovel (cidade) | imovel_cidade | imovel |
-| endereco_imovel (estado) | imovel_estado | imovel |
-| numero_certidao | imovel_cnd_iptu_numero | imovel |
-| data_emissao | imovel_cnd_iptu_data | imovel |
-| situacao_onus == "LIVRE" | imovel_cnd_iptu_valida | imovel |
+| contribuinte_municipal | SQL | imovel |
+| matricula_numero | NUMERO DA MATRICULA | imovel |
+| endereco_imovel (logradouro) | LOGRADOURO | imovel |
+| endereco_imovel (numero) | NUMERO | imovel |
+| endereco_imovel (complemento) | COMPLEMENTO | imovel |
+| endereco_imovel (bairro) | BAIRRO | imovel |
+| endereco_imovel (cidade) | CIDADE | imovel |
+| endereco_imovel (estado) | ESTADO | imovel |
+| numero_certidao | NUMERO DA CERTIDAO | imovel |
+| data_emissao | DATA DE EMISSAO | imovel |
+| situacao_onus == "LIVRE" | VALIDADE | imovel |
 
 ---
 
@@ -93,17 +93,17 @@ A certidao e usada para validacao da situacao do imovel, sendo mencionada na esc
   "pessoa_natural": {},
   "pessoa_juridica": {},
   "imovel": {
-    "imovel_sql": "039.080.0244-3",
-    "matricula_numero": "46.511",
-    "imovel_logradouro": "Rua Francisco Cruz",
-    "imovel_numero": "515",
-    "imovel_complemento": "Apto 124, Bloco B",
-    "imovel_bairro": "Vila Mariana",
-    "imovel_cidade": "Sao Paulo",
-    "imovel_estado": "SP",
-    "imovel_cnd_iptu_numero": "2026/123456",
-    "imovel_cnd_iptu_data": "28/01/2026",
-    "imovel_cnd_iptu_valida": true
+    "SQL": "039.080.0244-3",
+    "NUMERO DA MATRICULA": "46.511",
+    "LOGRADOURO": "Rua Francisco Cruz",
+    "NUMERO": "515",
+    "COMPLEMENTO": "Apto 124, Bloco B",
+    "BAIRRO": "Vila Mariana",
+    "CIDADE": "Sao Paulo",
+    "ESTADO": "SP",
+    "NUMERO DA CERTIDAO": "2026/123456",
+    "DATA DE EMISSAO": "28/01/2026",
+    "VALIDADE": true
   },
   "negocio": {}
 }
@@ -117,19 +117,19 @@ A certidao e usada para validacao da situacao do imovel, sendo mencionada na esc
 
 A CND de Imovel e documento obrigatorio para lavratura de escrituras publicas. Os campos extraidos sao usados para:
 
-- **Identificacao do imovel na minuta**: `matricula_numero`, endereco completo
-- **Referencia a certidao**: `imovel_cnd_iptu_numero`, `imovel_cnd_iptu_data`
-- **Validacao de regularidade**: `imovel_cnd_iptu_valida` confirma se imovel esta livre de onus
+- **Identificacao do imovel na minuta**: `NUMERO DA MATRICULA`, endereco completo
+- **Referencia a certidao**: `NUMERO DA CERTIDAO`, `DATA DE EMISSAO`
+- **Validacao de regularidade**: `VALIDADE` confirma se imovel esta livre de onus
 
 ### 5.2 Correlacao com Matricula e SQL
 
-- `matricula_numero` -> Correlacao univoca com MATRICULA_IMOVEL
-- `imovel_sql` -> Correlacao com cadastro fiscal municipal (IPTU, VVR, CND_MUNICIPAL)
+- `NUMERO DA MATRICULA` -> Correlacao univoca com MATRICULA_IMOVEL
+- `SQL` -> Correlacao com cadastro fiscal municipal (IPTU, VVR, CND_MUNICIPAL)
 
 ### 5.3 Mencao na Escritura
 
 A certidao e mencionada na escritura publica da seguinte forma:
-> "Apresentada Certidao de Onus Reais no [imovel_cnd_iptu_numero], expedida em [imovel_cnd_iptu_data], constando que o imovel encontra-se livre e desembaracado de quaisquer onus."
+> "Apresentada Certidao de Onus Reais no [NUMERO DA CERTIDAO], expedida em [DATA DE EMISSAO], constando que o imovel encontra-se livre e desembaracado de quaisquer onus."
 
 ---
 
@@ -139,24 +139,24 @@ A certidao e mencionada na escritura publica da seguinte forma:
 
 | Campo Util | Tambem Util Em | Finalidade |
 |------------|---------------|------------|
-| matricula_numero | MATRICULA_IMOVEL, ITBI, ESCRITURA, PROTOCOLO_ONR, COMPROMISSO | Identificar imovel univocamente |
-| imovel_sql | IPTU, VVR, CND_MUNICIPAL, DADOS_CADASTRAIS, ITBI | Correlacao cadastro fiscal |
-| imovel_logradouro | MATRICULA_IMOVEL, IPTU, VVR, DADOS_CADASTRAIS | Validar endereco |
-| imovel_numero | MATRICULA_IMOVEL, IPTU, VVR, DADOS_CADASTRAIS | Validar endereco |
-| imovel_bairro | MATRICULA_IMOVEL, IPTU, VVR, DADOS_CADASTRAIS | Validar endereco |
-| imovel_cidade | MATRICULA_IMOVEL, IPTU, VVR, DADOS_CADASTRAIS | Validar endereco |
-| imovel_estado | MATRICULA_IMOVEL, IPTU, VVR, DADOS_CADASTRAIS | Validar endereco |
+| NUMERO DA MATRICULA | MATRICULA_IMOVEL, ITBI, ESCRITURA, PROTOCOLO_ONR, COMPROMISSO | Identificar imovel univocamente |
+| SQL | IPTU, VVR, CND_MUNICIPAL, DADOS_CADASTRAIS, ITBI | Correlacao cadastro fiscal |
+| LOGRADOURO | MATRICULA_IMOVEL, IPTU, VVR, DADOS_CADASTRAIS | Validar endereco |
+| NUMERO | MATRICULA_IMOVEL, IPTU, VVR, DADOS_CADASTRAIS | Validar endereco |
+| BAIRRO | MATRICULA_IMOVEL, IPTU, VVR, DADOS_CADASTRAIS | Validar endereco |
+| CIDADE | MATRICULA_IMOVEL, IPTU, VVR, DADOS_CADASTRAIS | Validar endereco |
+| ESTADO | MATRICULA_IMOVEL, IPTU, VVR, DADOS_CADASTRAIS | Validar endereco |
 
 ### 6.2 Correlacao Especifica
 
 | Documento | Campo de Correlacao | Observacao |
 |-----------|---------------------|------------|
-| **MATRICULA_IMOVEL** | matricula_numero | Deve ser identico; fonte primaria de dados do imovel |
-| **IPTU** | imovel_sql | SQL vincula certidao ao cadastro fiscal |
-| **VVR** | imovel_sql | SQL vincula ao valor venal de referencia |
-| **CND_MUNICIPAL** | imovel_sql | SQL vincula a certidao de debitos municipais |
-| **ITBI** | matricula_numero | Matricula identifica imovel na guia de ITBI |
-| **PROTOCOLO_ONR** | matricula_numero | Referencia ao protocolo de registro |
+| **MATRICULA_IMOVEL** | NUMERO DA MATRICULA | Deve ser identico; fonte primaria de dados do imovel |
+| **IPTU** | SQL | SQL vincula certidao ao cadastro fiscal |
+| **VVR** | SQL | SQL vincula ao valor venal de referencia |
+| **CND_MUNICIPAL** | SQL | SQL vincula a certidao de debitos municipais |
+| **ITBI** | NUMERO DA MATRICULA | Matricula identifica imovel na guia de ITBI |
+| **PROTOCOLO_ONR** | NUMERO DA MATRICULA | Referencia ao protocolo de registro |
 
 ### 6.3 Hierarquia de Fontes para Dados do Imovel
 

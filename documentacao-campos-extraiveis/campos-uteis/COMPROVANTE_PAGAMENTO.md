@@ -53,30 +53,30 @@ Este documento NAO contem dados de imovel - apenas dados transacionais e identif
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome do pagador | "MARINA AYUB" | SIM |
-| cpf | CPF do pagador | "368.366.718-43" | SIM |
+| NOME | Nome do pagador | "MARINA AYUB" | SIM |
+| CPF | CPF do pagador | "368.366.718-43" | SIM |
 
 ### 3.2 Pessoa Juridica (2 campos)
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| pj_denominacao | Razao social do beneficiario | "PREFEITURA DE SAO PAULO" | SIM (se PJ) |
-| pj_cnpj | CNPJ do beneficiario | "46.395.000/0001-39" | SIM (se PJ) |
+| DENOMINACAO | Razao social do beneficiario | "PREFEITURA DE SAO PAULO" | SIM (se PJ) |
+| CNPJ | CNPJ do beneficiario | "46.395.000/0001-39" | SIM (se PJ) |
 
 ### 3.3 Negocio Juridico (10 campos)
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| negocio_valor_total | Valor pago | "15000.00" | SIM |
-| pagamento_tipo | Tipo de transferencia | "PIX" / "TED" / "DOC" / "BOLETO" | SIM |
-| pagamento_modo | Modo de pagamento | "Transferencia" / "Boleto" | SIM |
-| pagamento_data | Data do pagamento | "25/01/2026" | SIM |
-| pagamento_banco_origem | Banco do pagador | "Itau Unibanco S.A." | SIM |
-| pagamento_agencia_origem | Agencia do pagador | "0001" | SIM |
-| pagamento_conta_origem | Conta do pagador | "12345-6" | SIM |
-| pagamento_banco_destino | Banco do beneficiario | "Banco do Brasil S.A." | SIM |
-| pagamento_agencia_destino | Agencia do beneficiario | "1234-5" | SIM |
-| pagamento_conta_destino | Conta do beneficiario | "98765-4" | SIM |
+| VALOR TOTAL | Valor pago | "15000.00" | SIM |
+| TIPO DE PAGAMENTO | Tipo de transferencia | "PIX" / "TED" / "DOC" / "BOLETO" | SIM |
+| MODO DE PAGAMENTO | Modo de pagamento | "Transferencia" / "Boleto" | SIM |
+| DATA DO PAGAMENTO | Data do pagamento | "25/01/2026" | SIM |
+| BANCO DE ORIGEM | Banco do pagador | "Itau Unibanco S.A." | SIM |
+| AGENCIA DE ORIGEM | Agencia do pagador | "0001" | SIM |
+| CONTA DE ORIGEM | Conta do pagador | "12345-6" | SIM |
+| BANCO DE DESTINO | Banco do beneficiario | "Banco do Brasil S.A." | SIM |
+| AGENCIA DE DESTINO | Agencia do beneficiario | "1234-5" | SIM |
+| CONTA DE DESTINO | Conta do beneficiario | "98765-4" | SIM |
 
 ---
 

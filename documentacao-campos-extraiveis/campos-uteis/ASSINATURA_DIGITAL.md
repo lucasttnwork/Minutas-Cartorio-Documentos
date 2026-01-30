@@ -23,7 +23,7 @@ Este documento lista **APENAS os campos uteis** extraidos da ASSINATURA_DIGITAL 
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome do signatario | "JOAO DA SILVA" | SIM |
+| NOME | Nome do signatario | "JOAO DA SILVA" | SIM |
 
 ### 2.2-2.4 Demais Categorias (0 campos)
 

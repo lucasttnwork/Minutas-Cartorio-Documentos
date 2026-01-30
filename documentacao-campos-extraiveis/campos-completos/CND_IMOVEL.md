@@ -205,17 +205,17 @@ A CND de Imovel **nao alimenta** diretamente campos de Pessoa Juridica.
 
 | Campo no Documento | Campo Mapeado | Descricao Mapeada | Usado em Minutas? |
 |-------------------|---------------|-------------------|-------------------|
-| contribuinte_municipal | imovel_sql | Cadastro Municipal (SQL) | SIM |
-| matricula_numero | matricula_numero | Numero da matricula | SIM |
-| endereco_imovel | imovel_logradouro | Logradouro do imovel | SIM |
-| endereco_imovel | imovel_numero | Numero do imovel | SIM |
-| endereco_imovel | imovel_complemento | Complemento (apto, bloco) | SIM |
-| endereco_imovel | imovel_bairro | Bairro do imovel | SIM |
-| endereco_imovel | imovel_cidade | Cidade do imovel | SIM |
-| endereco_imovel | imovel_estado | Estado do imovel | SIM |
-| numero_certidao | imovel_cnd_iptu_numero | Referencia da CND na minuta | SIM |
-| data_emissao | imovel_cnd_iptu_data | Data de emissao da certidao | SIM |
-| (situacao_onus == "LIVRE") | imovel_cnd_iptu_valida | Certidao valida (sim/nao) | SIM |
+| contribuinte_municipal | SQL | Cadastro Municipal (SQL) | SIM |
+| matricula_numero | NUMERO DA MATRICULA | Numero da matricula | SIM |
+| endereco_imovel | LOGRADOURO | Logradouro do imovel | SIM |
+| endereco_imovel | NUMERO | Numero do imovel | SIM |
+| endereco_imovel | COMPLEMENTO | Complemento (apto, bloco) | SIM |
+| endereco_imovel | BAIRRO | Bairro do imovel | SIM |
+| endereco_imovel | CIDADE | Cidade do imovel | SIM |
+| endereco_imovel | ESTADO | Estado do imovel | SIM |
+| numero_certidao | NUMERO DA CERTIDAO | Referencia da CND na minuta | SIM |
+| data_emissao | DATA DE EMISSAO | Data de emissao da certidao | SIM |
+| (situacao_onus == "LIVRE") | VALIDADE | Certidao valida (sim/nao) | SIM |
 
 **Observacao:** O endereco na CND de Imovel pode ser um campo unico que precisa ser parseado para extrair os componentes individuais.
 

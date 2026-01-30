@@ -324,74 +324,74 @@ Lista de testemunhas do contrato. Confianca esperada: MEDIA (nivel de extracao 2
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Observacao |
 |-----------------|---------------|-------------------|------------|
-| vendedores[].nome / compradores[].nome | nome | SIM | Nome completo da parte |
-| vendedores[].cpf / compradores[].cpf | cpf | SIM | CPF da parte |
-| vendedores[].rg / compradores[].rg | rg | SIM | Numero do RG |
-| vendedores[].orgao_rg | orgao_emissor_rg | SIM | SSP, DETRAN, etc. |
-| (extraido do orgao_rg) | estado_emissor_rg | SIM | UF do RG |
-| vendedores[].nacionalidade | nacionalidade | SIM | Nacionalidade declarada |
-| vendedores[].profissao | profissao | SIM | Profissao ou ocupacao |
-| vendedores[].estado_civil | estado_civil | SIM | Solteiro, casado, etc. |
-| vendedores[].regime_bens | regime_bens | SIM | Se casado |
-| (se presente no documento) | data_nascimento | SIM | Data de nascimento |
-| vendedores[].endereco.logradouro | domicilio_logradouro | SIM | Rua, Avenida, etc. |
-| vendedores[].endereco.numero | domicilio_numero | SIM | Numero do endereco |
-| vendedores[].endereco.complemento | domicilio_complemento | SIM | Apto, Bloco, etc. |
-| vendedores[].endereco.bairro | domicilio_bairro | SIM | Bairro |
-| vendedores[].endereco.cidade | domicilio_cidade | SIM | Cidade |
-| vendedores[].endereco.uf | domicilio_estado | SIM | Estado (UF) |
-| vendedores[].endereco.cep | domicilio_cep | SIM | CEP |
-| vendedores[].email | email | SIM | E-mail de contato |
-| vendedores[].telefone | telefone | SIM | Telefone de contato |
+| vendedores[].nome / compradores[].nome | NOME | SIM | Nome completo da parte |
+| vendedores[].cpf / compradores[].cpf | CPF | SIM | CPF da parte |
+| vendedores[].rg / compradores[].rg | RG | SIM | Numero do RG |
+| vendedores[].orgao_rg | ORGAO EMISSOR DO RG | SIM | SSP, DETRAN, etc. |
+| (extraido do orgao_rg) | ESTADO EMISSOR DO RG | SIM | UF do RG |
+| vendedores[].nacionalidade | NACIONALIDADE | SIM | Nacionalidade declarada |
+| vendedores[].profissao | PROFISSAO | SIM | Profissao ou ocupacao |
+| vendedores[].estado_civil | ESTADO CIVIL | SIM | Solteiro, casado, etc. |
+| vendedores[].regime_bens | REGIME DE BENS | SIM | Se casado |
+| (se presente no documento) | DATA DE NASCIMENTO | SIM | Data de nascimento |
+| vendedores[].endereco.logradouro | LOGRADOURO | SIM | Rua, Avenida, etc. |
+| vendedores[].endereco.numero | NUMERO | SIM | Numero do endereco |
+| vendedores[].endereco.complemento | COMPLEMENTO | SIM | Apto, Bloco, etc. |
+| vendedores[].endereco.bairro | BAIRRO | SIM | Bairro |
+| vendedores[].endereco.cidade | CIDADE | SIM | Cidade |
+| vendedores[].endereco.uf | ESTADO | SIM | Estado (UF) |
+| vendedores[].endereco.cep | CEP | SIM | CEP |
+| vendedores[].email | E-MAIL | SIM | E-mail de contato |
+| vendedores[].telefone | TELEFONE | SIM | Telefone de contato |
 
 ### 3.2 Campos que Alimentam "Pessoa Juridica" (9 campos)
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Observacao |
 |-----------------|---------------|-------------------|------------|
-| vendedores[].nome (se PJ) | pj_denominacao | SIM | Razao social |
-| vendedores[].cpf (se CNPJ) | pj_cnpj | SIM | CNPJ da empresa |
-| vendedores[].endereco.logradouro (se PJ) | pj_sede_logradouro | SIM | Logradouro da sede |
-| vendedores[].endereco.numero (se PJ) | pj_sede_numero | SIM | Numero da sede |
-| vendedores[].endereco.complemento (se PJ) | pj_sede_complemento | SIM | Complemento da sede |
-| vendedores[].endereco.bairro (se PJ) | pj_sede_bairro | SIM | Bairro da sede |
-| vendedores[].endereco.cidade (se PJ) | pj_sede_cidade | SIM | Cidade da sede |
-| vendedores[].endereco.uf (se PJ) | pj_sede_estado | SIM | Estado da sede |
-| vendedores[].endereco.cep (se PJ) | pj_sede_cep | SIM | CEP da sede |
+| vendedores[].nome (se PJ) | DENOMINACAO | SIM | Razao social |
+| vendedores[].cpf (se CNPJ) | CNPJ | SIM | CNPJ da empresa |
+| vendedores[].endereco.logradouro (se PJ) | LOGRADOURO DA SEDE | SIM | Logradouro da sede |
+| vendedores[].endereco.numero (se PJ) | NUMERO DA SEDE | SIM | Numero da sede |
+| vendedores[].endereco.complemento (se PJ) | COMPLEMENTO DA SEDE | SIM | Complemento da sede |
+| vendedores[].endereco.bairro (se PJ) | BAIRRO DA SEDE | SIM | Bairro da sede |
+| vendedores[].endereco.cidade (se PJ) | CIDADE DA SEDE | SIM | Cidade da sede |
+| vendedores[].endereco.uf (se PJ) | ESTADO DA SEDE | SIM | Estado da sede |
+| vendedores[].endereco.cep (se PJ) | CEP DA SEDE | SIM | CEP da sede |
 
 ### 3.3 Campos que Alimentam "Dados do Imovel" (12 campos)
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Observacao |
 |-----------------|---------------|-------------------|------------|
-| imovel.matricula | matricula_numero | SIM | Numero da matricula |
-| imovel.cartorio_ri | matricula_cartorio_numero | SIM | Identificacao do cartorio |
-| (cidade do cartorio) | matricula_cartorio_cidade | SIM | Cidade do cartorio de RI |
-| imovel.tipo | imovel_denominacao | SIM | Apartamento, Casa, etc. |
-| imovel.logradouro / endereco_completo | imovel_logradouro | SIM | Logradouro do imovel |
-| imovel.numero | imovel_numero | SIM | Numero do imovel |
-| imovel.bloco + andar + unidade | imovel_complemento | SIM | Complemento completo |
-| imovel.bairro | imovel_bairro | SIM | Bairro do imovel |
-| imovel.cidade | imovel_cidade | SIM | Cidade do imovel |
-| imovel.estado | imovel_estado | SIM | Estado do imovel |
-| imovel.area_total | imovel_area_total | SIM | Area total em m2 |
-| imovel.area_privativa | imovel_area_privativa | SIM | Area privativa em m2 |
+| imovel.matricula | NUMERO DA MATRICULA | SIM | Numero da matricula |
+| imovel.cartorio_ri | NUMERO DO REGISTRO DE IMOVEIS | SIM | Identificacao do cartorio |
+| (cidade do cartorio) | CIDADE DO REGISTRO DE IMOVEIS | SIM | Cidade do cartorio de RI |
+| imovel.tipo | DENOMINACAO DO IMOVEL | SIM | Apartamento, Casa, etc. |
+| imovel.logradouro / endereco_completo | LOGRADOURO | SIM | Logradouro do imovel |
+| imovel.numero | NUMERO | SIM | Numero do imovel |
+| imovel.bloco + andar + unidade | COMPLEMENTO | SIM | Complemento completo |
+| imovel.bairro | BAIRRO | SIM | Bairro do imovel |
+| imovel.cidade | CIDADE | SIM | Cidade do imovel |
+| imovel.estado | ESTADO | SIM | Estado do imovel |
+| imovel.area_total | AREA TOTAL EM M2 | SIM | Area total em m2 |
+| imovel.area_privativa | AREA PRIVATIVA EM M2 | SIM | Area privativa em m2 |
 
 ### 3.4 Campos que Alimentam "Negocio Juridico" (13 campos)
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Observacao |
 |-----------------|---------------|-------------------|------------|
-| preco_total | negocio_valor_total | SIM | Valor total da transacao |
-| (fracao vendida) | negocio_fracao_alienada | SIM | Fracao ideal alienada (se parcial) |
-| vendedores[].nome | alienante_nome | SIM | Nome do vendedor |
-| vendedores[].percentual | alienante_fracao_ideal | SIM | Percentual do vendedor |
-| (valor por vendedor) | alienante_valor_alienacao | SIM | Valor recebido por cada vendedor |
-| vendedores[].conjuge.nome | alienante_conjuge | SIM | Conjuge do vendedor (se casado) |
-| compradores[].nome | adquirente_nome | SIM | Nome do comprador |
-| compradores[].percentual | adquirente_fracao_ideal | SIM | Percentual do comprador |
-| (valor por comprador) | adquirente_valor_aquisicao | SIM | Valor pago por cada comprador |
-| dados_pagamento_saldo.tipo | pagamento_tipo | SIM | A vista, financiado, etc. |
-| dados_pagamento_sinal.forma_pagamento | pagamento_modo | SIM | TED, PIX, boleto, etc. |
-| dados_pagamento_sinal.data_pagamento | pagamento_data | SIM | Data do pagamento |
-| condicoes_especificas | termos_promessa | SIM | Condicoes especiais do contrato |
+| preco_total | VALOR TOTAL | SIM | Valor total da transacao |
+| (fracao vendida) | FRACAO ALIENADA | SIM | Fracao ideal alienada (se parcial) |
+| vendedores[].nome | NOME DO ALIENANTE | SIM | Nome do vendedor |
+| vendedores[].percentual | FRACAO IDEAL DO ALIENANTE | SIM | Percentual do vendedor |
+| (valor por vendedor) | VALOR DA ALIENACAO | SIM | Valor recebido por cada vendedor |
+| vendedores[].conjuge.nome | CONJUGE DO ALIENANTE | SIM | Conjuge do vendedor (se casado) |
+| compradores[].nome | NOME DO ADQUIRENTE | SIM | Nome do comprador |
+| compradores[].percentual | FRACAO IDEAL DO ADQUIRENTE | SIM | Percentual do comprador |
+| (valor por comprador) | VALOR DA AQUISICAO | SIM | Valor pago por cada comprador |
+| dados_pagamento_saldo.tipo | TIPO DE PAGAMENTO | SIM | A vista, financiado, etc. |
+| dados_pagamento_sinal.forma_pagamento | MODO DE PAGAMENTO | SIM | TED, PIX, boleto, etc. |
+| dados_pagamento_sinal.data_pagamento | DATA DO PAGAMENTO | SIM | Data do pagamento |
+| condicoes_especificas | TERMOS DA PROMESSA | SIM | Condicoes especiais do contrato |
 
 ### 3.5 Campos Nao Mapeados
 

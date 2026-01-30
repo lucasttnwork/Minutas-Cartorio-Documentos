@@ -141,8 +141,8 @@ A CND Estadual nao possui estrutura nested complexa. Todos os campos sao de nive
 
 | Campo no Documento | Campo Mapeado | Usado em Minutas? | Prioridade |
 |-------------------|---------------|-------------------|------------|
-| nome_contribuinte | nome | NAO (apenas validacao) | Baixa |
-| cpf | cpf | NAO (apenas validacao) | Baixa |
+| nome_contribuinte | NOME | NAO (apenas validacao) | Baixa |
+| cpf | CPF | NAO (apenas validacao) | Baixa |
 | numero_certidao | cnd_estadual_numero | SIM | Alta |
 | data_emissao | cnd_estadual_data | SIM | Alta |
 
@@ -152,8 +152,8 @@ A CND Estadual nao possui estrutura nested complexa. Todos os campos sao de nive
 
 | Campo no Documento | Campo Mapeado | Usado em Minutas? | Prioridade |
 |-------------------|---------------|-------------------|------------|
-| nome_contribuinte (se PJ) | pj_denominacao | NAO (apenas validacao) | Baixa |
-| cnpj | pj_cnpj | NAO (apenas validacao) | Baixa |
+| nome_contribuinte (se PJ) | DENOMINACAO | NAO (apenas validacao) | Baixa |
+| cnpj | CNPJ | NAO (apenas validacao) | Baixa |
 | numero_certidao | pj_cnd_estadual_numero | SIM | Alta |
 | data_emissao | pj_cnd_estadual_data | SIM | Alta |
 

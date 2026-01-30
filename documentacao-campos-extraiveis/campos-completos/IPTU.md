@@ -193,8 +193,8 @@ Array obrigatorio contendo a lista de contribuintes (proprietarios ou responsave
 
 | Campo no Schema | Campo Mapeado | Descricao Mapeada | Usado em Minutas? |
 |-----------------|---------------|-------------------|-------------------|
-| contribuintes[].nome | nome | Nome completo da pessoa | SIM |
-| contribuintes[].cpf | cpf | Cadastro de Pessoa Fisica | SIM |
+| contribuintes[].nome | NOME | Nome completo da pessoa | SIM |
+| contribuintes[].cpf | CPF | Cadastro de Pessoa Fisica | SIM |
 
 **Observacao**: O IPTU fornece dados basicos de identificacao (nome e CPF/CNPJ). Dados complementares como RG, profissao, estado civil e endereco domiciliar devem ser obtidos de outros documentos (RG, Certidao de Casamento, Comprovante de Residencia).
 
@@ -202,17 +202,17 @@ Array obrigatorio contendo a lista de contribuintes (proprietarios ou responsave
 
 | Campo no Schema | Campo Mapeado | Descricao Mapeada | Usado em Minutas? |
 |-----------------|---------------|-------------------|-------------------|
-| cadastro_imovel | imovel_sql | Cadastro Municipal (SQL) | SIM |
-| endereco_imovel.logradouro | imovel_logradouro | Logradouro do imovel | SIM |
-| endereco_imovel.numero | imovel_numero | Numero do imovel | SIM |
-| endereco_imovel.complemento | imovel_complemento | Complemento do imovel | SIM |
-| endereco_imovel.bairro | imovel_bairro | Bairro do imovel | SIM |
-| (inferido) | imovel_cidade | Cidade do imovel | SIM |
-| (inferido) | imovel_estado | Estado do imovel | SIM |
-| endereco_imovel.cep | imovel_cep | CEP do imovel | SIM |
-| dados_terreno.area | imovel_area_total | Area total em m2 | SIM |
-| dados_construcao.area | imovel_area_construida | Area construida em m2 | SIM |
-| valor_venal_total | imovel_valor_venal_iptu | Valor venal para IPTU | SIM |
+| cadastro_imovel | SQL | Cadastro Municipal (SQL) | SIM |
+| endereco_imovel.logradouro | LOGRADOURO | Logradouro do imovel | SIM |
+| endereco_imovel.numero | NUMERO | Numero do imovel | SIM |
+| endereco_imovel.complemento | COMPLEMENTO | Complemento do imovel | SIM |
+| endereco_imovel.bairro | BAIRRO | Bairro do imovel | SIM |
+| (inferido) | CIDADE | Cidade do imovel | SIM |
+| (inferido) | ESTADO | Estado do imovel | SIM |
+| endereco_imovel.cep | CEP | CEP do imovel | SIM |
+| dados_terreno.area | AREA TOTAL EM M2 | Area total em m2 | SIM |
+| dados_construcao.area | AREA CONSTRUIDA EM M2 | Area construida em m2 | SIM |
+| valor_venal_total | VALOR VENAL DO IPTU | Valor venal para IPTU | SIM |
 
 **Observacoes**:
 - A cidade e estado sao inferidos do orgao emissor ("Prefeitura de Sao Paulo" = Sao Paulo/SP)

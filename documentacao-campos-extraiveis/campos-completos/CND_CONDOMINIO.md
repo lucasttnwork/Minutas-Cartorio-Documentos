@@ -111,7 +111,7 @@ O CNPJ do condominio ou administradora nao e mapeado para o modelo de dados porq
 
 | Campo no Documento | Campo Mapeado | Descricao Mapeada | Usado em Minutas? |
 |-------------------|---------------|-------------------|-------------------|
-| unidade | imovel_complemento | Complemento (apto, bloco) | SIM |
+| unidade | COMPLEMENTO | Complemento (apto, bloco) | SIM |
 
 **Observacao**: A unidade (apartamento, bloco) e mapeada para o complemento do endereco do imovel, permitindo validacao cruzada com outros documentos.
 

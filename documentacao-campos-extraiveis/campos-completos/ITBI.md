@@ -158,10 +158,10 @@ Array obrigatorio contendo a lista de transmitentes/vendedores.
 
 | Campo no Schema | Campo Mapeado | Descricao Mapeada | Usado em Minutas? |
 |-----------------|---------------|-------------------|-------------------|
-| compradores[].nome | nome | Nome completo da pessoa | SIM |
-| compradores[].cpf | cpf | Cadastro de Pessoa Fisica | SIM |
-| vendedores[].nome | nome | Nome completo da pessoa | SIM |
-| vendedores[].cpf | cpf | Cadastro de Pessoa Fisica | SIM |
+| compradores[].nome | NOME | Nome completo da pessoa | SIM |
+| compradores[].cpf | CPF | Cadastro de Pessoa Fisica | SIM |
+| vendedores[].nome | NOME | Nome completo da pessoa | SIM |
+| vendedores[].cpf | CPF | Cadastro de Pessoa Fisica | SIM |
 
 **Observacao**: O ITBI fornece dados basicos de identificacao (nome e CPF). Dados complementares como RG, profissao e estado civil devem ser obtidos de outros documentos.
 
@@ -169,10 +169,10 @@ Array obrigatorio contendo a lista de transmitentes/vendedores.
 
 | Campo no Schema | Campo Mapeado | Descricao Mapeada | Usado em Minutas? |
 |-----------------|---------------|-------------------|-------------------|
-| compradores[].nome (se PJ) | pj_denominacao | Razao social ou denominacao | SIM |
-| compradores[].cpf (se CNPJ) | pj_cnpj | CNPJ da empresa | SIM |
-| vendedores[].nome (se PJ) | pj_denominacao | Razao social ou denominacao | SIM |
-| vendedores[].cpf (se CNPJ) | pj_cnpj | CNPJ da empresa | SIM |
+| compradores[].nome (se PJ) | DENOMINACAO | Razao social ou denominacao | SIM |
+| compradores[].cpf (se CNPJ) | CNPJ | CNPJ da empresa | SIM |
+| vendedores[].nome (se PJ) | DENOMINACAO | Razao social ou denominacao | SIM |
+| vendedores[].cpf (se CNPJ) | CNPJ | CNPJ da empresa | SIM |
 
 **Observacao**: A identificacao de PJ vs PF e feita pelo formato do documento (CPF = 11 digitos, CNPJ = 14 digitos).
 
@@ -180,14 +180,14 @@ Array obrigatorio contendo a lista de transmitentes/vendedores.
 
 | Campo no Schema | Campo Mapeado | Descricao Mapeada | Usado em Minutas? |
 |-----------------|---------------|-------------------|-------------------|
-| dados_imovel.matricula | matricula_numero | Numero da matricula | SIM |
-| cartorio_registro | matricula_cartorio_numero | Numero do Registro de Imoveis | SIM |
-| dados_imovel.sql | imovel_sql | Cadastro Municipal (SQL) | SIM |
-| dados_imovel.endereco | imovel_logradouro | Logradouro do imovel | SIM |
-| dados_imovel.endereco | imovel_numero | Numero do imovel | SIM |
-| dados_imovel.endereco | imovel_bairro | Bairro do imovel | SIM |
-| dados_imovel.endereco | imovel_cidade | Cidade do imovel | SIM |
-| dados_imovel.endereco | imovel_estado | Estado do imovel | SIM |
+| dados_imovel.matricula | NUMERO DA MATRICULA | Numero da matricula | SIM |
+| cartorio_registro | NUMERO DO REGISTRO DE IMOVEIS | Numero do Registro de Imoveis | SIM |
+| dados_imovel.sql | SQL | Cadastro Municipal (SQL) | SIM |
+| dados_imovel.endereco | LOGRADOURO | Logradouro do imovel | SIM |
+| dados_imovel.endereco | NUMERO | Numero do imovel | SIM |
+| dados_imovel.endereco | BAIRRO | Bairro do imovel | SIM |
+| dados_imovel.endereco | CIDADE | Cidade do imovel | SIM |
+| dados_imovel.endereco | ESTADO | Estado do imovel | SIM |
 
 **Observacao**: O endereco no ITBI e um campo unico que precisa ser parseado para extrair os componentes individuais.
 
@@ -195,16 +195,16 @@ Array obrigatorio contendo a lista de transmitentes/vendedores.
 
 | Campo no Schema | Campo Mapeado | Descricao Mapeada | Usado em Minutas? |
 |-----------------|---------------|-------------------|-------------------|
-| dados_transacao.valor_total | negocio_valor_total | Valor total da alienacao | SIM |
-| vendedores[].nome | alienante_nome | Nome do alienante | SIM |
-| compradores[].nome | adquirente_nome | Nome do adquirente | SIM |
-| numero_transacao | itbi_numero_guia | Numero da guia de ITBI | SIM |
-| dados_calculo.base_calculo | itbi_base_calculo | Base de calculo do ITBI | SIM |
-| dados_calculo.imposto | itbi_valor | Valor do ITBI | SIM |
-| codigo_barras | itbi_linha_digitavel | Linha digitavel do boleto de ITBI | SIM |
-| dados_calculo.aliquota | itbi_aliquota | Aliquota do ITBI (percentual) | SIM |
-| dados_transacao.proporcao_adquirida | itbi_proporcao_transmitida | Proporcao transmitida (fracao ideal) | SIM |
-| data_pagamento | itbi_data_pagamento | Data de pagamento do ITBI | SIM |
+| dados_transacao.valor_total | VALOR TOTAL | Valor total da alienacao | SIM |
+| vendedores[].nome | NOME DO ALIENANTE | Nome do alienante | SIM |
+| compradores[].nome | NOME DO ADQUIRENTE | Nome do adquirente | SIM |
+| numero_transacao | NUMERO DA GUIA | Numero da guia de ITBI | SIM |
+| dados_calculo.base_calculo | BASE DE CALCULO | Base de calculo do ITBI | SIM |
+| dados_calculo.imposto | VALOR DO ITBI | Valor do ITBI | SIM |
+| codigo_barras | LINHA DIGITAVEL | Linha digitavel do boleto de ITBI | SIM |
+| dados_calculo.aliquota | ALIQUOTA | Aliquota do ITBI (percentual) | SIM |
+| dados_transacao.proporcao_adquirida | PROPORCAO TRANSMITIDA | Proporcao transmitida (fracao ideal) | SIM |
+| data_pagamento | DATA DO PAGAMENTO | Data de pagamento do ITBI | SIM |
 
 ### 3.5 Campos Nao Mapeados
 

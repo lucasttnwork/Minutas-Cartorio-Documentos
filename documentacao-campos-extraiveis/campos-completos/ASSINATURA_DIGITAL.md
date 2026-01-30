@@ -77,25 +77,25 @@ E importante entender a diferenca entre os tipos de assinatura:
 
 ### 2.1 Campos Raiz (Obrigatorios)
 
-| Campo | Tipo | Descricao | Exemplo | Regex | Confianca |
+| CAMPO | TIPO | DESCRICAO | EXEMPLO | REGEX | CONFIANCA |
 |-------|------|-----------|---------|-------|-----------|
-| plataforma | string | Plataforma de assinatura utilizada | "DOCUSIGN" | `(DOCUSIGN\|ADOBE SIGN\|CLICKSIGN\|D4SIGN\|ZAPSIGN)` | Alta |
-| envelope_id | string | Identificador unico do envelope/processo | "BBD017A3224B4B11E8D29269736F25BD7" | `[A-Z0-9-]{20,}` | Alta |
-| signatarios | array | Lista de pessoas que assinaram | [...] | - | Alta |
+| PLATAFORMA | STRING | Plataforma de assinatura utilizada | "DOCUSIGN" | `(DOCUSIGN\|ADOBE SIGN\|CLICKSIGN\|D4SIGN\|ZAPSIGN)` | Alta |
+| ENVELOPE_ID | STRING | Identificador unico do envelope/processo | "BBD017A3224B4B11E8D29269736F25BD7" | `[A-Z0-9-]{20,}` | Alta |
+| SIGNATARIOS | ARRAY | Lista de pessoas que assinaram | [...] | - | Alta |
 
 ### 2.2 Campos Raiz (Opcionais)
 
-| Campo | Tipo | Descricao | Exemplo | Quando Presente | Confianca |
+| CAMPO | TIPO | DESCRICAO | EXEMPLO | QUANDO PRESENTE | CONFIANCA |
 |-------|------|-----------|---------|-----------------|-----------|
-| documento_nome | string | Nome do documento assinado | "Compromisso_Compra_Venda.pdf" | Sempre presente | Alta |
-| data_envio | date | Data de envio para assinatura | "10/10/2023" | Maioria das plataformas | Alta |
-| data_conclusao | date | Data de conclusao de todas assinaturas | "12/10/2023" | Quando processo concluido | Alta |
-| status_envelope | string | Status atual do processo | "CONCLUIDO" | Sempre presente | Alta |
-| hash_documento | string | Hash criptografico do documento | "a3b2c1d4e5f6..." | Plataformas avancadas | Media |
-| total_paginas | number | Numero de paginas do documento | 9 | DocuSign, Adobe Sign | Alta |
-| total_assinaturas | number | Quantidade de assinaturas coletadas | 3 | Maioria das plataformas | Alta |
-| total_rubricas | number | Quantidade de rubricas/iniciais | 35 | DocuSign | Media |
-| assinatura_guiada | string | Se assinatura guiada estava ativa | "ATIVADO" | DocuSign | Baixa |
+| DOCUMENTO_NOME | STRING | Nome do documento assinado | "Compromisso_Compra_Venda.pdf" | Sempre presente | Alta |
+| DATA_ENVIO | DATE | Data de envio para assinatura | "10/10/2023" | Maioria das plataformas | Alta |
+| DATA_CONCLUSAO | DATE | Data de conclusao de todas assinaturas | "12/10/2023" | Quando processo concluido | Alta |
+| STATUS_ENVELOPE | STRING | Status atual do processo | "CONCLUIDO" | Sempre presente | Alta |
+| HASH_DOCUMENTO | STRING | Hash criptografico do documento | "a3b2c1d4e5f6..." | Plataformas avancadas | Media |
+| TOTAL_PAGINAS | NUMBER | Numero de paginas do documento | 9 | DocuSign, Adobe Sign | Alta |
+| TOTAL_ASSINATURAS | NUMBER | Quantidade de assinaturas coletadas | 3 | Maioria das plataformas | Alta |
+| TOTAL_RUBRICAS | NUMBER | Quantidade de rubricas/iniciais | 35 | DocuSign | Media |
+| ASSINATURA_GUIADA | STRING | Se assinatura guiada estava ativa | "ATIVADO" | DocuSign | Baixa |
 
 ### 2.3 Arrays
 
@@ -103,17 +103,17 @@ E importante entender a diferenca entre os tipos de assinatura:
 
 Lista de signatarios do documento. Este e o principal array do documento. Confianca esperada: ALTA.
 
-| Subcampo | Tipo | Descricao | Exemplo | Obrigatorio |
+| SUBCAMPO | TIPO | DESCRICAO | EXEMPLO | OBRIGATORIO |
 |----------|------|-----------|---------|-------------|
-| signatarios[].nome | string | Nome completo do signatario | "Elizete Aparecida Silva" | Sim |
-| signatarios[].email | string | E-mail do signatario | "elizetesilva85@hotmail.com" | Sim |
-| signatarios[].cpf | string | CPF do signatario (quando informado) | "949.735.638-20" | Nao |
-| signatarios[].status | string | Status da assinatura | "ASSINADO" | Sim |
-| signatarios[].data_assinatura | string | Data e hora da assinatura | "10/10/2023 15:14:50" | Sim (se assinado) |
-| signatarios[].ip_assinatura | string | IP do dispositivo usado | "187.38.185.233" | Sim (se assinado) |
-| signatarios[].dispositivo | string | Tipo de dispositivo | "CELULAR" | Nao |
-| signatarios[].certificado | string | Informacoes do certificado digital | "CN=Elizete..." | Nao |
-| signatarios[].papel | string | Papel no processo | "SIGNATARIO" | Nao |
+| SIGNATARIOS[].NOME | STRING | Nome completo do signatario | "Elizete Aparecida Silva" | Sim |
+| SIGNATARIOS[].EMAIL | STRING | E-mail do signatario | "elizetesilva85@hotmail.com" | Sim |
+| SIGNATARIOS[].CPF | STRING | CPF do signatario (quando informado) | "949.735.638-20" | Nao |
+| SIGNATARIOS[].STATUS | STRING | Status da assinatura | "ASSINADO" | Sim |
+| SIGNATARIOS[].DATA_ASSINATURA | STRING | Data e hora da assinatura | "10/10/2023 15:14:50" | Sim (se assinado) |
+| SIGNATARIOS[].IP_ASSINATURA | STRING | IP do dispositivo usado | "187.38.185.233" | Sim (se assinado) |
+| SIGNATARIOS[].DISPOSITIVO | STRING | Tipo de dispositivo | "CELULAR" | Nao |
+| SIGNATARIOS[].CERTIFICADO | STRING | Informacoes do certificado digital | "CN=Elizete..." | Nao |
+| SIGNATARIOS[].PAPEL | STRING | Papel no processo | "SIGNATARIO" | Nao |
 
 **Valores aceitos para status:**
 - ASSINADO
@@ -132,11 +132,11 @@ Lista de signatarios do documento. Este e o principal array do documento. Confia
 
 Algumas plataformas fornecem timeline detalhada por signatario:
 
-| Subcampo | Tipo | Descricao | Exemplo |
+| SUBCAMPO | TIPO | DESCRICAO | EXEMPLO |
 |----------|------|-----------|---------|
-| signatarios[].timeline.enviado | datetime | Quando foi enviado para o signatario | "10/10/2023 12:17:58" |
-| signatarios[].timeline.visualizado | datetime | Quando o signatario abriu o documento | "10/10/2023 15:09:50" |
-| signatarios[].timeline.assinado | datetime | Quando efetivamente assinou | "10/10/2023 15:14:50" |
+| SIGNATARIOS[].TIMELINE.ENVIADO | DATETIME | Quando foi enviado para o signatario | "10/10/2023 12:17:58" |
+| SIGNATARIOS[].TIMELINE.VISUALIZADO | DATETIME | Quando o signatario abriu o documento | "10/10/2023 15:09:50" |
+| SIGNATARIOS[].TIMELINE.ASSINADO | DATETIME | Quando efetivamente assinou | "10/10/2023 15:14:50" |
 
 ### 2.4 Objetos Nested
 
@@ -144,33 +144,33 @@ Algumas plataformas fornecem timeline detalhada por signatario:
 
 Informacoes de identificacao do documento assinado:
 
-| Subcampo | Tipo | Descricao | Exemplo |
+| SUBCAMPO | TIPO | DESCRICAO | EXEMPLO |
 |----------|------|-----------|---------|
-| identificacao_documento.plataforma | string | Plataforma utilizada | "DOCUSIGN" |
-| identificacao_documento.envelope_id | string | ID do envelope | "BBD017A3..." |
-| identificacao_documento.titulo_documento_completo | string | Titulo original do documento | "Compromisso de Compra e Venda [894066473]" |
-| identificacao_documento.status | string | Status geral | "COMPLETO" |
+| IDENTIFICACAO_DOCUMENTO.PLATAFORMA | STRING | Plataforma utilizada | "DOCUSIGN" |
+| IDENTIFICACAO_DOCUMENTO.ENVELOPE_ID | STRING | ID do envelope | "BBD017A3..." |
+| IDENTIFICACAO_DOCUMENTO.TITULO_DOCUMENTO_COMPLETO | STRING | Titulo original do documento | "Compromisso de Compra e Venda [894066473]" |
+| IDENTIFICACAO_DOCUMENTO.STATUS | STRING | Status geral | "COMPLETO" |
 
 #### 2.4.2 datas_envelope (object)
 
 Datas do ciclo de vida do envelope:
 
-| Subcampo | Tipo | Descricao | Exemplo |
+| SUBCAMPO | TIPO | DESCRICAO | EXEMPLO |
 |----------|------|-----------|---------|
-| datas_envelope.criacao | datetime | Data de criacao do envelope | "10/10/2023 12:17:56" |
-| datas_envelope.conclusao | datetime | Data de conclusao | "12/10/2023 19:29:56" |
-| datas_envelope.expiracao | datetime | Data de expiracao (se aplicavel) | "10/11/2023 12:17:56" |
+| DATAS_ENVELOPE.CRIACAO | DATETIME | Data de criacao do envelope | "10/10/2023 12:17:56" |
+| DATAS_ENVELOPE.CONCLUSAO | DATETIME | Data de conclusao | "12/10/2023 19:29:56" |
+| DATAS_ENVELOPE.EXPIRACAO | DATETIME | Data de expiracao (se aplicavel) | "10/11/2023 12:17:56" |
 
 #### 2.4.3 configuracoes_envelope (object)
 
 Configuracoes do processo de assinatura:
 
-| Subcampo | Tipo | Descricao | Exemplo |
+| SUBCAMPO | TIPO | DESCRICAO | EXEMPLO |
 |----------|------|-----------|---------|
-| configuracoes_envelope.documentar_paginas | number | Numero de paginas | 9 |
-| configuracoes_envelope.total_assinaturas_esperadas | number | Assinaturas esperadas | 3 |
-| configuracoes_envelope.total_rubricas | number | Rubricas esperadas | 35 |
-| configuracoes_envelope.assinatura_guiada | string | Se usa assinatura guiada | "ATIVADO" |
+| CONFIGURACOES_ENVELOPE.DOCUMENTAR_PAGINAS | NUMBER | Numero de paginas | 9 |
+| CONFIGURACOES_ENVELOPE.TOTAL_ASSINATURAS_ESPERADAS | NUMBER | Assinaturas esperadas | 3 |
+| CONFIGURACOES_ENVELOPE.TOTAL_RUBRICAS | NUMBER | Rubricas esperadas | 35 |
+| CONFIGURACOES_ENVELOPE.ASSINATURA_GUIADA | STRING | Se usa assinatura guiada | "ATIVADO" |
 
 ---
 
@@ -178,11 +178,11 @@ Configuracoes do processo de assinatura:
 
 ### 3.1 Campos que Alimentam "Pessoa Natural"
 
-| Campo no Schema | Campo Mapeado | Usado em Minutas? | Observacao |
+| CAMPO NO SCHEMA | CAMPO MAPEADO | USADO EM MINUTAS? | OBSERVACAO |
 |-----------------|---------------|-------------------|------------|
-| signatarios[].nome | - | NAO | Usado apenas para correlacao |
-| signatarios[].email | - | NAO | Usado apenas para correlacao |
-| signatarios[].cpf | - | NAO | Usado apenas para correlacao/validacao |
+| SIGNATARIOS[].NOME | - | NAO | Usado apenas para correlacao |
+| SIGNATARIOS[].EMAIL | - | NAO | Usado apenas para correlacao |
+| SIGNATARIOS[].CPF | - | NAO | Usado apenas para correlacao/validacao |
 
 **Observacao Importante**: A ASSINATURA_DIGITAL **nao alimenta** diretamente campos de minutas. Os dados extraidos sao usados exclusivamente para:
 1. Correlacionar signatarios com partes do COMPROMISSO_COMPRA_VENDA
@@ -205,17 +205,17 @@ No entanto, o campo `data_conclusao` pode ser usado para determinar a data efeti
 
 ### 3.5 Campos Nao Mapeados
 
-| Campo no Schema | Motivo da Exclusao | Observacao |
+| CAMPO NO SCHEMA | MOTIVO DA EXCLUSAO | OBSERVACAO |
 |-----------------|-------------------|------------|
-| plataforma | Metadado tecnico | Nao relevante para minutas |
-| envelope_id | Identificador tecnico | Usado para correlacao, nao para minuta |
-| documento_nome | Metadado | Usado para identificar o documento correlacionado |
-| ip_assinatura | Dado de auditoria | Nao usado em minutas |
-| dispositivo | Dado de auditoria | Nao usado em minutas |
-| certificado | Dado tecnico | Nao usado em minutas |
-| hash_documento | Dado de integridade | Nao usado em minutas |
-| status_envelope | Dado de validacao | Usado para confirmar conclusao |
-| configuracoes_envelope | Metadados | Nao relevante para minutas |
+| PLATAFORMA | Metadado tecnico | Nao relevante para minutas |
+| ENVELOPE_ID | Identificador tecnico | Usado para correlacao, nao para minuta |
+| DOCUMENTO_NOME | Metadado | Usado para identificar o documento correlacionado |
+| IP_ASSINATURA | Dado de auditoria | Nao usado em minutas |
+| DISPOSITIVO | Dado de auditoria | Nao usado em minutas |
+| CERTIFICADO | Dado tecnico | Nao usado em minutas |
+| HASH_DOCUMENTO | Dado de integridade | Nao usado em minutas |
+| STATUS_ENVELOPE | Dado de validacao | Usado para confirmar conclusao |
+| CONFIGURACOES_ENVELOPE | Metadados | Nao relevante para minutas |
 
 **Conclusao**: Este documento tem **cobertura minima** no mapeamento para minutas. Seu valor esta na **validacao** e **correlacao**, nao na **alimentacao** de campos.
 
@@ -294,13 +294,13 @@ No entanto, o campo `data_conclusao` pode ser usado para determinar a data efeti
 
 ### 5.1 Campos Compartilhados
 
-| Campo | Tambem Presente Em | Uso na Correlacao |
+| CAMPO | TAMBEM PRESENTE EM | USO NA CORRELACAO |
 |-------|-------------------|-------------------|
-| signatarios[].nome | COMPROMISSO_COMPRA_VENDA (vendedores, compradores) | Validar que partes assinaram |
-| signatarios[].email | COMPROMISSO_COMPRA_VENDA (vendedores[].email, compradores[].email) | Correlacionar signatario com parte |
-| signatarios[].cpf | RG, CNH, COMPROMISSO_COMPRA_VENDA | Identificacao inequivoca do signatario |
-| documento_nome | COMPROMISSO_COMPRA_VENDA (arquivo_origem) | Vincular certificado ao documento |
-| envelope_id | COMPROMISSO_COMPRA_VENDA (assinatura_digital.envelope_id) | Vincular certificado ao contrato |
+| SIGNATARIOS[].NOME | COMPROMISSO_COMPRA_VENDA (vendedores, compradores) | Validar que partes assinaram |
+| SIGNATARIOS[].EMAIL | COMPROMISSO_COMPRA_VENDA (vendedores[].email, compradores[].email) | Correlacionar signatario com parte |
+| SIGNATARIOS[].CPF | RG, CNH, COMPROMISSO_COMPRA_VENDA | Identificacao inequivoca do signatario |
+| DOCUMENTO_NOME | COMPROMISSO_COMPRA_VENDA (arquivo_origem) | Vincular certificado ao documento |
+| ENVELOPE_ID | COMPROMISSO_COMPRA_VENDA (assinatura_digital.envelope_id) | Vincular certificado ao contrato |
 
 ### 5.2 Correlacao Principal: COMPROMISSO_COMPRA_VENDA
 
@@ -361,22 +361,22 @@ Para dados de partes:
 
 ### 6.1 Validacoes Automaticas
 
-| Validacao | Descricao | Tipo |
+| VALIDACAO | DESCRICAO | TIPO |
 |-----------|-----------|------|
-| envelope_id_formato_valido | Formato do ID compativel com plataforma | Estrutural |
-| todos_signatarios_assinaram | Todos os signatarios tem status ASSINADO | Logica |
-| status_envelope_concluido | Envelope tem status CONCLUIDO | Logica |
-| datas_coerentes | Data conclusao >= data criacao >= data envio | Logica |
-| quantidade_signatarios_positiva | Ao menos 1 signatario no array | Estrutural |
+| ENVELOPE_ID_FORMATO_VALIDO | Formato do ID compativel com plataforma | Estrutural |
+| TODOS_SIGNATARIOS_ASSINARAM | Todos os signatarios tem status ASSINADO | Logica |
+| STATUS_ENVELOPE_CONCLUIDO | Envelope tem status CONCLUIDO | Logica |
+| DATAS_COERENTES | Data conclusao >= data criacao >= data envio | Logica |
+| QUANTIDADE_SIGNATARIOS_POSITIVA | Ao menos 1 signatario no array | Estrutural |
 
 ### 6.2 Validacoes de Negocio
 
-| Validacao | Descricao | Consequencia |
+| VALIDACAO | DESCRICAO | CONSEQUENCIA |
 |-----------|-----------|--------------|
-| signatarios_correspondem_partes | Signatarios sao vendedores/compradores do CCV | Valida autenticidade |
-| todos_vendedores_assinaram | Todos os vendedores do CCV assinaram | Contrato valido |
-| todos_compradores_assinaram | Todos os compradores do CCV assinaram | Contrato valido |
-| conjuges_assinaram | Conjuges de partes casadas tambem assinaram | Regime de bens respeitado |
+| SIGNATARIOS_CORRESPONDEM_PARTES | Signatarios sao vendedores/compradores do CCV | Valida autenticidade |
+| TODOS_VENDEDORES_ASSINARAM | Todos os vendedores do CCV assinaram | Contrato valido |
+| TODOS_COMPRADORES_ASSINARAM | Todos os compradores do CCV assinaram | Contrato valido |
+| CONJUGES_ASSINARAM | Conjuges de partes casadas tambem assinaram | Regime de bens respeitado |
 
 ### 6.3 Alertas de Qualidade
 
@@ -393,49 +393,49 @@ O sistema gera alertas quando:
 
 ### 7.1 Campos Computados
 
-| Campo Computado | Formula/Logica | Observacao |
+| CAMPO COMPUTADO | FORMULA/LOGICA | OBSERVACAO |
 |-----------------|----------------|------------|
-| todos_assinaram | Verifica se todos signatarios tem status ASSINADO | Validacao booleana |
-| tempo_total_assinatura | data_conclusao - data_criacao | Tempo em dias/horas |
-| ultimo_signatario | Signatario com maior data_assinatura | Identificacao |
+| TODOS_ASSINARAM | Verifica se todos signatarios tem status ASSINADO | Validacao booleana |
+| TEMPO_TOTAL_ASSINATURA | data_conclusao - data_criacao | Tempo em dias/horas |
+| ULTIMO_SIGNATARIO | Signatario com maior data_assinatura | Identificacao |
 
 ### 7.2 Campos Inferidos
 
-| Campo Inferido | Origem | Logica de Inferencia |
+| CAMPO INFERIDO | ORIGEM | LOGICA DE INFERENCIA |
 |----------------|--------|---------------------|
-| plataforma | envelope_id | Formato do ID identifica a plataforma |
-| tipo_assinatura | certificado | Presenca de certificado ICP-Brasil indica qualificada |
+| PLATAFORMA | ENVELOPE_ID | Formato do ID identifica a plataforma |
+| TIPO_ASSINATURA | CERTIFICADO | Presenca de certificado ICP-Brasil indica qualificada |
 
 ### 7.3 Formatos de Envelope ID por Plataforma
 
-| Plataforma | Formato do Envelope ID | Exemplo |
+| PLATAFORMA | FORMATO DO ENVELOPE ID | EXEMPLO |
 |------------|------------------------|---------|
-| DocuSign | UUID (32 hex sem hifen ou com hifen) | BBD017A3224B4B11E8D29269736F25BD7 |
-| Adobe Sign | Alfanumerico com prefixo | CBJCHBCAABAAu5PZx... |
-| ClickSign | Alfanumerico com hifen | abc-123-def-456 |
-| D4Sign | Numerico longo | 12345678901234567890 |
-| ZapSign | Alfanumerico curto | ZABC123 |
+| DOCUSIGN | UUID (32 HEX SEM HIFEN OU COM HIFEN) | BBD017A3224B4B11E8D29269736F25BD7 |
+| ADOBE SIGN | ALFANUMERICO COM PREFIXO | CBJCHBCAABAAu5PZx... |
+| CLICKSIGN | ALFANUMERICO COM HIFEN | abc-123-def-456 |
+| D4SIGN | NUMERICO LONGO | 12345678901234567890 |
+| ZAPSIGN | ALFANUMERICO CURTO | ZABC123 |
 
 ### 7.4 Timezones
 
-- **DocuSign**: Datas em UTC por padrao, pode converter para timezone local
-- **Adobe Sign**: Datas em timezone do remetente
-- **ClickSign**: Datas em horario de Brasilia (BRT/BRST)
-- **D4Sign**: Datas em horario de Brasilia
-- **ZapSign**: Datas em horario de Brasilia
+- **DOCUSIGN**: Datas em UTC por padrao, pode converter para timezone local
+- **ADOBE SIGN**: Datas em timezone do remetente
+- **CLICKSIGN**: Datas em horario de Brasilia (BRT/BRST)
+- **D4SIGN**: Datas em horario de Brasilia
+- **ZAPSIGN**: Datas em horario de Brasilia
 
 ### 7.5 Validade Juridica
 
 **Assinatura Eletronica vs ICP-Brasil:**
 
-| Aspecto | Assinatura Eletronica (DocuSign, etc) | Assinatura ICP-Brasil |
+| ASPECTO | ASSINATURA ELETRONICA (DOCUSIGN, ETC) | ASSINATURA ICP-BRASIL |
 |---------|--------------------------------------|----------------------|
-| Base Legal | MP 2.200-2/2001, Art. 10, §2 | MP 2.200-2/2001, Art. 10, §1 |
-| Validade | Valida se partes concordam | Presuncao de veracidade (fe publica) |
-| Uso em Contratos | Sim (contratos particulares) | Sim (todos os tipos) |
-| Uso em Escrituras | Nao (exceto e-Notariado) | Sim (obrigatorio) |
-| Custo | Pago por uso da plataforma | Certificado digital + token |
-| Verificacao | Portal da plataforma | Portal ITI/ICP-Brasil |
+| BASE LEGAL | MP 2.200-2/2001, ART. 10, §2 | MP 2.200-2/2001, ART. 10, §1 |
+| VALIDADE | Valida se partes concordam | Presuncao de veracidade (fe publica) |
+| USO EM CONTRATOS | Sim (contratos particulares) | Sim (todos os tipos) |
+| USO EM ESCRITURAS | Nao (exceto e-Notariado) | Sim (obrigatorio) |
+| CUSTO | Pago por uso da plataforma | Certificado digital + token |
+| VERIFICACAO | Portal da plataforma | Portal ITI/ICP-Brasil |
 
 **Para Compromisso de Compra e Venda:**
 - Assinatura eletronica simples/avancada e **suficiente** e **valida**
@@ -446,13 +446,13 @@ O sistema gera alertas quando:
 
 Cada plataforma oferece forma de verificar autenticidade:
 
-| Plataforma | Como Verificar |
+| PLATAFORMA | COMO VERIFICAR |
 |------------|----------------|
-| DocuSign | docusign.com/verify com envelope_id |
-| Adobe Sign | QR Code no documento ou portal Adobe |
-| ClickSign | clicksign.com/verificar com codigo |
-| D4Sign | d4sign.com.br/verificar com codigo |
-| ZapSign | QR Code no documento |
+| DOCUSIGN | docusign.com/verify com envelope_id |
+| ADOBE SIGN | QR Code no documento ou portal Adobe |
+| CLICKSIGN | clicksign.com/verificar com codigo |
+| D4SIGN | d4sign.com.br/verificar com codigo |
+| ZAPSIGN | QR Code no documento |
 
 ---
 
@@ -470,6 +470,6 @@ Cada plataforma oferece forma de verificar autenticidade:
 
 ## CHANGELOG
 
-| Data | Versao | Alteracao |
+| DATA | VERSAO | ALTERACAO |
 |------|--------|-----------|
 | 2026-01-30 | 1.0 | Documentacao inicial completa |

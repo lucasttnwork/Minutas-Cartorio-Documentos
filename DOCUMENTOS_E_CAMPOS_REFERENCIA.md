@@ -5,7 +5,7 @@
 **Ultima Atualizacao:** Limpeza das secoes 3.11-3.16 alinhada aos schemas JSON oficiais
 **Fonte da Verdade:** `Guia-de-campos-e-variaveis/*.md`
 
-Este documento descreve os **26 tipos de documentos** reconhecidos pelo sistema e os **campos de dados** que podem ser extraidos de cada um deles. O objetivo e permitir uma visualizacao clara de:
+Este documento descreve os **27 tipos de documentos** reconhecidos pelo sistema e os **campos de dados** que podem ser extraidos de cada um deles. O objetivo e permitir uma visualizacao clara de:
 
 1. Quais tipos de documentos podem ser enviados
 2. Quais campos uteis podem ser extraidos de cada documento
@@ -52,7 +52,7 @@ Os campos de dados estao organizados em **4 categorias principais**:
 | `CERTIDAO_OBITO` | Certidao de Obito | Nome, Data Obito, Estado Civil |
 | `COMPROVANTE_RESIDENCIA` | Comprovante de Endereco | Nome, Endereco Completo |
 
-### 2.2 Certidoes (7 tipos)
+### 2.2 Certidoes (8 tipos)
 
 | Codigo | Nome | Campos Principais |
 |--------|------|-------------------|
@@ -62,6 +62,7 @@ Os campos de dados estao organizados em **4 categorias principais**:
 | `CND_MUNICIPAL` | Certidao Negativa Municipal | Contribuinte, CPF/CNPJ, SQL, Endereco, Status, Tributos Cobertos, Validade |
 | `CND_IMOVEL` | Certidao Negativa do Imovel | SQL, Matricula, Endereco |
 | `CND_CONDOMINIO` | Certidao de Quitacao Condominial | Nome, Unidade |
+| `CERTIDAO_DISTRIBUIDOR` | Certidoes de Distribuidores | Nome, CPF/CNPJ, Tipo, Resultado, Validade, Codigo Verificacao |
 | `CONTRATO_SOCIAL` | Contrato Social da Empresa | Razao Social, CNPJ, NIRE, Sede, Administrador |
 
 ### 2.3 Documentos do Imovel (6 tipos)
@@ -519,7 +520,7 @@ Este documento e o mais completo em termos de campos extraiveis, cobrindo dados 
 | Campo | Categoria | Exemplo |
 |-------|-----------|---------|
 | NUMERO DA CERTIDAO | Certidoes | 2026.123.456.789 |
-| CADASTRO DO IMOVEL (SQL) | Dados do Imovel | 000.000.0000-0 |
+| SQL | Dados do Imovel | 000.000.0000-0 |
 | NOME DO CONTRIBUINTE | Pessoa Natural | JOAO DA SILVA |
 | CPF DO CONTRIBUINTE | Pessoa Natural | 123.456.789-00 |
 | ENDERECO DO IMOVEL | Dados do Imovel | RUA DAS FLORES, 123 |
@@ -541,7 +542,7 @@ Este documento e o mais completo em termos de campos extraiveis, cobrindo dados 
 | Campo | Categoria | Exemplo |
 |-------|-----------|---------|
 | NUMERO DA MATRICULA | Dados do Imovel | 123.456 (quando referenciado) |
-| CADASTRO DO IMOVEL (SQL) | Dados do Imovel | 031.045.0123-4 |
+| SQL | Dados do Imovel | 031.045.0123-4 |
 | VALOR VENAL DE REFERENCIA | Dados do Imovel | R$ 450.000,00 |
 | LOGRADOURO | Dados do Imovel | RUA DAS FLORES |
 | NUMERO | Dados do Imovel | 123 |
@@ -560,7 +561,7 @@ Este documento e o mais completo em termos de campos extraiveis, cobrindo dados 
 | Campo | Categoria | Exemplo |
 |-------|-----------|---------|
 | NUMERO DA MATRICULA | Dados do Imovel | 123.456 (quando referenciado) |
-| CADASTRO DO IMOVEL (SQL) | Dados do Imovel | 031.045.0123-4 |
+| SQL | Dados do Imovel | 031.045.0123-4 |
 | ANO DO EXERCICIO | Dados do Imovel | 2026 |
 | **ENDERECO DO IMOVEL** | | |
 | LOGRADOURO | Dados do Imovel | RUA AUGUSTA |
@@ -604,6 +605,58 @@ Este documento e o mais completo em termos de campos extraiveis, cobrindo dados 
 | Campo | Categoria | Exemplo |
 |-------|-----------|---------|
 | NOME | Pessoa Natural | JOAO DA SILVA |
+
+---
+
+### 3.17 CERTIDAO_DISTRIBUIDOR - Certidoes de Distribuidores
+
+**Descricao:** Categoria que agrupa certidoes emitidas por distribuidores judiciais e cartorios que atestam a situacao juridica do vendedor. Essenciais para due diligence imobiliaria.
+
+**Subtipos cobertos:**
+- **Civel** - Certidao de distribuicao de acoes civeis
+- **Criminal** - Certidao de antecedentes criminais
+- **Protesto** - Certidao de protestos de titulos
+- **Falencia** - Certidao de falencia e recuperacao judicial
+- **Execucao Fiscal** - Certidao de execucoes fiscais
+- **Interdicao/Tutela** - Certidao de capacidade civil
+
+**Campos Extraiveis (Pessoa Natural):**
+
+| Campo | Categoria | Exemplo |
+|-------|-----------|---------|
+| NOME | Pessoa Natural | JOAO DA SILVA |
+| CPF | Pessoa Natural | 123.456.789-00 |
+| TIPO DE CERTIDAO | Certidao | CIVEL |
+| ORGAO EMISSOR | Certidao | TRIBUNAL DE JUSTICA DE SAO PAULO |
+| COMARCA | Certidao | SAO PAULO |
+| ESTADO | Certidao | SP |
+| RESULTADO | Certidao | NADA CONSTA |
+| DATA DE EMISSAO | Certidao | 30/01/2026 |
+| DATA DE VALIDADE | Certidao | 30/04/2026 |
+| CODIGO DE VERIFICACAO | Certidao | TJ-SP-2026-123456 |
+
+**Campos Extraiveis (Pessoa Juridica):**
+
+| Campo | Categoria | Exemplo |
+|-------|-----------|---------|
+| DENOMINACAO | Pessoa Juridica | XYZ EMPREENDIMENTOS LTDA |
+| CNPJ | Pessoa Juridica | 12.345.678/0001-90 |
+| TIPO DE CERTIDAO | Certidao | FALENCIA |
+| ORGAO EMISSOR | Certidao | TRIBUNAL DE JUSTICA DE SAO PAULO |
+| COMARCA | Certidao | SAO PAULO |
+| ESTADO | Certidao | SP |
+| RESULTADO | Certidao | NADA CONSTA |
+| DATA DE EMISSAO | Certidao | 30/01/2026 |
+| DATA DE VALIDADE | Certidao | 30/04/2026 |
+| CODIGO DE VERIFICACAO | Certidao | TJ-SP-FAL-2026-789012 |
+
+**Observacoes:**
+- Validade padrao: 90 dias (Interdicao/Tutela: 180 dias)
+- Resultado deve ser "NADA CONSTA" para prosseguir sem ressalvas
+- Se "CONSTAM REGISTROS", analise de risco e necessaria
+- Codigo de verificacao permite validacao online no site do orgao emissor
+
+**Nao Confundir Com:** CNDs fiscais (CNDT, CND_FEDERAL, CND_ESTADUAL, CND_MUNICIPAL) que tratam de debitos tributarios.
 
 ---
 
@@ -803,8 +856,8 @@ Pasta FC 515/
 
 Este documento serve como referencia rapida para entender:
 
-- **26 tipos de documentos** que o sistema reconhece
-- **16 tipos de documentos** com mapeamento detalhado de campos (Secao 3)
+- **27 tipos de documentos** que o sistema reconhece
+- **17 tipos de documentos** com mapeamento detalhado de campos (Secao 3)
 - **Centenas de campos** distribuidos em 4 categorias principais
 - **7 campos principais** que permitem correlacao entre documentos
 - **Exemplos praticos** de como os dados sao extraidos

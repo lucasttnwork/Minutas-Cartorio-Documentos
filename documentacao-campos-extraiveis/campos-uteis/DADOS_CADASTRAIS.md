@@ -39,19 +39,19 @@ A Certidao de Dados Cadastrais e um documento emitido pela Prefeitura que contem
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| matricula_numero | Numero da matricula (se informado) | "46.511" | NAO |
-| imovel_sql | Cadastro Municipal (SQL) | "039.080.0244-3" | SIM - CRITICO |
-| imovel_logradouro | Logradouro do imovel | "RUA FRANCISCO CRUZ" | SIM |
-| imovel_numero | Numero do imovel | "515" | SIM |
-| imovel_complemento | Complemento (apto, bloco, sala) | "APTO 124 BL-B" | Condicional |
-| imovel_bairro | Bairro do imovel | "VILA MARIANA" | SIM |
-| imovel_cidade | Cidade do imovel | "Sao Paulo" | SIM |
-| imovel_estado | Estado do imovel | "SP" | SIM |
-| imovel_cep | CEP do imovel | "04117-902" | Condicional |
-| imovel_area_total | Area total do terreno em m2 | "1666.00" | Condicional |
-| imovel_area_construida | Area construida em m2 | "112.00" | Condicional |
-| imovel_denominacao | Tipo do imovel | "Apartamento Residencial" | Condicional |
-| imovel_data_certidao_cadastro | Data de expedicao da certidao | "2025-10-15" | SIM |
+| NUMERO DA MATRICULA | Numero da matricula (se informado) | "46.511" | NAO |
+| SQL | Cadastro Municipal (SQL) | "039.080.0244-3" | SIM - CRITICO |
+| LOGRADOURO | Logradouro do imovel | "RUA FRANCISCO CRUZ" | SIM |
+| NUMERO | Numero do imovel | "515" | SIM |
+| COMPLEMENTO | Complemento (apto, bloco, sala) | "APTO 124 BL-B" | Condicional |
+| BAIRRO | Bairro do imovel | "VILA MARIANA" | SIM |
+| CIDADE | Cidade do imovel | "Sao Paulo" | SIM |
+| ESTADO | Estado do imovel | "SP" | SIM |
+| CEP | CEP do imovel | "04117-902" | Condicional |
+| AREA TOTAL EM M2 | Area total do terreno em m2 | "1666.00" | Condicional |
+| AREA CONSTRUIDA EM M2 | Area construida em m2 | "112.00" | Condicional |
+| DENOMINACAO DO IMOVEL | Tipo do imovel | "Apartamento Residencial" | Condicional |
+| DATA DA CERTIDAO DE CADASTRO | Data de expedicao da certidao | "2025-10-15" | SIM |
 
 **Notas**:
 - O SQL e o identificador unico do imovel no cadastro municipal
@@ -79,14 +79,14 @@ Embora o documento contenha dados de contribuintes, o mapeamento atual **nao ext
 **Para Pessoa Fisica (PF) - NAO MAPEADOS**:
 | Dado no Documento | Campo Potencial | Status |
 |-------------------|-----------------|--------|
-| Nome do contribuinte | nome | Visivel no documento |
-| CPF do contribuinte | cpf | Visivel no documento |
+| Nome do contribuinte | NOME | Visivel no documento |
+| CPF do contribuinte | CPF | Visivel no documento |
 
 **Para Pessoa Juridica (PJ) - NAO MAPEADOS**:
 | Dado no Documento | Campo Potencial | Status |
 |-------------------|-----------------|--------|
-| Razao social | pj_denominacao | Visivel no documento |
-| CNPJ | pj_cnpj | Visivel no documento |
+| Razao social | DENOMINACAO | Visivel no documento |
+| CNPJ | CNPJ | Visivel no documento |
 
 **Importante**: Os dados de contribuintes devem ser obtidos de documentos especificos como:
 - **RG/CNH**: Para identificacao completa de PF
@@ -99,19 +99,19 @@ Embora o documento contenha dados de contribuintes, o mapeamento atual **nao ext
 
 | Campo no Schema | Campo Util Mapeado | Categoria |
 |-----------------|-------------------|-----------|
-| cadastro_municipal.sql | imovel_sql | imovel |
-| cadastro_municipal.matricula | matricula_numero | imovel |
-| endereco_imovel.logradouro | imovel_logradouro | imovel |
-| endereco_imovel.numero | imovel_numero | imovel |
-| endereco_imovel.complemento | imovel_complemento | imovel |
-| endereco_imovel.bairro | imovel_bairro | imovel |
-| endereco_imovel.cidade | imovel_cidade | imovel |
-| endereco_imovel.estado | imovel_estado | imovel |
-| endereco_imovel.cep | imovel_cep | imovel |
-| caracteristicas.area_terreno | imovel_area_total | imovel |
-| caracteristicas.area_construida | imovel_area_construida | imovel |
-| caracteristicas.tipo_imovel | imovel_denominacao | imovel |
-| certidao.data_expedicao | imovel_data_certidao_cadastro | imovel |
+| cadastro_municipal.sql | SQL | imovel |
+| cadastro_municipal.matricula | NUMERO DA MATRICULA | imovel |
+| endereco_imovel.logradouro | LOGRADOURO | imovel |
+| endereco_imovel.numero | NUMERO | imovel |
+| endereco_imovel.complemento | COMPLEMENTO | imovel |
+| endereco_imovel.bairro | BAIRRO | imovel |
+| endereco_imovel.cidade | CIDADE | imovel |
+| endereco_imovel.estado | ESTADO | imovel |
+| endereco_imovel.cep | CEP | imovel |
+| caracteristicas.area_terreno | AREA TOTAL EM M2 | imovel |
+| caracteristicas.area_construida | AREA CONSTRUIDA EM M2 | imovel |
+| caracteristicas.tipo_imovel | DENOMINACAO DO IMOVEL | imovel |
+| certidao.data_expedicao | DATA DA CERTIDAO DE CADASTRO | imovel |
 
 ---
 
@@ -120,19 +120,19 @@ Embora o documento contenha dados de contribuintes, o mapeamento atual **nao ext
 ```json
 {
   "imovel": {
-    "matricula_numero": "46.511",
-    "imovel_sql": "039.080.0244-3",
-    "imovel_logradouro": "RUA FRANCISCO CRUZ",
-    "imovel_numero": "515",
-    "imovel_complemento": "APTO 124 BL-B",
-    "imovel_bairro": "VILA MARIANA",
-    "imovel_cidade": "Sao Paulo",
-    "imovel_estado": "SP",
-    "imovel_cep": "04117-902",
-    "imovel_area_total": "1666.00",
-    "imovel_area_construida": "112.00",
-    "imovel_denominacao": "Apartamento Residencial",
-    "imovel_data_certidao_cadastro": "2025-10-15"
+    "NUMERO DA MATRICULA": "46.511",
+    "SQL": "039.080.0244-3",
+    "LOGRADOURO": "RUA FRANCISCO CRUZ",
+    "NUMERO": "515",
+    "COMPLEMENTO": "APTO 124 BL-B",
+    "BAIRRO": "VILA MARIANA",
+    "CIDADE": "Sao Paulo",
+    "ESTADO": "SP",
+    "CEP": "04117-902",
+    "AREA TOTAL EM M2": "1666.00",
+    "AREA CONSTRUIDA EM M2": "112.00",
+    "DENOMINACAO DO IMOVEL": "Apartamento Residencial",
+    "DATA DA CERTIDAO DE CADASTRO": "2025-10-15"
   }
 }
 ```
@@ -142,10 +142,10 @@ Embora o documento contenha dados de contribuintes, o mapeamento atual **nao ext
 ## 6. USO EM MINUTAS
 
 ### 6.1 Escritura de Compra e Venda
-- `imovel_sql` -> Identificacao do imovel no cadastro municipal
-- `imovel_denominacao` -> Tipo do imovel na descricao
-- `imovel_logradouro/numero/complemento/bairro/cidade/estado` -> Endereco completo
-- `imovel_area_construida` -> Referencia de area
+- `SQL` -> Identificacao do imovel no cadastro municipal
+- `DENOMINACAO DO IMOVEL` -> Tipo do imovel na descricao
+- `LOGRADOURO/NUMERO/COMPLEMENTO/BAIRRO/CIDADE/ESTADO` -> Endereco completo
+- `AREA CONSTRUIDA EM M2` -> Referencia de area
 
 ### 6.2 Validacoes em Minutas
 - O SQL dos DADOS_CADASTRAIS deve coincidir com SQL do IPTU e MATRICULA
@@ -169,15 +169,15 @@ Embora o documento contenha dados de contribuintes, o mapeamento atual **nao ext
 
 | Campo Util | Tambem Util Em | Finalidade |
 |------------|---------------|------------|
-| imovel_sql | IPTU, VVR, CND_MUNICIPAL, CND_IMOVEL, ITBI, MATRICULA_IMOVEL | Identificador PRIMARIO do imovel |
-| imovel_logradouro | IPTU, MATRICULA_IMOVEL, ITBI, ESCRITURA, COMPROMISSO, VVR | Validar endereco |
-| imovel_numero | IPTU, MATRICULA_IMOVEL, ITBI, ESCRITURA, COMPROMISSO, VVR | Validar endereco |
-| imovel_complemento | IPTU, MATRICULA_IMOVEL, ESCRITURA, COMPROMISSO | Validar unidade |
-| imovel_bairro | IPTU, MATRICULA_IMOVEL, ITBI, ESCRITURA, CND_MUNICIPAL | Validar endereco |
-| imovel_area_construida | IPTU, MATRICULA_IMOVEL, VVR | Validar caracteristicas |
-| imovel_area_total | IPTU, MATRICULA_IMOVEL, COMPROMISSO | Validar caracteristicas |
-| imovel_denominacao | MATRICULA_IMOVEL, ESCRITURA, COMPROMISSO | Validar tipo de imovel |
-| matricula_numero | IPTU, VVR, ITBI, MATRICULA_IMOVEL | Identificar matricula |
+| SQL | IPTU, VVR, CND_MUNICIPAL, CND_IMOVEL, ITBI, MATRICULA_IMOVEL | Identificador PRIMARIO do imovel |
+| LOGRADOURO | IPTU, MATRICULA_IMOVEL, ITBI, ESCRITURA, COMPROMISSO, VVR | Validar endereco |
+| NUMERO | IPTU, MATRICULA_IMOVEL, ITBI, ESCRITURA, COMPROMISSO, VVR | Validar endereco |
+| COMPLEMENTO | IPTU, MATRICULA_IMOVEL, ESCRITURA, COMPROMISSO | Validar unidade |
+| BAIRRO | IPTU, MATRICULA_IMOVEL, ITBI, ESCRITURA, CND_MUNICIPAL | Validar endereco |
+| AREA CONSTRUIDA EM M2 | IPTU, MATRICULA_IMOVEL, VVR | Validar caracteristicas |
+| AREA TOTAL EM M2 | IPTU, MATRICULA_IMOVEL, COMPROMISSO | Validar caracteristicas |
+| DENOMINACAO DO IMOVEL | MATRICULA_IMOVEL, ESCRITURA, COMPROMISSO | Validar tipo de imovel |
+| NUMERO DA MATRICULA | IPTU, VVR, ITBI, MATRICULA_IMOVEL | Identificar matricula |
 
 ### Correlacao Especifica
 
@@ -195,29 +195,29 @@ Embora o documento contenha dados de contribuintes, o mapeamento atual **nao ext
 Campos uteis para minutas que NAO vem dos DADOS_CADASTRAIS:
 
 **Pessoa Natural (precisa de outros documentos)**:
-- `nome`, `cpf` -> Visivel no documento mas obter de RG, CNH ou declaracao
-- `rg`, `orgao_emissor_rg`, `estado_emissor_rg` -> RG ou CNH
-- `estado_civil`, `regime_bens` -> CERTIDAO_CASAMENTO
-- `profissao`, `nacionalidade` -> RG, CNH ou declaracao
+- `NOME`, `CPF` -> Visivel no documento mas obter de RG, CNH ou declaracao
+- `RG`, `ORGAO EMISSOR DO RG`, `ESTADO EMISSOR DO RG` -> RG ou CNH
+- `ESTADO CIVIL`, `REGIME DE BENS` -> CERTIDAO_CASAMENTO
+- `PROFISSAO`, `NACIONALIDADE` -> RG, CNH ou declaracao
 - `data_nascimento` -> RG, CNH ou CERTIDAO_NASCIMENTO
-- `domicilio_*` (endereco residencial) -> COMPROVANTE_RESIDENCIA
+- `LOGRADOURO`, `NUMERO`, `COMPLEMENTO`, `BAIRRO`, `CIDADE`, `ESTADO`, `CEP` (endereco residencial) -> COMPROVANTE_RESIDENCIA
 - `filiacao_pai`, `filiacao_mae` -> RG ou CERTIDAO_NASCIMENTO
 
 **Pessoa Juridica (precisa de outros documentos)**:
-- `pj_denominacao`, `pj_cnpj` -> Visivel no documento mas obter de CONTRATO_SOCIAL
-- `pj_nire`, `pj_sede_*` -> CONTRATO_SOCIAL
-- `pj_admin_*` -> CONTRATO_SOCIAL
+- `DENOMINACAO`, `CNPJ` -> Visivel no documento mas obter de CONTRATO_SOCIAL
+- `pj_nire`, `LOGRADOURO DA SEDE`, `NUMERO DA SEDE`, `BAIRRO DA SEDE`, `CIDADE DA SEDE`, `ESTADO DA SEDE`, `CEP DA SEDE` -> CONTRATO_SOCIAL
+- `NOME DO ADMINISTRADOR`, `CPF DO ADMINISTRADOR` -> CONTRATO_SOCIAL
 
 **Imovel (precisa de outros documentos)**:
-- `imovel_valor_venal_iptu` -> IPTU
+- `VALOR VENAL DO IPTU` -> IPTU
 - `imovel_valor_venal_referencia` (VVR para ITBI) -> VVR
-- `imovel_descricao_conforme_matricula` -> MATRICULA_IMOVEL
+- `DESCRICAO CONFORME MATRICULA` -> MATRICULA_IMOVEL
 - `imovel_area_privativa` -> MATRICULA_IMOVEL
-- `matricula_cartorio_*` -> MATRICULA_IMOVEL
+- `NUMERO DO REGISTRO DE IMOVEIS`, `CIDADE DO REGISTRO DE IMOVEIS` -> MATRICULA_IMOVEL
 - `proprietario_*` (dados de registro) -> MATRICULA_IMOVEL
 
 **Negocio**:
-- `negocio_valor_total`, `alienante_nome`, `adquirente_nome` -> ITBI, COMPROMISSO, ESCRITURA
+- `VALOR TOTAL`, `NOME DO ALIENANTE`, `NOME DO ADQUIRENTE` -> ITBI, COMPROMISSO, ESCRITURA
 - `itbi_*` (dados do imposto de transmissao) -> ITBI
 
 ---
@@ -226,11 +226,11 @@ Campos uteis para minutas que NAO vem dos DADOS_CADASTRAIS:
 
 | Validacao | Documento Comparado | Regra |
 |-----------|-------------------|-------|
-| SQL consistente | IPTU, VVR, CND_MUNICIPAL, ITBI | DADOS_CADASTRAIS.sql == outro.sql |
-| Endereco consistente | MATRICULA_IMOVEL, IPTU, ITBI | Logradouro + numero devem coincidir |
-| Area consistente | MATRICULA_IMOVEL, IPTU | Areas devem ser compativeis (tolerancia) |
-| Denominacao compativel | MATRICULA_IMOVEL | Tipo de imovel deve ser consistente |
-| Certidao atualizada | - | Data de expedicao < 30 dias |
+| SQL consistente | IPTU, VVR, CND_MUNICIPAL, ITBI | SQL == SQL de outro documento |
+| Endereco consistente | MATRICULA_IMOVEL, IPTU, ITBI | LOGRADOURO + NUMERO devem coincidir |
+| Area consistente | MATRICULA_IMOVEL, IPTU | AREA TOTAL EM M2 e AREA CONSTRUIDA EM M2 devem ser compativeis (tolerancia) |
+| Denominacao compativel | MATRICULA_IMOVEL | DENOMINACAO DO IMOVEL deve ser consistente |
+| Certidao atualizada | - | DATA DA CERTIDAO DE CADASTRO < 30 dias |
 | Contribuinte = Proprietario | MATRICULA_IMOVEL | Contribuinte deve ser proprietario atual |
 
 ---

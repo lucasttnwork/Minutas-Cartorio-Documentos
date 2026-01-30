@@ -22,74 +22,74 @@ Qualificacao completa de vendedores e compradores.
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome completo | "JOAO DA SILVA" | SIM |
-| cpf | CPF | "123.456.789-00" | SIM |
-| rg | RG | "12.345.678-9" | SIM |
-| orgao_emissor_rg | Orgao emissor | "SSP" | SIM |
-| estado_emissor_rg | UF do emissor | "SP" | SIM |
-| nacionalidade | Nacionalidade | "brasileiro" | SIM |
-| profissao | Profissao | "empresario" | SIM |
-| estado_civil | Estado civil | "casado" | SIM |
-| regime_bens | Regime de bens | "comunhao parcial" | Se casado |
-| data_nascimento | Data de nascimento | "10/05/1985" | Condicional |
-| domicilio_logradouro | Logradouro | "Rua das Flores" | SIM |
-| domicilio_numero | Numero | "123" | SIM |
-| domicilio_complemento | Complemento | "Apto 45" | Condicional |
-| domicilio_bairro | Bairro | "Centro" | SIM |
-| domicilio_cidade | Cidade | "Sao Paulo" | SIM |
-| domicilio_estado | Estado | "SP" | SIM |
-| domicilio_cep | CEP | "01234-567" | Condicional |
-| email | Email | "joao@email.com" | Condicional |
-| telefone | Telefone | "(11) 99999-9999" | Condicional |
+| NOME | Nome completo | "JOAO DA SILVA" | SIM |
+| CPF | CPF | "123.456.789-00" | SIM |
+| RG | RG | "12.345.678-9" | SIM |
+| ORGAO EMISSOR DO RG | Orgao emissor | "SSP" | SIM |
+| ESTADO EMISSOR DO RG | UF do emissor | "SP" | SIM |
+| NACIONALIDADE | Nacionalidade | "brasileiro" | SIM |
+| PROFISSAO | Profissao | "empresario" | SIM |
+| ESTADO CIVIL | Estado civil | "casado" | SIM |
+| REGIME DE BENS | Regime de bens | "comunhao parcial" | Se casado |
+| DATA DE NASCIMENTO | Data de nascimento | "10/05/1985" | Condicional |
+| LOGRADOURO | Logradouro | "Rua das Flores" | SIM |
+| NUMERO | Numero | "123" | SIM |
+| COMPLEMENTO | Complemento | "Apto 45" | Condicional |
+| BAIRRO | Bairro | "Centro" | SIM |
+| CIDADE | Cidade | "Sao Paulo" | SIM |
+| ESTADO | Estado | "SP" | SIM |
+| CEP | CEP | "01234-567" | Condicional |
+| E-MAIL | Email | "joao@email.com" | Condicional |
+| TELEFONE | Telefone | "(11) 99999-9999" | Condicional |
 
 ### 2.2 Pessoa Juridica (9 campos)
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| pj_denominacao | Razao social | "XYZ LTDA" | SIM (se PJ) |
-| pj_cnpj | CNPJ | "12.345.678/0001-90" | SIM (se PJ) |
-| pj_sede_logradouro | Logradouro sede | "Av. Paulista" | SIM (se PJ) |
-| pj_sede_numero | Numero sede | "1000" | SIM (se PJ) |
-| pj_sede_complemento | Complemento sede | "Sala 101" | Condicional |
-| pj_sede_bairro | Bairro sede | "Bela Vista" | SIM (se PJ) |
-| pj_sede_cidade | Cidade sede | "Sao Paulo" | SIM (se PJ) |
-| pj_sede_estado | Estado sede | "SP" | SIM (se PJ) |
-| pj_sede_cep | CEP sede | "01310-100" | Condicional |
+| DENOMINACAO | Razao social | "XYZ LTDA" | SIM (se PJ) |
+| CNPJ | CNPJ | "12.345.678/0001-90" | SIM (se PJ) |
+| LOGRADOURO DA SEDE | Logradouro sede | "Av. Paulista" | SIM (se PJ) |
+| NUMERO DA SEDE | Numero sede | "1000" | SIM (se PJ) |
+| COMPLEMENTO DA SEDE | Complemento sede | "Sala 101" | Condicional |
+| BAIRRO DA SEDE | Bairro sede | "Bela Vista" | SIM (se PJ) |
+| CIDADE DA SEDE | Cidade sede | "Sao Paulo" | SIM (se PJ) |
+| ESTADO DA SEDE | Estado sede | "SP" | SIM (se PJ) |
+| CEP DA SEDE | CEP sede | "01310-100" | Condicional |
 
 ### 2.3 Dados do Imovel (12 campos)
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| matricula_numero | Numero da matricula | "46.511" | SIM |
-| matricula_cartorio_numero | Cartorio de RI | "1o OFICIAL DE RI" | SIM |
-| matricula_cartorio_cidade | Cidade do cartorio | "Sao Paulo" | SIM |
-| imovel_denominacao | Tipo do imovel | "apartamento" | SIM |
-| imovel_logradouro | Logradouro | "Rua Francisco Cruz" | SIM |
-| imovel_numero | Numero | "515" | SIM |
-| imovel_complemento | Complemento | "Apto 124" | Condicional |
-| imovel_bairro | Bairro | "Vila Mariana" | SIM |
-| imovel_cidade | Cidade | "Sao Paulo" | SIM |
-| imovel_estado | Estado | "SP" | SIM |
-| imovel_area_total | Area total m2 | "83.49" | SIM |
-| imovel_area_privativa | Area privativa m2 | "70.83" | Condicional |
+| NUMERO DA MATRICULA | Numero da matricula | "46.511" | SIM |
+| NUMERO DO REGISTRO DE IMOVEIS | Cartorio de RI | "1o OFICIAL DE RI" | SIM |
+| CIDADE DO REGISTRO DE IMOVEIS | Cidade do cartorio | "Sao Paulo" | SIM |
+| DENOMINACAO DO IMOVEL | Tipo do imovel | "apartamento" | SIM |
+| LOGRADOURO | Logradouro | "Rua Francisco Cruz" | SIM |
+| NUMERO | Numero | "515" | SIM |
+| COMPLEMENTO | Complemento | "Apto 124" | Condicional |
+| BAIRRO | Bairro | "Vila Mariana" | SIM |
+| CIDADE | Cidade | "Sao Paulo" | SIM |
+| ESTADO | Estado | "SP" | SIM |
+| AREA TOTAL EM M2 | Area total m2 | "83.49" | SIM |
+| AREA PRIVATIVA EM M2 | Area privativa m2 | "70.83" | Condicional |
 
 ### 2.4 Negocio Juridico (13 campos)
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| negocio_valor_total | Valor total | "500000.00" | SIM |
-| negocio_fracao_alienada | Fracao vendida | "100%" | SIM |
-| alienante_nome | Nome do vendedor | "ELIZETE APARECIDA SILVA" | SIM |
-| alienante_fracao_ideal | Fracao do vendedor | "50%" | SIM |
-| alienante_valor_alienacao | Valor do vendedor | "250000.00" | SIM |
-| alienante_conjuge | Nome do conjuge vendedor | "RODOLFO ORTRIWANO" | Se casado |
-| adquirente_nome | Nome do comprador | "MARINA AYUB" | SIM |
-| adquirente_fracao_ideal | Fracao do comprador | "100%" | SIM |
-| adquirente_valor_aquisicao | Valor do comprador | "500000.00" | SIM |
-| pagamento_tipo | Tipo de pagamento | "A VISTA + FINANCIAMENTO" | SIM |
-| pagamento_modo | Modo de pagamento | "TED + CAIXA" | SIM |
-| pagamento_data | Data do pagamento | "15/12/2025" | Condicional |
-| termos_promessa | Termos do contrato | "Imovel entregue vazio..." | Condicional |
+| VALOR TOTAL | Valor total | "500000.00" | SIM |
+| FRACAO ALIENADA | Fracao vendida | "100%" | SIM |
+| NOME DO ALIENANTE | Nome do vendedor | "ELIZETE APARECIDA SILVA" | SIM |
+| FRACAO IDEAL DO ALIENANTE | Fracao do vendedor | "50%" | SIM |
+| VALOR DA ALIENACAO | Valor do vendedor | "250000.00" | SIM |
+| CONJUGE DO ALIENANTE | Nome do conjuge vendedor | "RODOLFO ORTRIWANO" | Se casado |
+| NOME DO ADQUIRENTE | Nome do comprador | "MARINA AYUB" | SIM |
+| FRACAO IDEAL DO ADQUIRENTE | Fracao do comprador | "100%" | SIM |
+| VALOR DA AQUISICAO | Valor do comprador | "500000.00" | SIM |
+| TIPO DE PAGAMENTO | Tipo de pagamento | "A VISTA + FINANCIAMENTO" | SIM |
+| MODO DE PAGAMENTO | Modo de pagamento | "TED + CAIXA" | SIM |
+| DATA DO PAGAMENTO | Data do pagamento | "15/12/2025" | Condicional |
+| TERMOS DA PROMESSA | Termos do contrato | "Imovel entregue vazio..." | Condicional |
 
 ---
 

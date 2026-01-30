@@ -51,8 +51,8 @@ O PROTOCOLO_ONR **NAO** fornece dados de pessoas juridicas.
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| matricula_numero | Numero da matricula (quando presente) | "123456" | NAO |
-| matricula_cartorio | Cartorio de destino da solicitacao | "1o OFICIAL DE REGISTRO DE IMOVEIS DE SAO PAULO" | NAO |
+| NUMERO DA MATRICULA | Numero da matricula (quando presente) | "123456" | NAO |
+| NUMERO DO REGISTRO DE IMOVEIS | Cartorio de destino da solicitacao | "1o OFICIAL DE REGISTRO DE IMOVEIS DE SAO PAULO" | NAO |
 
 **Nota**: Estes campos sao apenas referencias, nao dados autoritativos. A fonte primaria e sempre a MATRICULA_IMOVEL.
 
@@ -66,8 +66,8 @@ O PROTOCOLO_ONR **NAO** fornece dados de negocio juridico.
 
 | Campo no Schema | Campo Util Mapeado | Categoria |
 |-----------------|-------------------|-----------|
-| matricula_imovel | matricula_numero | imovel |
-| cartorio_destino | matricula_cartorio | imovel |
+| matricula_imovel | NUMERO DA MATRICULA | imovel |
+| cartorio_destino | NUMERO DO REGISTRO DE IMOVEIS | imovel |
 
 ---
 
@@ -78,8 +78,8 @@ O PROTOCOLO_ONR **NAO** fornece dados de negocio juridico.
   "pessoa_natural": {},
   "pessoa_juridica": {},
   "imovel": {
-    "matricula_numero": "123456",
-    "matricula_cartorio": "1o OFICIAL DE REGISTRO DE IMOVEIS DE SAO PAULO"
+    "NUMERO DA MATRICULA": "123456",
+    "NUMERO DO REGISTRO DE IMOVEIS": "1o OFICIAL DE REGISTRO DE IMOVEIS DE SAO PAULO"
   },
   "negocio": {}
 }
@@ -114,8 +114,8 @@ O protocolo pode ser usado para:
 
 | Campo do Protocolo | Correlaciona com | Finalidade |
 |--------------------|------------------|------------|
-| matricula_numero | MATRICULA_IMOVEL.matricula_numero | Identificar qual certidao foi solicitada |
-| cartorio_destino | MATRICULA_IMOVEL.matricula_cartorio | Confirmar cartorio |
+| NUMERO DA MATRICULA | MATRICULA_IMOVEL.NUMERO DA MATRICULA | Identificar qual certidao foi solicitada |
+| NUMERO DO REGISTRO DE IMOVEIS | MATRICULA_IMOVEL.NUMERO DO REGISTRO DE IMOVEIS | Confirmar cartorio |
 
 ### 6.2 Fluxo de Correlacao
 

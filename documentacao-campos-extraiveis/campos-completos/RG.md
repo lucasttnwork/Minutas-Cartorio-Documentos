@@ -111,16 +111,16 @@ Campos booleanos que indicam a presenca de elementos visuais:
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Prioridade |
 |-----------------|---------------|-------------------|------------|
-| nome_completo | nome | SIM | Alta |
-| cpf | cpf | SIM | Alta |
-| numero_rg | rg | SIM | Alta |
-| orgao_expedidor | orgao_emissor_rg | SIM | Alta |
-| uf_expedidor | estado_emissor_rg | SIM | Alta |
-| data_expedicao | data_emissao_rg | SIM | Media |
-| data_nascimento | data_nascimento | SIM | Alta |
-| naturalidade | naturalidade | SIM | Media |
-| nome_pai | filiacao_pai | SIM | Media |
-| nome_mae | filiacao_mae | SIM | Media |
+| nome_completo | NOME | SIM | Alta |
+| cpf | CPF | SIM | Alta |
+| numero_rg | RG | SIM | Alta |
+| orgao_expedidor | ORGAO EMISSOR DO RG | SIM | Alta |
+| uf_expedidor | ESTADO EMISSOR DO RG | SIM | Alta |
+| data_expedicao | DATA DE EMISSAO DO RG | SIM | Media |
+| data_nascimento | DATA DE NASCIMENTO | SIM | Alta |
+| naturalidade | NATURALIDADE | SIM | Media |
+| nome_pai | FILIACAO PAI | SIM | Media |
+| nome_mae | FILIACAO MAE | SIM | Media |
 
 ### 3.2 Campos que Alimentam "Pessoa Juridica"
 

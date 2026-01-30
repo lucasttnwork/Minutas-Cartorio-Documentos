@@ -25,8 +25,8 @@ A CND Municipal e uma certidao **obrigatoria** para escrituras de compra e venda
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome do contribuinte | "JOAO DA SILVA" | SIM |
-| cpf | CPF do contribuinte | "123.456.789-00" | NAO (nem sempre disponivel) |
+| NOME | Nome do contribuinte | "JOAO DA SILVA" | SIM |
+| CPF | CPF do contribuinte | "123.456.789-00" | NAO (nem sempre disponivel) |
 
 **Observacao**: Os dados do contribuinte servem para **validacao** e correlacao com o alienante, nao sao fonte primaria de dados pessoais.
 
@@ -34,8 +34,8 @@ A CND Municipal e uma certidao **obrigatoria** para escrituras de compra e venda
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| pj_denominacao | Razao social (se PJ) | "XYZ EMPREENDIMENTOS LTDA" | SIM (se PJ) |
-| pj_cnpj | CNPJ (se PJ) | "12.345.678/0001-90" | SIM (se PJ) |
+| DENOMINACAO | Razao social (se PJ) | "XYZ EMPREENDIMENTOS LTDA" | SIM (se PJ) |
+| CNPJ | CNPJ (se PJ) | "12.345.678/0001-90" | SIM (se PJ) |
 
 **Observacao**: A identificacao entre PF e PJ e feita pelo formato do documento (CPF = 11 digitos, CNPJ = 14 digitos).
 
@@ -43,15 +43,15 @@ A CND Municipal e uma certidao **obrigatoria** para escrituras de compra e venda
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| imovel_sql | Cadastro Municipal (SQL) | "039.080.0244-3" | SIM |
-| imovel_logradouro | Logradouro do imovel | "RUA FRANCISCO CRUZ" | SIM |
-| imovel_numero | Numero do imovel | "515" | SIM |
-| imovel_complemento | Complemento (apto, bloco) | "APTO 124 BL-B" | NAO |
-| imovel_bairro | Bairro do imovel | "VILA MARIANA" | SIM |
-| imovel_cidade | Cidade do imovel | "SAO PAULO" | SIM |
-| imovel_estado | Estado do imovel | "SP" | SIM |
-| imovel_cnd_iptu_numero | Numero da certidao | "0001046713-2023" | SIM |
-| imovel_cnd_iptu_data | Data de emissao | "26/10/2023" | SIM |
+| SQL | Cadastro Municipal (SQL) | "039.080.0244-3" | SIM |
+| LOGRADOURO | Logradouro do imovel | "RUA FRANCISCO CRUZ" | SIM |
+| NUMERO | Numero do imovel | "515" | SIM |
+| COMPLEMENTO | Complemento (apto, bloco) | "APTO 124 BL-B" | NAO |
+| BAIRRO | Bairro do imovel | "VILA MARIANA" | SIM |
+| CIDADE | Cidade do imovel | "SAO PAULO" | SIM |
+| ESTADO | Estado do imovel | "SP" | SIM |
+| NUMERO DA CERTIDAO | Numero da certidao | "0001046713-2023" | SIM |
+| DATA DE EMISSAO | Data de emissao | "26/10/2023" | SIM |
 
 **Observacao**: O endereco na CND Municipal e frequentemente um campo unico que precisa ser parseado para extrair os componentes individuais.
 
@@ -65,14 +65,14 @@ A CND Municipal nao alimenta campos diretos de negocio juridico. No entanto, a *
 
 | Campo no Schema | Campo Util Mapeado | Categoria |
 |-----------------|-------------------|-----------|
-| nome_contribuinte | nome / pj_denominacao | pessoa_natural / pessoa_juridica |
-| cpf_contribuinte | cpf | pessoa_natural |
-| cpf_contribuinte (CNPJ) | pj_cnpj | pessoa_juridica |
-| cadastro_imovel (SQL) | imovel_sql | imovel |
-| endereco_imovel | imovel_logradouro, imovel_numero, imovel_complemento, imovel_bairro, imovel_cidade, imovel_estado | imovel |
+| nome_contribuinte | NOME / DENOMINACAO | pessoa_natural / pessoa_juridica |
+| cpf_contribuinte | CPF | pessoa_natural |
+| cpf_contribuinte (CNPJ) | CNPJ | pessoa_juridica |
+| cadastro_imovel (SQL) | SQL | imovel |
+| endereco_imovel | LOGRADOURO, NUMERO, COMPLEMENTO, BAIRRO, CIDADE, ESTADO | imovel |
 | cep_imovel | imovel_cep | imovel |
-| numero_certidao | imovel_cnd_iptu_numero | imovel |
-| data_emissao | imovel_cnd_iptu_data | imovel |
+| numero_certidao | NUMERO DA CERTIDAO | imovel |
+| data_emissao | DATA DE EMISSAO | imovel |
 
 ---
 
@@ -81,20 +81,20 @@ A CND Municipal nao alimenta campos diretos de negocio juridico. No entanto, a *
 ```json
 {
   "pessoa_natural": {
-    "nome": "JOAO DA SILVA",
-    "cpf": "123.456.789-00"
+    "NOME": "JOAO DA SILVA",
+    "CPF": "123.456.789-00"
   },
   "pessoa_juridica": {},
   "imovel": {
-    "imovel_sql": "039.080.0244-3",
-    "imovel_logradouro": "RUA FRANCISCO CRUZ",
-    "imovel_numero": "515",
-    "imovel_complemento": "APTO 124 BL-B",
-    "imovel_bairro": "VILA MARIANA",
-    "imovel_cidade": "SAO PAULO",
-    "imovel_estado": "SP",
-    "imovel_cnd_iptu_numero": "0001046713-2023",
-    "imovel_cnd_iptu_data": "26/10/2023"
+    "SQL": "039.080.0244-3",
+    "LOGRADOURO": "RUA FRANCISCO CRUZ",
+    "NUMERO": "515",
+    "COMPLEMENTO": "APTO 124 BL-B",
+    "BAIRRO": "VILA MARIANA",
+    "CIDADE": "SAO PAULO",
+    "ESTADO": "SP",
+    "NUMERO DA CERTIDAO": "0001046713-2023",
+    "DATA DE EMISSAO": "26/10/2023"
   },
   "negocio": {}
 }
@@ -106,8 +106,8 @@ A CND Municipal nao alimenta campos diretos de negocio juridico. No entanto, a *
 
 ### 5.1 Referencia na Escritura
 
-- `imovel_cnd_iptu_numero` -> Citado na escritura como certidao de tributos imobiliarios apresentada
-- `imovel_cnd_iptu_data` -> Data de emissao para verificar validade
+- `NUMERO DA CERTIDAO` -> Citado na escritura como certidao de tributos imobiliarios apresentada
+- `DATA DE EMISSAO` -> Data de emissao para verificar validade
 
 **Exemplo de texto na minuta**:
 > "...foi apresentada Certidao Negativa de Tributos Imobiliarios n. 0001046713-2023, emitida em 26/10/2023 pela Prefeitura Municipal de Sao Paulo..."
@@ -217,7 +217,7 @@ A CND Municipal faz parte do conjunto de certidoes fiscais exigidas em escritura
 
 | Certidao | Orgao | Vinculacao | Campos Mapeados |
 |----------|-------|------------|-----------------|
-| CND Municipal | Prefeitura | Imovel (SQL) | imovel_cnd_iptu_* |
+| CND Municipal | Prefeitura | Imovel (SQL) | NUMERO DA CERTIDAO, DATA DE EMISSAO |
 | CND Federal | RFB/PGFN | Pessoa (CPF/CNPJ) | certidao_uniao_* |
 | CND Estadual | Sefaz | Pessoa (CPF/CNPJ) | (nao mapeados especificos) |
 | CNDT | TST | Pessoa (CPF/CNPJ) | cndt_* |

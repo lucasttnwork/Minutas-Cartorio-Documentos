@@ -22,62 +22,62 @@ Qualificacao completa das partes.
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome completo | "JOAO DA SILVA" | SIM |
-| cpf | CPF | "123.456.789-00" | SIM |
-| rg | RG | "12.345.678-9" | SIM |
-| orgao_emissor_rg | Orgao emissor | "SSP" | SIM |
-| estado_emissor_rg | UF do emissor | "SP" | SIM |
-| nacionalidade | Nacionalidade | "brasileiro" | SIM |
-| profissao | Profissao | "empresario" | SIM |
-| estado_civil | Estado civil | "casado" | SIM |
-| regime_bens | Regime de bens | "comunhao parcial" | Se casado |
-| domicilio_logradouro | Logradouro | "Rua das Flores" | SIM |
-| domicilio_numero | Numero | "123" | SIM |
-| domicilio_bairro | Bairro | "Centro" | SIM |
-| domicilio_cidade | Cidade | "Sao Paulo" | SIM |
-| domicilio_estado | Estado | "SP" | SIM |
-| domicilio_cep | CEP | "01234-567" | Condicional |
+| NOME | Nome completo | "JOAO DA SILVA" | SIM |
+| CPF | CPF | "123.456.789-00" | SIM |
+| RG | RG | "12.345.678-9" | SIM |
+| ORGAO EMISSOR DO RG | Orgao emissor | "SSP" | SIM |
+| ESTADO EMISSOR DO RG | UF do emissor | "SP" | SIM |
+| NACIONALIDADE | Nacionalidade | "brasileiro" | SIM |
+| PROFISSAO | Profissao | "empresario" | SIM |
+| ESTADO CIVIL | Estado civil | "casado" | SIM |
+| REGIME DE BENS | Regime de bens | "comunhao parcial" | Se casado |
+| LOGRADOURO | Logradouro | "Rua das Flores" | SIM |
+| NUMERO | Numero | "123" | SIM |
+| BAIRRO | Bairro | "Centro" | SIM |
+| CIDADE | Cidade | "Sao Paulo" | SIM |
+| ESTADO | Estado | "SP" | SIM |
+| CEP | CEP | "01234-567" | Condicional |
 
 ### 2.2 Pessoa Juridica (10 campos)
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| pj_denominacao | Razao social | "XYZ EMPREENDIMENTOS LTDA" | SIM (se PJ) |
-| pj_cnpj | CNPJ | "12.345.678/0001-90" | SIM (se PJ) |
-| pj_sede_logradouro | Logradouro da sede | "Av. Paulista" | SIM (se PJ) |
-| pj_sede_numero | Numero da sede | "1000" | SIM (se PJ) |
-| pj_sede_bairro | Bairro da sede | "Bela Vista" | SIM (se PJ) |
-| pj_sede_cidade | Cidade da sede | "Sao Paulo" | SIM (se PJ) |
-| pj_sede_estado | Estado da sede | "SP" | SIM (se PJ) |
-| pj_sede_cep | CEP da sede | "01310-100" | Condicional |
-| pj_admin_nome | Nome do administrador | "CARLOS PEREIRA" | SIM (se PJ) |
-| pj_admin_cpf | CPF do administrador | "987.654.321-00" | SIM (se PJ) |
+| DENOMINACAO | Razao social | "XYZ EMPREENDIMENTOS LTDA" | SIM (se PJ) |
+| CNPJ | CNPJ | "12.345.678/0001-90" | SIM (se PJ) |
+| LOGRADOURO DA SEDE | Logradouro da sede | "Av. Paulista" | SIM (se PJ) |
+| NUMERO DA SEDE | Numero da sede | "1000" | SIM (se PJ) |
+| BAIRRO DA SEDE | Bairro da sede | "Bela Vista" | SIM (se PJ) |
+| CIDADE DA SEDE | Cidade da sede | "Sao Paulo" | SIM (se PJ) |
+| ESTADO DA SEDE | Estado da sede | "SP" | SIM (se PJ) |
+| CEP DA SEDE | CEP da sede | "01310-100" | Condicional |
+| NOME DO ADMINISTRADOR | Nome do administrador | "CARLOS PEREIRA" | SIM (se PJ) |
+| CPF DO ADMINISTRADOR | CPF do administrador | "987.654.321-00" | SIM (se PJ) |
 
 ### 2.3 Dados do Imovel (11 campos)
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| matricula_numero | Numero da matricula | "46.511" | SIM |
-| matricula_cartorio_numero | Cartorio de RI | "1o OFICIAL DE RI" | SIM |
-| matricula_cartorio_cidade | Cidade do cartorio | "Sao Paulo" | SIM |
-| imovel_denominacao | Tipo do imovel | "apartamento" | SIM |
-| imovel_descricao_conforme_matricula | Descricao completa | "Unidade autonoma..." | SIM |
-| imovel_logradouro | Logradouro | "Rua Francisco Cruz" | SIM |
-| imovel_numero | Numero | "515" | SIM |
-| imovel_complemento | Complemento | "Apto 124" | Condicional |
-| imovel_bairro | Bairro | "Vila Mariana" | SIM |
-| imovel_cidade | Cidade | "Sao Paulo" | SIM |
-| imovel_estado | Estado | "SP" | SIM |
+| NUMERO DA MATRICULA | Numero da matricula | "46.511" | SIM |
+| NUMERO DO REGISTRO DE IMOVEIS | Cartorio de RI | "1o OFICIAL DE RI" | SIM |
+| CIDADE DO REGISTRO DE IMOVEIS | Cidade do cartorio | "Sao Paulo" | SIM |
+| DENOMINACAO DO IMOVEL | Tipo do imovel | "apartamento" | SIM |
+| DESCRICAO CONFORME MATRICULA | Descricao completa | "Unidade autonoma..." | SIM |
+| LOGRADOURO | Logradouro | "Rua Francisco Cruz" | SIM |
+| NUMERO | Numero | "515" | SIM |
+| COMPLEMENTO | Complemento | "Apto 124" | Condicional |
+| BAIRRO | Bairro | "Vila Mariana" | SIM |
+| CIDADE | Cidade | "Sao Paulo" | SIM |
+| ESTADO | Estado | "SP" | SIM |
 
 ### 2.4 Negocio Juridico (5 campos)
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| negocio_valor_total | Valor da transacao | "500000.00" | SIM |
-| alienante_nome | Nome do vendedor | "ELIZETE APARECIDA SILVA" | SIM |
-| adquirente_nome | Nome do comprador | "MARINA AYUB" | SIM |
-| pagamento_tipo | Tipo de pagamento | "A VISTA + FINANCIAMENTO" | SIM |
-| pagamento_modo | Modo de pagamento | "TED + CEF" | SIM |
+| VALOR TOTAL | Valor da transacao | "500000.00" | SIM |
+| NOME DO ALIENANTE | Nome do vendedor | "ELIZETE APARECIDA SILVA" | SIM |
+| NOME DO ADQUIRENTE | Nome do comprador | "MARINA AYUB" | SIM |
+| TIPO DE PAGAMENTO | Tipo de pagamento | "A VISTA + FINANCIAMENTO" | SIM |
+| MODO DE PAGAMENTO | Modo de pagamento | "TED + CEF" | SIM |
 
 ---
 
@@ -85,21 +85,21 @@ Qualificacao completa das partes.
 
 | Campo no Schema | Campo Util Mapeado | Categoria |
 |-----------------|-------------------|-----------|
-| outorgantes[].nome | nome / alienante_nome | pessoa_natural / negocio |
-| outorgados[].nome | nome / adquirente_nome | pessoa_natural / negocio |
-| outorgantes[].cpf | cpf | pessoa_natural |
-| outorgantes[].rg | rg | pessoa_natural |
-| outorgantes[].orgao_rg | orgao_emissor_rg | pessoa_natural |
-| outorgantes[].nacionalidade | nacionalidade | pessoa_natural |
-| outorgantes[].profissao | profissao | pessoa_natural |
-| outorgantes[].estado_civil | estado_civil | pessoa_natural |
-| outorgantes[].regime_bens | regime_bens | pessoa_natural |
-| outorgantes[].endereco.* | domicilio_* | pessoa_natural |
-| imovel.matricula | matricula_numero | imovel |
-| imovel.cartorio_ri | matricula_cartorio_numero | imovel |
-| imovel.descricao | imovel_descricao_conforme_matricula | imovel |
-| valor_transacao | negocio_valor_total | negocio |
-| forma_pagamento.* | pagamento_tipo/modo | negocio |
+| outorgantes[].nome | NOME / NOME DO ALIENANTE | pessoa_natural / negocio |
+| outorgados[].nome | NOME / NOME DO ADQUIRENTE | pessoa_natural / negocio |
+| outorgantes[].cpf | CPF | pessoa_natural |
+| outorgantes[].rg | RG | pessoa_natural |
+| outorgantes[].orgao_rg | ORGAO EMISSOR DO RG | pessoa_natural |
+| outorgantes[].nacionalidade | NACIONALIDADE | pessoa_natural |
+| outorgantes[].profissao | PROFISSAO | pessoa_natural |
+| outorgantes[].estado_civil | ESTADO CIVIL | pessoa_natural |
+| outorgantes[].regime_bens | REGIME DE BENS | pessoa_natural |
+| outorgantes[].endereco.* | LOGRADOURO/NUMERO/COMPLEMENTO/BAIRRO/CIDADE/ESTADO/CEP | pessoa_natural |
+| imovel.matricula | NUMERO DA MATRICULA | imovel |
+| imovel.cartorio_ri | NUMERO DO REGISTRO DE IMOVEIS | imovel |
+| imovel.descricao | DESCRICAO CONFORME MATRICULA | imovel |
+| valor_transacao | VALOR TOTAL | negocio |
+| forma_pagamento.* | TIPO DE PAGAMENTO/MODO DE PAGAMENTO | negocio |
 
 ---
 
@@ -108,42 +108,42 @@ Qualificacao completa das partes.
 ```json
 {
   "pessoa_natural": {
-    "nome": "JOAO DA SILVA",
-    "cpf": "123.456.789-00",
-    "rg": "12.345.678-9",
-    "orgao_emissor_rg": "SSP",
-    "estado_emissor_rg": "SP",
-    "nacionalidade": "brasileiro",
-    "profissao": "empresario",
-    "estado_civil": "casado",
-    "regime_bens": "comunhao parcial de bens",
-    "domicilio_logradouro": "Rua das Flores",
-    "domicilio_numero": "123",
-    "domicilio_bairro": "Centro",
-    "domicilio_cidade": "Sao Paulo",
-    "domicilio_estado": "SP",
-    "domicilio_cep": "01234-567"
+    "NOME": "JOAO DA SILVA",
+    "CPF": "123.456.789-00",
+    "RG": "12.345.678-9",
+    "ORGAO EMISSOR DO RG": "SSP",
+    "ESTADO EMISSOR DO RG": "SP",
+    "NACIONALIDADE": "brasileiro",
+    "PROFISSAO": "empresario",
+    "ESTADO CIVIL": "casado",
+    "REGIME DE BENS": "comunhao parcial de bens",
+    "LOGRADOURO": "Rua das Flores",
+    "NUMERO": "123",
+    "BAIRRO": "Centro",
+    "CIDADE": "Sao Paulo",
+    "ESTADO": "SP",
+    "CEP": "01234-567"
   },
   "pessoa_juridica": {},
   "imovel": {
-    "matricula_numero": "46.511",
-    "matricula_cartorio_numero": "1o OFICIAL DE RI SP",
-    "matricula_cartorio_cidade": "Sao Paulo",
-    "imovel_denominacao": "apartamento",
-    "imovel_descricao_conforme_matricula": "Unidade autonoma no 124...",
-    "imovel_logradouro": "Rua Francisco Cruz",
-    "imovel_numero": "515",
-    "imovel_complemento": "Apto 124",
-    "imovel_bairro": "Vila Mariana",
-    "imovel_cidade": "Sao Paulo",
-    "imovel_estado": "SP"
+    "NUMERO DA MATRICULA": "46.511",
+    "NUMERO DO REGISTRO DE IMOVEIS": "1o OFICIAL DE RI SP",
+    "CIDADE DO REGISTRO DE IMOVEIS": "Sao Paulo",
+    "DENOMINACAO DO IMOVEL": "apartamento",
+    "DESCRICAO CONFORME MATRICULA": "Unidade autonoma no 124...",
+    "LOGRADOURO": "Rua Francisco Cruz",
+    "NUMERO": "515",
+    "COMPLEMENTO": "Apto 124",
+    "BAIRRO": "Vila Mariana",
+    "CIDADE": "Sao Paulo",
+    "ESTADO": "SP"
   },
   "negocio": {
-    "negocio_valor_total": "500000.00",
-    "alienante_nome": "ELIZETE APARECIDA SILVA",
-    "adquirente_nome": "MARINA AYUB",
-    "pagamento_tipo": "A VISTA + FINANCIAMENTO",
-    "pagamento_modo": "TED + CAIXA ECONOMICA FEDERAL"
+    "VALOR TOTAL": "500000.00",
+    "NOME DO ALIENANTE": "ELIZETE APARECIDA SILVA",
+    "NOME DO ADQUIRENTE": "MARINA AYUB",
+    "TIPO DE PAGAMENTO": "A VISTA + FINANCIAMENTO",
+    "MODO DE PAGAMENTO": "TED + CAIXA ECONOMICA FEDERAL"
   }
 }
 ```
@@ -168,10 +168,10 @@ Todos os campos uteis sao usados para gerar a minuta final.
 
 | Campo Util | Tambem Util Em | Finalidade |
 |------------|---------------|------------|
-| matricula_numero | MATRICULA_IMOVEL, ITBI, COMPROMISSO | Identificar imovel |
-| nome, cpf | RG, CNH, CERTIDAO_CASAMENTO, etc. | Identificar pessoa |
-| negocio_valor_total | ITBI, COMPROMISSO | Validar valor |
-| imovel_descricao_conforme_matricula | MATRICULA_IMOVEL | Descricao oficial |
+| NUMERO DA MATRICULA | MATRICULA_IMOVEL, ITBI, COMPROMISSO | Identificar imovel |
+| NOME, CPF | RG, CNH, CERTIDAO_CASAMENTO, etc. | Identificar pessoa |
+| VALOR TOTAL | ITBI, COMPROMISSO | Validar valor |
+| DESCRICAO CONFORME MATRICULA | MATRICULA_IMOVEL | Descricao oficial |
 
 ---
 
@@ -180,8 +180,8 @@ Todos os campos uteis sao usados para gerar a minuta final.
 - `data_nascimento`: Obter de RG, CNH
 - `filiacao_*`: Obter de RG, CERTIDAO_NASCIMENTO
 - `email`, `telefone`: Obter de COMPROMISSO
-- `imovel_sql`: Obter de MATRICULA_IMOVEL, ITBI
-- `imovel_area_*`: Obter de MATRICULA_IMOVEL
+- `SQL`: Obter de MATRICULA_IMOVEL, ITBI
+- `AREA TOTAL EM M2`, `AREA CONSTRUIDA EM M2`: Obter de MATRICULA_IMOVEL
 - `itbi_*`: Obter de ITBI
 - Dados bancarios: Obter de COMPROVANTE_PAGAMENTO
 

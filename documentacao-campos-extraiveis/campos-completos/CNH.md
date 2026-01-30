@@ -118,16 +118,16 @@ Campos booleanos que indicam a presenca de elementos visuais:
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Prioridade |
 |-----------------|---------------|-------------------|------------|
-| nome_completo | nome | SIM | Alta |
-| cpf | cpf | SIM | Alta |
-| rg | rg | SIM | Alta |
-| orgao_rg | orgao_emissor_rg | SIM | Alta |
-| uf_rg | estado_emissor_rg | SIM | Alta |
-| numero_registro | cnh | SIM | Alta |
-| orgao_emissor + uf_emissor | orgao_emissor_cnh | SIM | Alta |
-| data_nascimento | data_nascimento | SIM | Alta |
-| filiacao_pai | filiacao_pai | SIM | Media |
-| filiacao_mae | filiacao_mae | SIM | Media |
+| nome_completo | NOME | SIM | Alta |
+| cpf | CPF | SIM | Alta |
+| rg | RG | SIM | Alta |
+| orgao_rg | ORGAO EMISSOR DO RG | SIM | Alta |
+| uf_rg | ESTADO EMISSOR DO RG | SIM | Alta |
+| numero_registro | CNH | SIM | Alta |
+| orgao_emissor + uf_emissor | ORGAO EMISSOR DA CNH | SIM | Alta |
+| data_nascimento | DATA DE NASCIMENTO | SIM | Alta |
+| filiacao_pai | FILIACAO PAI | SIM | Media |
+| filiacao_mae | FILIACAO MAE | SIM | Media |
 
 **Nota sobre orgao_emissor_cnh**: Este campo e computado concatenando "DETRAN-" + uf_emissor (ex: "DETRAN-SP").
 

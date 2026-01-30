@@ -236,76 +236,76 @@ Lista de intervenientes no negocio (intermediadores, anuentes, etc.).
 
 | Campo no Schema | Campo Mapeado | Descricao | Usado em Minutas? |
 |-----------------|---------------|-----------|-------------------|
-| outorgantes[].nome | nome | Nome completo | SIM |
-| outorgantes[].cpf | cpf | Numero do CPF | SIM |
-| outorgantes[].rg | rg | Numero do RG | SIM |
-| outorgantes[].orgao_rg | orgao_emissor_rg | Orgao emissor | SIM |
-| (extraido do orgao_rg) | estado_emissor_rg | UF do orgao emissor | SIM |
-| outorgantes[].nacionalidade | nacionalidade | Nacionalidade | SIM |
-| outorgantes[].profissao | profissao | Profissao | SIM |
-| outorgantes[].estado_civil | estado_civil | Estado civil | SIM |
-| outorgantes[].regime_bens | regime_bens | Regime de bens | SIM |
-| outorgantes[].endereco | domicilio_logradouro | Logradouro | SIM |
-| outorgantes[].endereco | domicilio_numero | Numero | SIM |
-| outorgantes[].endereco | domicilio_bairro | Bairro | SIM |
-| outorgantes[].endereco | domicilio_cidade | Cidade | SIM |
-| outorgantes[].endereco | domicilio_estado | Estado | SIM |
-| outorgantes[].endereco | domicilio_cep | CEP | SIM |
-| outorgados[].nome | nome | Nome completo | SIM |
-| outorgados[].cpf | cpf | Numero do CPF | SIM |
-| outorgados[].rg | rg | Numero do RG | SIM |
-| outorgados[].orgao_rg | orgao_emissor_rg | Orgao emissor | SIM |
-| outorgados[].nacionalidade | nacionalidade | Nacionalidade | SIM |
-| outorgados[].profissao | profissao | Profissao | SIM |
-| outorgados[].estado_civil | estado_civil | Estado civil | SIM |
-| outorgados[].regime_bens | regime_bens | Regime de bens | SIM |
-| outorgados[].endereco | domicilio_* | Endereco completo | SIM |
+| outorgantes[].nome | NOME | Nome completo | SIM |
+| outorgantes[].cpf | CPF | Numero do CPF | SIM |
+| outorgantes[].rg | RG | Numero do RG | SIM |
+| outorgantes[].orgao_rg | ORGAO EMISSOR DO RG | Orgao emissor | SIM |
+| (extraido do orgao_rg) | ESTADO EMISSOR DO RG | UF do orgao emissor | SIM |
+| outorgantes[].nacionalidade | NACIONALIDADE | Nacionalidade | SIM |
+| outorgantes[].profissao | PROFISSAO | Profissao | SIM |
+| outorgantes[].estado_civil | ESTADO CIVIL | Estado civil | SIM |
+| outorgantes[].regime_bens | REGIME DE BENS | Regime de bens | SIM |
+| outorgantes[].endereco | LOGRADOURO | Logradouro | SIM |
+| outorgantes[].endereco | NUMERO | Numero | SIM |
+| outorgantes[].endereco | BAIRRO | Bairro | SIM |
+| outorgantes[].endereco | CIDADE | Cidade | SIM |
+| outorgantes[].endereco | ESTADO | Estado | SIM |
+| outorgantes[].endereco | CEP | CEP | SIM |
+| outorgados[].nome | NOME | Nome completo | SIM |
+| outorgados[].cpf | CPF | Numero do CPF | SIM |
+| outorgados[].rg | RG | Numero do RG | SIM |
+| outorgados[].orgao_rg | ORGAO EMISSOR DO RG | Orgao emissor | SIM |
+| outorgados[].nacionalidade | NACIONALIDADE | Nacionalidade | SIM |
+| outorgados[].profissao | PROFISSAO | Profissao | SIM |
+| outorgados[].estado_civil | ESTADO CIVIL | Estado civil | SIM |
+| outorgados[].regime_bens | REGIME DE BENS | Regime de bens | SIM |
+| outorgados[].endereco | LOGRADOURO, NUMERO, BAIRRO, CIDADE, ESTADO, CEP | Endereco completo | SIM |
 
 ### 3.2 Campos que Alimentam "Pessoa Juridica"
 
 | Campo no Schema | Campo Mapeado | Descricao | Usado em Minutas? |
 |-----------------|---------------|-----------|-------------------|
-| outorgantes[].nome (se PJ) | pj_denominacao | Razao social | SIM |
-| outorgantes[].cpf (se CNPJ) | pj_cnpj | CNPJ | SIM |
-| outorgantes[].endereco (se PJ) | pj_sede_logradouro | Logradouro da sede | SIM |
-| outorgantes[].endereco (se PJ) | pj_sede_numero | Numero da sede | SIM |
-| outorgantes[].endereco (se PJ) | pj_sede_bairro | Bairro da sede | SIM |
-| outorgantes[].endereco (se PJ) | pj_sede_cidade | Cidade da sede | SIM |
-| outorgantes[].endereco (se PJ) | pj_sede_estado | Estado da sede | SIM |
-| outorgantes[].endereco (se PJ) | pj_sede_cep | CEP da sede | SIM |
-| intervenientes[].nome | pj_denominacao | Denominacao | SIM |
-| intervenientes[].cnpj | pj_cnpj | CNPJ | SIM |
-| (representante PJ) | pj_admin_nome | Nome do administrador | SIM |
-| (representante PJ) | pj_admin_cpf | CPF do administrador | SIM |
+| outorgantes[].nome (se PJ) | DENOMINACAO | Razao social | SIM |
+| outorgantes[].cpf (se CNPJ) | CNPJ | CNPJ | SIM |
+| outorgantes[].endereco (se PJ) | LOGRADOURO DA SEDE | Logradouro da sede | SIM |
+| outorgantes[].endereco (se PJ) | NUMERO DA SEDE | Numero da sede | SIM |
+| outorgantes[].endereco (se PJ) | BAIRRO DA SEDE | Bairro da sede | SIM |
+| outorgantes[].endereco (se PJ) | CIDADE DA SEDE | Cidade da sede | SIM |
+| outorgantes[].endereco (se PJ) | ESTADO DA SEDE | Estado da sede | SIM |
+| outorgantes[].endereco (se PJ) | CEP DA SEDE | CEP da sede | SIM |
+| intervenientes[].nome | DENOMINACAO | Denominacao | SIM |
+| intervenientes[].cnpj | CNPJ | CNPJ | SIM |
+| (representante PJ) | NOME DO ADMINISTRADOR | Nome do administrador | SIM |
+| (representante PJ) | CPF DO ADMINISTRADOR | CPF do administrador | SIM |
 
 ### 3.3 Campos que Alimentam "Dados do Imovel"
 
 | Campo no Schema | Campo Mapeado | Descricao | Usado em Minutas? |
 |-----------------|---------------|-----------|-------------------|
-| imovel.matricula | matricula_numero | Numero da matricula | SIM |
-| imovel.cartorio_ri | matricula_cartorio_numero | Numero do RI | SIM |
-| (extraido de cartorio_ri) | matricula_cartorio_cidade | Cidade do RI | SIM |
-| imovel.tipo | imovel_denominacao | Tipo do imovel | SIM |
-| imovel.descricao | imovel_descricao_conforme_matricula | Descricao completa | SIM |
-| imovel.endereco | imovel_logradouro | Logradouro | SIM |
-| imovel.endereco | imovel_numero | Numero | SIM |
-| imovel.endereco | imovel_complemento | Complemento | SIM |
-| imovel.endereco | imovel_bairro | Bairro | SIM |
-| imovel.endereco | imovel_cidade | Cidade | SIM |
-| imovel.endereco | imovel_estado | Estado | SIM |
-| imovel.sql | imovel_sql | Cadastro municipal | Nao (CND IMOVEL) |
-| imovel.area_total | imovel_area_total | Area total m2 | Nao (MATRICULA) |
-| imovel.area_privativa | imovel_area_privativa | Area privativa m2 | Nao (MATRICULA) |
+| imovel.matricula | NUMERO DA MATRICULA | Numero da matricula | SIM |
+| imovel.cartorio_ri | NUMERO DO REGISTRO DE IMOVEIS | Numero do RI | SIM |
+| (extraido de cartorio_ri) | CIDADE DO REGISTRO DE IMOVEIS | Cidade do RI | SIM |
+| imovel.tipo | DENOMINACAO DO IMOVEL | Tipo do imovel | SIM |
+| imovel.descricao | DESCRICAO CONFORME MATRICULA | Descricao completa | SIM |
+| imovel.endereco | LOGRADOURO | Logradouro | SIM |
+| imovel.endereco | NUMERO | Numero | SIM |
+| imovel.endereco | COMPLEMENTO | Complemento | SIM |
+| imovel.endereco | BAIRRO | Bairro | SIM |
+| imovel.endereco | CIDADE | Cidade | SIM |
+| imovel.endereco | ESTADO | Estado | SIM |
+| imovel.sql | SQL | Cadastro municipal | Nao (CND IMOVEL) |
+| imovel.area_total | AREA TOTAL EM M2 | Area total m2 | Nao (MATRICULA) |
+| imovel.area_privativa | AREA CONSTRUIDA EM M2 | Area privativa m2 | Nao (MATRICULA) |
 
 ### 3.4 Campos que Alimentam "Negocio Juridico"
 
 | Campo no Schema | Campo Mapeado | Descricao | Usado em Minutas? |
 |-----------------|---------------|-----------|-------------------|
-| valor_transacao | negocio_valor_total | Valor total da transacao | SIM |
-| outorgantes[].nome | alienante_nome | Nome do alienante | SIM |
-| outorgados[].nome | adquirente_nome | Nome do adquirente | SIM |
-| forma_pagamento.forma_pagamento | pagamento_tipo | Tipo de pagamento | SIM |
-| forma_pagamento.descricao_detalhada | pagamento_modo | Modo de pagamento | SIM |
+| valor_transacao | VALOR TOTAL | Valor total da transacao | SIM |
+| outorgantes[].nome | NOME DO ALIENANTE | Nome do alienante | SIM |
+| outorgados[].nome | NOME DO ADQUIRENTE | Nome do adquirente | SIM |
+| forma_pagamento.forma_pagamento | TIPO DE PAGAMENTO | Tipo de pagamento | SIM |
+| forma_pagamento.descricao_detalhada | MODO DE PAGAMENTO | Modo de pagamento | SIM |
 | dados_itbi.numero_guia | itbi_numero_guia | Numero da guia ITBI | Nao (ITBI) |
 | dados_itbi.valor | itbi_valor | Valor do ITBI | Nao (ITBI) |
 | dados_itbi.data_pagamento | itbi_data_pagamento | Data do pagamento | Nao (ITBI) |

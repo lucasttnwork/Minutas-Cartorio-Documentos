@@ -132,15 +132,15 @@ Campos booleanos que indicam a presenca de elementos visuais:
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Prioridade |
 |-----------------|---------------|-------------------|------------|
-| nome_titular | nome | NAO (apenas correlacao) | Baixa |
-| cpf_titular | cpf | NAO (apenas correlacao) | Baixa |
-| logradouro | domicilio_logradouro | SIM | Alta |
-| numero | domicilio_numero | SIM | Alta |
-| complemento | domicilio_complemento | SIM | Media |
-| bairro | domicilio_bairro | SIM | Media |
-| cidade | domicilio_cidade | SIM | Alta |
-| estado | domicilio_estado | SIM | Alta |
-| cep | domicilio_cep | SIM | Media |
+| nome_titular | NOME | NAO (apenas correlacao) | Baixa |
+| cpf_titular | CPF | NAO (apenas correlacao) | Baixa |
+| logradouro | LOGRADOURO | SIM | Alta |
+| numero | NUMERO | SIM | Alta |
+| complemento | COMPLEMENTO | SIM | Media |
+| bairro | BAIRRO | SIM | Media |
+| cidade | CIDADE | SIM | Alta |
+| estado | ESTADO | SIM | Alta |
+| cep | CEP | SIM | Media |
 
 **Nota**: O nome e CPF extraidos do comprovante sao usados principalmente para **correlacao** com outros documentos, nao para preencher diretamente a minuta (ja que vem de documentos de identificacao como RG/CNH).
 

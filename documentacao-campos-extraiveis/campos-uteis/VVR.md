@@ -34,12 +34,12 @@ O VVR **NAO** contem dados de pessoas juridicas.
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| matricula_numero | Numero da matricula do imovel | "46.511" | Condicional |
-| imovel_sql | Cadastro municipal (SQL) | "039.080.0244-3" | SIM |
-| imovel_valor_venal_referencia | Valor venal de referencia para ITBI | "485000.00" | SIM |
-| imovel_logradouro | Logradouro do imovel | "Rua Francisco Cruz" | SIM |
-| imovel_numero | Numero do imovel | "515" | SIM |
-| imovel_area_construida | Area construida em m2 | "75.00" | Condicional |
+| NUMERO DA MATRICULA | Numero da matricula do imovel | "46.511" | Condicional |
+| SQL | Cadastro municipal (SQL) | "039.080.0244-3" | SIM |
+| VALOR VENAL DE REFERENCIA | Valor venal de referencia para ITBI | "485000.00" | SIM |
+| LOGRADOURO | Logradouro do imovel | "Rua Francisco Cruz" | SIM |
+| NUMERO | Numero do imovel | "515" | SIM |
+| AREA CONSTRUIDA EM M2 | Area construida em m2 | "75.00" | Condicional |
 
 ### 2.4 Negocio Juridico (0 campos)
 

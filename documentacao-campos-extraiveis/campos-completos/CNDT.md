@@ -78,11 +78,11 @@ A CNDT nao possui estrutura nested complexa. Todos os campos sao de nivel raiz, 
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Prioridade |
 |-----------------|---------------|-------------------|------------|
-| nome_pessoa | nome | SIM | Media |
-| cpf | cpf | SIM | Media |
-| numero_certidao | cndt_numero | SIM | Alta |
-| data_expedicao | cndt_data_expedicao | SIM | Alta |
-| hora_expedicao | cndt_hora_expedicao | SIM | Media |
+| nome_pessoa | NOME | SIM | Media |
+| cpf | CPF | SIM | Media |
+| numero_certidao | NUMERO DA CNDT | SIM | Alta |
+| data_expedicao | DATA DE EXPEDICAO DA CNDT | SIM | Alta |
+| hora_expedicao | HORA DE EXPEDICAO DA CNDT | SIM | Media |
 
 **Observacao**: A CNDT e usada principalmente para validacao (verificar se pessoa esta regular), mas os dados de numero e data/hora sao referenciados na minuta como comprovacao da diligencia realizada.
 
@@ -90,11 +90,11 @@ A CNDT nao possui estrutura nested complexa. Todos os campos sao de nivel raiz, 
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Prioridade |
 |-----------------|---------------|-------------------|------------|
-| nome_pessoa (se PJ) | pj_denominacao | SIM | Media |
-| cnpj | pj_cnpj | SIM | Media |
-| numero_certidao | pj_cndt_numero | SIM | Alta |
-| data_expedicao | pj_cndt_data_expedicao | SIM | Alta |
-| hora_expedicao | pj_cndt_hora_expedicao | SIM | Media |
+| nome_pessoa (se PJ) | DENOMINACAO | SIM | Media |
+| cnpj | CNPJ | SIM | Media |
+| numero_certidao | NUMERO DA CNDT | SIM | Alta |
+| data_expedicao | DATA DE EXPEDICAO DA CNDT | SIM | Alta |
+| hora_expedicao | HORA DE EXPEDICAO DA CNDT | SIM | Media |
 
 **Observacao**: Quando a CNDT e de uma pessoa juridica, os campos sao mapeados para os equivalentes com prefixo `pj_`. A identificacao entre PF e PJ e feita pela presenca do campo `cnpj`.
 

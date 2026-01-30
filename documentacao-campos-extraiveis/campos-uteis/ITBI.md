@@ -20,43 +20,43 @@ O ITBI e a fonte primaria para dados do imposto de transmissao, sendo essencial 
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome do comprador ou vendedor | "JOAO DA SILVA" | SIM |
-| cpf | CPF do comprador ou vendedor | "123.456.789-00" | SIM |
+| NOME | Nome do comprador ou vendedor | "JOAO DA SILVA" | SIM |
+| CPF | CPF do comprador ou vendedor | "123.456.789-00" | SIM |
 
 ### 2.2 Pessoa Juridica (2 campos)
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| pj_denominacao | Razao social | "XYZ LTDA" | SIM (se PJ) |
-| pj_cnpj | CNPJ | "12.345.678/0001-90" | SIM (se PJ) |
+| DENOMINACAO | Razao social | "XYZ LTDA" | SIM (se PJ) |
+| CNPJ | CNPJ | "12.345.678/0001-90" | SIM (se PJ) |
 
 ### 2.3 Dados do Imovel (8 campos)
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| matricula_numero | Numero da matricula | "46.511" | SIM |
-| matricula_cartorio_numero | Cartorio de RI | "1o OFICIAL DE RI" | Condicional |
-| imovel_sql | Cadastro municipal | "039.080.0244-3" | SIM |
-| imovel_logradouro | Logradouro | "Rua Francisco Cruz" | SIM |
-| imovel_numero | Numero | "515" | SIM |
-| imovel_bairro | Bairro | "Vila Mariana" | SIM |
-| imovel_cidade | Cidade | "Sao Paulo" | SIM |
-| imovel_estado | Estado | "SP" | SIM |
+| NUMERO DA MATRICULA | Numero da matricula | "46.511" | SIM |
+| NUMERO DO REGISTRO DE IMOVEIS | Cartorio de RI | "1o OFICIAL DE RI" | Condicional |
+| SQL | Cadastro municipal | "039.080.0244-3" | SIM |
+| LOGRADOURO | Logradouro | "Rua Francisco Cruz" | SIM |
+| NUMERO | Numero | "515" | SIM |
+| BAIRRO | Bairro | "Vila Mariana" | SIM |
+| CIDADE | Cidade | "Sao Paulo" | SIM |
+| ESTADO | Estado | "SP" | SIM |
 
 ### 2.4 Negocio Juridico (10 campos)
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| negocio_valor_total | Valor da transacao | "500000.00" | SIM |
-| alienante_nome | Nome do vendedor | "ELIZETE APARECIDA SILVA" | SIM |
-| adquirente_nome | Nome do comprador | "MARINA AYUB" | SIM |
-| itbi_numero_guia | Numero da guia | "2026.123.456.789" | SIM |
-| itbi_base_calculo | Base de calculo | "500000.00" | SIM |
-| itbi_valor | Valor do imposto | "15000.00" | SIM |
-| itbi_linha_digitavel | Codigo de barras | "12345.67890..." | Condicional |
-| itbi_aliquota | Aliquota (%) | "3.0" | SIM |
-| itbi_proporcao_transmitida | Proporcao transmitida | "100" | SIM |
-| itbi_data_pagamento | Data do pagamento | "25/01/2026" | SIM |
+| VALOR TOTAL | Valor da transacao | "500000.00" | SIM |
+| NOME DO ALIENANTE | Nome do vendedor | "ELIZETE APARECIDA SILVA" | SIM |
+| NOME DO ADQUIRENTE | Nome do comprador | "MARINA AYUB" | SIM |
+| NUMERO DA GUIA | Numero da guia | "2026.123.456.789" | SIM |
+| BASE DE CALCULO | Base de calculo | "500000.00" | SIM |
+| VALOR DO ITBI | Valor do imposto | "15000.00" | SIM |
+| LINHA DIGITAVEL | Codigo de barras | "12345.67890..." | Condicional |
+| ALIQUOTA | Aliquota (%) | "3.0" | SIM |
+| PROPORCAO TRANSMITIDA | Proporcao transmitida | "100" | SIM |
+| DATA DO PAGAMENTO | Data do pagamento | "25/01/2026" | SIM |
 
 ---
 

@@ -51,17 +51,17 @@ O schema `desconhecido.json` e estruturado para coletar informacoes que permitam
 
 Objeto contendo a analise detalhada do documento.
 
-| Subcampo | Tipo | Obrigatorio | Descricao | Exemplo |
+| SUBCAMPO | TIPO | OBRIGATORIO | DESCRICAO | EXEMPLO |
 |----------|------|-------------|-----------|---------|
-| documento_reconhecido | boolean | Sim | Indica se corresponde a tipo existente | false |
-| tipo_identificado | string | Nao | Tipo identificado se conhecido | "CERTIDAO_NASCIMENTO" |
-| tipo_sugerido | string | Sim | Nome sugerido em SNAKE_CASE | "LAUDO_AVALIACAO_IMOVEL" |
-| categoria_recomendada | string | Sim | Uma das 5 categorias do sistema | "DOCUMENTOS_IMOVEL" |
-| confianca_analise | string | Sim | Nivel de confianca (alta/media/baixa) | "media" |
-| justificativa | string | Sim | Explicacao da analise e recomendacao | "..." |
-| orgao_emissor | string | Nao | Nome do orgao emissor identificado | "Prefeitura Municipal" |
-| data_documento | date | Nao | Data do documento (DD/MM/AAAA) | "15/03/2024" |
-| qualidade_imagem | string | Nao | Qualidade da digitalizacao | "media" |
+| DOCUMENTO_RECONHECIDO | BOOLEAN | Sim | Indica se corresponde a tipo existente | false |
+| TIPO_IDENTIFICADO | STRING | Nao | Tipo identificado se conhecido | "CERTIDAO_NASCIMENTO" |
+| TIPO_SUGERIDO | STRING | Sim | Nome sugerido em SNAKE_CASE | "LAUDO_AVALIACAO_IMOVEL" |
+| CATEGORIA_RECOMENDADA | STRING | Sim | Uma das 5 categorias do sistema | "DOCUMENTOS_IMOVEL" |
+| CONFIANCA_ANALISE | STRING | Sim | Nivel de confianca (alta/media/baixa) | "media" |
+| JUSTIFICATIVA | STRING | Sim | Explicacao da analise e recomendacao | "..." |
+| ORGAO_EMISSOR | STRING | Nao | Nome do orgao emissor identificado | "Prefeitura Municipal" |
+| DATA_DOCUMENTO | DATE | Nao | Data do documento (DD/MM/AAAA) | "15/03/2024" |
+| QUALIDADE_IMAGEM | STRING | Nao | Qualidade da digitalizacao | "media" |
 
 **Categorias validas:**
 - DOCUMENTOS_PESSOAIS
@@ -74,12 +74,12 @@ Objeto contendo a analise detalhada do documento.
 
 Caracteristicas que ajudam a identificar o tipo de documento.
 
-| Subcampo | Tipo | Obrigatorio | Descricao | Exemplo |
+| SUBCAMPO | TIPO | OBRIGATORIO | DESCRICAO | EXEMPLO |
 |----------|------|-------------|-----------|---------|
-| palavras_chave | array | Sim | Palavras distintivas encontradas | ["CERTIDAO", "REGISTRO", "IMOVEIS"] |
-| elementos_layout | array | Nao | Elementos de layout caracteristicos | ["cabecalho_brasao", "tabela_valores"] |
-| elementos_visuais | array | Nao | Elementos visuais distintivos | ["brasao_republica", "qr_code"] |
-| padroes_numeracao | array | Nao | Padroes de numeracao encontrados | ["numero_matricula_6_digitos"] |
+| PALAVRAS_CHAVE | ARRAY | Sim | Palavras distintivas encontradas | ["CERTIDAO", "REGISTRO", "IMOVEIS"] |
+| ELEMENTOS_LAYOUT | ARRAY | Nao | Elementos de layout caracteristicos | ["cabecalho_brasao", "tabela_valores"] |
+| ELEMENTOS_VISUAIS | ARRAY | Nao | Elementos visuais distintivos | ["brasao_republica", "qr_code"] |
+| PADROES_NUMERACAO | ARRAY | Nao | Padroes de numeracao encontrados | ["numero_matricula_6_digitos"] |
 
 ### 2.3 campos_recomendados (array) - Obrigatorio
 
@@ -87,25 +87,25 @@ Lista de campos que devem ser extraidos deste tipo de documento.
 
 Cada item do array contem:
 
-| Campo | Tipo | Obrigatorio | Descricao |
+| CAMPO | TIPO | OBRIGATORIO | DESCRICAO |
 |-------|------|-------------|-----------|
-| nome | string | Sim | Nome do campo em snake_case |
-| tipo | string | Sim | Tipo de dado (string, date, number, boolean, array, object) |
-| obrigatorio | boolean | Sim | Se o campo e obrigatorio |
-| regex | string | Nao | Expressao regular para validacao |
-| descricao | string | Sim | Descricao do campo |
-| exemplo | string | Nao | Exemplo de valor |
+| NOME | STRING | Sim | Nome do campo em snake_case |
+| TIPO | STRING | Sim | Tipo de dado (string, date, number, boolean, array, object) |
+| OBRIGATORIO | BOOLEAN | Sim | Se o campo e obrigatorio |
+| REGEX | STRING | Nao | Expressao regular para validacao |
+| DESCRICAO | STRING | Sim | Descricao do campo |
+| EXEMPLO | STRING | Nao | Exemplo de valor |
 
 ### 2.4 padroes_identificacao (object) - Obrigatorio
 
 Padroes para identificacao automatica futura.
 
-| Subcampo | Tipo | Obrigatorio | Descricao |
+| SUBCAMPO | TIPO | OBRIGATORIO | DESCRICAO |
 |----------|------|-------------|-----------|
-| palavras_obrigatorias | array | Nao | Palavras que DEVEM estar presentes |
-| palavras_opcionais | array | Nao | Palavras que ajudam na identificacao |
-| layout_esperado | string | Nao | Descricao do layout esperado |
-| regex_identificacao | array | Nao | Expressoes regulares para identificacao |
+| PALAVRAS_OBRIGATORIAS | ARRAY | Nao | Palavras que DEVEM estar presentes |
+| PALAVRAS_OPCIONAIS | ARRAY | Nao | Palavras que ajudam na identificacao |
+| LAYOUT_ESPERADO | STRING | Nao | Descricao do layout esperado |
+| REGEX_IDENTIFICACAO | ARRAY | Nao | Expressoes regulares para identificacao |
 
 ### 2.5 schema_sugerido (object) - Obrigatorio
 
@@ -133,15 +133,15 @@ Schema JSON completo proposto para este tipo de documento. Formato livre, exempl
 
 Dados que foram possiveis extrair do documento.
 
-| Subcampo | Tipo | Obrigatorio | Descricao |
+| SUBCAMPO | TIPO | OBRIGATORIO | DESCRICAO |
 |----------|------|-------------|-----------|
-| explicacao_contextual | string | Sim | Explicacao detalhada (3-5 paragrafos) |
-| partes | array | Nao | Partes/pessoas envolvidas |
-| valores | object | Nao | Valores monetarios encontrados |
-| datas_importantes | array | Nao | Datas relevantes |
-| numeros_identificadores | array | Nao | Numeros e codigos identificadores |
-| imovel | object | Nao | Dados de imovel se presente |
-| observacoes | string | Nao | Observacoes adicionais |
+| EXPLICACAO_CONTEXTUAL | STRING | Sim | Explicacao detalhada (3-5 paragrafos) |
+| PARTES | ARRAY | Nao | Partes/pessoas envolvidas |
+| VALORES | OBJECT | Nao | Valores monetarios encontrados |
+| DATAS_IMPORTANTES | ARRAY | Nao | Datas relevantes |
+| NUMEROS_IDENTIFICADORES | ARRAY | Nao | Numeros e codigos identificadores |
+| IMOVEL | OBJECT | Nao | Dados de imovel se presente |
+| OBSERVACOES | STRING | Nao | Observacoes adicionais |
 
 ---
 
@@ -196,12 +196,12 @@ Se o documento deve ser incorporado ao sistema:
 
 ### 5.1 Validacoes do Schema
 
-| Validacao | Descricao |
+| VALIDACAO | DESCRICAO |
 |-----------|-----------|
-| tipo_sugerido_snake_case | Tipo sugerido deve estar em SNAKE_CASE |
-| categoria_valida | Categoria deve ser uma das 5 aceitas |
-| campos_recomendados_nao_vazio | Array de campos nao pode ser vazio |
-| schema_sugerido_valido | Schema proposto deve ser JSON valido |
+| TIPO_SUGERIDO_SNAKE_CASE | Tipo sugerido deve estar em SNAKE_CASE |
+| CATEGORIA_VALIDA | Categoria deve ser uma das 5 aceitas |
+| CAMPOS_RECOMENDADOS_NAO_VAZIO | Array de campos nao pode ser vazio |
+| SCHEMA_SUGERIDO_VALIDO | Schema proposto deve ser JSON valido |
 
 ---
 
@@ -286,6 +286,6 @@ Documentos DESCONHECIDO sao isolados do fluxo principal ate que:
 
 ## CHANGELOG
 
-| Data | Versao | Alteracao |
+| DATA | VERSAO | ALTERACAO |
 |------|--------|-----------|
 | 2026-01-30 | 1.0 | Documentacao inicial |

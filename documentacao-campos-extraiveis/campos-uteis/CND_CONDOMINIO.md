@@ -26,7 +26,7 @@ A CND de Condominio possui uma das **menores coberturas de campos uteis** do sis
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome do proprietario | "JOAO DA SILVA" | NAO (validacao apenas) |
+| NOME | Nome do proprietario | "JOAO DA SILVA" | NAO (validacao apenas) |
 
 **Notas:**
 - O nome do proprietario e extraido **apenas para validacao cruzada** com o alienante da transacao
@@ -47,7 +47,7 @@ O CNPJ do condominio ou administradora presente no documento nao e mapeado porqu
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| imovel_complemento | Identificacao da unidade (apto, bloco) | "APARTAMENTO 124, BLOCO B" | NAO (validacao apenas) |
+| COMPLEMENTO | Identificacao da unidade (apto, bloco) | "APARTAMENTO 124, BLOCO B" | NAO (validacao apenas) |
 
 **Notas:**
 - A unidade e mapeada para o complemento do endereco do imovel
@@ -68,8 +68,8 @@ O documento atesta regularidade, nao termos contratuais.
 
 | Campo no Documento | Campo Util Mapeado | Categoria |
 |-------------------|-------------------|-----------|
-| proprietario | nome | pessoa_natural |
-| unidade | imovel_complemento | imovel |
+| proprietario | NOME | pessoa_natural |
+| unidade | COMPLEMENTO | imovel |
 
 ---
 
@@ -78,11 +78,11 @@ O documento atesta regularidade, nao termos contratuais.
 ```json
 {
   "pessoa_natural": {
-    "nome": "JOAO DA SILVA"
+    "NOME": "JOAO DA SILVA"
   },
   "pessoa_juridica": {},
   "imovel": {
-    "imovel_complemento": "APARTAMENTO 124, BLOCO B"
+    "COMPLEMENTO": "APARTAMENTO 124, BLOCO B"
   },
   "negocio": {}
 }
@@ -123,8 +123,8 @@ Embora nao componha diretamente o texto, a CND pode ser mencionada:
 
 | Campo Util | Tambem Util Em | Finalidade |
 |------------|---------------|------------|
-| nome | RG, CNH, CERTIDAO_CASAMENTO, etc. (20+ docs) | Validar alienante |
-| imovel_complemento | IPTU, MATRICULA_IMOVEL, ESCRITURA | Validar unidade |
+| NOME | RG, CNH, CERTIDAO_CASAMENTO, etc. (20+ docs) | Validar alienante |
+| COMPLEMENTO | IPTU, MATRICULA_IMOVEL, ESCRITURA | Validar unidade |
 
 ### 6.1 Hierarquia de Fontes
 
@@ -132,8 +132,8 @@ Para os 2 campos mapeados, a CND de Condominio **nao e fonte primaria**:
 
 | Campo | Fonte Primaria | CND Condominio |
 |-------|----------------|----------------|
-| nome | RG, CNH | Validacao apenas |
-| imovel_complemento | MATRICULA_IMOVEL, IPTU | Validacao apenas |
+| NOME | RG, CNH | Validacao apenas |
+| COMPLEMENTO | MATRICULA_IMOVEL, IPTU | Validacao apenas |
 
 ---
 

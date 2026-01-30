@@ -106,8 +106,8 @@ A CND Municipal nao possui estrutura nested complexa. Todos os campos sao de niv
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Prioridade |
 |-----------------|---------------|-------------------|------------|
-| nome_contribuinte | nome | NAO (apenas validacao) | Baixa |
-| cpf_contribuinte | cpf | NAO (apenas validacao) | Baixa |
+| nome_contribuinte | NOME | NAO (apenas validacao) | Baixa |
+| cpf_contribuinte | CPF | NAO (apenas validacao) | Baixa |
 
 **Observacao**: A CND Municipal e usada principalmente para validacao da regularidade fiscal do imovel. Os dados do contribuinte servem para correlacionar com o proprietario/alienante da transacao, mas nao sao fonte primaria de dados pessoais.
 
@@ -117,8 +117,8 @@ A CND Municipal pode ser emitida para imoveis de pessoas juridicas. Neste caso:
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Prioridade |
 |-----------------|---------------|-------------------|------------|
-| nome_contribuinte (se PJ) | pj_denominacao | NAO (apenas validacao) | Baixa |
-| cpf_contribuinte (se CNPJ) | pj_cnpj | NAO (apenas validacao) | Baixa |
+| nome_contribuinte (se PJ) | DENOMINACAO | NAO (apenas validacao) | Baixa |
+| cpf_contribuinte (se CNPJ) | CNPJ | NAO (apenas validacao) | Baixa |
 
 **Observacao**: A identificacao entre PF e PJ e feita pelo formato do documento (CPF = 11 digitos, CNPJ = 14 digitos).
 
@@ -126,13 +126,13 @@ A CND Municipal pode ser emitida para imoveis de pessoas juridicas. Neste caso:
 
 | Campo no Schema | Campo Mapeado | Descricao Mapeada | Usado em Minutas? |
 |-----------------|---------------|-------------------|-------------------|
-| cadastro_imovel | imovel_sql | Cadastro Municipal (SQL) | SIM |
-| endereco_imovel | imovel_logradouro | Logradouro do imovel | SIM |
-| endereco_imovel | imovel_numero | Numero do imovel | SIM |
-| endereco_imovel | imovel_complemento | Complemento (apto, bloco) | SIM |
-| endereco_imovel | imovel_bairro | Bairro do imovel | SIM |
-| endereco_imovel | imovel_cidade | Cidade do imovel | SIM |
-| endereco_imovel | imovel_estado | Estado do imovel | SIM |
+| cadastro_imovel | SQL | Cadastro Municipal (SQL) | SIM |
+| endereco_imovel | LOGRADOURO | Logradouro do imovel | SIM |
+| endereco_imovel | NUMERO | Numero do imovel | SIM |
+| endereco_imovel | COMPLEMENTO | Complemento (apto, bloco) | SIM |
+| endereco_imovel | BAIRRO | Bairro do imovel | SIM |
+| endereco_imovel | CIDADE | Cidade do imovel | SIM |
+| endereco_imovel | ESTADO | Estado do imovel | SIM |
 | cep_imovel | imovel_cep | CEP do imovel | SIM |
 | numero_certidao | cnd_tributos_municipais | Referencia da CND municipal na minuta | SIM |
 

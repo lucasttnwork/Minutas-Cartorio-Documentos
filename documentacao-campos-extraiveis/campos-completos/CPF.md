@@ -96,9 +96,9 @@ O campo `situacao_cadastral` pode assumir os seguintes valores:
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Prioridade |
 |-----------------|---------------|-------------------|------------|
-| nome_completo | nome | SIM | Media |
-| numero_cpf | cpf | SIM | Alta |
-| data_nascimento | data_nascimento | SIM | Media |
+| nome_completo | NOME | SIM | Media |
+| numero_cpf | CPF | SIM | Alta |
+| data_nascimento | DATA DE NASCIMENTO | SIM | Media |
 
 **Observacoes:**
 - O CPF e a **chave primaria** para identificacao de pessoas naturais no sistema

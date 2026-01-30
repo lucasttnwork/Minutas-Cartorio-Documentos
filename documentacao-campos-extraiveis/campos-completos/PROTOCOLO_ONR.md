@@ -123,8 +123,8 @@ Dados de suporte tecnico:
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Prioridade |
 |-----------------|---------------|-------------------|------------|
-| matricula_imovel | matricula_numero | NAO (apenas referencia) | Baixa |
-| cartorio_destino | cartorio_registro | NAO (apenas referencia) | Baixa |
+| matricula_imovel | NUMERO DA MATRICULA | NAO (apenas referencia) | Baixa |
+| cartorio_destino | NUMERO DO REGISTRO DE IMOVEIS | NAO (apenas referencia) | Baixa |
 
 **Nota importante**: O Protocolo ONR e um documento de **rastreamento e comprovacao**, nao sendo usado diretamente para alimentar dados de minutas. Sua principal utilidade e correlacionar solicitacoes com documentos finais (certidoes) que serao recebidos posteriormente.
 

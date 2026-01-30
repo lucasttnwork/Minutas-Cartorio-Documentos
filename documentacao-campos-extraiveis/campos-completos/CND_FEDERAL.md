@@ -133,13 +133,13 @@ A CND Federal nao possui estrutura nested complexa. Todos os campos sao de nivel
 
 | Campo no Documento | Campo Mapeado | Usado em Minutas? | Prioridade |
 |-------------------|---------------|-------------------|------------|
-| nome_contribuinte | nome | NAO (apenas validacao) | Baixa |
-| cpf | cpf | NAO (apenas validacao) | Baixa |
-| situacao | certidao_uniao_tipo | SIM | Alta |
-| data_emissao | certidao_uniao_data_emissao | SIM | Alta |
-| hora_emissao | certidao_uniao_hora_emissao | SIM | Media |
-| data_validade | certidao_uniao_validade | SIM | Alta |
-| codigo_controle | certidao_uniao_codigo_controle | SIM | Media |
+| nome_contribuinte | NOME | NAO (apenas validacao) | Baixa |
+| cpf | CPF | NAO (apenas validacao) | Baixa |
+| situacao | TIPO | SIM | Alta |
+| data_emissao | DATA DE EMISSAO | SIM | Alta |
+| hora_emissao | HORA DE EMISSAO | SIM | Media |
+| data_validade | VALIDADE | SIM | Alta |
+| codigo_controle | CODIGO DE CONTROLE | SIM | Media |
 
 **Observacao**: A CND Federal e usada principalmente para validacao da regularidade fiscal do alienante. Os dados de identificacao do contribuinte servem para correlacionar com o vendedor da transacao. Os campos de numero, tipo, data e codigo sao referenciados na minuta como comprovacao da diligencia fiscal realizada.
 
@@ -147,13 +147,13 @@ A CND Federal nao possui estrutura nested complexa. Todos os campos sao de nivel
 
 | Campo no Documento | Campo Mapeado | Usado em Minutas? | Prioridade |
 |-------------------|---------------|-------------------|------------|
-| nome_contribuinte (se PJ) | pj_denominacao | NAO (apenas validacao) | Baixa |
-| cnpj | pj_cnpj | NAO (apenas validacao) | Baixa |
-| situacao | pj_certidao_uniao_tipo | SIM | Alta |
-| data_emissao | pj_certidao_uniao_data_emissao | SIM | Alta |
-| hora_emissao | pj_certidao_uniao_hora_emissao | SIM | Media |
-| data_validade | pj_certidao_uniao_validade | SIM | Alta |
-| codigo_controle | pj_certidao_uniao_codigo_controle | SIM | Media |
+| nome_contribuinte (se PJ) | DENOMINACAO | NAO (apenas validacao) | Baixa |
+| cnpj | CNPJ | NAO (apenas validacao) | Baixa |
+| situacao | TIPO | SIM | Alta |
+| data_emissao | DATA DE EMISSAO | SIM | Alta |
+| hora_emissao | HORA DE EMISSAO | SIM | Media |
+| data_validade | VALIDADE | SIM | Alta |
+| codigo_controle | CODIGO DE CONTROLE | SIM | Media |
 
 **Observacao**: Quando a CND Federal e de uma pessoa juridica, os campos sao mapeados para os equivalentes com prefixo `pj_`. A identificacao entre PF e PJ e feita pela presenca do campo `cpf` ou `cnpj`.
 

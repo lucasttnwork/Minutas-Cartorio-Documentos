@@ -24,9 +24,9 @@ O CPF e um documento de **baixa complexidade** de extracao, porem de **alta impo
 
 | Campo Mapeado | Descricao | Exemplo | Obrigatorio? |
 |---------------|-----------|---------|--------------|
-| nome | Nome completo do titular | "JOSE DA SILVA" | SIM |
-| cpf | Numero do CPF | "123.456.789-00" | SIM |
-| data_nascimento | Data de nascimento | "15/03/1980" | Condicional |
+| NOME | Nome completo do titular | "JOSE DA SILVA" | SIM |
+| CPF | Numero do CPF | "123.456.789-00" | SIM |
+| DATA DE NASCIMENTO | Data de nascimento | "15/03/1980" | Condicional |
 
 **Notas:**
 - O campo `nome` e extraido como `nome_completo` no schema original
@@ -68,9 +68,9 @@ O CPF **nao alimenta** campos de:
 ```json
 {
   "pessoa_natural": {
-    "nome": "JOSE DA SILVA",
-    "cpf": "123.456.789-00",
-    "data_nascimento": "15/03/1980"
+    "NOME": "JOSE DA SILVA",
+    "CPF": "123.456.789-00",
+    "DATA DE NASCIMENTO": "15/03/1980"
   },
   "pessoa_juridica": {},
   "imovel": {},
@@ -86,9 +86,9 @@ O CPF **nao alimenta** campos de:
 
 Os campos do CPF sao usados para compor a qualificacao basica das partes:
 
-- `nome` -> Nome completo na qualificacao
-- `cpf` -> CPF na qualificacao (formato: "inscrito no CPF sob o n. XXX.XXX.XXX-XX")
-- `data_nascimento` -> Pode ser usada em qualificacoes completas
+- `NOME` -> Nome completo na qualificacao
+- `CPF` -> CPF na qualificacao (formato: "inscrito no CPF sob o n. XXX.XXX.XXX-XX")
+- `DATA DE NASCIMENTO` -> Pode ser usada em qualificacoes completas
 
 ### 5.2 Exemplo de Uso em Minuta
 
@@ -99,7 +99,7 @@ nascido em 15 de marco de 1980...
 
 ### 5.3 Correlacao como Chave Primaria
 
-O CPF e usado como **identificador unico** para:
+O CPF (`CPF`) e usado como **identificador unico** para:
 - Agrupar documentos de uma mesma pessoa
 - Validar consistencia entre documentos
 - Correlacionar informacoes de diferentes fontes
@@ -110,9 +110,9 @@ O CPF e usado como **identificador unico** para:
 
 | Campo Util | Tambem Util Em | Finalidade |
 |------------|---------------|------------|
-| nome | RG, CNH, CERTIDAO_CASAMENTO, CNDT, CND_FEDERAL, MATRICULA_IMOVEL, ESCRITURA, etc. (20 docs) | Identificar pessoa |
-| cpf | RG, CNH, CERTIDAO_CASAMENTO, CNDT, CND_FEDERAL, MATRICULA_IMOVEL, ITBI, IPTU, etc. (17 docs) | Identificador unico |
-| data_nascimento | RG, CNH, CERTIDAO_NASCIMENTO, CERTIDAO_CASAMENTO, CERTIDAO_OBITO, COMPROMISSO, CONTRATO_SOCIAL (7 docs) | Validar identidade |
+| NOME | RG, CNH, CERTIDAO_CASAMENTO, CNDT, CND_FEDERAL, MATRICULA_IMOVEL, ESCRITURA, etc. (20 docs) | Identificar pessoa |
+| CPF | RG, CNH, CERTIDAO_CASAMENTO, CNDT, CND_FEDERAL, MATRICULA_IMOVEL, ITBI, IPTU, etc. (17 docs) | Identificador unico |
+| DATA DE NASCIMENTO | RG, CNH, CERTIDAO_NASCIMENTO, CERTIDAO_CASAMENTO, CERTIDAO_OBITO, COMPROMISSO, CONTRATO_SOCIAL (7 docs) | Validar identidade |
 
 ### 6.1 Hierarquia de Fontes para os Campos
 
