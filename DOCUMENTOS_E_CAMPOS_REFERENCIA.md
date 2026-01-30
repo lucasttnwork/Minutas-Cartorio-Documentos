@@ -110,6 +110,9 @@ Os campos de dados estao organizados em **4 categorias principais**:
 | ESTADO EMISSOR DO RG | Pessoa Natural | SP |
 | DATA DE EMISSAO DO RG | Pessoa Natural | 15/03/2010 |
 | DATA DE NASCIMENTO | Pessoa Natural | 22/07/1985 |
+| NATURALIDADE | Pessoa Natural | SAO PAULO/SP |
+| FILIACAO PAI | Pessoa Natural | JOSE DA SILVA |
+| FILIACAO MAE | Pessoa Natural | MARIA DA SILVA |
 
 ---
 
@@ -127,6 +130,12 @@ Os campos de dados estao organizados em **4 categorias principais**:
 - Data de validade e 1a habilitacao
 - QR Code no verso para validacao
 
+**Observacao sobre Redundancia Intencional:**
+A CNH contem o RG fisicamente integrado. Embora esses campos tambem sejam extraidos do documento RG separado, **extraimos redundantemente da CNH** para:
+- Permitir correlacao entre documentos CNH e RG
+- Validar consistencia dos dados entre documentos
+- Preencher lacunas quando o documento RG nao estiver disponivel
+
 **Campos Extraiveis:**
 
 | Campo | Categoria | Exemplo (baseado em documento real) |
@@ -137,6 +146,8 @@ Os campos de dados estao organizados em **4 categorias principais**:
 | ORGAO EMISSOR DO RG | Pessoa Natural | SSP |
 | ESTADO EMISSOR DO RG | Pessoa Natural | SP |
 | DATA DE NASCIMENTO | Pessoa Natural | 21/09/1984 |
+| FILIACAO PAI | Pessoa Natural | JOSE CARLOS DA SILVA |
+| FILIACAO MAE | Pessoa Natural | MARIA FAEDO |
 | CNH (No REGISTRO) | Pessoa Natural | 03547235790 |
 | ORGAO EMISSOR DA CNH | Pessoa Natural | DETRAN-SP |
 
@@ -145,6 +156,7 @@ Os campos de dados estao organizados em **4 categorias principais**:
 - O numero de registro da CNH (No REGISTRO) e diferente do numero do RG
 - A CNH pode substituir o RG como documento de identificacao em escrituras
 - Campos como CATEGORIA, VALIDADE e 1a HABILITACAO nao fazem parte do mapeamento de campos uteis para minutas
+- **RG, Orgao Emissor e Estado Emissor sao extraidos redundantemente para correlacao com outros documentos**
 
 **Nao Confundir Com:** RG (formato diferente, nao tem categoria de habilitacao)
 
@@ -160,12 +172,19 @@ Os campos de dados estao organizados em **4 categorias principais**:
 |-------|-----------|---------|
 | NOME | Pessoa Natural | MARIA DA SILVA SANTOS |
 | CPF | Pessoa Natural | 123.456.789-00 |
+| RG | Pessoa Natural | 12.345.678-9 |
+| ORGAO EMISSOR DO RG | Pessoa Natural | SSP |
+| ESTADO EMISSOR DO RG | Pessoa Natural | SP |
 | DATA DE NASCIMENTO | Pessoa Natural | 22/07/1985 |
 | ESTADO CIVIL | Pessoa Natural | CASADA |
 | REGIME DE BENS | Pessoa Natural | COMUNHAO PARCIAL DE BENS |
 | DATA DO CASAMENTO | Pessoa Natural | 20/11/2010 |
+| FILIACAO PAI | Pessoa Natural | JOSE CARLOS SILVA |
+| FILIACAO MAE | Pessoa Natural | MARIA APARECIDA SILVA |
 | NACIONALIDADE | Pessoa Natural | BRASILEIRA |
 | CONJUGE (para negocio) | Negocio Juridico | CARLOS ALBERTO SANTOS |
+
+**Observacao:** Certidoes de casamento modernas incluem o RG dos conjuges para identificacao completa.
 
 **Regimes de Bens Validos:**
 - COMUNHAO PARCIAL DE BENS
@@ -185,6 +204,7 @@ Os campos de dados estao organizados em **4 categorias principais**:
 | Campo | Categoria | Exemplo |
 |-------|-----------|---------|
 | NOME | Pessoa Natural | PEDRO HENRIQUE OLIVEIRA |
+| CPF | Pessoa Natural | 123.456.789-00 |
 | LOGRADOURO | Pessoa Natural | RUA DAS FLORES |
 | NUMERO | Pessoa Natural | 1250 |
 | COMPLEMENTO | Pessoa Natural | APTO 101 BLOCO B |
@@ -192,6 +212,8 @@ Os campos de dados estao organizados em **4 categorias principais**:
 | CIDADE | Pessoa Natural | SAO PAULO |
 | ESTADO | Pessoa Natural | SP |
 | CEP | Pessoa Natural | 01310-100 |
+
+**Observacao:** O CPF e essencial para correlacao inequivoca do comprovante com a pessoa.
 
 ---
 
@@ -229,9 +251,11 @@ Os campos de dados estao organizados em **4 categorias principais**:
 
 | Campo | Categoria | Exemplo |
 |-------|-----------|---------|
+| **DADOS DA EMPRESA** | | |
 | DENOMINACAO | Pessoa Juridica | CONSTRUTORA ALPHA LTDA |
 | CNPJ | Pessoa Juridica | 12.345.678/0001-90 |
 | NIRE | Pessoa Juridica | 35.215.678.901 |
+| **ENDERECO DA SEDE** | | |
 | LOGRADOURO (Sede) | Pessoa Juridica | AVENIDA PAULISTA |
 | NUMERO (Sede) | Pessoa Juridica | 1000 |
 | COMPLEMENTO (Sede) | Pessoa Juridica | CONJUNTO 1501 |
@@ -239,15 +263,39 @@ Os campos de dados estao organizados em **4 categorias principais**:
 | CIDADE (Sede) | Pessoa Juridica | SAO PAULO |
 | ESTADO (Sede) | Pessoa Juridica | SP |
 | CEP (Sede) | Pessoa Juridica | 01310-100 |
+| **REGISTRO NA JUNTA COMERCIAL** | | |
 | INSTRUMENTO CONSTITUTIVO | Pessoa Juridica | CONTRATO SOCIAL E SUAS ALTERACOES |
 | JUNTA COMERCIAL | Pessoa Juridica | JUCESP |
-| NUMERO DO REGISTRO | Pessoa Juridica | 123.456.789.012 |
-| DATA DA SESSAO | Pessoa Juridica | 15/03/2020 |
+| NUMERO DO REGISTRO DO CONTRATO SOCIAL | Pessoa Juridica | 123.456.789.012 |
+| DATA DA SESSAO DO REGISTRO | Pessoa Juridica | 15/03/2020 |
+| DATA DE EXPEDICAO DA FICHA CADASTRAL | Pessoa Juridica | 20/03/2020 |
+| DATA DE EXPEDICAO DA CERTIDAO DE REGISTRO | Pessoa Juridica | 20/03/2020 |
+| **DADOS DO ADMINISTRADOR** | | |
 | NOME DO ADMINISTRADOR | Pessoa Juridica | JOAO CARLOS MENDES |
 | CPF DO ADMINISTRADOR | Pessoa Juridica | 987.654.321-00 |
+| RG DO ADMINISTRADOR | Pessoa Juridica | 45.678.901-2 |
+| ORGAO EMISSOR DO RG DO ADMINISTRADOR | Pessoa Juridica | SSP |
+| ESTADO EMISSOR DO RG DO ADMINISTRADOR | Pessoa Juridica | SP |
+| DATA DE EMISSAO DO RG DO ADMINISTRADOR | Pessoa Juridica | 10/05/2005 |
+| DATA DE NASCIMENTO DO ADMINISTRADOR | Pessoa Juridica | 15/08/1975 |
+| ESTADO CIVIL DO ADMINISTRADOR | Pessoa Juridica | CASADO |
+| PROFISSAO DO ADMINISTRADOR | Pessoa Juridica | ENGENHEIRO CIVIL |
+| NACIONALIDADE DO ADMINISTRADOR | Pessoa Juridica | BRASILEIRO |
+| LOGRADOURO DO ADMINISTRADOR | Pessoa Juridica | RUA DAS ACACIAS |
+| NUMERO DO ADMINISTRADOR | Pessoa Juridica | 250 |
+| COMPLEMENTO DO ADMINISTRADOR | Pessoa Juridica | APTO 802 |
+| BAIRRO DO ADMINISTRADOR | Pessoa Juridica | VILA MARIANA |
+| CIDADE DO ADMINISTRADOR | Pessoa Juridica | SAO PAULO |
+| ESTADO DO ADMINISTRADOR | Pessoa Juridica | SP |
+| CEP DO ADMINISTRADOR | Pessoa Juridica | 04101-050 |
+| E-MAIL DO ADMINISTRADOR | Pessoa Juridica | joao.mendes@construtoraalpha.com.br |
+| TELEFONE DO ADMINISTRADOR | Pessoa Juridica | +55 (11) 98765-4321 |
+| **REPRESENTACAO** | | |
 | TIPO DE REPRESENTACAO | Pessoa Juridica | ADMINISTRADOR INDICADO NO CONTRATO SOCIAL |
-| CLAUSULA DO ADMINISTRADOR | Pessoa Juridica | CLAUSULA DECIMA SEGUNDA |
-| CLAUSULA DOS PODERES | Pessoa Juridica | CLAUSULA DECIMA TERCEIRA |
+| CLAUSULA QUE INDICA O ADMINISTRADOR | Pessoa Juridica | CLAUSULA DECIMA SEGUNDA |
+| DATA DA ATA QUE INDICA O ADMINISTRADOR | Pessoa Juridica | 10/06/2022 |
+| NUMERO DE REGISTRO DA ATA | Pessoa Juridica | 987.654.321.098 |
+| CLAUSULA SOBRE PODERES DO ADMINISTRADOR | Pessoa Juridica | CLAUSULA DECIMA TERCEIRA |
 
 ---
 
@@ -259,29 +307,51 @@ Os campos de dados estao organizados em **4 categorias principais**:
 
 | Campo | Categoria | Exemplo |
 |-------|-----------|---------|
+| **DADOS DO PROPRIETARIO (Pessoa Natural)** |
+| NOME | Pessoa Natural | MARIA DA SILVA SANTOS |
+| CPF | Pessoa Natural | 123.456.789-00 |
+| ESTADO CIVIL | Pessoa Natural | CASADA |
+| PROFISSAO | Pessoa Natural | ENGENHEIRA CIVIL |
+| NACIONALIDADE | Pessoa Natural | BRASILEIRA |
+| **DADOS DO PROPRIETARIO (Pessoa Juridica)** |
+| DENOMINACAO | Pessoa Juridica | CONSTRUTORA ALPHA LTDA |
+| CNPJ | Pessoa Juridica | 12.345.678/0001-90 |
+| **DADOS DA MATRICULA E DO IMOVEL** |
 | NUMERO DA MATRICULA | Dados do Imovel | 123.456 |
 | NUMERO DO REGISTRO DE IMOVEIS | Dados do Imovel | 1o |
 | CIDADE DO REGISTRO DE IMOVEIS | Dados do Imovel | SAO PAULO |
 | ESTADO DO REGISTRO DE IMOVEIS | Dados do Imovel | SP |
-| DENOMINACAO | Dados do Imovel | APARTAMENTO |
+| NUMERO NACIONAL DA MATRICULA | Dados do Imovel | 123456789012345678 |
+| DENOMINACAO DO IMOVEL | Dados do Imovel | APARTAMENTO |
 | AREA TOTAL EM M2 | Dados do Imovel | 85,50 |
 | AREA PRIVATIVA EM M2 | Dados do Imovel | 62,30 |
+| AREA CONSTRUIDA EM M2 | Dados do Imovel | 65,00 |
 | LOGRADOURO | Dados do Imovel | RUA AUGUSTA |
 | NUMERO | Dados do Imovel | 2000 |
 | COMPLEMENTO | Dados do Imovel | APARTAMENTO 101, BLOCO A |
 | BAIRRO | Dados do Imovel | CERQUEIRA CESAR |
 | CIDADE | Dados do Imovel | SAO PAULO |
 | ESTADO | Dados do Imovel | SP |
+| CEP | Dados do Imovel | 01310-100 |
 | DESCRICAO CONFORME MATRICULA | Dados do Imovel | APARTAMENTO No 101, LOCALIZADO NO 1o ANDAR... |
+| NUMERO DA CERTIDAO DA MATRICULA | Dados do Imovel | 2026/123456 |
+| DATA DA CERTIDAO DA MATRICULA | Dados do Imovel | 28/01/2026 |
+| **PROPRIETARIOS (Array)** |
 | NOME DO PROPRIETARIO | Dados do Imovel | MARIA DA SILVA SANTOS |
-| FRACAO IDEAL | Dados do Imovel | 50% |
+| FRACAO IDEAL DO PROPRIETARIO | Dados do Imovel | 50% |
 | REGISTRO DE AQUISICAO | Dados do Imovel | R.4 |
 | DATA DO REGISTRO | Dados do Imovel | 15/06/2018 |
 | TITULO DE AQUISICAO | Dados do Imovel | COMPRA E VENDA |
+| **ONUS REGISTRADOS (Array)** |
 | TITULO DO ONUS | Dados do Imovel | ALIENACAO FIDUCIARIA |
 | REGISTRO DO ONUS | Dados do Imovel | R.5 |
+| DATA DO REGISTRO DO ONUS | Dados do Imovel | 20/06/2018 |
 | DESCRICAO DO ONUS | Dados do Imovel | ALIENACAO FIDUCIARIA EM GARANTIA... |
+| NOME DO TITULAR DO ONUS | Dados do Imovel | BANCO DO BRASIL S.A. |
+| FRACAO DO TITULAR DO ONUS | Dados do Imovel | 100% |
+| **RESSALVAS** |
 | EXISTENCIA DE RESSALVA | Dados do Imovel | NAO |
+| DESCRICAO DA RESSALVA | Dados do Imovel | - |
 
 ---
 
@@ -370,6 +440,8 @@ Este documento e o mais completo em termos de campos extraiveis, cobrindo dados 
 |-------|-----------|---------|
 | NOME (Transmitente) | Pessoa Natural | MARIA DA SILVA SANTOS |
 | CPF (Transmitente) | Pessoa Natural | 123.456.789-00 |
+| NUMERO DA MATRICULA | Dados do Imovel | 123.456 |
+| NUMERO DO REGISTRO DE IMOVEIS | Dados do Imovel | 1o |
 | SQL | Dados do Imovel | 031.045.0123-4 |
 | LOGRADOURO | Dados do Imovel | RUA AUGUSTA |
 | NUMERO | Dados do Imovel | 2000 |
@@ -377,7 +449,13 @@ Este documento e o mais completo em termos de campos extraiveis, cobrindo dados 
 | NOME (Adquirente) | Negocio Juridico | PEDRO HENRIQUE OLIVEIRA |
 | NUMERO DA GUIA | Negocio Juridico | ITBI-2026-789012 |
 | BASE DE CALCULO | Negocio Juridico | R$ 600.000,00 |
+| ALIQUOTA (%) | Negocio Juridico | 3,00% |
 | VALOR DO ITBI | Negocio Juridico | R$ 18.000,00 |
+| LINHA DIGITAVEL | Negocio Juridico | 23456.78901 23456.789012 34567.890123 4 12345678901234 |
+| PROPORCAO TRANSMITIDA | Negocio Juridico | 100% (fracao ideal transmitida) |
+| DATA DO PAGAMENTO | Negocio Juridico | 25/01/2026 |
+
+**Observacao:** ITBI SEMPRE referencia a matricula do imovel. Essencial para correlacao ITBI ↔ Matricula ↔ Escritura.
 
 ---
 
@@ -390,7 +468,10 @@ Este documento e o mais completo em termos de campos extraiveis, cobrindo dados 
 | Campo | Categoria | Exemplo |
 |-------|-----------|---------|
 | NOME (Pagador) | Pessoa Natural | PEDRO HENRIQUE OLIVEIRA |
+| CPF (Pagador) | Pessoa Natural | 123.456.789-00 |
 | DENOMINACAO (Pagador PJ) | Pessoa Juridica | INVESTIMENTOS BETA LTDA |
+| CNPJ (Pagador PJ) | Pessoa Juridica | 12.345.678/0001-90 |
+| VALOR TOTAL | Negocio Juridico | R$ 250.000,00 |
 | TIPO DE PAGAMENTO | Negocio Juridico | A VISTA |
 | MODO DE PAGAMENTO | Negocio Juridico | TRANSFERENCIA BANCARIA |
 | DATA DO PAGAMENTO | Negocio Juridico | 28/01/2026 |
@@ -400,6 +481,8 @@ Este documento e o mais completo em termos de campos extraiveis, cobrindo dados 
 | BANCO (Destino) | Negocio Juridico | ITAU |
 | AGENCIA (Destino) | Negocio Juridico | 0987 |
 | CONTA (Destino) | Negocio Juridico | 98765-4 |
+
+**Observacao:** CPF/CNPJ e valor sao essenciais para identificacao das partes e rastreamento do pagamento.
 
 ---
 
@@ -411,24 +494,19 @@ Este documento e o mais completo em termos de campos extraiveis, cobrindo dados 
 
 | Campo | Categoria | Exemplo |
 |-------|-----------|---------|
-| MATRICULA | Pessoa Natural | 123456.01.55.2020.1.12345.123.1234567-89 |
-| LIVRO | Pessoa Natural | A-123 |
-| FOLHA | Pessoa Natural | 45v |
-| TERMO | Pessoa Natural | 12345 |
-| NOME REGISTRADO | Pessoa Natural | PEDRO HENRIQUE SILVA |
+| NOME | Pessoa Natural | PEDRO HENRIQUE SILVA |
+| CPF | Pessoa Natural | 123.456.789-00 (em certidoes modernas, pós-2010) |
 | DATA DE NASCIMENTO | Pessoa Natural | 15/03/1995 |
-| HORA DE NASCIMENTO | Pessoa Natural | 14:30 |
-| SEXO | Pessoa Natural | MASCULINO |
-| LOCAL DE NASCIMENTO | Pessoa Natural | SAO PAULO/SP |
-| NOME DO PAI | Pessoa Natural | JOSE CARLOS SILVA |
-| NOME DA MAE | Pessoa Natural | MARIA APARECIDA SILVA |
-| AVO PATERNO | Pessoa Natural | ANTONIO SILVA |
-| AVOA PATERNA | Pessoa Natural | JOANA SILVA |
-| AVO MATERNO | Pessoa Natural | JOAQUIM SANTOS |
-| AVOA MATERNA | Pessoa Natural | ROSA SANTOS |
-| CARTORIO | Pessoa Natural | 1o CARTORIO DE REGISTRO CIVIL DE SAO PAULO |
-| MUNICIPIO DO CARTORIO | Pessoa Natural | SAO PAULO |
-| DATA DO REGISTRO | Pessoa Natural | 20/03/1995 |
+| NATURALIDADE | Pessoa Natural | SAO PAULO/SP |
+| FILIACAO PAI | Pessoa Natural | JOSE CARLOS SILVA |
+| FILIACAO MAE | Pessoa Natural | MARIA APARECIDA SILVA |
+| MATRICULA (Nacional) | Pessoa Natural | 123456 78901 55 2010 1 12345 123 1234567 12 |
+| LIVRO | Pessoa Natural | B |
+| FOLHA | Pessoa Natural | 123 |
+| TERMO | Pessoa Natural | 1234 |
+| CARTORIO | Pessoa Natural | 1o Registro Civil de Pessoas Naturais de Sao Paulo |
+
+**Observacao:** Certidoes modernas (a partir de 2010) incluem CPF e matrícula nacional para rastreabilidade e correlacao.
 
 ---
 
@@ -462,11 +540,14 @@ Este documento e o mais completo em termos de campos extraiveis, cobrindo dados 
 
 | Campo | Categoria | Exemplo |
 |-------|-----------|---------|
-| CADASTRO DO IMOVEL (SQL) | Dados do Imovel | 000.000.0000-0 |
+| NUMERO DA MATRICULA | Dados do Imovel | 123.456 (quando referenciado) |
+| CADASTRO DO IMOVEL (SQL) | Dados do Imovel | 031.045.0123-4 |
 | VALOR VENAL DE REFERENCIA | Dados do Imovel | R$ 450.000,00 |
-| ENDERECO COMPLETO | Dados do Imovel | RUA DAS FLORES, 123 - APTO 101 |
-| DATA DA CONSULTA | Dados do Imovel | 27/01/2026 |
-| ANO DE REFERENCIA | Dados do Imovel | 2026 |
+| LOGRADOURO | Dados do Imovel | RUA DAS FLORES |
+| NUMERO | Dados do Imovel | 123 |
+| AREA CONSTRUIDA EM M2 | Dados do Imovel | 85,50 |
+
+**Observacao:** VVR pode referenciar matricula em alguns municipios. Permite correlacao alternativa VVR ↔ Matricula.
 
 ---
 
@@ -478,6 +559,7 @@ Este documento e o mais completo em termos de campos extraiveis, cobrindo dados 
 
 | Campo | Categoria | Exemplo |
 |-------|-----------|---------|
+| NUMERO DA MATRICULA | Dados do Imovel | 123.456 (quando referenciado) |
 | CADASTRO DO IMOVEL (SQL) | Dados do Imovel | 031.045.0123-4 |
 | ANO DO EXERCICIO | Dados do Imovel | 2026 |
 | **ENDERECO DO IMOVEL** | | |
@@ -508,15 +590,8 @@ Este documento e o mais completo em termos de campos extraiveis, cobrindo dados 
 
 | Campo | Categoria | Exemplo |
 |-------|-----------|---------|
-| NUMERO DO PROTOCOLO | Documentos Administrativos | ONR-2026-123456 |
-| DATA DO PROTOCOLO | Documentos Administrativos | 27/01/2026 |
-| HORA DO PROTOCOLO | Documentos Administrativos | 14:30:45 |
-| TIPO DE SOLICITACAO | Documentos Administrativos | CERTIDAO DE INTEIRO TEOR |
-| CARTORIO DE DESTINO | Documentos Administrativos | 1o OFICIAL DE REGISTRO DE IMOVEIS DE SAO PAULO |
-| MATRICULA DO IMOVEL | Dados do Imovel | 123456 |
-| STATUS DA SOLICITACAO | Documentos Administrativos | CONCLUIDO |
-| SOLICITANTE | Pessoa Natural | Nome: JOAO DA SILVA, CPF: 123.456.789-00 |
-| CODIGO DE VERIFICACAO | Documentos Administrativos | ABC123DEF456 |
+| NUMERO DA MATRICULA | Dados do Imovel | 123456 |
+| NUMERO DO REGISTRO DE IMOVEIS | Dados do Imovel | 1o |
 
 ---
 
@@ -528,14 +603,7 @@ Este documento e o mais completo em termos de campos extraiveis, cobrindo dados 
 
 | Campo | Categoria | Exemplo |
 |-------|-----------|---------|
-| PLATAFORMA | Documentos Administrativos | DOCUSIGN |
-| ENVELOPE ID | Documentos Administrativos | ABC12345-DEF6-7890-GHIJ-KLMNOPQRSTUV |
-| NOME DO DOCUMENTO | Documentos Administrativos | Compromisso_Compra_Venda.pdf |
-| SIGNATARIOS | Pessoa Natural | Lista com nome, email, CPF, status, data/hora/IP de assinatura e certificado de cada signatario |
-| DATA DE ENVIO | Documentos Administrativos | 25/01/2026 |
-| DATA DE CONCLUSAO | Documentos Administrativos | 27/01/2026 |
-| STATUS DO ENVELOPE | Documentos Administrativos | CONCLUIDO |
-| HASH DO DOCUMENTO | Documentos Administrativos | a1b2c3d4e5f6g7h8i9j0... |
+| NOME | Pessoa Natural | JOAO DA SILVA |
 
 ---
 

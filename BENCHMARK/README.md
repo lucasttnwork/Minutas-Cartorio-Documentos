@@ -19,6 +19,28 @@ Arquivos **originais** das escrituras finalizadas em formato PDF. Sao os documen
 ### `Escrituras-Finais-Padrao-Minuta/`
 **Versao no padrao de minuta**. Reescrita da escritura original seguindo exatamente o padrao definido nos arquivos da pasta `Minutas-Padrao/` na raiz do projeto. Esta e a versao que deve ser comparada diretamente com o output do pipeline.
 
+### `Escrituras-Finais-Leigo/`
+**Versao para publico leigo**. Traducao da escritura em linguagem acessivel, sem juridiques. Cada documento inclui:
+- Resumo "Em Uma Frase" da transacao
+- Explicacao detalhada de quem vendeu, quem comprou e o que foi vendido
+- Valores e formas de pagamento em tabelas claras
+- Glossario de termos tecnicos
+- Orientacoes sobre proximos passos
+Ideal para comunicacao com clientes nao-tecnicos e material educacional sobre escrituras.
+
+### `Escrituras-Finais-Mapeamento-Campos/`
+**Auditoria de completude de campos**. Mapeamento estruturado de TODOS os campos possiveis em uma escritura, organizado por categorias:
+- Pessoas Naturais: dados individuais, familiares, domicilio, contatos, certidoes (109 campos)
+- Imoveis: matricula, descricao, cadastro, valores, certidoes, onus (76 campos)
+- Negocio Juridico: valores, alienantes, adquirentes, pagamento, declaracoes, ITBI (52+ campos)
+
+Cada campo e marcado com status:
+- ✅ Presente - Campo foi preenchido na escritura
+- ❌ Nao informado - Campo nao consta no documento
+- ⚪ N/A - Campo nao se aplica ao caso especifico
+
+Inclui estatisticas de completude por categoria. Serve como **ground truth** para validacao do pipeline de extracao e identificacao de gaps nos prompts.
+
 ---
 
 ## Proposito

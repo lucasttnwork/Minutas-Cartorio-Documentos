@@ -1,9 +1,10 @@
 {
   "metadata": {
-    "version": "1.0",
-    "date": "2026-01-28",
+    "version": "1.1",
+    "date": "2026-01-30",
     "total_document_types": 26,
-    "total_fields": 191
+    "total_fields": 205,
+    "changes": "Adicao de campos para maximizar correlacao entre documentos (redundancia intencional)"
   },
   "field_definitions": {
     "pessoa_natural": {
@@ -48,7 +49,12 @@
       "certidao_uniao_data_emissao": "Data de emissao da certidao da Uniao",
       "certidao_uniao_hora_emissao": "Hora de emissao da certidao da Uniao",
       "certidao_uniao_validade": "Data de validade da certidao",
-      "certidao_uniao_codigo_controle": "Codigo de controle da certidao"
+      "certidao_uniao_codigo_controle": "Codigo de controle da certidao",
+      "certidao_nascimento_matricula": "Matricula nacional da certidao de nascimento",
+      "certidao_nascimento_livro": "Livro do registro de nascimento",
+      "certidao_nascimento_folha": "Folha do registro de nascimento",
+      "certidao_nascimento_termo": "Termo do registro de nascimento",
+      "certidao_nascimento_cartorio": "Nome do cartorio de registro"
     },
     "pessoa_juridica": {
       "pj_denominacao": "Razao social ou denominacao",
@@ -203,7 +209,11 @@
       "instrucoes_extras": "Instrucoes extras para a minuta",
       "itbi_numero_guia": "Numero da guia de ITBI",
       "itbi_base_calculo": "Base de calculo do ITBI",
-      "itbi_valor": "Valor do ITBI"
+      "itbi_valor": "Valor do ITBI",
+      "itbi_linha_digitavel": "Linha digitavel do boleto de ITBI",
+      "itbi_aliquota": "Aliquota do ITBI (percentual)",
+      "itbi_proporcao_transmitida": "Proporcao transmitida (fracao ideal)",
+      "itbi_data_pagamento": "Data de pagamento do ITBI"
     }
   },
   "document_field_mapping": {
@@ -228,9 +238,14 @@
       "pessoa_natural": [
         "nome",
         "cpf",
+        "rg",
+        "orgao_emissor_rg",
+        "estado_emissor_rg",
         "cnh",
         "orgao_emissor_cnh",
-        "data_nascimento"
+        "data_nascimento",
+        "filiacao_pai",
+        "filiacao_mae"
       ],
       "pessoa_juridica": [],
       "imovel": [],
@@ -249,10 +264,16 @@
     "CERTIDAO_NASCIMENTO": {
       "pessoa_natural": [
         "nome",
+        "cpf",
         "data_nascimento",
         "naturalidade",
         "filiacao_pai",
-        "filiacao_mae"
+        "filiacao_mae",
+        "certidao_nascimento_matricula",
+        "certidao_nascimento_livro",
+        "certidao_nascimento_folha",
+        "certidao_nascimento_termo",
+        "certidao_nascimento_cartorio"
       ],
       "pessoa_juridica": [],
       "imovel": [],
@@ -262,6 +283,9 @@
       "pessoa_natural": [
         "nome",
         "cpf",
+        "rg",
+        "orgao_emissor_rg",
+        "estado_emissor_rg",
         "data_nascimento",
         "estado_civil",
         "regime_bens",
@@ -279,6 +303,9 @@
     "CERTIDAO_OBITO": {
       "pessoa_natural": [
         "nome",
+        "cpf",
+        "rg",
+        "data_nascimento",
         "data_obito",
         "estado_civil",
         "data_falecimento_conjuge"
@@ -290,6 +317,7 @@
     "COMPROVANTE_RESIDENCIA": {
       "pessoa_natural": [
         "nome",
+        "cpf",
         "domicilio_logradouro",
         "domicilio_numero",
         "domicilio_complemento",
@@ -447,6 +475,9 @@
       "pessoa_natural": [
         "nome",
         "cpf",
+        "rg",
+        "orgao_emissor_rg",
+        "estado_emissor_rg",
         "estado_civil",
         "profissao",
         "nacionalidade"
@@ -462,6 +493,7 @@
         "matricula_cartorio_estado",
         "matricula_numero_nacional",
         "imovel_denominacao",
+        "imovel_sql",
         "imovel_area_total",
         "imovel_area_privativa",
         "imovel_area_construida",
@@ -501,6 +533,8 @@
         "pj_cnpj"
       ],
       "imovel": [
+        "matricula_numero",
+        "matricula_cartorio_numero",
         "imovel_sql",
         "imovel_logradouro",
         "imovel_numero",
@@ -514,13 +548,18 @@
         "adquirente_nome",
         "itbi_numero_guia",
         "itbi_base_calculo",
-        "itbi_valor"
+        "itbi_valor",
+        "itbi_linha_digitavel",
+        "itbi_aliquota",
+        "itbi_proporcao_transmitida",
+        "itbi_data_pagamento"
       ]
     },
     "VVR": {
       "pessoa_natural": [],
       "pessoa_juridica": [],
       "imovel": [
+        "matricula_numero",
         "imovel_sql",
         "imovel_valor_venal_referencia",
         "imovel_logradouro",
@@ -536,6 +575,7 @@
       ],
       "pessoa_juridica": [],
       "imovel": [
+        "matricula_numero",
         "imovel_sql",
         "imovel_valor_venal_iptu",
         "imovel_logradouro",
@@ -553,6 +593,7 @@
       "pessoa_natural": [],
       "pessoa_juridica": [],
       "imovel": [
+        "matricula_numero",
         "imovel_sql",
         "imovel_logradouro",
         "imovel_numero",
@@ -727,13 +768,16 @@
     },
     "COMPROVANTE_PAGAMENTO": {
       "pessoa_natural": [
-        "nome"
+        "nome",
+        "cpf"
       ],
       "pessoa_juridica": [
-        "pj_denominacao"
+        "pj_denominacao",
+        "pj_cnpj"
       ],
       "imovel": [],
       "negocio": [
+        "negocio_valor_total",
         "pagamento_tipo",
         "pagamento_modo",
         "pagamento_data",
@@ -771,12 +815,12 @@
   },
   "coverage_report": {
     "totals_by_category": {
-      "pessoa_natural": 42,
+      "pessoa_natural": 47,
       "pessoa_juridica": 76,
-      "imovel": 40,
-      "negocio": 33
+      "imovel": 44,
+      "negocio": 37
     },
-    "total_fields": 191,
+    "total_fields": 204,
     "total_documents": 26,
     "document_coverage": {
       "RG": {
@@ -787,11 +831,11 @@
         "total": 10
       },
       "CNH": {
-        "pessoa_natural": 5,
+        "pessoa_natural": 10,
         "pessoa_juridica": 0,
         "imovel": 0,
         "negocio": 0,
-        "total": 5
+        "total": 10
       },
       "CPF": {
         "pessoa_natural": 3,
@@ -801,32 +845,32 @@
         "total": 3
       },
       "CERTIDAO_NASCIMENTO": {
-        "pessoa_natural": 5,
+        "pessoa_natural": 11,
         "pessoa_juridica": 0,
         "imovel": 0,
         "negocio": 0,
-        "total": 5
+        "total": 11
       },
       "CERTIDAO_CASAMENTO": {
-        "pessoa_natural": 9,
+        "pessoa_natural": 12,
         "pessoa_juridica": 0,
         "imovel": 0,
         "negocio": 1,
-        "total": 10
+        "total": 13
       },
       "CERTIDAO_OBITO": {
-        "pessoa_natural": 4,
+        "pessoa_natural": 7,
         "pessoa_juridica": 0,
         "imovel": 0,
         "negocio": 0,
-        "total": 4
+        "total": 7
       },
       "COMPROVANTE_RESIDENCIA": {
-        "pessoa_natural": 8,
+        "pessoa_natural": 9,
         "pessoa_juridica": 0,
         "imovel": 0,
         "negocio": 0,
-        "total": 8
+        "total": 9
       },
       "CNDT": {
         "pessoa_natural": 5,
@@ -878,39 +922,39 @@
         "total": 32
       },
       "MATRICULA_IMOVEL": {
-        "pessoa_natural": 5,
+        "pessoa_natural": 8,
         "pessoa_juridica": 2,
-        "imovel": 32,
+        "imovel": 33,
         "negocio": 0,
-        "total": 39
+        "total": 43
       },
       "ITBI": {
         "pessoa_natural": 2,
         "pessoa_juridica": 2,
-        "imovel": 6,
-        "negocio": 6,
-        "total": 16
+        "imovel": 8,
+        "negocio": 10,
+        "total": 22
       },
       "VVR": {
         "pessoa_natural": 0,
         "pessoa_juridica": 0,
-        "imovel": 5,
+        "imovel": 6,
         "negocio": 0,
-        "total": 5
+        "total": 6
       },
       "IPTU": {
         "pessoa_natural": 2,
         "pessoa_juridica": 0,
-        "imovel": 10,
+        "imovel": 11,
         "negocio": 0,
-        "total": 12
+        "total": 13
       },
       "DADOS_CADASTRAIS": {
         "pessoa_natural": 0,
         "pessoa_juridica": 0,
-        "imovel": 12,
+        "imovel": 13,
         "negocio": 0,
-        "total": 12
+        "total": 13
       },
       "ESCRITURA": {
         "pessoa_natural": 15,
@@ -934,11 +978,11 @@
         "total": 35
       },
       "COMPROVANTE_PAGAMENTO": {
-        "pessoa_natural": 1,
-        "pessoa_juridica": 1,
+        "pessoa_natural": 2,
+        "pessoa_juridica": 2,
         "imovel": 0,
-        "negocio": 9,
-        "total": 11
+        "negocio": 10,
+        "total": 14
       },
       "PROTOCOLO_ONR": {
         "pessoa_natural": 0,
@@ -1112,7 +1156,7 @@
       ],
       [
         "cpf",
-        14
+        17
       ],
       [
         "pj_denominacao",
@@ -1120,7 +1164,7 @@
       ],
       [
         "pj_cnpj",
-        10
+        11
       ],
       [
         "imovel_logradouro",
@@ -1128,6 +1172,10 @@
       ],
       [
         "imovel_numero",
+        9
+      ],
+      [
+        "matricula_numero",
         9
       ],
       [
@@ -1143,8 +1191,16 @@
         8
       ],
       [
+        "rg",
+        8
+      ],
+      [
+        "imovel_sql",
+        7
+      ],
+      [
         "data_nascimento",
-        6
+        7
       ]
     ]
   }
