@@ -143,18 +143,18 @@ Detalhes do pacto antenupcial quando existente:
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Prioridade |
 |-----------------|---------------|-------------------|------------|
-| nome_conjuge_1 / nome_conjuge_2 | nome | SIM | Alta |
-| cpf_conjuge_1 / cpf_conjuge_2 | cpf | SIM | Alta |
-| (rg se presente) | rg | SIM | Media |
-| (orgao se presente) | orgao_emissor_rg | SIM | Media |
-| (uf se presente) | estado_emissor_rg | SIM | Media |
-| data_nascimento_conjuge_1/2 | data_nascimento | SIM | Media |
-| Inferido das averbacoes | estado_civil | SIM | Alta |
-| regime_bens | regime_bens | SIM | Alta |
-| data_casamento | data_casamento | SIM | Alta |
-| pai_conjuge_1/2 | filiacao_pai | SIM | Media |
-| mae_conjuge_1/2 | filiacao_mae | SIM | Media |
-| Inferido da naturalidade | nacionalidade | SIM | Media |
+| nome_conjuge_1 / nome_conjuge_2 | NOME | SIM | Alta |
+| cpf_conjuge_1 / cpf_conjuge_2 | CPF | SIM | Alta |
+| (rg se presente) | RG | SIM | Media |
+| (orgao se presente) | ORGAO EMISSOR DO RG | SIM | Media |
+| (uf se presente) | ESTADO EMISSOR DO RG | SIM | Media |
+| data_nascimento_conjuge_1/2 | DATA DE NASCIMENTO | SIM | Media |
+| Inferido das averbacoes | ESTADO CIVIL | SIM | Alta |
+| regime_bens | REGIME DE BENS | SIM | Alta |
+| data_casamento | DATA DO CASAMENTO | SIM | Alta |
+| pai_conjuge_1/2 | FILIACAO PAI | SIM | Media |
+| mae_conjuge_1/2 | FILIACAO MAE | SIM | Media |
+| Inferido da naturalidade | NACIONALIDADE | SIM | Media |
 
 **Nota importante**: Cada certidao de casamento alimenta dados de **duas pessoas** (conjuge 1 e conjuge 2), que serao correlacionadas com outros documentos pelo CPF ou nome.
 
@@ -170,7 +170,7 @@ A Certidao de Casamento **nao alimenta** campos de Imovel.
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Observacao |
 |-----------------|---------------|-------------------|------------|
-| nome_conjuge_1 ou nome_conjuge_2 | alienante_conjuge | SIM | Usado quando o alienante e casado |
+| nome_conjuge_1 ou nome_conjuge_2 | CONJUGE | SIM | Usado quando o alienante e casado |
 
 **Nota critica**: O nome do conjuge do alienante e extraido para que o conjuge compareca na escritura quando necessario. Nos regimes de **comunhao parcial** ou **comunhao universal de bens**, o conjuge DEVE anuir na venda de imovel adquirido na constancia do casamento.
 
@@ -466,7 +466,7 @@ A Certidao de Casamento e a **UNICA fonte confiavel** e autoritativa para:
 |-----------|-------|-----------------|
 | Se ha averbacao de DIVORCIO | estado_civil deve ser "divorciado" | Corrigir estado_civil |
 | Se ha averbacao de SEPARACAO (sem divorcio) | estado_civil deve ser "separado judicialmente" | Corrigir estado_civil |
-| Se ha averbacao de OBITO | estado_civil do sobrevivente e "viuvo/a" | Marcar data_falecimento_conjuge |
+| Se ha averbacao de OBITO | estado_civil do sobrevivente e "viuvo/a" | Marcar DATA DE FALECIMENTO DO CONJUGE |
 | Se regime e SEPARACAO OBRIGATORIA | Verificar idade dos conjuges ou outras causas | Alertar para verificacao |
 | Se pacto_antenupcial = true | Regime deve ser diferente do legal | Validar consistencia |
 

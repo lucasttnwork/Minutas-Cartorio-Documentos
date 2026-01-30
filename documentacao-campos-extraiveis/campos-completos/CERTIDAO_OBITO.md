@@ -159,14 +159,14 @@ A matricula nacional e **unica em todo o territorio brasileiro**.
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Prioridade |
 |-----------------|---------------|-------------------|------------|
-| nome_falecido | nome | SIM | Alta |
-| cpf_falecido | cpf | SIM | Alta |
-| rg_falecido | rg | SIM | Media |
-| data_nascimento | data_nascimento | SIM | Media |
-| data_obito | data_obito | SIM | Alta |
-| estado_civil | estado_civil | SIM | Media |
-| filiacao_pai | filiacao_pai | SIM | Media |
-| filiacao_mae | filiacao_mae | SIM | Media |
+| nome_falecido | NOME | SIM | Alta |
+| cpf_falecido | CPF | SIM | Alta |
+| rg_falecido | RG | SIM | Media |
+| data_nascimento | DATA DE NASCIMENTO | SIM | Media |
+| data_obito | DATA DO OBITO | SIM | Alta |
+| estado_civil | ESTADO CIVIL | SIM | Media |
+| filiacao_pai | FILIACAO PAI | SIM | Media |
+| filiacao_mae | FILIACAO MAE | SIM | Media |
 
 **Nota especial**: O campo `data_obito` e usado para:
 1. Determinar que a pessoa esta falecida

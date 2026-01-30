@@ -154,17 +154,17 @@ Os campos de avos estao presentes principalmente em certidoes de **inteiro teor*
 
 | Campo no Schema | Campo Mapeado | Usado em Minutas? | Prioridade |
 |-----------------|---------------|-------------------|------------|
-| nome_registrado | nome | SIM | Alta |
-| data_nascimento | data_nascimento | SIM | Alta |
-| local_nascimento | naturalidade | SIM | Media |
-| sexo | sexo | NAO (apenas referencia) | Baixa |
-| nome_pai | filiacao_pai | SIM | Media |
-| nome_mae | filiacao_mae | SIM | Media |
+| nome_registrado | NOME | SIM | Alta |
+| data_nascimento | DATA DE NASCIMENTO | SIM | Alta |
+| local_nascimento | NATURALIDADE | SIM | Media |
+| sexo | SEXO | NAO (apenas referencia) | Baixa |
+| nome_pai | FILIACAO PAI | SIM | Media |
+| nome_mae | FILIACAO MAE | SIM | Media |
 | avo_paterno | avo_paterno | NAO (dados genealogicos) | Baixa |
 | avo_paterna | avo_paterna | NAO (dados genealogicos) | Baixa |
 | avo_materno | avo_materno | NAO (dados genealogicos) | Baixa |
 | avo_materna | avo_materna | NAO (dados genealogicos) | Baixa |
-| Inferido do local | nacionalidade | SIM | Media |
+| Inferido do local | NACIONALIDADE | SIM | Media |
 
 **Nota**: Os campos de avos, embora extraidos, nao sao tipicamente usados em minutas cartoriais, mas sao importantes para correlacao genealogica e validacao de identidade em processos sucessorios.
 
