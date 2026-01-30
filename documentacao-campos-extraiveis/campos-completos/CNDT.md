@@ -51,18 +51,20 @@ A CNDT possui formato padronizado nacionalmente, sendo emitida exclusivamente pe
 |-------|------|-----------|---------|-------|-----------|
 | numero_certidao | string | Numero da certidao (20+ digitos) | "12345678901234567890" | `\d{20,}` | Alta |
 | nome_pessoa | string | Nome da pessoa ou razao social | "JOAO DA SILVA" | `[A-Z...][A-Z...a-z...\s]+` | Alta |
-| cpf | string | CPF do titular | "123.456.789-00" | `\d{3}\.\d{3}\.\d{3}-\d{2}` | Alta |
 | data_expedicao | date | Data de emissao da certidao | "27/01/2026" | `\d{2}/\d{2}/\d{4}` | Alta |
 | data_validade | date | Data de validade (180 dias) | "26/07/2026" | `\d{2}/\d{2}/\d{4}` | Alta |
 | status_certidao | string | Resultado da certidao | "NADA CONSTA" | `(NADA CONSTA\|POSITIVA\|NEGATIVA)` | Alta |
 
-### 2.2 Campos Raiz (Opcionais)
+### 2.2 Campos Raiz (Condicionais)
 
 | Campo | Tipo | Descricao | Exemplo | Quando Presente | Confianca |
 |-------|------|-----------|---------|-----------------|-----------|
+| cpf | string | CPF do titular | "123.456.789-00" | Apenas para Pessoa Fisica | Alta |
 | cnpj | string | CNPJ se pessoa juridica | "12.345.678/0001-90" | Apenas para Pessoa Juridica | Alta |
 | hora_expedicao | string | Hora de emissao da certidao | "10:30:45" | Sempre presente | Alta |
 | orgao_emissor | string | Orgao emissor | "TRIBUNAL SUPERIOR DO TRABALHO" | Sempre presente (implicito) | Alta |
+
+**Nota**: CPF e CNPJ sao mutuamente exclusivos - Pessoa Fisica possui CPF, Pessoa Juridica possui CNPJ.
 
 ### 2.3 Objetos Nested
 

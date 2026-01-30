@@ -4,32 +4,35 @@ Esta pasta contem escrituras de compra e venda organizadas em diferentes formato
 
 ## Estrutura de Subpastas
 
-### `Escrituras-Finais-PDF/`
-Arquivos **originais** das escrituras finalizadas em formato PDF. Sao os documentos de origem, exatamente como foram emitidos pelo cartorio.
+A numeracao indica o fluxo de progressao do processamento das escrituras:
 
-### `Escrituras-Finais-Reescrita-Simplificada/`
-**Transcricao simplificada** da escritura original. Utiliza um padrao de escrita menos rigido, priorizando a **facil compreensao** e organizacao intuitiva dos dados. Ideal para leitura rapida e entendimento geral.
+### `01-Originais/`
+Arquivos **originais** das escrituras finalizadas em formato PDF. Sao os documentos de origem, exatamente como foram emitidos pelo cartorio. **Fonte primaria** de todos os demais processamentos.
 
-### `Escrituras-Finais-Analise/`
+### `02-Narrativa/`
+**Transcricao em texto fluido**. Utiliza um padrao de escrita narrativo, priorizando a **facil compreensao** e organizacao intuitiva dos dados. Ideal para leitura rapida e entendimento geral do conteudo da escritura.
+
+### `03-Estruturada/`
 **Versao analitica** da escritura com dados organizados de forma parametrizada. Inclui:
 - Explicacao geral dos pontos principais
 - Dados estruturados e categorizados
-- Organizacao mais formal que a reescrita simplificada
+- Organizacao mais formal e sistematica
 
-### `Escrituras-Finais-Padrao-Minuta/`
-**Versao no padrao de minuta**. Reescrita da escritura original seguindo exatamente o padrao definido nos arquivos da pasta `Minutas-Padrao/` na raiz do projeto. Esta e a versao que deve ser comparada diretamente com o output do pipeline.
+### `04-Minuta-Padrao/`
+**Versao no padrao de minuta**. Reescrita da escritura original seguindo exatamente o padrao definido nos arquivos da pasta `Minutas-Padrao/` na raiz do projeto. Esta e a versao que deve ser comparada diretamente com o output do pipeline. **Ground truth principal**.
 
-### `Escrituras-Finais-Leigo/`
-**Versao para publico leigo**. Traducao da escritura em linguagem acessivel, sem juridiques. Cada documento inclui:
+### `05-Guia-Explicativo/`
+**Versao educacional e acessivel**. Traducao da escritura em linguagem simples, sem juridiques. Cada documento inclui:
 - Resumo "Em Uma Frase" da transacao
 - Explicacao detalhada de quem vendeu, quem comprou e o que foi vendido
 - Valores e formas de pagamento em tabelas claras
 - Glossario de termos tecnicos
 - Orientacoes sobre proximos passos
-Ideal para comunicacao com clientes nao-tecnicos e material educacional sobre escrituras.
 
-### `Escrituras-Finais-Mapeamento-Campos/`
-**Auditoria de completude de campos**. Mapeamento estruturado de TODOS os campos possiveis em uma escritura, organizado por categorias:
+Ideal para comunicacao com clientes e material educacional sobre escrituras.
+
+### `06-Inventario-Campos/`
+**Auditoria tecnica de completude**. Mapeamento estruturado de TODOS os campos possiveis em uma escritura, organizado por categorias:
 - Pessoas Naturais: dados individuais, familiares, domicilio, contatos, certidoes (109 campos)
 - Imoveis: matricula, descricao, cadastro, valores, certidoes, onus (76 campos)
 - Negocio Juridico: valores, alienantes, adquirentes, pagamento, declaracoes, ITBI (52+ campos)
@@ -56,9 +59,23 @@ Os arquivos desta pasta servem como **ground truth** (verdade de referencia) par
 
 ## Como Usar para Benchmark
 
-1. Processar os documentos originais (`Escrituras-Finais-PDF/`) pelo pipeline completo
-2. Comparar o output gerado em `output-final-minuta/` com a versao correspondente em `Escrituras-Finais-Padrao-Minuta/`
-3. Documentar diferencas e ajustar o pipeline conforme necessario
+1. Processar os documentos originais (`01-Originais/`) pelo pipeline completo
+2. Comparar o output gerado em `output-final-minuta/` com a versao correspondente em `04-Minuta-Padrao/`
+3. Para auditoria de completude, verificar se todos os campos presentes em `06-Inventario-Campos/` foram extraidos
+4. Documentar diferencas e ajustar o pipeline conforme necessario
+
+### Fluxo de Validacao Recomendado
+
+```
+01-Originais (PDF)
+    ↓
+[Pipeline de Extracao]
+    ↓
+output-final-minuta/
+    ↓
+Comparar com → 04-Minuta-Padrao/ (estrutura e conteudo)
+Comparar com → 06-Inventario-Campos/ (completude de campos)
+```
 
 ---
 
