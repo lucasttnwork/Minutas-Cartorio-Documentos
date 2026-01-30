@@ -1,7 +1,8 @@
 # Referencia de Documentos e Campos Extraiveis
 
-**Versao:** 2.0
-**Data:** 2026-01-28
+**Versao:** 2.1
+**Data:** 2026-01-29
+**Ultima Atualizacao:** Limpeza das secoes 3.11-3.16 alinhada aos schemas JSON oficiais
 **Fonte da Verdade:** `Guia-de-campos-e-variaveis/*.md`
 
 Este documento descreve os **26 tipos de documentos** reconhecidos pelo sistema e os **campos de dados** que podem ser extraidos de cada um deles. O objetivo e permitir uma visualizacao clara de:
@@ -46,7 +47,7 @@ Os campos de dados estao organizados em **4 categorias principais**:
 | `RG` | Carteira de Identidade | Nome, CPF, RG, Orgao Emissor, Data Nascimento |
 | `CNH` | Carteira Nacional de Habilitacao | Nome, CPF, RG (integrado), CNH, Data Nascimento |
 | `CPF` | Cadastro de Pessoa Fisica | Nome, CPF, Data Nascimento |
-| `CERTIDAO_NASCIMENTO` | Certidao de Nascimento | Nome, Data Nascimento |
+| `CERTIDAO_NASCIMENTO` | Certidao de Nascimento | Nome, Data/Hora Nascimento, Filiacao, Avos, Cartorio, Matricula |
 | `CERTIDAO_CASAMENTO` | Certidao de Casamento | Nome, Estado Civil, Regime de Bens, Data Casamento |
 | `CERTIDAO_OBITO` | Certidao de Obito | Nome, Data Obito, Estado Civil |
 | `COMPROVANTE_RESIDENCIA` | Comprovante de Endereco | Nome, Endereco Completo |
@@ -58,7 +59,7 @@ Os campos de dados estao organizados em **4 categorias principais**:
 | `CNDT` | Certidao Negativa de Debitos Trabalhistas | Nome/Razao Social, CPF/CNPJ, Numero, Data/Hora Expedicao |
 | `CND_FEDERAL` | Certidao de Regularidade Fiscal Federal | Nome/Razao Social, CPF/CNPJ, Tipo, Validade, Codigo Controle |
 | `CND_ESTADUAL` | Certidao Negativa Estadual | Nome/Razao Social, CPF/CNPJ |
-| `CND_MUNICIPAL` | Certidao Negativa Municipal | Nome/Razao Social, CPF/CNPJ, SQL, Endereco Imovel |
+| `CND_MUNICIPAL` | Certidao Negativa Municipal | Contribuinte, CPF/CNPJ, SQL, Endereco, Status, Tributos Cobertos, Validade |
 | `CND_IMOVEL` | Certidao Negativa do Imovel | SQL, Matricula, Endereco |
 | `CND_CONDOMINIO` | Certidao de Quitacao Condominial | Nome, Unidade |
 | `CONTRATO_SOCIAL` | Contrato Social da Empresa | Razao Social, CNPJ, NIRE, Sede, Administrador |
@@ -69,8 +70,8 @@ Os campos de dados estao organizados em **4 categorias principais**:
 |--------|------|-------------------|
 | `MATRICULA_IMOVEL` | Matricula do Imovel | Numero Matricula, Cartorio, Descricao, Proprietarios, Onus |
 | `ITBI` | Guia de ITBI | Transmitente, Adquirente, Valor, Base Calculo |
-| `VVR` | Valor Venal de Referencia | SQL, Valor Venal, Endereco |
-| `IPTU` | Carne/Certidao de IPTU | SQL, Valor Venal, Areas, Endereco |
+| `VVR` | Valor Venal de Referencia | SQL, Valor Venal de Referencia, Endereco, Data/Hora Consulta |
+| `IPTU` | Carne/Certidao de IPTU | SQL, Contribuinte, Areas (Terreno/Construcao), Valores m2, Valor Venal, Ano Exercicio |
 | `DADOS_CADASTRAIS` | Ficha Cadastral da Prefeitura | SQL, Endereco, Areas, Denominacao |
 | `ESCRITURA` | Escritura Publica | Partes, Imovel, Valor, Forma Pagamento |
 
@@ -86,8 +87,8 @@ Os campos de dados estao organizados em **4 categorias principais**:
 
 | Codigo | Nome | Campos Principais |
 |--------|------|-------------------|
-| `PROTOCOLO_ONR` | Protocolo do ONR | Numero Matricula, Cartorio |
-| `ASSINATURA_DIGITAL` | Certificado de Assinatura | Nome do Signatario |
+| `PROTOCOLO_ONR` | Protocolo do ONR | Numero Protocolo, Tipo Solicitacao, Status, Data/Hora, Sistema |
+| `ASSINATURA_DIGITAL` | Certificado de Assinatura | Plataforma, Envelope ID, Titulo Documento, Partes, Testemunhas, Datas, Imovel |
 | `OUTRO` | Documento Nao Classificado | - |
 
 ---
@@ -288,53 +289,74 @@ Os campos de dados estao organizados em **4 categorias principais**:
 
 **Descricao:** Contrato particular que formaliza a intencao de compra e venda de imovel.
 
-**Campos Extraiveis (Resumo):**
+**Campos Extraiveis:**
 
-Este documento e o mais completo em termos de campos extraiveis, cobrindo:
+Este documento e o mais completo em termos de campos extraiveis, cobrindo dados das partes (alienantes e adquirentes), do imovel e do negocio juridico.
 
-- **Pessoa Natural (19 campos):** Dados completos de identificacao, estado civil, domicilio e contatos das partes
-- **Pessoa Juridica (9 campos):** Dados de empresas envolvidas na transacao
-- **Dados do Imovel (12 campos):** Identificacao completa do imovel objeto da transacao
-- **Negocio Juridico (13 campos):** Valores, fracoes, forma de pagamento e termos especiais
-
-**Exemplo de Extracao Completa:**
-
-```
-VENDEDOR (Alienante):
-- Nome: MARIA DA SILVA SANTOS
-- CPF: 123.456.789-00
-- RG: 12.345.678-9 (SSP/SP)
-- Nacionalidade: BRASILEIRA
-- Profissao: ENGENHEIRA CIVIL
-- Estado Civil: CASADA
-- Regime de Bens: COMUNHAO PARCIAL DE BENS
-- Endereco: RUA DAS FLORES, 1250, APTO 101, JARDIM PAULISTA, SAO PAULO/SP, CEP 01310-100
-- E-mail: maria.santos@email.com
-- Telefone: +55 (11) 99876-5432
-- Fracao Ideal: 50%
-- Valor da Alienacao: R$ 300.000,00
-- Conjuge: CARLOS ALBERTO SANTOS
-
-COMPRADOR (Adquirente):
-- Nome: PEDRO HENRIQUE OLIVEIRA
-- (demais dados...)
-- Fracao Ideal: 100%
-- Valor da Aquisicao: R$ 600.000,00
-
-IMOVEL:
-- Matricula: 123.456 - 1o RI de SAO PAULO/SP
-- Denominacao: APARTAMENTO
-- Endereco: RUA AUGUSTA, 2000, APTO 101 BLOCO A, CERQUEIRA CESAR, SAO PAULO/SP
-- Area Total: 85,50 m2
-- Area Privativa: 62,30 m2
-
-NEGOCIO:
-- Valor Total: R$ 600.000,00
-- Forma de Pagamento: A VISTA
-- Modo de Pagamento: TRANSFERENCIA BANCARIA
-- Data do Pagamento: 28/01/2026
-- Termos da Promessa: CONFORME CLAUSULA QUINTA...
-```
+| Campo | Categoria | Exemplo |
+|-------|-----------|---------|
+| **DADOS DO ALIENANTE (VENDEDOR)** |
+| NOME | Pessoa Natural | MARIA DA SILVA SANTOS |
+| CPF | Pessoa Natural | 123.456.789-00 |
+| RG | Pessoa Natural | 12.345.678-9 |
+| ORGAO EMISSOR DO RG | Pessoa Natural | SSP |
+| ESTADO EMISSOR DO RG | Pessoa Natural | SP |
+| NACIONALIDADE | Pessoa Natural | BRASILEIRA |
+| PROFISSAO | Pessoa Natural | ENGENHEIRA CIVIL |
+| ESTADO CIVIL | Pessoa Natural | CASADA |
+| REGIME DE BENS | Pessoa Natural | COMUNHAO PARCIAL DE BENS |
+| LOGRADOURO | Pessoa Natural | RUA DAS FLORES |
+| NUMERO | Pessoa Natural | 1250 |
+| COMPLEMENTO | Pessoa Natural | APTO 101 |
+| BAIRRO | Pessoa Natural | JARDIM PAULISTA |
+| CIDADE | Pessoa Natural | SAO PAULO |
+| ESTADO | Pessoa Natural | SP |
+| CEP | Pessoa Natural | 01310-100 |
+| E-MAIL | Pessoa Natural | maria.santos@email.com |
+| TELEFONE | Pessoa Natural | +55 (11) 99876-5432 |
+| CONJUGE | Negocio Juridico | CARLOS ALBERTO SANTOS |
+| FRACAO IDEAL (Alienante) | Negocio Juridico | 50% |
+| VALOR DA ALIENACAO | Negocio Juridico | R$ 300.000,00 |
+| **DADOS DO ADQUIRENTE (COMPRADOR)** |
+| NOME | Pessoa Natural | PEDRO HENRIQUE OLIVEIRA |
+| CPF | Pessoa Natural | 987.654.321-00 |
+| RG | Pessoa Natural | 98.765.432-1 |
+| ORGAO EMISSOR DO RG | Pessoa Natural | SSP |
+| ESTADO EMISSOR DO RG | Pessoa Natural | SP |
+| NACIONALIDADE | Pessoa Natural | BRASILEIRA |
+| PROFISSAO | Pessoa Natural | EMPRESARIO |
+| ESTADO CIVIL | Pessoa Natural | SOLTEIRO |
+| LOGRADOURO | Pessoa Natural | AVENIDA PAULISTA |
+| NUMERO | Pessoa Natural | 500 |
+| COMPLEMENTO | Pessoa Natural | CONJUNTO 802 |
+| BAIRRO | Pessoa Natural | BELA VISTA |
+| CIDADE | Pessoa Natural | SAO PAULO |
+| ESTADO | Pessoa Natural | SP |
+| CEP | Pessoa Natural | 01310-200 |
+| E-MAIL | Pessoa Natural | pedro.oliveira@email.com |
+| TELEFONE | Pessoa Natural | +55 (11) 98765-4321 |
+| FRACAO IDEAL (Adquirente) | Negocio Juridico | 100% |
+| VALOR DA AQUISICAO | Negocio Juridico | R$ 600.000,00 |
+| **DADOS DO IMOVEL** |
+| NUMERO DA MATRICULA | Dados do Imovel | 123.456 |
+| NUMERO DO REGISTRO DE IMOVEIS | Dados do Imovel | 1o |
+| CIDADE DO REGISTRO DE IMOVEIS | Dados do Imovel | SAO PAULO |
+| ESTADO DO REGISTRO DE IMOVEIS | Dados do Imovel | SP |
+| DENOMINACAO | Dados do Imovel | APARTAMENTO |
+| LOGRADOURO | Dados do Imovel | RUA AUGUSTA |
+| NUMERO | Dados do Imovel | 2000 |
+| COMPLEMENTO | Dados do Imovel | APTO 101 BLOCO A |
+| BAIRRO | Dados do Imovel | CERQUEIRA CESAR |
+| CIDADE | Dados do Imovel | SAO PAULO |
+| ESTADO | Dados do Imovel | SP |
+| AREA TOTAL EM M2 | Dados do Imovel | 85,50 |
+| AREA PRIVATIVA EM M2 | Dados do Imovel | 62,30 |
+| **DADOS DO NEGOCIO JURIDICO** |
+| VALOR TOTAL | Negocio Juridico | R$ 600.000,00 |
+| FORMA DE PAGAMENTO | Negocio Juridico | A VISTA |
+| MODO DE PAGAMENTO | Negocio Juridico | TRANSFERENCIA BANCARIA |
+| DATA DO PAGAMENTO | Negocio Juridico | 28/01/2026 |
+| TERMOS DA PROMESSA | Negocio Juridico | CONFORME CLAUSULA QUINTA... |
 
 ---
 
@@ -378,6 +400,142 @@ NEGOCIO:
 | BANCO (Destino) | Negocio Juridico | ITAU |
 | AGENCIA (Destino) | Negocio Juridico | 0987 |
 | CONTA (Destino) | Negocio Juridico | 98765-4 |
+
+---
+
+### 3.11 CERTIDAO_NASCIMENTO - Certidao de Nascimento
+
+**Descricao:** Certidao de Registro Civil de Nascimento que comprova a filiacao, data e local de nascimento.
+
+**Campos Extraiveis:**
+
+| Campo | Categoria | Exemplo |
+|-------|-----------|---------|
+| MATRICULA | Pessoa Natural | 123456.01.55.2020.1.12345.123.1234567-89 |
+| LIVRO | Pessoa Natural | A-123 |
+| FOLHA | Pessoa Natural | 45v |
+| TERMO | Pessoa Natural | 12345 |
+| NOME REGISTRADO | Pessoa Natural | PEDRO HENRIQUE SILVA |
+| DATA DE NASCIMENTO | Pessoa Natural | 15/03/1995 |
+| HORA DE NASCIMENTO | Pessoa Natural | 14:30 |
+| SEXO | Pessoa Natural | MASCULINO |
+| LOCAL DE NASCIMENTO | Pessoa Natural | SAO PAULO/SP |
+| NOME DO PAI | Pessoa Natural | JOSE CARLOS SILVA |
+| NOME DA MAE | Pessoa Natural | MARIA APARECIDA SILVA |
+| AVO PATERNO | Pessoa Natural | ANTONIO SILVA |
+| AVOA PATERNA | Pessoa Natural | JOANA SILVA |
+| AVO MATERNO | Pessoa Natural | JOAQUIM SANTOS |
+| AVOA MATERNA | Pessoa Natural | ROSA SANTOS |
+| CARTORIO | Pessoa Natural | 1o CARTORIO DE REGISTRO CIVIL DE SAO PAULO |
+| MUNICIPIO DO CARTORIO | Pessoa Natural | SAO PAULO |
+| DATA DO REGISTRO | Pessoa Natural | 20/03/1995 |
+
+---
+
+### 3.12 CND_MUNICIPAL - Certidao Negativa de Debitos Municipais
+
+**Descricao:** Certidao emitida pela Prefeitura que comprova a regularidade fiscal do imovel perante o municipio.
+
+**Campos Extraiveis:**
+
+| Campo | Categoria | Exemplo |
+|-------|-----------|---------|
+| NUMERO DA CERTIDAO | Certidoes | 2026.123.456.789 |
+| CADASTRO DO IMOVEL (SQL) | Dados do Imovel | 000.000.0000-0 |
+| NOME DO CONTRIBUINTE | Pessoa Natural | JOAO DA SILVA |
+| CPF DO CONTRIBUINTE | Pessoa Natural | 123.456.789-00 |
+| ENDERECO DO IMOVEL | Dados do Imovel | RUA DAS FLORES, 123 |
+| SITUACAO FISCAL | Certidoes | SEM DEBITOS |
+| TRIBUTOS ABRANGIDOS | Certidoes | IPTU, TAXAS |
+| DATA DE LIBERACAO | Certidoes | 27/01/2026 |
+| DATA DE VALIDADE | Certidoes | 26/04/2026 |
+| DATA DE EMISSAO | Certidoes | 27/01/2026 |
+| CODIGO DE AUTENTICIDADE | Certidoes | ABC123-DEF456 |
+
+---
+
+### 3.13 VVR - Valor Venal de Referencia
+
+**Descricao:** Consulta que apresenta o valor venal minimo de referencia estabelecido pela Prefeitura para calculo do ITBI.
+
+**Campos Extraiveis:**
+
+| Campo | Categoria | Exemplo |
+|-------|-----------|---------|
+| CADASTRO DO IMOVEL (SQL) | Dados do Imovel | 000.000.0000-0 |
+| VALOR VENAL DE REFERENCIA | Dados do Imovel | R$ 450.000,00 |
+| ENDERECO COMPLETO | Dados do Imovel | RUA DAS FLORES, 123 - APTO 101 |
+| DATA DA CONSULTA | Dados do Imovel | 27/01/2026 |
+| ANO DE REFERENCIA | Dados do Imovel | 2026 |
+
+---
+
+### 3.14 IPTU - Certidao de Dados Cadastrais do Imovel / Carne de IPTU
+
+**Descricao:** Documento emitido pela Prefeitura contendo dados cadastrais do imovel e valores venais para calculo do IPTU.
+
+**Campos Extraiveis:**
+
+| Campo | Categoria | Exemplo |
+|-------|-----------|---------|
+| CADASTRO DO IMOVEL (SQL) | Dados do Imovel | 031.045.0123-4 |
+| ANO DO EXERCICIO | Dados do Imovel | 2026 |
+| **ENDERECO DO IMOVEL** | | |
+| LOGRADOURO | Dados do Imovel | RUA AUGUSTA |
+| NUMERO | Dados do Imovel | 2000 |
+| COMPLEMENTO | Dados do Imovel | APTO 101 BLOCO A |
+| BAIRRO | Dados do Imovel | CERQUEIRA CESAR |
+| CEP | Dados do Imovel | 01310-100 |
+| ENDERECO DE NOTIFICACAO | Dados do Imovel | Endereco para correspondencia (se diferente do imovel) |
+| CONTRIBUINTES | Pessoa Natural | Lista com nome e CPF/CNPJ de cada contribuinte |
+| DADOS DO TERRENO | Dados do Imovel | Area (m2), fracao ideal, testada (m) |
+| DADOS DA CONSTRUCAO | Dados do Imovel | Area (m2), tipo, padrao, ano de construcao |
+| VALORES POR M2 | Dados do Imovel | Terreno e construcao em R$/m2 |
+| VALOR VENAL DO TERRENO | Dados do Imovel | R$ 200.000,00 |
+| VALOR VENAL DA CONSTRUCAO | Dados do Imovel | R$ 250.000,00 |
+| VALOR VENAL TOTAL | Dados do Imovel | R$ 450.000,00 |
+| VALORES DO IPTU | Dados do Imovel | Imposto, taxas (lixo, bombeiros), total, desconto |
+| USO DO IMOVEL | Dados do Imovel | RESIDENCIAL |
+| DATA DE EMISSAO | Dados do Imovel | 15/01/2026 |
+
+---
+
+### 3.15 PROTOCOLO_ONR - Protocolo do Operador Nacional do Registro
+
+**Descricao:** Comprovante de protocolo do Sistema de Atendimento Eletronico Compartilhado (SAEC) do ONR para solicitacoes de certidoes e servicos registrais.
+
+**Campos Extraiveis:**
+
+| Campo | Categoria | Exemplo |
+|-------|-----------|---------|
+| NUMERO DO PROTOCOLO | Documentos Administrativos | ONR-2026-123456 |
+| DATA DO PROTOCOLO | Documentos Administrativos | 27/01/2026 |
+| HORA DO PROTOCOLO | Documentos Administrativos | 14:30:45 |
+| TIPO DE SOLICITACAO | Documentos Administrativos | CERTIDAO DE INTEIRO TEOR |
+| CARTORIO DE DESTINO | Documentos Administrativos | 1o OFICIAL DE REGISTRO DE IMOVEIS DE SAO PAULO |
+| MATRICULA DO IMOVEL | Dados do Imovel | 123456 |
+| STATUS DA SOLICITACAO | Documentos Administrativos | CONCLUIDO |
+| SOLICITANTE | Pessoa Natural | Nome: JOAO DA SILVA, CPF: 123.456.789-00 |
+| CODIGO DE VERIFICACAO | Documentos Administrativos | ABC123DEF456 |
+
+---
+
+### 3.16 ASSINATURA_DIGITAL - Certificado de Assinatura Digital
+
+**Descricao:** Certificado de conclusao de assinatura digital (DocuSign, Clicksign, Adobe Sign, etc).
+
+**Campos Extraiveis:**
+
+| Campo | Categoria | Exemplo |
+|-------|-----------|---------|
+| PLATAFORMA | Documentos Administrativos | DOCUSIGN |
+| ENVELOPE ID | Documentos Administrativos | ABC12345-DEF6-7890-GHIJ-KLMNOPQRSTUV |
+| NOME DO DOCUMENTO | Documentos Administrativos | Compromisso_Compra_Venda.pdf |
+| SIGNATARIOS | Pessoa Natural | Lista com nome, email, CPF, status, data/hora/IP de assinatura e certificado de cada signatario |
+| DATA DE ENVIO | Documentos Administrativos | 25/01/2026 |
+| DATA DE CONCLUSAO | Documentos Administrativos | 27/01/2026 |
+| STATUS DO ENVELOPE | Documentos Administrativos | CONCLUIDO |
+| HASH DO DOCUMENTO | Documentos Administrativos | a1b2c3d4e5f6g7h8i9j0... |
 
 ---
 
@@ -578,7 +736,8 @@ Pasta FC 515/
 Este documento serve como referencia rapida para entender:
 
 - **26 tipos de documentos** que o sistema reconhece
-- **181 campos unicos** distribuidos em 4 categorias
+- **16 tipos de documentos** com mapeamento detalhado de campos (Secao 3)
+- **Centenas de campos** distribuidos em 4 categorias principais
 - **7 campos principais** que permitem correlacao entre documentos
 - **Exemplos praticos** de como os dados sao extraidos
 
