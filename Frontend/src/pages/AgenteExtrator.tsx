@@ -1,6 +1,6 @@
 // src/pages/AgenteExtrator.tsx
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Square, RefreshCw, FilePlus } from 'lucide-react';
@@ -17,7 +17,7 @@ export default function AgenteExtrator() {
   const { tipo } = useParams<{ tipo: string }>();
   const navigate = useNavigate();
 
-  const agente = getAgenteBySlug(tipo || '');
+  const agente = useMemo(() => getAgenteBySlug(tipo || ''), [tipo]);
 
   const [arquivos, setArquivos] = useState<ArquivoUpload[]>([]);
   const [instrucoes, setInstrucoes] = useState('');
@@ -27,20 +27,12 @@ export default function AgenteExtrator() {
 
   const abortRef = useRef<ReturnType<typeof createAbortableStream> | null>(null);
 
-  if (!agente) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Agente nao encontrado</p>
-      </div>
-    );
-  }
-
   const canAnalyze = arquivos.length > 0 && status !== 'analyzing';
   const isAnalyzing = status === 'analyzing';
   const isCompleted = status === 'completed';
 
   const handleAnalyze = useCallback(async () => {
-    if (!canAnalyze) return;
+    if (!canAnalyze || !agente) return;
 
     setStatus('analyzing');
     setResultado('');
@@ -64,7 +56,7 @@ export default function AgenteExtrator() {
       },
       30
     );
-  }, [canAnalyze, agente.slug]);
+  }, [canAnalyze, agente]);
 
   const handleStop = useCallback(() => {
     if (abortRef.current) {
@@ -87,29 +79,40 @@ export default function AgenteExtrator() {
   const handleCopy = useCallback(async () => {
     try {
       await copyToClipboard(resultado);
-      toast.success('Copiado para a area de transferencia');
+      toast.success('Copiado para a área de transferência');
     } catch {
       toast.error('Erro ao copiar');
     }
   }, [resultado]);
 
   const handleDownloadDocx = useCallback(async () => {
+    if (!agente) return;
     try {
       await exportToDocx(resultado, `${agente.slug}-extracao`);
       toast.success('DOCX baixado com sucesso');
     } catch {
       toast.error('Erro ao gerar DOCX');
     }
-  }, [resultado, agente.slug]);
+  }, [resultado, agente]);
 
   const handleDownloadPdf = useCallback(() => {
+    if (!agente) return;
     try {
       exportToPdf(resultado, `${agente.slug}-extracao`);
       toast.success('PDF baixado com sucesso');
     } catch {
       toast.error('Erro ao gerar PDF');
     }
-  }, [resultado, agente.slug]);
+  }, [resultado, agente]);
+
+  // Early return after all hooks
+  if (!agente) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Agente não encontrado</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -172,12 +175,12 @@ export default function AgenteExtrator() {
           {/* Instructions */}
           <div className="mb-6 flex-1">
             <label className="text-sm font-medium mb-2 block">
-              Instrucoes extras (opcional)
+              Instruções extras (opcional)
             </label>
             <Textarea
               value={instrucoes}
               onChange={(e) => setInstrucoes(e.target.value)}
-              placeholder="Adicione instrucoes especificas para a extracao..."
+              placeholder="Adicione instruções específicas para a extração..."
               className="min-h-[100px] resize-none"
             />
           </div>

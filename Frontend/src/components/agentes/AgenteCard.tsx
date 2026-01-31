@@ -2,7 +2,7 @@
 
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import * as Icons from 'lucide-react';
+import { icons, FileText, type LucideIcon } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { AgenteConfig } from '@/types/agente';
 
@@ -15,7 +15,7 @@ export function AgenteCard({ agente, index }: AgenteCardProps) {
   const navigate = useNavigate();
 
   // Get icon component dynamically
-  const IconComponent = (Icons as Record<string, React.ComponentType<{ className?: string }>>)[agente.icone] || Icons.FileText;
+  const IconComponent: LucideIcon = icons[agente.icone as keyof typeof icons] || FileText;
 
   return (
     <motion.div

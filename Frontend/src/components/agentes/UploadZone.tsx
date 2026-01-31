@@ -15,6 +15,17 @@ interface UploadZoneProps {
 export function UploadZone({ arquivos, onArquivosChange, disabled }: UploadZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
 
+  const addFiles = useCallback((files: File[]) => {
+    const newArquivos: ArquivoUpload[] = files.map(file => ({
+      id: crypto.randomUUID(),
+      file,
+      nome: file.name,
+      tamanho: file.size,
+      tipo: file.type,
+    }));
+    onArquivosChange([...arquivos, ...newArquivos]);
+  }, [arquivos, onArquivosChange]);
+
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     if (!disabled) setIsDragging(true);
@@ -32,25 +43,14 @@ export function UploadZone({ arquivos, onArquivosChange, disabled }: UploadZoneP
 
     const files = Array.from(e.dataTransfer.files);
     addFiles(files);
-  }, [disabled]);
+  }, [disabled, addFiles]);
 
   const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (disabled || !e.target.files) return;
     const files = Array.from(e.target.files);
     addFiles(files);
     e.target.value = '';
-  }, [disabled]);
-
-  const addFiles = (files: File[]) => {
-    const newArquivos: ArquivoUpload[] = files.map(file => ({
-      id: crypto.randomUUID(),
-      file,
-      nome: file.name,
-      tamanho: file.size,
-      tipo: file.type,
-    }));
-    onArquivosChange([...arquivos, ...newArquivos]);
-  };
+  }, [disabled, addFiles]);
 
   const removeFile = (id: string) => {
     if (disabled) return;

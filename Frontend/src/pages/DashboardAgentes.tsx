@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { AgenteCard, AgenteFilter } from '@/components/agentes';
-import { agentes, getAgentesByCategoria } from '@/data/agentes';
+import { getAgentesByCategoria } from '@/data/agentes';
 
 export default function DashboardAgentes() {
   const [categoriaAtiva, setCategoriaAtiva] = useState('todos');

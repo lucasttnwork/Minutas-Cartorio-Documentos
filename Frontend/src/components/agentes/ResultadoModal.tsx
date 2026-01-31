@@ -1,6 +1,6 @@
 // src/components/agentes/ResultadoModal.tsx
 
-import { Copy, FileDown, X, FileText as FileIcon } from 'lucide-react';
+import { Copy, FileDown, FileText as FileIcon } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
