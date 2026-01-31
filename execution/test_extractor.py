@@ -94,33 +94,51 @@ def get_gemini_client() -> genai.Client:
 
 
 def list_available_types() -> List[str]:
-    """Lista todos os tipos de documento com prompts disponiveis."""
-    if not PROMPTS_DIR.exists():
-        return []
+    """
+    Lista todos os tipos de documento com prompts disponiveis.
 
-    types_list = []
-    for file in PROMPTS_DIR.glob("*.txt"):
-        tipo = file.stem.lower()
-        # Exclui prompts especiais
-        if tipo not in ['generic', 'desconhecido'] and not tipo.endswith('_compact'):
-            types_list.append(tipo)
+    Usa o modulo prompt_loader para detectar automaticamente
+    todas as versoes disponiveis.
+    """
+    try:
+        from execution.prompt_loader import list_available_prompts
+        return list_available_prompts(PROMPTS_DIR)
+    except ImportError:
+        # Fallback se prompt_loader nao estiver disponivel
+        if not PROMPTS_DIR.exists():
+            return []
 
-    return sorted(types_list)
+        types_list = []
+        for file in PROMPTS_DIR.glob("*.txt"):
+            tipo = file.stem.lower()
+            if tipo not in ['generic', 'desconhecido'] and not tipo.endswith('_compact'):
+                types_list.append(tipo.upper())
+
+        return sorted(types_list)
 
 
 def load_prompt(tipo_documento: str) -> str:
-    """Carrega o prompt para o tipo de documento especificado."""
-    prompt_file = PROMPTS_DIR / f"{tipo_documento.lower()}.txt"
+    """
+    Carrega o prompt para o tipo de documento especificado.
 
-    if not prompt_file.exists():
-        # Tenta prompt generico
-        generic_file = PROMPTS_DIR / "generic.txt"
-        if generic_file.exists():
-            logger.warning(f"Prompt '{tipo_documento}' nao encontrado, usando generic")
-            return generic_file.read_text(encoding='utf-8')
-        raise FileNotFoundError(f"Prompt nao encontrado: {prompt_file}")
+    Detecta automaticamente a versao mais recente disponivel.
+    Por exemplo, se existirem rg.txt e rg_v2.txt, carrega rg_v2.txt.
+    """
+    try:
+        from execution.prompt_loader import load_prompt as loader_load_prompt
+        return loader_load_prompt(tipo_documento, prompts_dir=PROMPTS_DIR)
+    except ImportError:
+        # Fallback se prompt_loader nao estiver disponivel
+        prompt_file = PROMPTS_DIR / f"{tipo_documento.lower()}.txt"
 
-    return prompt_file.read_text(encoding='utf-8')
+        if not prompt_file.exists():
+            generic_file = PROMPTS_DIR / "generic.txt"
+            if generic_file.exists():
+                logger.warning(f"Prompt '{tipo_documento}' nao encontrado, usando generic")
+                return generic_file.read_text(encoding='utf-8')
+            raise FileNotFoundError(f"Prompt nao encontrado: {prompt_file}")
+
+        return prompt_file.read_text(encoding='utf-8')
 
 
 # =============================================================================
