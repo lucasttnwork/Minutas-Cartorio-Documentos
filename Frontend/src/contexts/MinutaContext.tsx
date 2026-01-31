@@ -1,5 +1,6 @@
 // src/contexts/MinutaContext.tsx
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import type { Minuta, MinutaStep, UploadedDocument, PessoaNatural, PessoaJuridica, Imovel, NegocioJuridico } from '@/types/minuta';
 
 interface MinutaContextType {
@@ -60,32 +61,41 @@ function createEmptyMinuta(): Minuta {
   };
 }
 
-export function MinutaProvider({ children }: { children: ReactNode }) {
-  const [minutas, setMinutas] = useState<Minuta[]>([]);
-  const [currentMinutaId, setCurrentMinutaId] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
+// Initialize state from localStorage (lazy initialization)
+function getInitialMinutas(): Minuta[] {
+  if (typeof window === 'undefined') return [];
+  try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        setMinutas(parsed);
-      } catch (e) {
-        console.error('Failed to parse stored minutas:', e);
-      }
+      return JSON.parse(stored);
     }
-  }, []);
+  } catch (e) {
+    console.error('Failed to parse stored minutas:', e);
+  }
+  return [];
+}
 
+export function MinutaProvider({ children }: { children: ReactNode }) {
+  const [minutas, setMinutas] = useState<Minuta[]>(getInitialMinutas);
+  const [currentMinutaId, setCurrentMinutaId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const isInitialMount = useRef(true);
+
+  // Save to localStorage when minutas change (skip initial mount)
+  // This pattern is intentional for showing save indicator during debounced localStorage writes
   useEffect(() => {
-    if (minutas.length > 0) {
-      setIsSaving(true);
-      const timeout = setTimeout(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(minutas));
-        setIsSaving(false);
-      }, 500);
-      return () => clearTimeout(timeout);
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
     }
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: showing save indicator
+    setIsSaving(true);
+    const timeout = setTimeout(() => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(minutas));
+      setIsSaving(false);
+    }, 500);
+    return () => clearTimeout(timeout);
   }, [minutas]);
 
   const currentMinuta = minutas.find(m => m.id === currentMinutaId) || null;

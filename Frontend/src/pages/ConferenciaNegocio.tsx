@@ -1,5 +1,5 @@
 // src/pages/ConferenciaNegocio.tsx
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useParams } from "react-router-dom";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -14,11 +14,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function ConferenciaNegocio() {
-  const { id } = useParams();
+  useParams(); // Route param available for future use
   const { currentMinuta, isSaving, updateNegocioJuridico, updateMinuta } = useMinuta();
 
-  const imoveis = currentMinuta?.imoveis || [];
-  const negocios = currentMinuta?.negociosJuridicos || [];
+  const imoveis = useMemo(() => currentMinuta?.imoveis || [], [currentMinuta?.imoveis]);
+  const negocios = useMemo(() => currentMinuta?.negociosJuridicos || [], [currentMinuta?.negociosJuridicos]);
 
   // Ensure each imovel has a corresponding negocio
   useEffect(() => {

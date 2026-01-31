@@ -13,7 +13,7 @@ export default function Dashboard() {
   const { minutas, createMinuta, loadMinuta, deleteMinuta } = useMinuta();
 
   const handleNewMinuta = () => {
-    const id = createMinuta();
+    createMinuta();
     navigate('/minuta/nova');
   };
 

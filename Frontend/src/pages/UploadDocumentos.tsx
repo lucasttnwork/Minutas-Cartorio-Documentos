@@ -260,7 +260,7 @@ export default function UploadDocumentos() {
                     )}
                   >
                     <input
-                      ref={(el) => (fileInputRefs.current[category.id] = el)}
+                      ref={(el) => { fileInputRefs.current[category.id] = el; }}
                       type="file"
                       multiple
                       accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx"

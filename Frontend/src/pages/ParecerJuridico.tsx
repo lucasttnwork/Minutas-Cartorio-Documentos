@@ -9,7 +9,7 @@ import { useMinuta } from "@/contexts/MinutaContext";
 import { Scale, CheckCircle2, XCircle, AlertTriangle, FileText, AlertCircle } from "lucide-react";
 
 export default function ParecerJuridico() {
-  const { id } = useParams();
+  useParams(); // Route param available for future use
   const { currentMinuta, isSaving } = useMinuta();
 
   const parecer = currentMinuta?.parecer || {

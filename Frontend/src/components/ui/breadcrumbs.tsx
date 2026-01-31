@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import * as React from "react"
 import { Link, useLocation } from "react-router-dom"
 import { ChevronRight, Home } from "lucide-react"

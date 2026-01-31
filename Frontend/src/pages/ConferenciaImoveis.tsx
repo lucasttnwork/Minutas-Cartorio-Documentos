@@ -71,7 +71,7 @@ function createEmptyImovel(): Imovel {
 }
 
 export default function ConferenciaImoveis() {
-  const { id } = useParams();
+  useParams(); // Route param available for future use
   const { currentMinuta, isSaving, addImovel, updateImovel, removeImovel } = useMinuta();
 
   const imoveis = currentMinuta?.imoveis || [];

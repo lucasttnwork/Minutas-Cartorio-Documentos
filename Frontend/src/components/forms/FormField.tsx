@@ -22,6 +22,15 @@ import { cn } from "@/lib/utils";
 
 type FieldType = "text" | "date" | "email" | "tel" | "number" | "select" | "textarea" | "cpf" | "cnpj" | "phone" | "cep" | "rg" | "currency" | "masked-date";
 
+interface MaskedComponentProps {
+  value?: string;
+  onChange?: (formatted: string, raw: string) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  required?: boolean;
+  className?: string;
+}
+
 interface FormFieldProps {
   label: string;
   value?: string;
@@ -37,7 +46,7 @@ interface FormFieldProps {
 }
 
 // Mapeamento de tipo para componente de máscara
-const maskedComponents: Record<string, React.FC<any>> = {
+const maskedComponents: Record<string, React.ForwardRefExoticComponent<MaskedComponentProps & React.RefAttributes<HTMLInputElement>>> = {
   cpf: CPFInput,
   cnpj: CNPJInput,
   phone: PhoneInput,

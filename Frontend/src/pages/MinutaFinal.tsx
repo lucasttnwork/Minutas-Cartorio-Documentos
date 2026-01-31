@@ -1,5 +1,5 @@
 // src/pages/MinutaFinal.tsx
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -29,7 +29,7 @@ export default function MinutaFinal() {
   const navigate = useNavigate();
   const { currentMinuta, isSaving, updateMinutaTexto, finalizarMinuta } = useMinuta();
 
-  const generateDefaultMinuta = () => {
+  const generateDefaultMinuta = useCallback(() => {
     if (!currentMinuta) return '<p>Carregando...</p>';
 
     const outorgantes = currentMinuta.outorgantes.pessoasNaturais
@@ -68,7 +68,7 @@ export default function MinutaFinal() {
       <h2>CLAUSULAS E CONDICOES:</h2>
       <p>[Inserir clausulas]</p>
     `;
-  };
+  }, [currentMinuta]);
 
   const editor = useEditor({
     extensions: [
@@ -96,6 +96,7 @@ export default function MinutaFinal() {
         }
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Intentionally only sync on minuta ID change
   }, [editor, currentMinuta?.id]);
 
   const handleFinalizar = () => {
