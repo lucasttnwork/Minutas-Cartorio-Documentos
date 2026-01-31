@@ -1,12 +1,24 @@
-export { PageHeader } from "./PageHeader";
-export { SectionCard } from "./SectionCard";
+// src/components/layout/index.ts
+// Layout components barrel export
+
+// Page Structure
+export { PageHeader, PageHeaderSimple, SectionHeader } from "./PageHeader";
+export { SectionCard, SectionCardCompact, StatsCard, FeatureCard } from "./SectionCard";
 export { FieldGrid } from "./FieldGrid";
-export { NavigationBar } from "./NavigationBar";
-export { ProgressStepper } from "./ProgressStepper";
+
+// Navigation
 export { GlobalNavigation } from "./GlobalNavigation";
-export { CollapsibleSection } from "./CollapsibleSection";
+export { NavigationBar } from "./NavigationBar";
+export { HubSidebar, HubSidebarMobile } from "./HubSidebar";
+
+// Flow Components
+export { FlowNavigation, PageNavigation } from "./FlowNavigation";
+export { FlowStepper, FlowStepperVertical } from "./FlowStepper";
+export { ProgressStepper } from "./ProgressStepper";
+
+// Collapsible & Accordion
+export { CollapsibleSection, AccordionGroup, AccordionItem } from "./CollapsibleSection";
+
+// Entity & Error
 export { EntityCard } from "./EntityCard";
-export { FlowNavigation } from "./FlowNavigation";
-export { FlowStepper } from "./FlowStepper";
 export { ErrorBoundary } from "./ErrorBoundary";
-export { HubSidebar } from "./HubSidebar";

@@ -69,3 +69,10 @@ export {
   SkeletonTable,
   SkeletonDashboardCard,
 } from "./skeleton";
+
+// Theme Switcher
+export {
+  ThemeSwitcher,
+  ThemeSwitcherCompact,
+  useTheme,
+} from "./theme-switcher";

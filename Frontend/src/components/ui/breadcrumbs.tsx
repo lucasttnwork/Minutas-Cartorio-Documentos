@@ -67,7 +67,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
       aria-label="Breadcrumb"
       className={cn("flex items-center text-sm", className)}
     >
-      <ol className="flex items-center gap-1.5">
+      <ol className="flex items-center gap-2">
         {/* Home link */}
         {showHome && (
           <>
@@ -80,17 +80,19 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
                 to="/"
                 className={cn(
                   "flex items-center gap-1.5 text-muted-foreground",
-                  "hover:text-foreground transition-colors duration-200",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+                  "hover:text-foreground transition-all duration-200",
+                  "hover:scale-105",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm",
+                  "px-1.5 py-0.5 -mx-1.5 rounded-md hover:bg-secondary/50"
                 )}
               >
-                <Home className="h-4 w-4" />
-                <span className="sr-only sm:not-sr-only">Dashboard</span>
+                <Home className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only text-xs font-medium">Dashboard</span>
               </Link>
             </motion.li>
-            
-            <li className="text-muted-foreground/50">
-              <ChevronRight className="h-4 w-4" />
+
+            <li className="text-muted-foreground/40 flex items-center">
+              <ChevronRight className="h-3.5 w-3.5" />
             </li>
           </>
         )}
@@ -110,7 +112,8 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
                   // Item atual (não clicável)
                   <span
                     className={cn(
-                      "flex items-center gap-1.5 font-medium text-foreground"
+                      "flex items-center gap-1.5 font-semibold text-foreground",
+                      "text-sm"
                     )}
                     aria-current="page"
                   >
@@ -122,9 +125,10 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
                   <Link
                     to={item.href || "#"}
                     className={cn(
-                      "flex items-center gap-1.5 text-muted-foreground",
-                      "hover:text-foreground transition-colors duration-200",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+                      "flex items-center gap-1.5 text-muted-foreground text-sm",
+                      "hover:text-foreground transition-all duration-200",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm",
+                      "px-1.5 py-0.5 -mx-1.5 rounded-md hover:bg-secondary/50"
                     )}
                   >
                     {item.icon}
@@ -132,10 +136,10 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
                   </Link>
                 )}
               </motion.li>
-              
+
               {!isLast && (
-                <li className="text-muted-foreground/50">
-                  <ChevronRight className="h-4 w-4" />
+                <li className="text-muted-foreground/40 flex items-center">
+                  <ChevronRight className="h-3.5 w-3.5" />
                 </li>
               )}
             </React.Fragment>

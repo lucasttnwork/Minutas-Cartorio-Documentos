@@ -1,10 +1,47 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR" class="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
     <title>Sistema de Minutas</title>
+
+    <!--
+      TYPOGRAPHY: Geist Sans
+      Why Geist? Created by Vercel, inspired by SF Pro. Modern, clean, excellent legibility.
+      Perfect for data-heavy interfaces and professional applications.
+      - Great x-height for readability at small sizes
+      - Distinctive but not distracting
+      - Optimized for screens and code
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Theme initialization - prevents flash of wrong theme -->
+    <script>
+      (function() {
+        const theme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (theme === 'light') {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+        } else if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light');
+        } else {
+          // System preference
+          if (prefersDark) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+          }
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
