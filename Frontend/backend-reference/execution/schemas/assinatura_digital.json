@@ -1,0 +1,111 @@
+{
+  "tipo_documento": "ASSINATURA_DIGITAL",
+  "versao": "1.0",
+  "descricao": "Schema de extracao para Comprovante de Assinatura Digital (DocuSign, etc)",
+  "complexidade": "MUITO_BAIXA",
+  "campos": [
+    {
+      "nome": "plataforma",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": "DOCUSIGN",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Plataforma de assinatura utilizada (DocuSign, Adobe Sign, etc)"
+    },
+    {
+      "nome": "envelope_id",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "[A-F0-9-]+",
+      "exemplo": "ABC12345-DEF6-7890-GHIJ-KLMNOPQRSTUV",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "ID unico do envelope de assinatura"
+    },
+    {
+      "nome": "documento_nome",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "Compromisso_Compra_Venda.pdf",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Nome do documento assinado"
+    },
+    {
+      "nome": "signatarios",
+      "tipo": "array",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": [{"nome": "JOAO DA SILVA", "email": "joao@email.com", "status": "ASSINADO", "data_assinatura": "27/01/2026 14:30"}],
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Lista de signatarios e status",
+      "campos_internos": [
+        {"nome": "nome", "tipo": "string"},
+        {"nome": "email", "tipo": "string"},
+        {"nome": "cpf", "tipo": "string"},
+        {"nome": "status", "tipo": "string", "exemplo": "ASSINADO|PENDENTE|RECUSADO"},
+        {"nome": "data_assinatura", "tipo": "string"},
+        {"nome": "ip_assinatura", "tipo": "string"},
+        {"nome": "certificado", "tipo": "string"}
+      ]
+    },
+    {
+      "nome": "data_envio",
+      "tipo": "date",
+      "obrigatorio": false,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "25/01/2026",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data de envio para assinatura"
+    },
+    {
+      "nome": "data_conclusao",
+      "tipo": "date",
+      "obrigatorio": false,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "27/01/2026",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data de conclusao (todas assinaturas)"
+    },
+    {
+      "nome": "status_envelope",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "(CONCLUIDO|PENDENTE|CANCELADO|EXPIRADO)",
+      "exemplo": "CONCLUIDO",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Status geral do envelope"
+    },
+    {
+      "nome": "hash_documento",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-Fa-f0-9]+",
+      "exemplo": "a1b2c3d4e5f6g7h8i9j0...",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Hash SHA-256 do documento"
+    }
+  ],
+  "padroes_identificacao": [
+    "DOCUSIGN",
+    "ADOBE SIGN",
+    "ASSINATURA ELETRONICA",
+    "ASSINATURA DIGITAL",
+    "ENVELOPE ID",
+    "CERTIFICATE OF COMPLETION",
+    "CERTIFICADO DE CONCLUSAO"
+  ],
+  "validacoes": [
+    "envelope_id_formato_valido",
+    "todos_signatarios_assinaram",
+    "hash_documento_valido"
+  ]
+}

@@ -1,0 +1,262 @@
+{
+  "tipo_documento": "CERTIDAO_CASAMENTO",
+  "versao": "1.0",
+  "descricao": "Schema de extracao para Certidao de Registro de Casamento",
+  "complexidade": "ALTA",
+  "campos": [
+    {
+      "nome": "matricula",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d{6}\\.\\d{2}\\.\\d{2}\\.\\d{4}\\.\\d\\.\\d{5}\\.\\d{3}\\.\\d{7}-\\d{2}",
+      "exemplo": "123456.01.55.2020.2.12345.123.1234567-89",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Matricula nacional (certidoes novas)"
+    },
+    {
+      "nome": "livro",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-Z]?-?\\d+",
+      "exemplo": "B-456",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Numero do livro"
+    },
+    {
+      "nome": "folha",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d+[vV]?",
+      "exemplo": "78",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Numero da folha"
+    },
+    {
+      "nome": "termo",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d+",
+      "exemplo": "54321",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Numero do termo"
+    },
+    {
+      "nome": "nome_conjuge_1",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "JOAO DA SILVA",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Nome completo do primeiro conjuge (antes do casamento)"
+    },
+    {
+      "nome": "nome_conjuge_2",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "MARIA SANTOS",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Nome completo do segundo conjuge (antes do casamento)"
+    },
+    {
+      "nome": "cpf_conjuge_1",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}",
+      "exemplo": "123.456.789-00",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "CPF do primeiro conjuge"
+    },
+    {
+      "nome": "cpf_conjuge_2",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}",
+      "exemplo": "987.654.321-00",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "CPF do segundo conjuge"
+    },
+    {
+      "nome": "data_nascimento_conjuge_1",
+      "tipo": "date",
+      "obrigatorio": false,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "10/05/1980",
+      "nivel_extracao": 1,
+      "confianca_esperada": "media",
+      "descricao": "Data de nascimento do primeiro conjuge"
+    },
+    {
+      "nome": "data_nascimento_conjuge_2",
+      "tipo": "date",
+      "obrigatorio": false,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "15/08/1982",
+      "nivel_extracao": 1,
+      "confianca_esperada": "media",
+      "descricao": "Data de nascimento do segundo conjuge"
+    },
+    {
+      "nome": "naturalidade_conjuge_1",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ\\s]+/[A-Z]{2}",
+      "exemplo": "SAO PAULO/SP",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Naturalidade do primeiro conjuge"
+    },
+    {
+      "nome": "naturalidade_conjuge_2",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ\\s]+/[A-Z]{2}",
+      "exemplo": "RIO DE JANEIRO/RJ",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Naturalidade do segundo conjuge"
+    },
+    {
+      "nome": "pai_conjuge_1",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "ANTONIO DA SILVA",
+      "nivel_extracao": 2,
+      "confianca_esperada": "baixa",
+      "descricao": "Nome do pai do primeiro conjuge"
+    },
+    {
+      "nome": "mae_conjuge_1",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "ROSA DA SILVA",
+      "nivel_extracao": 2,
+      "confianca_esperada": "baixa",
+      "descricao": "Nome da mae do primeiro conjuge"
+    },
+    {
+      "nome": "pai_conjuge_2",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "JOSE SANTOS",
+      "nivel_extracao": 2,
+      "confianca_esperada": "baixa",
+      "descricao": "Nome do pai do segundo conjuge"
+    },
+    {
+      "nome": "mae_conjuge_2",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "ANA SANTOS",
+      "nivel_extracao": 2,
+      "confianca_esperada": "baixa",
+      "descricao": "Nome da mae do segundo conjuge"
+    },
+    {
+      "nome": "data_casamento",
+      "tipo": "date",
+      "obrigatorio": true,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "20/11/2010",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data da celebracao do casamento"
+    },
+    {
+      "nome": "regime_bens",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "(COMUNHAO PARCIAL|COMUNHAO UNIVERSAL|SEPARACAO TOTAL|SEPARACAO OBRIGATORIA|PARTICIPACAO FINAL NOS AQUESTOS)",
+      "exemplo": "COMUNHAO PARCIAL DE BENS",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Regime de bens do casamento"
+    },
+    {
+      "nome": "pacto_antenupcial",
+      "tipo": "boolean",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": false,
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Indica se houve pacto antenupcial"
+    },
+    {
+      "nome": "nome_pos_casamento_conjuge_1",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "JOAO DA SILVA",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Nome do conjuge 1 apos casamento (se alterado)"
+    },
+    {
+      "nome": "nome_pos_casamento_conjuge_2",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "MARIA SANTOS DA SILVA",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Nome do conjuge 2 apos casamento (se alterado)"
+    },
+    {
+      "nome": "averbacoes",
+      "tipo": "array",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": [{"tipo": "DIVORCIO", "data": "15/03/2020"}],
+      "nivel_extracao": 3,
+      "confianca_esperada": "media",
+      "descricao": "Lista de averbacoes (divorcio, separacao, etc)"
+    },
+    {
+      "nome": "cartorio",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "2o CARTORIO DE REGISTRO CIVIL DE SAO PAULO",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Nome do cartorio de registro"
+    },
+    {
+      "nome": "selo_digital",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-Z0-9]+",
+      "exemplo": "ABCD1234567890",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Codigo do selo digital"
+    }
+  ],
+  "padroes_identificacao": [
+    "CERTIDAO DE CASAMENTO",
+    "REGISTRO DE CASAMENTO",
+    "REGISTRO CIVIL",
+    "CONTRAENTES",
+    "NUBENTES",
+    "REGIME DE BENS"
+  ],
+  "validacoes": [
+    "cpf_digito_verificador",
+    "data_casamento_valida",
+    "regime_bens_valido",
+    "matricula_formato_valido"
+  ]
+}

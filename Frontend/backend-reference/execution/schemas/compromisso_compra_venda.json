@@ -1,0 +1,306 @@
+{
+  "tipo_documento": "COMPROMISSO_COMPRA_VENDA",
+  "versao": "1.0",
+  "descricao": "Schema de extracao para Contrato Particular de Compromisso de Compra e Venda",
+  "complexidade": "MUITO_ALTA",
+  "campos": [
+    {
+      "nome": "envelope_id",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-F0-9-]+",
+      "exemplo": "ABC12345-DEF6-7890-GHIJ-KLMNOPQRSTUV",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "ID do envelope de assinatura digital (DocuSign, etc)"
+    },
+    {
+      "nome": "data_contrato",
+      "tipo": "date",
+      "obrigatorio": true,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "15/12/2025",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data de assinatura do contrato"
+    },
+    {
+      "nome": "preco_total",
+      "tipo": "number",
+      "obrigatorio": true,
+      "regex": "R\\$\\s*[\\d.,]+",
+      "exemplo": "500000.00",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Valor total da venda"
+    },
+    {
+      "nome": "valor_sinal",
+      "tipo": "number",
+      "obrigatorio": false,
+      "regex": "R\\$\\s*[\\d.,]+",
+      "exemplo": "100000.00",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Valor do sinal/entrada"
+    },
+    {
+      "nome": "valor_saldo",
+      "tipo": "number",
+      "obrigatorio": false,
+      "regex": "R\\$\\s*[\\d.,]+",
+      "exemplo": "400000.00",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Valor do saldo (financiamento ou pagamento posterior)"
+    },
+    {
+      "nome": "vendedores",
+      "tipo": "array",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": [{"nome": "JOAO DA SILVA", "cpf": "123.456.789-00", "percentual": 50}],
+      "nivel_extracao": 3,
+      "confianca_esperada": "alta",
+      "descricao": "Lista de vendedores (promitentes vendedores)",
+      "campos_internos": [
+        {"nome": "nome", "tipo": "string"},
+        {"nome": "cpf", "tipo": "string"},
+        {"nome": "rg", "tipo": "string"},
+        {"nome": "orgao_rg", "tipo": "string"},
+        {"nome": "nacionalidade", "tipo": "string"},
+        {"nome": "profissao", "tipo": "string"},
+        {"nome": "estado_civil", "tipo": "string"},
+        {"nome": "regime_bens", "tipo": "string"},
+        {"nome": "email", "tipo": "string"},
+        {"nome": "telefone", "tipo": "string"},
+        {"nome": "endereco", "tipo": "object", "campos_internos": [
+          {"nome": "logradouro", "tipo": "string"},
+          {"nome": "numero", "tipo": "string"},
+          {"nome": "complemento", "tipo": "string"},
+          {"nome": "bairro", "tipo": "string"},
+          {"nome": "cidade", "tipo": "string"},
+          {"nome": "uf", "tipo": "string"},
+          {"nome": "cep", "tipo": "string"}
+        ]},
+        {"nome": "percentual", "tipo": "number"},
+        {"nome": "conjuge", "tipo": "object"}
+      ]
+    },
+    {
+      "nome": "compradores",
+      "tipo": "array",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": [{"nome": "MARIA SANTOS", "cpf": "987.654.321-00", "percentual": 100}],
+      "nivel_extracao": 3,
+      "confianca_esperada": "alta",
+      "descricao": "Lista de compradores (promitentes compradores)",
+      "campos_internos": [
+        {"nome": "nome", "tipo": "string"},
+        {"nome": "cpf", "tipo": "string"},
+        {"nome": "rg", "tipo": "string"},
+        {"nome": "orgao_rg", "tipo": "string"},
+        {"nome": "nacionalidade", "tipo": "string"},
+        {"nome": "profissao", "tipo": "string"},
+        {"nome": "estado_civil", "tipo": "string"},
+        {"nome": "regime_bens", "tipo": "string"},
+        {"nome": "email", "tipo": "string"},
+        {"nome": "telefone", "tipo": "string"},
+        {"nome": "endereco", "tipo": "object"},
+        {"nome": "percentual", "tipo": "number"},
+        {"nome": "conjuge", "tipo": "object"}
+      ]
+    },
+    {
+      "nome": "imovel",
+      "tipo": "object",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": {"endereco": "RUA DAS FLORES, 123 - APTO 101", "matricula": "123456"},
+      "nivel_extracao": 3,
+      "confianca_esperada": "alta",
+      "descricao": "Dados do imovel objeto da venda",
+      "campos_internos": [
+        {"nome": "tipo", "tipo": "string", "exemplo": "APARTAMENTO|CASA|TERRENO"},
+        {"nome": "endereco_completo", "tipo": "string"},
+        {"nome": "numero_unidade", "tipo": "string"},
+        {"nome": "andar", "tipo": "string"},
+        {"nome": "bloco", "tipo": "string"},
+        {"nome": "edificio", "tipo": "string"},
+        {"nome": "matricula", "tipo": "string"},
+        {"nome": "cartorio_ri", "tipo": "string"},
+        {"nome": "inscricao_iptu", "tipo": "string"},
+        {"nome": "area_privativa", "tipo": "number"},
+        {"nome": "area_comum", "tipo": "number"},
+        {"nome": "area_total", "tipo": "number"},
+        {"nome": "fracao_ideal", "tipo": "number"}
+      ]
+    },
+    {
+      "nome": "vagas_garagem",
+      "tipo": "array",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": [{"matricula": "123457", "tipo": "INDETERMINADA", "area": 12.50}],
+      "nivel_extracao": 3,
+      "confianca_esperada": "media",
+      "descricao": "Vagas de garagem incluidas na venda",
+      "campos_internos": [
+        {"nome": "matricula", "tipo": "string"},
+        {"nome": "numero", "tipo": "string"},
+        {"nome": "tipo", "tipo": "string", "exemplo": "DETERMINADA|INDETERMINADA|AUTONOMA"},
+        {"nome": "area", "tipo": "number"}
+      ]
+    },
+    {
+      "nome": "dados_pagamento_sinal",
+      "tipo": "object",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": {"valor": 100000, "data": "15/12/2025", "forma": "TED"},
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Dados do pagamento do sinal",
+      "campos_internos": [
+        {"nome": "valor", "tipo": "number"},
+        {"nome": "data_pagamento", "tipo": "date"},
+        {"nome": "forma_pagamento", "tipo": "string"},
+        {"nome": "banco_destino", "tipo": "string"},
+        {"nome": "agencia", "tipo": "string"},
+        {"nome": "conta", "tipo": "string"},
+        {"nome": "pix", "tipo": "string"},
+        {"nome": "beneficiario", "tipo": "string"}
+      ]
+    },
+    {
+      "nome": "dados_pagamento_saldo",
+      "tipo": "object",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": {"valor": 400000, "tipo": "FINANCIAMENTO", "banco": "CAIXA ECONOMICA"},
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Dados do pagamento do saldo",
+      "campos_internos": [
+        {"nome": "valor", "tipo": "number"},
+        {"nome": "tipo", "tipo": "string", "exemplo": "FINANCIAMENTO|A VISTA|PARCELADO"},
+        {"nome": "banco_financiador", "tipo": "string"},
+        {"nome": "prazo_dias", "tipo": "number"},
+        {"nome": "data_prevista", "tipo": "date"},
+        {"nome": "condicoes", "tipo": "string"}
+      ]
+    },
+    {
+      "nome": "comissao_corretagem",
+      "tipo": "object",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": {"percentual": 6, "valor": 30000, "responsavel": "VENDEDOR"},
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Dados da comissao de corretagem",
+      "campos_internos": [
+        {"nome": "percentual", "tipo": "number"},
+        {"nome": "valor", "tipo": "number"},
+        {"nome": "responsavel", "tipo": "string", "exemplo": "VENDEDOR|COMPRADOR|AMBOS"},
+        {"nome": "imobiliaria", "tipo": "string"},
+        {"nome": "cnpj_imobiliaria", "tipo": "string"},
+        {"nome": "corretor", "tipo": "string"},
+        {"nome": "creci", "tipo": "string"}
+      ]
+    },
+    {
+      "nome": "condicoes_especificas",
+      "tipo": "array",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": ["Imovel sera entregue vazio", "Prazo para desocupacao: 30 dias"],
+      "nivel_extracao": 3,
+      "confianca_esperada": "baixa",
+      "descricao": "Condicoes especiais do contrato"
+    },
+    {
+      "nome": "prazo_escritura",
+      "tipo": "number",
+      "obrigatorio": false,
+      "regex": "\\d+",
+      "exemplo": "90",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Prazo em dias para lavratura da escritura"
+    },
+    {
+      "nome": "multa_inadimplemento",
+      "tipo": "object",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": {"percentual": 10, "sobre": "VALOR_PAGO"},
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Clausula penal por inadimplemento"
+    },
+    {
+      "nome": "testemunhas",
+      "tipo": "array",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": [{"nome": "JOSE PEREIRA", "cpf": "111.222.333-44"}],
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Lista de testemunhas do contrato",
+      "campos_internos": [
+        {"nome": "nome", "tipo": "string"},
+        {"nome": "cpf", "tipo": "string"},
+        {"nome": "rg", "tipo": "string"}
+      ]
+    },
+    {
+      "nome": "foro",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "SAO PAULO/SP",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Foro eleito para resolucao de disputas"
+    },
+    {
+      "nome": "numero_clausulas",
+      "tipo": "number",
+      "obrigatorio": false,
+      "regex": "\\d+",
+      "exemplo": "15",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Quantidade total de clausulas"
+    },
+    {
+      "nome": "plataforma_assinatura",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "DOCUSIGN",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Plataforma de assinatura eletronica utilizada"
+    }
+  ],
+  "padroes_identificacao": [
+    "COMPROMISSO",
+    "COMPRA E VENDA",
+    "PROMITENTE VENDEDOR",
+    "PROMITENTE COMPRADOR",
+    "INSTRUMENTO PARTICULAR",
+    "PROMESSA DE COMPRA",
+    "CONTRATO PARTICULAR"
+  ],
+  "validacoes": [
+    "cpf_digito_verificador",
+    "soma_sinal_saldo_igual_total",
+    "soma_percentuais_vendedores_100",
+    "soma_percentuais_compradores_100",
+    "matricula_valida",
+    "datas_coerentes"
+  ]
+}

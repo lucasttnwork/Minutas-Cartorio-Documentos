@@ -1,0 +1,174 @@
+Analise este documento de IPTU ou Certidao de Dados Cadastrais do Imovel.
+
+TAREFAS OBRIGATORIAS:
+1. REESCRITA: Transcreva todos os dados do documento, incluindo cabecalho, rodape e informacoes de validacao.
+2. EXPLICACAO: Descreva as caracteristicas do imovel, valores venais e composicao do calculo.
+3. CATALOGACAO: Extraia TODOS os campos estruturados conforme schema abaixo.
+
+REGRAS IMPORTANTES:
+- Se um campo nao existir no documento, use null (NAO use "Nao especificado" ou strings vazias)
+- Valores numericos devem ser numeros (ex: 100.0), nao strings
+- Datas devem estar no formato DD/MM/AAAA
+- CPF/CNPJ devem manter a formatacao original com pontuacao
+- Extraia TODOS os valores de m2 (terreno e construcao) - sao campos explicitos no documento
+
+FORMATO DE SAIDA (use exatamente este formato):
+
+## REESCRITA DO DOCUMENTO
+[transcricao completa do documento, incluindo cabecalho, dados, certificacao e rodape]
+
+## EXPLICACAO CONTEXTUAL
+
+### Identificacao do Imovel
+- SQL (Cadastro Municipal): [numero]
+- Endereco completo: [logradouro, numero, complemento]
+- Bairro: [nome ou null se nao constar]
+- CEP: [numero]
+- Cidade/Estado: [cidade - UF]
+- Subdivisao da Zona Urbana: [ex: 1a Subdivisao da Zona Urbana]
+
+### Caracteristicas do Terreno
+- Area total do terreno: [m2]
+- Area incorporada: [m2]
+- Area nao incorporada: [m2]
+- Testada (frente do lote): [metros]
+- Fracao ideal: [percentual]
+
+### Caracteristicas da Construcao
+- Tipo de imovel: [apartamento/casa/terreno/comercial]
+- Area construida: [m2]
+- Area ocupada pela construcao: [m2]
+- Ano da construcao corrigido: [ano]
+- Padrao construtivo: [codigo e descricao]
+- Uso: [residencial/comercial/misto]
+
+### Valores Unitarios de m2
+- Valor do m2 do terreno: R$ [valor]
+- Valor do m2 da construcao: R$ [valor]
+
+### Valores Venais para Calculo do IPTU (Exercicio [ano])
+- Valor da area incorporada: R$ [valor]
+- Valor da area nao incorporada: R$ [valor]
+- Valor da construcao: R$ [valor]
+- Base de calculo do IPTU (valor venal total): R$ [valor]
+
+### Contribuintes
+[Lista de contribuintes com tipo (PF/PJ), nome e CPF/CNPJ]
+
+### Certificacao e Validacao
+- Data de emissao: [DD/MM/AAAA]
+- Numero do documento: [numero]
+- URL para verificacao: [url]
+- Validade da verificacao online: [data limite]
+- Solicitante: [nome e CPF]
+
+## DADOS CATALOGADOS (JSON)
+```json
+{
+  "identificacao_imovel": {
+    "sql": "000.000.0000-0",
+    "logradouro": "R EXEMPLO",
+    "numero": "123",
+    "complemento": "APTO 101 BL-A",
+    "endereco_completo": "R EXEMPLO, 123 - APTO 101 BL-A, Cidade - UF",
+    "bairro": null,
+    "cep": "00000-000",
+    "cidade": "Cidade",
+    "estado": "UF",
+    "subdivisao_zona_urbana": "1a Subdivisao da Zona Urbana"
+  },
+  "endereco_notificacao": {
+    "endereco": "R EXEMPLO, 123 - APTO 101 BL-A",
+    "cep": "00000-000",
+    "igual_ao_imovel": true
+  },
+  "contribuintes": [
+    {
+      "tipo_pessoa": "juridica",
+      "nome": "EMPRESA LTDA",
+      "cpf": null,
+      "cnpj": "00.000.000/0001-00"
+    },
+    {
+      "tipo_pessoa": "fisica",
+      "nome": "NOME DA PESSOA",
+      "cpf": "000.000.000-00",
+      "cnpj": null
+    }
+  ],
+  "dados_terreno": {
+    "area_incorporada_m2": 0.00,
+    "area_nao_incorporada_m2": 0.00,
+    "area_total_m2": 0.00,
+    "testada_m": 0.00,
+    "fracao_ideal": 0.0000,
+    "fracao_ideal_formatado": "0,0000%"
+  },
+  "dados_construcao": {
+    "area_construida_m2": 0.00,
+    "area_ocupada_m2": 0.00,
+    "ano_construcao_corrigido": 0000,
+    "padrao_construcao": "0-X",
+    "uso": "residencia",
+    "tipo_imovel": "APARTAMENTO"
+  },
+  "valores_m2": {
+    "valor_m2_terreno": 0.00,
+    "valor_m2_construcao": 0.00,
+    "moeda": "BRL"
+  },
+  "valores_venais": {
+    "ano_exercicio": 0000,
+    "valor_area_incorporada": 0.00,
+    "valor_area_nao_incorporada": 0.00,
+    "valor_construcao": 0.00,
+    "valor_venal_total": 0.00,
+    "base_calculo_iptu": 0.00
+  },
+  "metadados_documento": {
+    "orgao_emissor": "PREFEITURA MUNICIPAL - FAZENDA",
+    "titulo_documento": "Certidao de Dados Cadastrais do Imovel - IPTU",
+    "data_emissao": "DD/MM/AAAA",
+    "numero_documento": "0.0000.000000000-0",
+    "solicitante_nome": "NOME DO SOLICITANTE",
+    "solicitante_cpf": "000.000.000-00"
+  },
+  "validacao_documento": {
+    "portaria_expedicao": "Portaria XX no 000/0000, de DD/MM/AAAA",
+    "url_autenticidade": "http://www.prefeitura.exemplo.gov.br/servicos/certidoes/",
+    "data_limite_verificacao": "DD/MM/AAAA",
+    "meio_expedicao": "Internet"
+  },
+  "pessoa_relacionada": "NOME DO SOLICITANTE"
+}
+```
+
+CAMPOS OBRIGATORIOS A EXTRAIR:
+1. SQL (cadastro do imovel) - CRITICO
+2. Endereco completo E componentes separados (logradouro, numero, complemento) - CRITICO
+3. CEP - CRITICO
+4. Contribuintes com CPF/CNPJ e tipo de pessoa - CRITICO
+5. Area do terreno (incorporada, nao incorporada, total) - CRITICO
+6. TESTADA em metros - CRITICO (campo explicito "Testada (m)")
+7. Fracao ideal (numero E formatado) - IMPORTANTE
+8. Area construida E area ocupada pela construcao - CRITICO (sao campos diferentes!)
+9. ANO DA CONSTRUCAO CORRIGIDO - CRITICO (campo explicito no documento)
+10. Padrao construtivo e uso - IMPORTANTE
+11. VALOR DO M2 DO TERRENO - CRITICO (campo em "Valores de m2 (R$)")
+12. VALOR DO M2 DA CONSTRUCAO - CRITICO (campo em "Valores de m2 (R$)")
+13. Valores venais detalhados (area incorporada, nao incorporada, construcao, total) - CRITICO
+14. Ano do exercicio fiscal - CRITICO
+15. DATA DE EMISSAO do documento - CRITICO (geralmente no rodape)
+16. NUMERO DO DOCUMENTO - CRITICO (identificador unico)
+17. Solicitante (nome e CPF) - IMPORTANTE
+18. URL de autenticidade - IMPORTANTE
+19. Data limite para verificacao - IMPORTANTE
+20. Subdivisao da zona urbana - IMPORTANTE
+
+ATENCAO ESPECIAL:
+- O campo "Testada (m)" representa os metros de frente do terreno - NAO OMITIR
+- O campo "Ano da construcao corrigido" e diferente de ano de exercicio - NAO CONFUNDIR
+- "Area ocupada pela construcao" e diferente de "Area construida" - EXTRAIR AMBOS
+- Os "Valores de m2 (R$)" sao campos explicitos com valor unitario do terreno e da construcao - NAO OMITIR
+- A data de emissao e numero do documento geralmente estao no rodape - VERIFICAR RODAPE
+- Se houver URL para verificacao de autenticidade, extrair completa

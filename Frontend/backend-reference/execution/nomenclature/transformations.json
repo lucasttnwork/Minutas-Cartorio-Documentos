@@ -1,0 +1,622 @@
+{
+  "version": "2.0",
+  "description": "Regras de transformacao para converter estruturas nested em flat e normalizar dados por tipo de documento",
+  "last_updated": "2026-01-30",
+  "document_transformations": {
+    "RG": {
+      "description": "Transformacoes para documento RG",
+      "nested_to_flat": {
+        "filiacao.pai": "pn_filiacao_pai",
+        "filiacao.mae": "pn_filiacao_mae",
+        "dados_catalogados.nome_completo": "pn_nome",
+        "dados_catalogados.numero_rg": "pn_rg",
+        "dados_catalogados.cpf": "pn_cpf",
+        "dados_catalogados.data_nascimento": "pn_data_nascimento",
+        "dados_catalogados.naturalidade": "pn_naturalidade",
+        "dados_catalogados.orgao_expedidor": "pn_orgao_emissor_rg",
+        "dados_catalogados.uf_expedidor": "pn_estado_emissor_rg",
+        "dados_catalogados.data_expedicao": "pn_data_emissao_rg",
+        "dados_catalogados.nome_pai": "pn_filiacao_pai",
+        "dados_catalogados.nome_mae": "pn_filiacao_mae"
+      },
+      "field_renames": {
+        "numero_rg": "pn_rg",
+        "nome_completo": "pn_nome",
+        "orgao_expedidor": "pn_orgao_emissor_rg",
+        "uf_expedidor": "pn_estado_emissor_rg",
+        "data_expedicao": "pn_data_emissao_rg",
+        "nome_pai": "pn_filiacao_pai",
+        "nome_mae": "pn_filiacao_mae"
+      },
+      "output_category": "pessoa_natural"
+    },
+    "CNH": {
+      "description": "Transformacoes para documento CNH",
+      "nested_to_flat": {
+        "filiacao.pai": "pn_filiacao_pai",
+        "filiacao.mae": "pn_filiacao_mae",
+        "dados_catalogados.nome_completo": "pn_nome",
+        "dados_catalogados.cpf": "pn_cpf",
+        "dados_catalogados.numero_cnh": "pn_cnh",
+        "dados_catalogados.data_nascimento": "pn_data_nascimento"
+      },
+      "field_renames": {
+        "numero_cnh": "pn_cnh",
+        "nome_completo": "pn_nome",
+        "nome_pai": "pn_filiacao_pai",
+        "nome_mae": "pn_filiacao_mae"
+      },
+      "output_category": "pessoa_natural"
+    },
+    "CPF": {
+      "description": "Transformacoes para documento CPF",
+      "nested_to_flat": {
+        "dados_catalogados.nome": "pn_nome",
+        "dados_catalogados.cpf": "pn_cpf",
+        "dados_catalogados.data_nascimento": "pn_data_nascimento"
+      },
+      "field_renames": {
+        "nome": "pn_nome"
+      },
+      "output_category": "pessoa_natural"
+    },
+    "CERTIDAO_NASCIMENTO": {
+      "description": "Transformacoes para Certidao de Nascimento",
+      "nested_to_flat": {
+        "filiacao.pai": "pn_filiacao_pai",
+        "filiacao.mae": "pn_filiacao_mae",
+        "dados_catalogados.nome_registrado": "pn_nome",
+        "dados_catalogados.cpf": "pn_cpf",
+        "dados_catalogados.data_nascimento": "pn_data_nascimento",
+        "dados_catalogados.naturalidade": "pn_naturalidade",
+        "dados_catalogados.matricula": "pn_certidao_nascimento_matricula",
+        "dados_catalogados.livro": "pn_certidao_nascimento_livro",
+        "dados_catalogados.folha": "pn_certidao_nascimento_folha",
+        "dados_catalogados.termo": "pn_certidao_nascimento_termo",
+        "dados_catalogados.cartorio": "pn_certidao_nascimento_cartorio"
+      },
+      "field_renames": {
+        "nome_registrado": "pn_nome",
+        "matricula": "pn_certidao_nascimento_matricula",
+        "livro": "pn_certidao_nascimento_livro",
+        "folha": "pn_certidao_nascimento_folha",
+        "termo": "pn_certidao_nascimento_termo",
+        "cartorio": "pn_certidao_nascimento_cartorio"
+      },
+      "output_category": "pessoa_natural"
+    },
+    "CERTIDAO_CASAMENTO": {
+      "description": "Transformacoes para Certidao de Casamento",
+      "nested_to_flat": {
+        "filiacao.pai": "pn_filiacao_pai",
+        "filiacao.mae": "pn_filiacao_mae",
+        "dados_catalogados.nome": "pn_nome",
+        "dados_catalogados.cpf": "pn_cpf",
+        "dados_catalogados.rg": "pn_rg",
+        "dados_catalogados.data_nascimento": "pn_data_nascimento",
+        "dados_catalogados.estado_civil": "pn_estado_civil",
+        "dados_catalogados.regime_bens": "pn_regime_bens",
+        "dados_catalogados.data_casamento": "pn_data_casamento",
+        "dados_catalogados.nacionalidade": "pn_nacionalidade",
+        "dados_catalogados.conjuge_nome": "ng_alienante_conjuge"
+      },
+      "field_renames": {
+        "conjuge_nome": "ng_alienante_conjuge"
+      },
+      "output_category": "pessoa_natural"
+    },
+    "CERTIDAO_OBITO": {
+      "description": "Transformacoes para Certidao de Obito",
+      "nested_to_flat": {
+        "dados_catalogados.nome_falecido": "pn_nome",
+        "dados_catalogados.cpf": "pn_cpf",
+        "dados_catalogados.rg": "pn_rg",
+        "dados_catalogados.data_nascimento": "pn_data_nascimento",
+        "dados_catalogados.data_obito": "pn_data_obito",
+        "dados_catalogados.estado_civil": "pn_estado_civil"
+      },
+      "field_renames": {
+        "nome_falecido": "pn_nome",
+        "data_falecimento": "pn_data_obito"
+      },
+      "output_category": "pessoa_natural"
+    },
+    "COMPROVANTE_RESIDENCIA": {
+      "description": "Transformacoes para Comprovante de Residencia",
+      "nested_to_flat": {
+        "dados_catalogados.nome_titular": "pn_nome",
+        "dados_catalogados.cpf": "pn_cpf",
+        "endereco.logradouro": "pn_domicilio_logradouro",
+        "endereco.numero": "pn_domicilio_numero",
+        "endereco.complemento": "pn_domicilio_complemento",
+        "endereco.bairro": "pn_domicilio_bairro",
+        "endereco.cidade": "pn_domicilio_cidade",
+        "endereco.estado": "pn_domicilio_estado",
+        "endereco.cep": "pn_domicilio_cep"
+      },
+      "field_renames": {
+        "nome_titular": "pn_nome",
+        "logradouro": "pn_domicilio_logradouro",
+        "numero": "pn_domicilio_numero",
+        "complemento": "pn_domicilio_complemento",
+        "bairro": "pn_domicilio_bairro",
+        "cidade": "pn_domicilio_cidade",
+        "estado": "pn_domicilio_estado",
+        "cep": "pn_domicilio_cep"
+      },
+      "output_category": "pessoa_natural"
+    },
+    "CNDT": {
+      "description": "Transformacoes para CNDT",
+      "nested_to_flat": {
+        "dados_catalogados.nome": "pn_nome",
+        "dados_catalogados.cpf": "pn_cpf",
+        "dados_catalogados.numero_cndt": "pn_cndt_numero",
+        "dados_catalogados.data_expedicao": "pn_cndt_data_expedicao",
+        "dados_catalogados.hora_expedicao": "pn_cndt_hora_expedicao",
+        "dados_catalogados.razao_social": "pj_denominacao",
+        "dados_catalogados.cnpj": "pj_cnpj",
+        "dados_catalogados.numero_cndt_pj": "pj_cndt_numero",
+        "dados_catalogados.data_expedicao_pj": "pj_cndt_data_expedicao"
+      },
+      "field_renames": {
+        "numero_cndt": "pn_cndt_numero",
+        "razao_social": "pj_denominacao"
+      },
+      "output_category": "misto"
+    },
+    "CND_FEDERAL": {
+      "description": "Transformacoes para CND Federal",
+      "nested_to_flat": {
+        "dados_catalogados.nome": "pn_nome",
+        "dados_catalogados.cpf": "pn_cpf",
+        "dados_catalogados.tipo_certidao": "pn_certidao_uniao_tipo",
+        "dados_catalogados.data_emissao": "pn_certidao_uniao_data_emissao",
+        "dados_catalogados.hora_emissao": "pn_certidao_uniao_hora_emissao",
+        "dados_catalogados.validade": "pn_certidao_uniao_validade",
+        "dados_catalogados.codigo_controle": "pn_certidao_uniao_codigo_controle",
+        "dados_catalogados.razao_social": "pj_denominacao",
+        "dados_catalogados.cnpj": "pj_cnpj"
+      },
+      "field_renames": {
+        "tipo_certidao": "pn_certidao_uniao_tipo"
+      },
+      "output_category": "misto"
+    },
+    "CND_ESTADUAL": {
+      "description": "Transformacoes para CND Estadual",
+      "nested_to_flat": {
+        "dados_catalogados.nome": "pn_nome",
+        "dados_catalogados.cpf": "pn_cpf",
+        "dados_catalogados.razao_social": "pj_denominacao",
+        "dados_catalogados.cnpj": "pj_cnpj"
+      },
+      "field_renames": {},
+      "output_category": "misto"
+    },
+    "CND_MUNICIPAL": {
+      "description": "Transformacoes para CND Municipal",
+      "nested_to_flat": {
+        "dados_catalogados.nome": "pn_nome",
+        "dados_catalogados.cpf": "pn_cpf",
+        "dados_catalogados.razao_social": "pj_denominacao",
+        "dados_catalogados.cnpj": "pj_cnpj",
+        "dados_catalogados.sql": "im_sql",
+        "endereco.logradouro": "im_logradouro",
+        "endereco.numero": "im_numero",
+        "endereco.bairro": "im_bairro",
+        "endereco.cidade": "im_cidade",
+        "endereco.estado": "im_estado",
+        "dados_catalogados.numero_certidao": "im_cnd_iptu_numero",
+        "dados_catalogados.data_emissao": "im_cnd_iptu_data"
+      },
+      "field_renames": {
+        "sql": "im_sql",
+        "numero_certidao": "im_cnd_iptu_numero"
+      },
+      "output_category": "imovel"
+    },
+    "CND_IMOVEL": {
+      "description": "Transformacoes para CND do Imovel",
+      "nested_to_flat": {
+        "dados_catalogados.sql": "im_sql",
+        "dados_catalogados.matricula": "im_matricula_numero",
+        "endereco.logradouro": "im_logradouro",
+        "endereco.numero": "im_numero",
+        "endereco.complemento": "im_complemento",
+        "endereco.bairro": "im_bairro",
+        "endereco.cidade": "im_cidade",
+        "endereco.estado": "im_estado",
+        "dados_catalogados.numero_certidao": "im_cnd_iptu_numero",
+        "dados_catalogados.data_emissao": "im_cnd_iptu_data"
+      },
+      "field_renames": {},
+      "output_category": "imovel"
+    },
+    "CND_CONDOMINIO": {
+      "description": "Transformacoes para CND do Condominio",
+      "nested_to_flat": {
+        "dados_catalogados.nome_proprietario": "pn_nome",
+        "dados_catalogados.unidade": "im_complemento"
+      },
+      "field_renames": {
+        "nome_proprietario": "pn_nome",
+        "unidade": "im_complemento"
+      },
+      "output_category": "imovel"
+    },
+    "CONTRATO_SOCIAL": {
+      "description": "Transformacoes para Contrato Social",
+      "nested_to_flat": {
+        "dados_catalogados.razao_social": "pj_denominacao",
+        "dados_catalogados.cnpj": "pj_cnpj",
+        "dados_catalogados.nire": "pj_nire",
+        "sede.logradouro": "pj_sede_logradouro",
+        "sede.numero": "pj_sede_numero",
+        "sede.complemento": "pj_sede_complemento",
+        "sede.bairro": "pj_sede_bairro",
+        "sede.cidade": "pj_sede_cidade",
+        "sede.estado": "pj_sede_estado",
+        "sede.cep": "pj_sede_cep",
+        "dados_catalogados.instrumento_constitutivo": "pj_instrumento_constitutivo",
+        "dados_catalogados.junta_comercial": "pj_junta_comercial",
+        "dados_catalogados.numero_registro": "pj_numero_registro_contrato",
+        "dados_catalogados.data_sessao": "pj_data_sessao_registro",
+        "administrador.nome": "pj_admin_nome",
+        "administrador.cpf": "pj_admin_cpf",
+        "administrador.rg": "pj_admin_rg",
+        "administrador.orgao_rg": "pj_admin_orgao_emissor_rg",
+        "administrador.uf_rg": "pj_admin_estado_emissor_rg",
+        "administrador.data_nascimento": "pj_admin_data_nascimento",
+        "administrador.estado_civil": "pj_admin_estado_civil",
+        "administrador.profissao": "pj_admin_profissao",
+        "administrador.nacionalidade": "pj_admin_nacionalidade",
+        "administrador.domicilio.logradouro": "pj_admin_domicilio_logradouro",
+        "administrador.domicilio.numero": "pj_admin_domicilio_numero",
+        "administrador.domicilio.bairro": "pj_admin_domicilio_bairro",
+        "administrador.domicilio.cidade": "pj_admin_domicilio_cidade",
+        "administrador.domicilio.estado": "pj_admin_domicilio_estado",
+        "administrador.domicilio.cep": "pj_admin_domicilio_cep",
+        "dados_catalogados.tipo_representacao": "pj_tipo_representacao",
+        "dados_catalogados.clausula_admin": "pj_clausula_indica_admin",
+        "dados_catalogados.clausula_poderes": "pj_clausula_poderes_admin"
+      },
+      "field_renames": {
+        "razao_social": "pj_denominacao",
+        "instrumento_constitutivo": "pj_instrumento_constitutivo",
+        "junta_comercial": "pj_junta_comercial"
+      },
+      "output_category": "pessoa_juridica"
+    },
+    "MATRICULA_IMOVEL": {
+      "description": "Transformacoes para Matricula de Imovel",
+      "nested_to_flat": {
+        "matricula.numero": "im_matricula_numero",
+        "matricula.cartorio": "im_matricula_cartorio_numero",
+        "matricula.cidade": "im_matricula_cartorio_cidade",
+        "matricula.estado": "im_matricula_cartorio_estado",
+        "matricula.numero_nacional": "im_matricula_numero_nacional",
+        "imovel.tipo": "im_denominacao",
+        "imovel.area_total": "im_area_total",
+        "imovel.area_privativa": "im_area_privativa",
+        "imovel.area_construida": "im_area_construida",
+        "endereco.logradouro": "im_logradouro",
+        "endereco.numero": "im_numero",
+        "endereco.complemento": "im_complemento",
+        "endereco.bairro": "im_bairro",
+        "endereco.cidade": "im_cidade",
+        "endereco.estado": "im_estado",
+        "endereco.cep": "im_cep",
+        "imovel.descricao": "im_descricao_conforme_matricula",
+        "imovel.sql": "im_sql",
+        "certidao.numero": "im_certidao_matricula_numero",
+        "certidao.data": "im_certidao_matricula_data",
+        "proprietario.nome": "im_proprietario_nome",
+        "proprietario.fracao_ideal": "im_proprietario_fracao_ideal",
+        "proprietario.registro_aquisicao": "im_proprietario_registro_aquisicao",
+        "proprietario.data_registro": "im_proprietario_data_registro",
+        "proprietario.titulo_aquisicao": "im_proprietario_titulo_aquisicao"
+      },
+      "array_handlers": {
+        "onus": {
+          "fields": ["titulo", "registro", "data_registro", "descricao", "titular_nome", "titular_fracao"],
+          "prefix": "im_onus_"
+        },
+        "proprietarios": {
+          "fields": ["nome", "fracao_ideal", "registro_aquisicao", "data_registro", "titulo_aquisicao"],
+          "prefix": "im_proprietario_"
+        }
+      },
+      "field_renames": {
+        "tipo_imovel": "im_denominacao",
+        "descricao": "im_descricao_conforme_matricula"
+      },
+      "output_category": "imovel"
+    },
+    "ITBI": {
+      "description": "Transformacoes para ITBI",
+      "nested_to_flat": {
+        "dados_catalogados.nome_transmitente": "pn_nome",
+        "dados_catalogados.cpf_transmitente": "pn_cpf",
+        "dados_catalogados.razao_social_transmitente": "pj_denominacao",
+        "dados_catalogados.cnpj_transmitente": "pj_cnpj",
+        "dados_catalogados.matricula": "im_matricula_numero",
+        "dados_catalogados.cartorio_ri": "im_matricula_cartorio_numero",
+        "dados_catalogados.sql": "im_sql",
+        "endereco.logradouro": "im_logradouro",
+        "endereco.numero": "im_numero",
+        "endereco.bairro": "im_bairro",
+        "endereco.cidade": "im_cidade",
+        "endereco.estado": "im_estado",
+        "dados_catalogados.valor_transacao": "ng_valor_total",
+        "dados_catalogados.nome_alienante": "ng_alienante_nome",
+        "dados_catalogados.nome_adquirente": "ng_adquirente_nome",
+        "dados_catalogados.numero_guia": "ng_itbi_numero_guia",
+        "dados_catalogados.base_calculo": "ng_itbi_base_calculo",
+        "dados_catalogados.valor_itbi": "ng_itbi_valor",
+        "dados_catalogados.linha_digitavel": "ng_itbi_linha_digitavel",
+        "dados_catalogados.aliquota": "ng_itbi_aliquota",
+        "dados_catalogados.proporcao_transmitida": "ng_itbi_proporcao_transmitida",
+        "dados_catalogados.data_pagamento": "ng_itbi_data_pagamento"
+      },
+      "field_renames": {
+        "valor_transacao": "ng_valor_total",
+        "numero_guia": "ng_itbi_numero_guia"
+      },
+      "output_category": "negocio"
+    },
+    "VVR": {
+      "description": "Transformacoes para VVR (Valor Venal de Referencia)",
+      "nested_to_flat": {
+        "dados_catalogados.matricula": "im_matricula_numero",
+        "dados_catalogados.sql": "im_sql",
+        "dados_catalogados.valor_venal_referencia": "im_valor_venal_referencia",
+        "endereco.logradouro": "im_logradouro",
+        "endereco.numero": "im_numero",
+        "dados_catalogados.area_construida": "im_area_construida"
+      },
+      "field_renames": {
+        "valor_venal_referencia": "im_valor_venal_referencia"
+      },
+      "output_category": "imovel"
+    },
+    "IPTU": {
+      "description": "Transformacoes para IPTU",
+      "nested_to_flat": {
+        "dados_catalogados.nome_contribuinte": "pn_nome",
+        "dados_catalogados.cpf_contribuinte": "pn_cpf",
+        "dados_catalogados.matricula": "im_matricula_numero",
+        "dados_catalogados.sql": "im_sql",
+        "dados_catalogados.valor_venal": "im_valor_venal_iptu",
+        "endereco.logradouro": "im_logradouro",
+        "endereco.numero": "im_numero",
+        "endereco.bairro": "im_bairro",
+        "endereco.cidade": "im_cidade",
+        "endereco.estado": "im_estado",
+        "endereco.cep": "im_cep",
+        "dados_catalogados.area_total": "im_area_total",
+        "dados_catalogados.area_construida": "im_area_construida"
+      },
+      "field_renames": {
+        "nome_contribuinte": "pn_nome",
+        "valor_venal": "im_valor_venal_iptu"
+      },
+      "output_category": "imovel"
+    },
+    "DADOS_CADASTRAIS": {
+      "description": "Transformacoes para Dados Cadastrais do Imovel",
+      "nested_to_flat": {
+        "dados_catalogados.matricula": "im_matricula_numero",
+        "dados_catalogados.sql": "im_sql",
+        "endereco.logradouro": "im_logradouro",
+        "endereco.numero": "im_numero",
+        "endereco.complemento": "im_complemento",
+        "endereco.bairro": "im_bairro",
+        "endereco.cidade": "im_cidade",
+        "endereco.estado": "im_estado",
+        "endereco.cep": "im_cep",
+        "dados_catalogados.area_total": "im_area_total",
+        "dados_catalogados.area_construida": "im_area_construida",
+        "dados_catalogados.tipo_imovel": "im_denominacao",
+        "dados_catalogados.data_certidao": "im_data_certidao_cadastro"
+      },
+      "field_renames": {
+        "data_certidao": "im_data_certidao_cadastro"
+      },
+      "output_category": "imovel"
+    },
+    "ESCRITURA": {
+      "description": "Transformacoes para Escritura Publica",
+      "nested_to_flat": {
+        "partes.outorgantes_vendedores[*].nome": "ng_alienante_nome",
+        "partes.outorgantes_vendedores[*].cpf": "pn_cpf",
+        "partes.outorgantes_vendedores[*].rg": "pn_rg",
+        "partes.outorgantes_vendedores[*].nacionalidade": "pn_nacionalidade",
+        "partes.outorgantes_vendedores[*].profissao": "pn_profissao",
+        "partes.outorgantes_vendedores[*].estado_civil": "pn_estado_civil",
+        "partes.outorgantes_vendedores[*].regime_bens": "pn_regime_bens",
+        "partes.outorgantes_vendedores[*].endereco.logradouro": "pn_domicilio_logradouro",
+        "partes.outorgantes_vendedores[*].endereco.bairro": "pn_domicilio_bairro",
+        "partes.outorgantes_vendedores[*].endereco.cidade": "pn_domicilio_cidade",
+        "partes.outorgantes_vendedores[*].endereco.estado": "pn_domicilio_estado",
+        "partes.outorgados_compradores[*].nome": "ng_adquirente_nome",
+        "imovel.matricula": "im_matricula_numero",
+        "imovel.cartorio_ri": "im_matricula_cartorio_numero",
+        "imovel.cidade_ri": "im_matricula_cartorio_cidade",
+        "imovel.tipo": "im_denominacao",
+        "imovel.descricao": "im_descricao_conforme_matricula",
+        "imovel.endereco": "im_logradouro",
+        "valores.valor_transacao": "ng_valor_total",
+        "valores.forma_pagamento": "ng_pagamento_tipo",
+        "valores.modo_pagamento": "ng_pagamento_modo"
+      },
+      "array_handlers": {
+        "outorgantes": {
+          "treat_as": "alienantes",
+          "fields": ["nome", "cpf", "rg", "orgao_rg", "nacionalidade", "profissao", "estado_civil", "regime_bens"]
+        },
+        "outorgados": {
+          "treat_as": "adquirentes",
+          "fields": ["nome", "cpf", "rg", "orgao_rg", "nacionalidade", "profissao", "estado_civil", "regime_bens"]
+        }
+      },
+      "field_renames": {
+        "valor_transacao": "ng_valor_total",
+        "forma_pagamento": "ng_pagamento_tipo"
+      },
+      "output_category": "negocio"
+    },
+    "COMPROMISSO_COMPRA_VENDA": {
+      "description": "Transformacoes para Compromisso de Compra e Venda",
+      "nested_to_flat": {
+        "partes.promitentes_vendedores[*].nome": "ng_alienante_nome",
+        "partes.promitentes_vendedores[*].cpf": "pn_cpf",
+        "partes.promitentes_compradores[*].nome": "ng_adquirente_nome",
+        "imovel.matricula": "im_matricula_numero",
+        "imovel.cartorio_ri": "im_matricula_cartorio_numero",
+        "imovel.tipo": "im_denominacao",
+        "endereco.logradouro": "im_logradouro",
+        "endereco.numero": "im_numero",
+        "endereco.complemento": "im_complemento",
+        "endereco.bairro": "im_bairro",
+        "endereco.cidade": "im_cidade",
+        "endereco.estado": "im_estado",
+        "imovel.area_total": "im_area_total",
+        "imovel.area_privativa": "im_area_privativa",
+        "valores.valor_total": "ng_valor_total",
+        "valores.fracao_alienada": "ng_fracao_alienada",
+        "valores.tipo_pagamento": "ng_pagamento_tipo",
+        "valores.modo_pagamento": "ng_pagamento_modo",
+        "valores.data_pagamento": "ng_pagamento_data",
+        "termos.promessa": "ng_termos_promessa"
+      },
+      "field_renames": {},
+      "output_category": "negocio"
+    },
+    "PROCURACAO": {
+      "description": "Transformacoes para Procuracao",
+      "nested_to_flat": {
+        "outorgante.nome": "pn_nome",
+        "outorgante.cpf": "pn_cpf",
+        "outorgante.rg": "pn_rg",
+        "outorgante.orgao_rg": "pn_orgao_emissor_rg",
+        "outorgante.estado_rg": "pn_estado_emissor_rg",
+        "outorgante.nacionalidade": "pn_nacionalidade",
+        "outorgante.profissao": "pn_profissao",
+        "outorgante.estado_civil": "pn_estado_civil",
+        "outorgante.endereco.logradouro": "pn_domicilio_logradouro",
+        "outorgante.endereco.bairro": "pn_domicilio_bairro",
+        "outorgante.endereco.cidade": "pn_domicilio_cidade",
+        "outorgante.endereco.estado": "pn_domicilio_estado",
+        "outorgante.endereco.cep": "pn_domicilio_cep",
+        "outorgado.nome": "pj_procurador_nome",
+        "outorgado.cpf": "pj_procurador_cpf",
+        "outorgado.rg": "pj_procurador_rg",
+        "outorgado.orgao_rg": "pj_procurador_orgao_emissor_rg",
+        "outorgado.estado_rg": "pj_procurador_estado_emissor_rg",
+        "outorgado.data_nascimento": "pj_procurador_data_nascimento",
+        "outorgado.estado_civil": "pj_procurador_estado_civil",
+        "outorgado.profissao": "pj_procurador_profissao",
+        "outorgado.nacionalidade": "pj_procurador_nacionalidade",
+        "tabelionato": "pj_tabelionato_procuracao",
+        "data_lavratura": "pj_data_procuracao",
+        "livro": "pj_livro_procuracao",
+        "paginas": "pj_paginas_procuracao"
+      },
+      "field_renames": {
+        "tabelionato": "pj_tabelionato_procuracao"
+      },
+      "output_category": "misto"
+    },
+    "COMPROVANTE_PAGAMENTO": {
+      "description": "Transformacoes para Comprovante de Pagamento",
+      "nested_to_flat": {
+        "dados_catalogados.nome_pagador": "pn_nome",
+        "dados_catalogados.cpf_pagador": "pn_cpf",
+        "dados_catalogados.razao_social_pagador": "pj_denominacao",
+        "dados_catalogados.cnpj_pagador": "pj_cnpj",
+        "dados_catalogados.valor": "ng_valor_total",
+        "dados_catalogados.tipo_pagamento": "ng_pagamento_tipo",
+        "dados_catalogados.modo_pagamento": "ng_pagamento_modo",
+        "dados_catalogados.data_pagamento": "ng_pagamento_data",
+        "dados_catalogados.banco_origem": "ng_pagamento_banco_origem",
+        "dados_catalogados.agencia_origem": "ng_pagamento_agencia_origem",
+        "dados_catalogados.conta_origem": "ng_pagamento_conta_origem",
+        "dados_catalogados.banco_destino": "ng_pagamento_banco_destino",
+        "dados_catalogados.agencia_destino": "ng_pagamento_agencia_destino",
+        "dados_catalogados.conta_destino": "ng_pagamento_conta_destino"
+      },
+      "field_renames": {
+        "valor": "ng_valor_total"
+      },
+      "output_category": "negocio"
+    },
+    "PROTOCOLO_ONR": {
+      "description": "Transformacoes para Protocolo ONR",
+      "nested_to_flat": {
+        "dados_catalogados.matricula": "im_matricula_numero",
+        "dados_catalogados.cartorio_ri": "im_matricula_cartorio_numero"
+      },
+      "field_renames": {},
+      "output_category": "imovel"
+    },
+    "ASSINATURA_DIGITAL": {
+      "description": "Transformacoes para Assinatura Digital",
+      "nested_to_flat": {
+        "dados_catalogados.nome_signatario": "pn_nome"
+      },
+      "field_renames": {
+        "nome_signatario": "pn_nome"
+      },
+      "output_category": "pessoa_natural"
+    },
+    "OUTRO": {
+      "description": "Transformacoes genericas para documentos nao classificados",
+      "nested_to_flat": {},
+      "field_renames": {},
+      "output_category": "outro"
+    }
+  },
+  "global_transformations": {
+    "case_normalization": {
+      "fields_uppercase": [
+        "pn_nome", "pn_filiacao_pai", "pn_filiacao_mae", "pn_nacionalidade",
+        "pn_profissao", "pn_estado_civil", "pn_naturalidade",
+        "pn_domicilio_logradouro", "pn_domicilio_bairro", "pn_domicilio_cidade",
+        "pj_denominacao", "pj_sede_logradouro", "pj_sede_bairro", "pj_sede_cidade",
+        "pj_admin_nome", "pj_procurador_nome",
+        "im_logradouro", "im_bairro", "im_cidade", "im_descricao_conforme_matricula",
+        "ng_alienante_nome", "ng_adquirente_nome", "ng_pagamento_tipo"
+      ],
+      "fields_lowercase": [
+        "pn_email", "pj_admin_email", "pj_procurador_email"
+      ]
+    },
+    "format_masks": {
+      "pn_cpf": "###.###.###-##",
+      "pj_cnpj": "##.###.###/####-##",
+      "pn_domicilio_cep": "#####-###",
+      "pj_sede_cep": "#####-###",
+      "im_cep": "#####-###"
+    },
+    "date_format": {
+      "standard": "DD/MM/YYYY",
+      "fields": [
+        "pn_data_nascimento", "pn_data_emissao_rg", "pn_data_casamento",
+        "pn_data_obito", "pn_cndt_data_expedicao", "pn_certidao_uniao_data_emissao",
+        "pn_certidao_uniao_validade", "pj_data_sessao_registro", "pj_data_procuracao",
+        "im_cnd_iptu_data", "im_certidao_matricula_data", "im_data_certidao_cadastro",
+        "ng_pagamento_data", "ng_itbi_data_pagamento"
+      ]
+    },
+    "currency_format": {
+      "locale": "pt-BR",
+      "currency": "BRL",
+      "fields": [
+        "im_valor_venal_iptu", "im_valor_venal_referencia",
+        "ng_valor_total", "ng_alienante_valor_alienacao", "ng_adquirente_valor_aquisicao",
+        "ng_itbi_base_calculo", "ng_itbi_valor"
+      ]
+    }
+  }
+}
