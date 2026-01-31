@@ -16,6 +16,7 @@ import {
   CreditCard,
   FileCheck
 } from "lucide-react";
+import { toast } from "sonner";
 
 // ===================== INTERFACES =====================
 
@@ -94,9 +95,9 @@ interface ImpostoTransmissao {
 
 const initialState = {
   // SEÇÃO 1: VALOR (3 campos)
-  valorMatricula: "R$ 1.200.000,00",
+  valorMatricula: "1200000",
   fracaoIdealAlienada: "100%",
-  valorTotalAlienacao: "R$ 1.200.000,00",
+  valorTotalAlienacao: "1200000",
 
   // SEÇÃO 2: ALIENANTES
   alienantes: [
@@ -105,7 +106,7 @@ const initialState = {
       tipo: "PESSOA_NATURAL" as const,
       nome: "MARIA DA SILVA",
       fracaoIdeal: "50%",
-      valorAlienacao: "R$ 600.000,00",
+      valorAlienacao: "600000",
       conjuge: "JOÃO DA SILVA",
       compareceNaEscritura: "SIM",
       qualidadeComparecimento: "ALIENANTE",
@@ -115,7 +116,7 @@ const initialState = {
       tipo: "PESSOA_NATURAL" as const,
       nome: "JOÃO DA SILVA",
       fracaoIdeal: "50%",
-      valorAlienacao: "R$ 600.000,00",
+      valorAlienacao: "600000",
       conjuge: "MARIA DA SILVA",
       compareceNaEscritura: "SIM",
       qualidadeComparecimento: "ALIENANTE",
@@ -129,7 +130,7 @@ const initialState = {
       tipo: "PESSOA_NATURAL" as const,
       nome: "PEDRO SOUZA",
       fracaoIdeal: "100%",
-      valorAquisicao: "R$ 1.200.000,00",
+      valorAquisicao: "1200000",
     },
   ] as Adquirente[],
 
@@ -183,8 +184,8 @@ const initialState = {
   // SEÇÃO 8: IMPOSTO DE TRANSMISSÃO (3 campos)
   impostoTransmissao: {
     numeroGuiaITBI: "2024/00012345",
-    baseCalculo: "R$ 1.200.000,00",
-    valorGuia: "R$ 36.000,00",
+    baseCalculo: "1200000",
+    valorGuia: "36000",
   } as ImpostoTransmissao,
 };
 
@@ -223,6 +224,7 @@ export default function NegocioJuridico() {
   const [modalAlienante, setModalAlienante] = useState<Alienante | null>(null);
   const [modalAdquirente, setModalAdquirente] = useState<Adquirente | null>(null);
   const [consultando, setConsultando] = useState(false);
+  const [showMinutaModal, setShowMinutaModal] = useState(false);
 
   // ========== HELPERS DE ATUALIZAÇÃO ==========
 
@@ -363,6 +365,8 @@ export default function NegocioJuridico() {
 
   const realizarConsultaIndisponibilidade = async () => {
     setConsultando(true);
+    toast.info("Consultando indisponibilidade de bens...");
+    
     // Simulação de consulta
     await new Promise((resolve) => setTimeout(resolve, 2000));
     
@@ -381,6 +385,7 @@ export default function NegocioJuridico() {
       consultaRealizada: true,
     }));
     setConsultando(false);
+    toast.success("Consulta realizada com sucesso!");
   };
 
   // ========== IMPOSTO ==========
@@ -395,9 +400,15 @@ export default function NegocioJuridico() {
   // ========== GERAR MINUTA ==========
 
   const handleGerarMinuta = () => {
-    console.log("Gerando minuta...", data);
+    setShowMinutaModal(true);
+  };
+
+  const confirmGerarMinuta = () => {
+    setShowMinutaModal(false);
+    toast.success("Minuta gerada com sucesso!", {
+      description: "O documento está sendo preparado para download."
+    });
     // Aqui viria a lógica de geração da minuta
-    alert("Minuta gerada com sucesso!");
   };
 
   // ========== ANIMAÇÕES ==========
@@ -438,13 +449,14 @@ export default function NegocioJuridico() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="space-y-6"
+          className="space-y-8"
         >
           {/* ====== SEÇÃO 1: VALOR ====== */}
           <SectionCard title="Valor da Transação">
             <FieldGrid cols={3}>
               <FormField
                 label="Valor da Matrícula"
+                type="currency"
                 value={data.valorMatricula}
                 onChange={(v) => updateField("valorMatricula", v)}
                 placeholder="R$ 0,00"
@@ -457,6 +469,7 @@ export default function NegocioJuridico() {
               />
               <FormField
                 label="Valor Total da Alienação"
+                type="currency"
                 value={data.valorTotalAlienacao}
                 onChange={(v) => updateField("valorTotalAlienacao", v)}
                 placeholder="R$ 0,00"
@@ -545,6 +558,7 @@ export default function NegocioJuridico() {
                     />
                     <FormField
                       label="Valor da Alienação"
+                      type="currency"
                       value={ali.valorAlienacao}
                       onChange={(v) => updateAlienante(ali.id, "valorAlienacao", v)}
                       placeholder="R$ 0,00"
@@ -670,6 +684,7 @@ export default function NegocioJuridico() {
                     />
                     <FormField
                       label="Valor da Aquisição"
+                      type="currency"
                       value={adq.valorAquisicao}
                       onChange={(v) => updateAdquirente(adq.id, "valorAquisicao", v)}
                       placeholder="R$ 0,00"
@@ -713,7 +728,7 @@ export default function NegocioJuridico() {
                 />
               </FieldGrid>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4 border-t border-border/50">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4 border-t border-border/50">
                 {/* Conta de Origem */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground uppercase tracking-wide">
@@ -798,7 +813,7 @@ export default function NegocioJuridico() {
           </SectionCard>
 
           {/* ====== SEÇÃO 6: DECLARAÇÕES ====== */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Declarações do Alienante */}
             <SectionCard title="Declarações do(s) Alienante(s)">
               <div className="space-y-3">
@@ -962,12 +977,14 @@ export default function NegocioJuridico() {
               />
               <FormField
                 label="Base de Cálculo"
+                type="currency"
                 value={data.impostoTransmissao.baseCalculo}
                 onChange={(v) => updateImpostoTransmissao("baseCalculo", v)}
                 placeholder="R$ 0,00"
               />
               <FormField
                 label="Valor da Guia"
+                type="currency"
                 value={data.impostoTransmissao.valorGuia}
                 onChange={(v) => updateImpostoTransmissao("valorGuia", v)}
                 placeholder="R$ 0,00"
@@ -992,10 +1009,68 @@ export default function NegocioJuridico() {
 
         <NavigationBar
           onBack={() => navigate("/imovel")}
-          onNext={() => console.log("Fim do fluxo")}
-          nextLabel="Finalizar"
+          onNext={() => navigate("/upload")}
+          nextLabel="Upload de Arquivos"
         />
       </div>
+
+      {/* ====== MODAL: CONFIRMAÇÃO GERAR MINUTA ====== */}
+      <AnimatePresence>
+        {showMinutaModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={() => setShowMinutaModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-card border-2 border-accent rounded-lg p-6 max-w-md w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <FileCheck className="w-6 h-6 text-accent" />
+                <h3 className="text-lg font-semibold text-foreground">Gerar Minuta</h3>
+              </div>
+
+              <p className="text-muted-foreground mb-6">
+                Você está prestes a gerar a minuta do negócio jurídico. 
+                Certifique-se de que todos os dados estão corretos antes de prosseguir.
+              </p>
+
+              <div className="bg-secondary/50 rounded-lg p-4 mb-6">
+                <p className="text-sm text-muted-foreground">
+                  <strong>Resumo:</strong>
+                </p>
+                <ul className="text-sm mt-2 space-y-1">
+                  <li>• {data.alienantes.length} alienante(s)</li>
+                  <li>• {data.adquirentes.length} adquirente(s)</li>
+                  <li>• Valor: R$ {Number(data.valorTotalAlienacao).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</li>
+                </ul>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowMinutaModal(false)}
+                  className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={confirmGerarMinuta}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-background bg-accent hover:bg-accent/90 rounded-md transition-colors"
+                >
+                  <FileCheck className="w-4 h-4" />
+                  Confirmar e Gerar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ====== MODAL: ALIENANTE ====== */}
       <AnimatePresence>
@@ -1040,7 +1115,7 @@ export default function NegocioJuridico() {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Valor da Alienação</p>
-                    <p className="font-medium">{modalAlienante.valorAlienacao || "-"}</p>
+                    <p className="font-medium">R$ {Number(modalAlienante.valorAlienacao || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                   </div>
                   {modalAlienante.tipo === "PESSOA_NATURAL" && (
                     <>
@@ -1112,7 +1187,7 @@ export default function NegocioJuridico() {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Valor da Aquisição</p>
-                    <p className="font-medium">{modalAdquirente.valorAquisicao || "-"}</p>
+                    <p className="font-medium">R$ {Number(modalAdquirente.valorAquisicao || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                   </div>
                 </div>
 

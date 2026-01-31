@@ -3,6 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { PageHeader, SectionCard, FieldGrid, NavigationBar } from "@/components/layout";
 import { FormField, AddressFields, ContactFields, CertidaoSection } from "@/components/forms";
+import { SimpleTooltip } from "@/components/ui/tooltip";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { HelpCircle } from "lucide-react";
+import { toast } from "sonner";
 
 // Estado inicial dos dados
 const initialState = {
@@ -17,6 +22,7 @@ const initialState = {
   profissao: "ESTUDANTE",
   dataNascimento: "1995-05-05",
   dataObito: "",
+  pessoaFalecida: false,
   cnh: "000000000000",
   orgaoEmissorCnh: "DETRAN-SP",
   
@@ -86,18 +92,21 @@ const simnaoOptions = [
   { value: "NAO", label: "Não" },
 ];
 
-// Opção para uso futuro no select de certidão
-// const certidaoUniaoOptions = [
-//   { value: "NEGATIVA", label: "Negativa" },
-//   { value: "POSITIVA", label: "Positiva" },
-//   { value: "POSITIVA_EFEITOS_NEGATIVA", label: "Positiva com Efeitos de Negativa" },
-// ];
+// Helper para verificar se estado civil requer regime de bens
+const requiresRegimeBens = (estadoCivil: string) => {
+  return estadoCivil === "CASADO";
+};
+
+// Helper para verificar se estado civil requer data do casamento
+const requiresCasamentoFields = (estadoCivil: string) => {
+  return estadoCivil === "CASADO" || estadoCivil === "DIVORCIADO" || estadoCivil === "VIUVO" || estadoCivil === "SEPARADO";
+};
 
 export default function PessoaNatural() {
   const navigate = useNavigate();
   const [data, setData] = useState(initialState);
 
-  const updateField = (field: string, value: string) => {
+  const updateField = (field: string, value: string | boolean) => {
     setData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -113,6 +122,21 @@ export default function PessoaNatural() {
       ...prev,
       contato: { ...prev.contato, [field]: value },
     }));
+  };
+
+  const handleUpdateCNDT = () => {
+    toast.info("Atualizando CNDT...", { duration: 1500 });
+    // Simulação - em produção, chamaria a API
+    setTimeout(() => {
+      toast.success("CNDT atualizada com sucesso!");
+    }, 1500);
+  };
+
+  const handleUpdateCertidao = () => {
+    toast.info("Atualizando Certidão da União...", { duration: 1500 });
+    setTimeout(() => {
+      toast.success("Certidão atualizada com sucesso!");
+    }, 1500);
   };
 
   const containerVariants = {
@@ -146,7 +170,7 @@ export default function PessoaNatural() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-8"
         >
           {/* Dados Individuais */}
           <SectionCard title="Dados Individuais">
@@ -202,12 +226,38 @@ export default function PessoaNatural() {
                 value={data.dataNascimento}
                 onChange={(v) => updateField("dataNascimento", v)}
               />
-              <FormField
-                label="Data do Óbito"
-                type="date"
-                value={data.dataObito}
-                onChange={(v) => updateField("dataObito", v)}
-              />
+              
+              {/* Checkbox Pessoa Falecida */}
+              <div className="col-span-2 flex items-center gap-4 py-2 border-t border-border/50 mt-2 pt-4">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="pessoaFalecida"
+                    checked={data.pessoaFalecida}
+                    onCheckedChange={(checked) => updateField("pessoaFalecida", checked === true)}
+                  />
+                  <Label htmlFor="pessoaFalecida" className="text-sm font-medium cursor-pointer">
+                    Pessoa Falecida
+                  </Label>
+                </div>
+              </div>
+
+              {/* Data do Óbito - Só aparece se checkbox marcado */}
+              {data.pessoaFalecida && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="col-span-2"
+                >
+                  <FormField
+                    label="Data do Óbito"
+                    type="date"
+                    value={data.dataObito}
+                    onChange={(v) => updateField("dataObito", v)}
+                  />
+                </motion.div>
+              )}
+
               <FormField
                 label="CNH"
                 value={data.cnh}
@@ -231,37 +281,83 @@ export default function PessoaNatural() {
                 onChange={(v) => updateField("estadoCivil", v)}
                 options={estadoCivilOptions}
               />
-              <FormField
-                label="Regime de Bens"
-                type="select"
-                value={data.regimeBens}
-                onChange={(v) => updateField("regimeBens", v)}
-                options={regimeBensOptions}
-              />
-              <FormField
-                label="Data do Casamento"
-                type="date"
-                value={data.dataCasamento}
-                onChange={(v) => updateField("dataCasamento", v)}
-              />
-              <FormField
-                label="Data da Separação"
-                type="date"
-                value={data.dataSeparacao}
-                onChange={(v) => updateField("dataSeparacao", v)}
-              />
-              <FormField
-                label="Data do Divórcio"
-                type="date"
-                value={data.dataDivorcio}
-                onChange={(v) => updateField("dataDivorcio", v)}
-              />
-              <FormField
-                label="Data Falecimento Cônjuge"
-                type="date"
-                value={data.dataFalecimentoConjuge}
-                onChange={(v) => updateField("dataFalecimentoConjuge", v)}
-              />
+              
+              {/* Regime de Bens - Só aparece se casado */}
+              {requiresRegimeBens(data.estadoCivil) && (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                >
+                  <FormField
+                    label="Regime de Bens"
+                    type="select"
+                    value={data.regimeBens}
+                    onChange={(v) => updateField("regimeBens", v)}
+                    options={regimeBensOptions}
+                  />
+                </motion.div>
+              )}
+              
+              {/* Data do Casamento - Só aparece se relevante */}
+              {requiresCasamentoFields(data.estadoCivil) && (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                >
+                  <FormField
+                    label="Data do Casamento"
+                    type="date"
+                    value={data.dataCasamento}
+                    onChange={(v) => updateField("dataCasamento", v)}
+                  />
+                </motion.div>
+              )}
+              
+              {/* Data da Separação - Só se separado */}
+              {data.estadoCivil === "SEPARADO" && (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                >
+                  <FormField
+                    label="Data da Separação"
+                    type="date"
+                    value={data.dataSeparacao}
+                    onChange={(v) => updateField("dataSeparacao", v)}
+                  />
+                </motion.div>
+              )}
+              
+              {/* Data do Divórcio - Só se divorciado */}
+              {data.estadoCivil === "DIVORCIADO" && (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                >
+                  <FormField
+                    label="Data do Divórcio"
+                    type="date"
+                    value={data.dataDivorcio}
+                    onChange={(v) => updateField("dataDivorcio", v)}
+                  />
+                </motion.div>
+              )}
+              
+              {/* Data Falecimento Cônjuge - Só se viúvo */}
+              {data.estadoCivil === "VIUVO" && (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                >
+                  <FormField
+                    label="Data Falecimento Cônjuge"
+                    type="date"
+                    value={data.dataFalecimentoConjuge}
+                    onChange={(v) => updateField("dataFalecimentoConjuge", v)}
+                  />
+                </motion.div>
+              )}
+              
               <FormField
                 label="União Estável"
                 type="select"
@@ -269,25 +365,48 @@ export default function PessoaNatural() {
                 onChange={(v) => updateField("uniaoEstavel", v)}
                 options={simnaoOptions}
               />
-              <FormField
-                label="Regime de Bens (União)"
-                type="select"
-                value={data.regimeBensUniao}
-                onChange={(v) => updateField("regimeBensUniao", v)}
-                options={regimeBensOptions}
-              />
-              <FormField
-                label="Data da União Estável"
-                type="date"
-                value={data.dataUniaoEstavel}
-                onChange={(v) => updateField("dataUniaoEstavel", v)}
-              />
-              <FormField
-                label="Data Extinção União"
-                type="date"
-                value={data.dataExtincaoUniao}
-                onChange={(v) => updateField("dataExtincaoUniao", v)}
-              />
+              
+              {/* Campos de União Estável - Só se união estável = SIM */}
+              {data.uniaoEstavel === "SIM" && (
+                <>
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                  >
+                    <FormField
+                      label="Regime de Bens (União)"
+                      type="select"
+                      value={data.regimeBensUniao}
+                      onChange={(v) => updateField("regimeBensUniao", v)}
+                      options={regimeBensOptions}
+                    />
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.05 }}
+                  >
+                    <FormField
+                      label="Data da União Estável"
+                      type="date"
+                      value={data.dataUniaoEstavel}
+                      onChange={(v) => updateField("dataUniaoEstavel", v)}
+                    />
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <FormField
+                      label="Data Extinção União"
+                      type="date"
+                      value={data.dataExtincaoUniao}
+                      onChange={(v) => updateField("dataExtincaoUniao", v)}
+                    />
+                  </motion.div>
+                </>
+              )}
             </FieldGrid>
           </SectionCard>
 
@@ -309,20 +428,33 @@ export default function PessoaNatural() {
         </motion.div>
 
         {/* Certidões - Full Width */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <CertidaoSection
-            title="CNDT"
-            fields={[
-              { key: "numero", label: "Número da CNDT", value: data.cndt.numero },
-              { key: "dataExpedicao", label: "Data de Expedição", value: data.cndt.dataExpedicao, type: "date" },
-              { key: "horaExpedicao", label: "Hora de Expedição", value: data.cndt.horaExpedicao },
-            ]}
-            onUpdate={() => console.log("Atualizar CNDT")}
-            onChange={(key, value) => setData((prev) => ({
-              ...prev,
-              cndt: { ...prev.cndt, [key]: value },
-            }))}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+          <SectionCard 
+            title={
+              <div className="flex items-center gap-2">
+                <span>CNDT</span>
+                <SimpleTooltip content="Certidão Negativa de Débitos Trabalhistas">
+                  <button className="text-muted-foreground hover:text-accent transition-colors">
+                    <HelpCircle className="w-4 h-4" />
+                  </button>
+                </SimpleTooltip>
+              </div>
+            }
+          >
+            <CertidaoSection
+              title=""
+              fields={[
+                { key: "numero", label: "Número da CNDT", value: data.cndt.numero },
+                { key: "dataExpedicao", label: "Data de Expedição", value: data.cndt.dataExpedicao, type: "date" },
+                { key: "horaExpedicao", label: "Hora de Expedição", value: data.cndt.horaExpedicao },
+              ]}
+              onUpdate={handleUpdateCNDT}
+              onChange={(key, value) => setData((prev) => ({
+                ...prev,
+                cndt: { ...prev.cndt, [key]: value },
+              }))}
+            />
+          </SectionCard>
 
           <CertidaoSection
             title="Certidão da União"
@@ -333,7 +465,7 @@ export default function PessoaNatural() {
               { key: "validade", label: "Validade", value: data.certidaoUniao.validade, type: "date" },
               { key: "codigoControle", label: "Código de Controle", value: data.certidaoUniao.codigoControle },
             ]}
-            onUpdate={() => console.log("Atualizar Certidão")}
+            onUpdate={handleUpdateCertidao}
             onChange={(key, value) => setData((prev) => ({
               ...prev,
               certidaoUniao: { ...prev.certidaoUniao, [key]: value },

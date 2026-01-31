@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
 interface SectionCardProps {
-  title: string;
+  title: ReactNode;
   children: ReactNode;
   className?: string;
   action?: ReactNode;
@@ -26,17 +26,19 @@ export function SectionCard({ title, children, className, action, variant = "def
         className
       )}
     >
-      <div className="flex items-center justify-between mb-6">
-        <h3 className={cn(
-          "font-bold uppercase tracking-wider",
-          isNested 
-            ? "text-sm md:text-base text-foreground/70" 
-            : "text-lg md:text-xl text-foreground"
-        )}>
-          {title}
-        </h3>
-        {action && <div>{action}</div>}
-      </div>
+      {title && (
+        <div className="flex items-center justify-between mb-6">
+          <h3 className={cn(
+            "font-bold uppercase tracking-wider",
+            isNested 
+              ? "text-sm md:text-base text-foreground/70" 
+              : "text-lg md:text-xl text-foreground"
+          )}>
+            {title}
+          </h3>
+          {action && <div>{action}</div>}
+        </div>
+      )}
       {children}
     </motion.section>
   );

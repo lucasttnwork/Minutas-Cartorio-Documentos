@@ -6,11 +6,13 @@ import Imovel from "./pages/Imovel";
 import NegocioJuridico from "./pages/NegocioJuridico";
 import Upload from "./pages/Upload";
 import { Toaster } from "./components/ui/sonner";
+import { GlobalNavigation } from "./components/layout";
 
 function App() {
   return (
     <Router>
       <div className="min-h-screen bg-background">
+        <GlobalNavigation />
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/pessoa-natural" element={<PessoaNatural />} />

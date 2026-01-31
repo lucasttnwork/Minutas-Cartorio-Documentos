@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ProgressStepper } from "@/components/layout";
 import { FileText, Users, Building2, Briefcase, Upload } from "lucide-react";
 
 const modules = [
@@ -42,7 +43,24 @@ const modules = [
   },
 ];
 
+const steps = [
+  { id: "pessoa-natural", label: "Pessoa Natural", href: "/pessoa-natural" },
+  { id: "pessoa-juridica", label: "Pessoa Jurídica", href: "/pessoa-juridica" },
+  { id: "imovel", label: "Imóvel", href: "/imovel" },
+  { id: "negocio", label: "Negócio Jurídico", href: "/negocio-juridico" },
+  { id: "upload", label: "Upload", href: "/upload" },
+];
+
 export default function Dashboard() {
+  const navigate = useNavigate();
+  
+  // TODO: Em produção, calcular o passo atual baseado nos dados preenchidos
+  const currentStep = 0;
+
+  const handleStepClick = (stepIndex: number) => {
+    navigate(steps[stepIndex].href);
+  };
+
   return (
     <main className="min-h-screen p-6 md:p-10">
       <motion.div
@@ -52,7 +70,7 @@ export default function Dashboard() {
         className="max-w-6xl mx-auto"
       >
         {/* Header */}
-        <header className="text-center mb-12">
+        <header className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
             Sistema de Minutas
           </h1>
@@ -61,8 +79,25 @@ export default function Dashboard() {
           </p>
         </header>
 
+        {/* Progress Stepper */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mb-10 bg-card rounded-xl p-4 border border-border"
+        >
+          <p className="text-sm text-muted-foreground text-center mb-4">
+            Progresso do Fluxo
+          </p>
+          <ProgressStepper
+            steps={steps}
+            currentStep={currentStep}
+            onStepClick={handleStepClick}
+          />
+        </motion.div>
+
         {/* Module Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {modules.map((module, index) => (
             <motion.div
               key={module.href}
@@ -103,7 +138,7 @@ export default function Dashboard() {
           transition={{ duration: 0.5, delay: 0.5 }}
           className="mt-12 text-center text-muted-foreground text-sm"
         >
-          <p>Sistema em desenvolvimento • Cartório de Notas</p>
+          <p>Sistema de Minutas v1.0 • Cartório de Notas</p>
         </motion.footer>
       </motion.div>
     </main>

@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageHeader, SectionCard, FieldGrid, NavigationBar } from "@/components/layout";
-import { FormField, AddressFields, ESTADOS_BR } from "@/components/forms";
+import { FormField, AddressFields, ESTADOS_BR, TextareaWithCounter } from "@/components/forms";
 import { RefreshCw, Plus, Trash2, Eye, X, Building2, AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
 
 // ===================== INTERFACES =====================
 
@@ -90,7 +91,7 @@ interface RessalvasMatricula {
 const initialState = {
   // SEÇÃO 1: MATRÍCULA IMOBILIÁRIA (5 campos)
   matricula: {
-    numeroMatricula: "123.456",
+    numeroMatricula: "123456",
     numeroRegistroImoveis: "1º Ofício",
     cidadeRegistroImoveis: "SÃO PAULO",
     estadoRegistroImoveis: "SP",
@@ -283,6 +284,22 @@ export default function Imovel() {
     }));
   };
 
+  // ========== HANDLERS COM TOAST ==========
+
+  const handleUpdateValoresVenais = () => {
+    toast.info("Atualizando valores venais...", { duration: 1500 });
+    setTimeout(() => {
+      toast.success("Valores venais atualizados!");
+    }, 1500);
+  };
+
+  const handleUpdateCertidaoIPTU = () => {
+    toast.info("Atualizando certidão IPTU...", { duration: 1500 });
+    setTimeout(() => {
+      toast.success("Certidão IPTU atualizada!");
+    }, 1500);
+  };
+
   // ========== PROPRIETÁRIOS ==========
 
   const addProprietario = () => {
@@ -428,10 +445,10 @@ export default function Imovel() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="space-y-6"
+          className="space-y-8"
         >
           {/* ====== LINHA 1: Matrícula Imobiliária + Cadastro Imobiliário ====== */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* SEÇÃO 1: MATRÍCULA IMOBILIÁRIA (5 campos) */}
             <SectionCard title="Matrícula Imobiliária">
               <FieldGrid cols={2}>
@@ -439,7 +456,7 @@ export default function Imovel() {
                   label="Número da Matrícula"
                   value={data.matricula.numeroMatricula}
                   onChange={(v) => updateMatricula("numeroMatricula", v)}
-                  placeholder="000.000"
+                  placeholder="000000"
                 />
                 <FormField
                   label="Nº do Registro de Imóveis"
@@ -529,26 +546,26 @@ export default function Imovel() {
               </div>
 
               <div className="border-t border-border/50 pt-4">
-                <FormField
+                <TextareaWithCounter
                   label="Descrição conforme a Matrícula"
-                  type="textarea"
                   value={data.descricao.descricaoConformeMatricula}
                   onChange={(v) => updateDescricao("descricaoConformeMatricula", v)}
                   placeholder="Descrição completa do imóvel conforme consta na matrícula..."
-                  fullWidth
+                  maxLength={2000}
+                  rows={4}
                 />
               </div>
             </div>
           </SectionCard>
 
           {/* ====== LINHA 2: Valores Venais + Negativa IPTU + Certidão Matrícula ====== */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* SEÇÃO 4: VALORES VENAIS (2 campos) */}
             <SectionCard 
               title="Valores Venais"
               action={
                 <button
-                  onClick={() => console.log("Atualizar valores venais")}
+                  onClick={handleUpdateValoresVenais}
                   className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-accent hover:text-accent/80 bg-accent/10 hover:bg-accent/20 rounded-md transition-colors"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
@@ -559,12 +576,14 @@ export default function Imovel() {
               <FieldGrid cols={1}>
                 <FormField
                   label="Valor Venal (IPTU)"
+                  type="currency"
                   value={data.valoresVenais.valorVenalIPTU}
                   onChange={(v) => updateValoresVenais("valorVenalIPTU", v)}
                   placeholder="R$ 0,00"
                 />
                 <FormField
                   label="Valor Venal de Referência (ITBI)"
+                  type="currency"
                   value={data.valoresVenais.valorVenalReferenciaITBI}
                   onChange={(v) => updateValoresVenais("valorVenalReferenciaITBI", v)}
                   placeholder="R$ 0,00"
@@ -577,7 +596,7 @@ export default function Imovel() {
               title="Negativa de IPTU"
               action={
                 <button
-                  onClick={() => console.log("Atualizar certidão IPTU")}
+                  onClick={handleUpdateCertidaoIPTU}
                   className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-accent hover:text-accent/80 bg-accent/10 hover:bg-accent/20 rounded-md transition-colors"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
@@ -808,13 +827,13 @@ export default function Imovel() {
                   </FieldGrid>
 
                   <div className="mt-3">
-                    <FormField
+                    <TextareaWithCounter
                       label="Descrição do Ônus conforme a Matrícula"
-                      type="textarea"
                       value={onus.descricaoConformeMatricula}
                       onChange={(v) => updateOnus(onus.id, "descricaoConformeMatricula", v)}
                       placeholder="Descrição completa do ônus..."
-                      fullWidth
+                      maxLength={2000}
+                      rows={3}
                     />
                   </div>
 

@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SectionCard } from "@/components/layout/SectionCard";
 import { 
@@ -13,9 +13,11 @@ import {
   AlertCircle,
   ArrowLeft,
   Trash2,
-  CloudUpload
+  CloudUpload,
+  AlertTriangle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface UploadedFile {
   id: string;
@@ -39,22 +41,73 @@ const formatFileSize = (bytes: number) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 };
 
+// Formatos aceitos
+const ACCEPTED_TYPES = [
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+];
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+
 export default function Upload() {
+  const navigate = useNavigate();
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [showExitWarning, setShowExitWarning] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Warn user about unsaved uploads when leaving
+  useEffect(() => {
+    const hasUploads = uploadedFiles.length > 0;
+    
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUploads) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [uploadedFiles]);
+
+  const validateFile = (file: File): { valid: boolean; error?: string } => {
+    // Check file size
+    if (file.size > MAX_FILE_SIZE) {
+      return { valid: false, error: `Arquivo muito grande (max 50MB)` };
+    }
+    
+    // Check file type
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      return { valid: false, error: `Tipo não suportado: ${file.type}` };
+    }
+
+    return { valid: true };
+  };
 
   const simulateUpload = useCallback((file: File) => {
     const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
+    const validation = validateFile(file);
+    
     const newFile: UploadedFile = {
       id,
       file,
-      progress: 0,
-      status: "uploading",
+      progress: validation.valid ? 0 : 100,
+      status: validation.valid ? "uploading" : "error",
+      errorMessage: validation.error,
     };
     
     setUploadedFiles(prev => [...prev, newFile]);
+    
+    if (!validation.valid) {
+      toast.error(`Erro no arquivo ${file.name}: ${validation.error}`);
+      return;
+    }
     
     // Simulate upload progress
     const interval = setInterval(() => {
@@ -105,8 +158,29 @@ export default function Upload() {
     setUploadedFiles([]);
   }, []);
 
+  const handleNavigateBack = () => {
+    if (uploadedFiles.length > 0) {
+      setShowExitWarning(true);
+    } else {
+      navigate("/");
+    }
+  };
+
+  const confirmExit = () => {
+    setShowExitWarning(false);
+    navigate("/");
+  };
+
+  const handleFinalize = () => {
+    toast.success("Upload finalizado com sucesso!", {
+      description: `${completedCount} arquivo(s) enviado(s).`
+    });
+    // Em produção, enviar para o backend aqui
+  };
+
   const completedCount = uploadedFiles.filter(f => f.status === "complete").length;
   const uploadingCount = uploadedFiles.filter(f => f.status === "uploading").length;
+  const errorCount = uploadedFiles.filter(f => f.status === "error").length;
 
   return (
     <main className="min-h-screen p-6 md:p-10">
@@ -118,10 +192,13 @@ export default function Upload() {
       >
         {/* Header */}
         <header className="mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4">
+          <button 
+            onClick={handleNavigateBack}
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
+          >
             <ArrowLeft className="w-4 h-4" />
             <span>Voltar ao Dashboard</span>
-          </Link>
+          </button>
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
             Upload de Arquivos
           </h1>
@@ -129,6 +206,25 @@ export default function Upload() {
             Envie documentos e anexos para o sistema
           </p>
         </header>
+
+        {/* Warning Banner */}
+        {uploadedFiles.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg flex items-start gap-3"
+          >
+            <AlertTriangle className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-yellow-500">
+                Arquivos não persistidos
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Os arquivos enviados serão perdidos se você sair desta página sem finalizar o upload.
+              </p>
+            </div>
+          </motion.div>
+        )}
 
         {/* Drop Zone */}
         <SectionCard title="Área de Upload" className="mb-6">
@@ -148,6 +244,7 @@ export default function Upload() {
               ref={fileInputRef}
               type="file"
               multiple
+              accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx"
               className="hidden"
               onChange={(e) => handleFiles(e.target.files)}
             />
@@ -194,7 +291,7 @@ export default function Upload() {
                 <span className="font-semibold text-foreground">{uploadedFiles.length}</span> arquivo(s)
               </span>
               {completedCount > 0 && (
-                <span className="flex items-center gap-1 text-success">
+                <span className="flex items-center gap-1 text-green-500">
                   <CheckCircle2 className="w-4 h-4" />
                   {completedCount} concluído(s)
                 </span>
@@ -203,6 +300,12 @@ export default function Upload() {
                 <span className="flex items-center gap-1 text-primary">
                   <UploadIcon className="w-4 h-4 animate-pulse" />
                   {uploadingCount} enviando...
+                </span>
+              )}
+              {errorCount > 0 && (
+                <span className="flex items-center gap-1 text-destructive">
+                  <AlertCircle className="w-4 h-4" />
+                  {errorCount} erro(s)
                 </span>
               )}
             </div>
@@ -244,7 +347,7 @@ export default function Upload() {
                       className={cn(
                         "relative flex items-center gap-4 p-4 rounded-lg border transition-colors",
                         item.status === "complete" 
-                          ? "bg-success/5 border-success/30" 
+                          ? "bg-green-500/5 border-green-500/30" 
                           : item.status === "error"
                           ? "bg-destructive/5 border-destructive/30"
                           : "bg-secondary/50 border-border"
@@ -254,7 +357,7 @@ export default function Upload() {
                       <div className={cn(
                         "w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0",
                         item.status === "complete" 
-                          ? "bg-success/10" 
+                          ? "bg-green-500/10" 
                           : item.status === "error"
                           ? "bg-destructive/10"
                           : "bg-secondary"
@@ -262,7 +365,7 @@ export default function Upload() {
                         <FileIcon className={cn(
                           "w-6 h-6",
                           item.status === "complete" 
-                            ? "text-success" 
+                            ? "text-green-500" 
                             : item.status === "error"
                             ? "text-destructive"
                             : "text-muted-foreground"
@@ -276,7 +379,7 @@ export default function Upload() {
                             {item.file.name}
                           </p>
                           {item.status === "complete" && (
-                            <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
+                            <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
                           )}
                           {item.status === "error" && (
                             <AlertCircle className="w-4 h-4 text-destructive flex-shrink-0" />
@@ -329,13 +432,53 @@ export default function Upload() {
             <Button variant="outline" onClick={clearAll}>
               Enviar Mais Arquivos
             </Button>
-            <Button>
+            <Button onClick={handleFinalize}>
               Finalizar Upload
               <CheckCircle2 className="w-4 h-4 ml-2" />
             </Button>
           </motion.div>
         )}
       </motion.div>
+
+      {/* Exit Warning Modal */}
+      <AnimatePresence>
+        {showExitWarning && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={() => setShowExitWarning(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-card border-2 border-yellow-500 rounded-lg p-6 max-w-md w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <AlertTriangle className="w-6 h-6 text-yellow-500" />
+                <h3 className="text-lg font-semibold text-foreground">Sair sem salvar?</h3>
+              </div>
+
+              <p className="text-muted-foreground mb-6">
+                Você tem {uploadedFiles.length} arquivo(s) enviado(s) que ainda não foram salvos.
+                Se você sair agora, eles serão perdidos.
+              </p>
+
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowExitWarning(false)}>
+                  Cancelar
+                </Button>
+                <Button variant="destructive" onClick={confirmExit}>
+                  Sair mesmo assim
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

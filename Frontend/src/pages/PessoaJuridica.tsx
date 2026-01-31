@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { PageHeader, SectionCard, FieldGrid, NavigationBar } from "@/components/layout";
+import { PageHeader, SectionCard, FieldGrid, NavigationBar, CollapsibleSection } from "@/components/layout";
 import { FormField, AddressFields, ContactFields, CertidaoSection } from "@/components/forms";
+import { SimpleTooltip } from "@/components/ui/tooltip";
+import { HelpCircle } from "lucide-react";
+import { toast } from "sonner";
 
 // Tipos para os dados aninhados
 interface EnderecoData {
@@ -312,6 +315,20 @@ export default function PessoaJuridica() {
     }));
   };
 
+  const handleUpdateCNDT = () => {
+    toast.info("Atualizando CNDT...", { duration: 1500 });
+    setTimeout(() => {
+      toast.success("CNDT atualizada com sucesso!");
+    }, 1500);
+  };
+
+  const handleUpdateCertidaoUniao = () => {
+    toast.info("Atualizando Certidão da União...", { duration: 1500 });
+    setTimeout(() => {
+      toast.success("Certidão atualizada com sucesso!");
+    }, 1500);
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -343,10 +360,10 @@ export default function PessoaJuridica() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="space-y-6"
+          className="space-y-8"
         >
           {/* ====== LINHA 1: Qualificação + Sede ====== */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* SEÇÃO 1: QUALIFICAÇÃO (3 campos) */}
             <SectionCard title="Qualificação da Empresa">
               <FieldGrid cols={1}>
@@ -381,7 +398,7 @@ export default function PessoaJuridica() {
           </div>
 
           {/* ====== LINHA 2: Registro Vigente + Certidão ====== */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* SEÇÃO 3: REGISTRO VIGENTE (4 campos) */}
             <SectionCard title="Registro Vigente">
               <FieldGrid cols={2}>
@@ -444,7 +461,7 @@ export default function PessoaJuridica() {
               Representação por Administração
             </h3>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Dados Pessoais do Administrador (12 campos) */}
               <SectionCard title="Dados Pessoais do Administrador" variant="nested">
                 <FieldGrid cols={2}>
@@ -576,18 +593,15 @@ export default function PessoaJuridica() {
             </SectionCard>
           </motion.div>
 
-          {/* ====== SEÇÃO 6: REPRESENTAÇÃO POR PROCURAÇÃO (26 campos) ====== */}
-          <motion.div
-            className="border-2 border-muted/50 rounded-lg p-4 space-y-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+          {/* ====== SEÇÃO 6: REPRESENTAÇÃO POR PROCURAÇÃO (Colapsável, borda amarela) ====== */}
+          <CollapsibleSection
+            title="Representação por Procuração"
+            subtitle="(se aplicável)"
+            defaultOpen={false}
+            borderColor="border-yellow-500/50"
+            titleColor="text-yellow-500"
           >
-            <h3 className="text-lg font-semibold text-muted-foreground uppercase tracking-wide">
-              Representação por Procuração
-              <span className="text-sm font-normal ml-2 opacity-70">(se aplicável)</span>
-            </h3>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Dados Pessoais do Procurador (12 campos) */}
               <SectionCard title="Dados Pessoais do Procurador" variant="nested">
                 <FieldGrid cols={2}>
@@ -717,24 +731,37 @@ export default function PessoaJuridica() {
                 />
               </FieldGrid>
             </SectionCard>
-          </motion.div>
+          </CollapsibleSection>
 
           {/* ====== LINHA FINAL: CNDT + Certidão da União (8 campos) ====== */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* SEÇÃO 7: CNDT (3 campos) */}
-            <CertidaoSection
-              title="CNDT"
-              fields={[
-                { key: "numero", label: "Número da CNDT", value: data.cndt.numero },
-                { key: "dataExpedicao", label: "Data de Expedição", value: data.cndt.dataExpedicao, type: "date" },
-                { key: "horaExpedicao", label: "Hora de Expedição", value: data.cndt.horaExpedicao },
-              ]}
-              onUpdate={() => console.log("Atualizar CNDT")}
-              onChange={(key, value) => setData((prev) => ({
-                ...prev,
-                cndt: { ...prev.cndt, [key]: value },
-              }))}
-            />
+            <SectionCard 
+              title={
+                <div className="flex items-center gap-2">
+                  <span>CNDT</span>
+                  <SimpleTooltip content="Certidão Negativa de Débitos Trabalhistas">
+                    <button className="text-muted-foreground hover:text-accent transition-colors">
+                      <HelpCircle className="w-4 h-4" />
+                    </button>
+                  </SimpleTooltip>
+                </div>
+              }
+            >
+              <CertidaoSection
+                title=""
+                fields={[
+                  { key: "numero", label: "Número da CNDT", value: data.cndt.numero },
+                  { key: "dataExpedicao", label: "Data de Expedição", value: data.cndt.dataExpedicao, type: "date" },
+                  { key: "horaExpedicao", label: "Hora de Expedição", value: data.cndt.horaExpedicao },
+                ]}
+                onUpdate={handleUpdateCNDT}
+                onChange={(key, value) => setData((prev) => ({
+                  ...prev,
+                  cndt: { ...prev.cndt, [key]: value },
+                }))}
+              />
+            </SectionCard>
 
             {/* SEÇÃO 8: CERTIDÃO DA UNIÃO (5 campos) */}
             <CertidaoSection
@@ -752,7 +779,7 @@ export default function PessoaJuridica() {
                 { key: "validade", label: "Validade", value: data.certidaoUniao.validade, type: "date" },
                 { key: "codigoControle", label: "Código de Controle", value: data.certidaoUniao.codigoControle },
               ]}
-              onUpdate={() => console.log("Atualizar Certidão da União")}
+              onUpdate={handleUpdateCertidaoUniao}
               onChange={(key, value) => setData((prev) => ({
                 ...prev,
                 certidaoUniao: { ...prev.certidaoUniao, [key]: value },
