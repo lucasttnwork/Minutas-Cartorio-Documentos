@@ -183,45 +183,12 @@ def configure_gemini(api_key: str) -> genai.Client:
 LARGE_FILE_THRESHOLD_BYTES = 2_000_000
 
 
-def select_prompt(tipo_documento: str, file_size_bytes: int) -> str:
-    """
-    Seleciona o arquivo de prompt apropriado baseado no tipo e tamanho do documento.
-
-    Para matriculas de imovel grandes (>2MB), usa o prompt compacto que prioriza
-    o JSON estruturado e evita esgotar tokens de saida com reescrita completa.
-
-    Args:
-        tipo_documento: Tipo do documento (ex: MATRICULA_IMOVEL, RG)
-        file_size_bytes: Tamanho do arquivo em bytes
-
-    Returns:
-        Nome do arquivo de prompt (ex: "matricula_imovel.txt" ou "matricula_imovel_compact.txt")
-    """
-    tipo_upper = tipo_documento.upper()
-
-    # Para matriculas de imovel grandes, usa prompt compacto
-    if tipo_upper == "MATRICULA_IMOVEL" and file_size_bytes > LARGE_FILE_THRESHOLD_BYTES:
-        compact_prompt = "matricula_imovel_compact.txt"
-        compact_path = PROMPTS_DIR / compact_prompt
-        if compact_path.exists():
-            logger.info(
-                f"Arquivo grande ({file_size_bytes / 1_000_000:.2f}MB > 2MB), "
-                f"usando prompt compacto: {compact_prompt}"
-            )
-            return compact_prompt
-        else:
-            logger.warning(
-                f"Prompt compacto nao encontrado ({compact_prompt}), "
-                f"usando prompt padrao para matricula grande"
-            )
-
-    # Caso padrao: usa nome do tipo em minusculo
-    return f"{tipo_documento.lower()}.txt"
-
-
 def load_prompt(tipo_documento: str, file_size_bytes: int = 0) -> str:
     """
     Carrega prompt especifico para o tipo de documento.
+
+    Detecta automaticamente a versao mais recente disponivel.
+    Por exemplo, se existirem rg.txt e rg_v2.txt, carrega rg_v2.txt.
 
     Para documentos grandes (>2MB), pode selecionar prompts compactos
     quando disponiveis (ex: matricula_imovel_compact.txt).
@@ -236,45 +203,73 @@ def load_prompt(tipo_documento: str, file_size_bytes: int = 0) -> str:
     Raises:
         PromptNotFoundError: Se prompt nao existir e generic tambem nao
     """
-    # Seleciona o nome do arquivo de prompt (pode ser compacto para arquivos grandes)
-    prompt_filename = select_prompt(tipo_documento, file_size_bytes)
-    prompt_file = PROMPTS_DIR / prompt_filename
+    try:
+        from execution.prompt_loader import load_prompt as loader_load_prompt
+        return loader_load_prompt(
+            tipo_documento,
+            file_size_bytes=file_size_bytes,
+            prompts_dir=PROMPTS_DIR
+        )
+    except ImportError:
+        # Fallback se prompt_loader nao estiver disponivel
+        logger.warning("prompt_loader nao disponivel, usando logica legada")
 
-    if prompt_file.exists():
-        content = prompt_file.read_text(encoding='utf-8')
-        logger.debug(f"Prompt carregado: {prompt_file.name}")
-        return content
+        tipo_upper = tipo_documento.upper()
 
-    # Tenta carregar prompt generico
-    generic_file = PROMPTS_DIR / "generic.txt"
-    if generic_file.exists():
-        content = generic_file.read_text(encoding='utf-8')
-        logger.warning(f"Prompt especifico nao encontrado para {tipo_documento}, usando generic")
-        return content
+        # Para matriculas de imovel grandes, usa prompt compacto
+        if tipo_upper == "MATRICULA_IMOVEL" and file_size_bytes > LARGE_FILE_THRESHOLD_BYTES:
+            compact_prompt = "matricula_imovel_compact.txt"
+            compact_path = PROMPTS_DIR / compact_prompt
+            if compact_path.exists():
+                logger.info(
+                    f"Arquivo grande ({file_size_bytes / 1_000_000:.2f}MB > 2MB), "
+                    f"usando prompt compacto: {compact_prompt}"
+                )
+                return compact_path.read_text(encoding='utf-8')
 
-    raise PromptNotFoundError(
-        f"Prompt nao encontrado: {prompt_file}\n"
-        f"Crie o arquivo ou use o prompt generico."
-    )
+        # Caso padrao
+        prompt_file = PROMPTS_DIR / f"{tipo_documento.lower()}.txt"
+
+        if prompt_file.exists():
+            return prompt_file.read_text(encoding='utf-8')
+
+        # Tenta carregar prompt generico
+        generic_file = PROMPTS_DIR / "generic.txt"
+        if generic_file.exists():
+            logger.warning(f"Prompt especifico nao encontrado para {tipo_documento}, usando generic")
+            return generic_file.read_text(encoding='utf-8')
+
+        raise PromptNotFoundError(
+            f"Prompt nao encontrado: {prompt_file}\n"
+            f"Crie o arquivo ou use o prompt generico."
+        )
 
 
 def list_available_prompts() -> List[str]:
     """
     Lista todos os prompts disponiveis.
 
+    Detecta automaticamente todas as versoes e retorna apenas
+    os nomes base (tipos de documento).
+
     Returns:
         Lista de tipos de documento com prompts
     """
-    if not PROMPTS_DIR.exists():
-        return []
+    try:
+        from execution.prompt_loader import list_available_prompts as loader_list
+        return loader_list(PROMPTS_DIR)
+    except ImportError:
+        # Fallback se prompt_loader nao estiver disponivel
+        if not PROMPTS_DIR.exists():
+            return []
 
-    prompts = []
-    for file in PROMPTS_DIR.glob("*.txt"):
-        tipo = file.stem.upper()
-        if tipo != "GENERIC":
-            prompts.append(tipo)
+        prompts = []
+        for file in PROMPTS_DIR.glob("*.txt"):
+            tipo = file.stem.upper()
+            if tipo != "GENERIC":
+                prompts.append(tipo)
 
-    return sorted(prompts)
+        return sorted(prompts)
 
 
 # =============================================================================
