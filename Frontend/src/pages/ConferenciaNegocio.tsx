@@ -1,7 +1,7 @@
 // src/pages/ConferenciaNegocio.tsx
 import { useEffect, useMemo } from "react";
 import { AnimatePresence } from "framer-motion";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FlowStepper } from "@/components/layout/FlowStepper";
 import { FlowNavigation } from "@/components/layout/FlowNavigation";
@@ -12,9 +12,12 @@ import { useMinuta } from "@/contexts/MinutaContext";
 import { Briefcase, Home } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { validateNegocioJuridico } from "@/schemas/minuta.schemas";
+import { toast } from "sonner";
 
 export default function ConferenciaNegocio() {
-  useParams(); // Route param available for future use
+  const { id } = useParams();
+  const navigate = useNavigate();
   const { currentMinuta, isSaving, updateNegocioJuridico, updateMinuta } = useMinuta();
 
   const imoveis = useMemo(() => currentMinuta?.imoveis || [], [currentMinuta?.imoveis]);
@@ -58,6 +61,41 @@ export default function ConferenciaNegocio() {
   const getImovelName = (imovelId: string) => {
     const imovel = imoveis.find(i => i.id === imovelId);
     return imovel?.descricao.denominacao || imovel?.matricula.numeroMatricula || 'Imovel';
+  };
+
+  const validateAllData = (): boolean => {
+    const errors: string[] = [];
+
+    // Validate each negocio juridico
+    negocios.forEach((negocio, index) => {
+      const result = validateNegocioJuridico(negocio);
+      if (!result.success) {
+        result.error.issues.forEach((issue) => {
+          // Only show errors for fields that have values (not empty/required errors)
+          if (issue.message) {
+            errors.push(`Negocio ${index + 1}: ${issue.message}`);
+          }
+        });
+      }
+    });
+
+    if (errors.length > 0) {
+      // Show first 3 errors max to not overwhelm user
+      errors.slice(0, 3).forEach(error => {
+        toast.error(error);
+      });
+      if (errors.length > 3) {
+        toast.error(`E mais ${errors.length - 3} erro(s)...`);
+      }
+    }
+
+    return errors.length === 0;
+  };
+
+  const handleNext = () => {
+    if (validateAllData()) {
+      navigate(`/minuta/${id}/minuta`);
+    }
   };
 
   return (
@@ -157,7 +195,7 @@ export default function ConferenciaNegocio() {
           </div>
         </SectionCard>
 
-        <FlowNavigation currentStep="negocio" isSaving={isSaving} />
+        <FlowNavigation currentStep="negocio" onNext={handleNext} isSaving={isSaving} />
       </div>
     </main>
   );

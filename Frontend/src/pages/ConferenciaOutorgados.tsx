@@ -1,5 +1,6 @@
 // src/pages/ConferenciaOutorgados.tsx
 import { AnimatePresence } from "framer-motion";
+import { useNavigate, useParams } from "react-router-dom";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FlowStepper } from "@/components/layout/FlowStepper";
 import { FlowNavigation } from "@/components/layout/FlowNavigation";
@@ -11,8 +12,12 @@ import { useMinuta } from "@/contexts/MinutaContext";
 import { User, Building2, Plus } from "lucide-react";
 import type { Endereco, Contato } from "@/types/minuta";
 import { createEmptyPessoaNatural, createEmptyPessoaJuridica } from "@/utils/factories";
+import { validatePessoaNatural, validatePessoaJuridica } from "@/schemas/minuta.schemas";
+import { toast } from "sonner";
 
 export default function ConferenciaOutorgados() {
+  const navigate = useNavigate();
+  const { id } = useParams();
   const {
     currentMinuta,
     isSaving,
@@ -26,6 +31,53 @@ export default function ConferenciaOutorgados() {
 
   const pessoasNaturais = currentMinuta?.outorgados.pessoasNaturais || [];
   const pessoasJuridicas = currentMinuta?.outorgados.pessoasJuridicas || [];
+
+  const validateAllData = (): boolean => {
+    const errors: string[] = [];
+
+    // Validate each pessoa natural
+    pessoasNaturais.forEach((pessoa, index) => {
+      const result = validatePessoaNatural(pessoa);
+      if (!result.success) {
+        result.error.issues.forEach((issue) => {
+          // Only show errors for fields that have values (not empty/required errors)
+          if (issue.message) {
+            errors.push(`Pessoa ${index + 1}: ${issue.message}`);
+          }
+        });
+      }
+    });
+
+    // Validate each pessoa juridica
+    pessoasJuridicas.forEach((empresa, index) => {
+      const result = validatePessoaJuridica(empresa);
+      if (!result.success) {
+        result.error.issues.forEach((issue) => {
+          if (issue.message) {
+            errors.push(`Empresa ${index + 1}: ${issue.message}`);
+          }
+        });
+      }
+    });
+
+    if (errors.length > 0) {
+      // Show first 3 errors max to not overwhelm user
+      errors.slice(0, 3).forEach(error => {
+        toast.error(error);
+      });
+      if (errors.length > 3) {
+        toast.error(`E mais ${errors.length - 3} erro(s)...`);
+      }
+    }
+
+    return errors.length === 0;
+  };
+
+  const handleNext = () => {
+    if (validateAllData()) {
+      navigate(`/minuta/${id}/imoveis`);
+    }
+  };
 
   const handleAddPessoaNatural = () => {
     addPessoaNaturalOutorgado(createEmptyPessoaNatural());
@@ -224,7 +276,7 @@ export default function ConferenciaOutorgados() {
           </div>
         </SectionCard>
 
-        <FlowNavigation currentStep="outorgados" isSaving={isSaving} />
+        <FlowNavigation currentStep="outorgados" onNext={handleNext} isSaving={isSaving} />
       </div>
     </main>
   );

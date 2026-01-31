@@ -1,5 +1,6 @@
 // src/pages/ConferenciaImoveis.tsx
 import { AnimatePresence } from "framer-motion";
+import { useNavigate, useParams } from "react-router-dom";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FlowStepper } from "@/components/layout/FlowStepper";
 import { FlowNavigation } from "@/components/layout/FlowNavigation";
@@ -11,11 +12,50 @@ import { useMinuta } from "@/contexts/MinutaContext";
 import { Home, Plus } from "lucide-react";
 import type { Imovel } from "@/types/minuta";
 import { createEmptyImovel } from "@/utils/factories";
+import { validateImovel } from "@/schemas/minuta.schemas";
+import { toast } from "sonner";
 
 export default function ConferenciaImoveis() {
+  const navigate = useNavigate();
+  const { id } = useParams();
   const { currentMinuta, isSaving, addImovel, updateImovel, removeImovel } = useMinuta();
 
   const imoveis = currentMinuta?.imoveis || [];
+
+  const validateAllData = (): boolean => {
+    const errors: string[] = [];
+
+    // Validate each imovel
+    imoveis.forEach((imovel, index) => {
+      const result = validateImovel(imovel);
+      if (!result.success) {
+        result.error.issues.forEach((issue) => {
+          // Only show errors for fields that have values (not empty/required errors)
+          if (issue.message) {
+            errors.push(`Imovel ${index + 1}: ${issue.message}`);
+          }
+        });
+      }
+    });
+
+    if (errors.length > 0) {
+      // Show first 3 errors max to not overwhelm user
+      errors.slice(0, 3).forEach(error => {
+        toast.error(error);
+      });
+      if (errors.length > 3) {
+        toast.error(`E mais ${errors.length - 3} erro(s)...`);
+      }
+    }
+
+    return errors.length === 0;
+  };
+
+  const handleNext = () => {
+    if (validateAllData()) {
+      navigate(`/minuta/${id}/parecer`);
+    }
+  };
 
   const handleAddImovel = () => {
     addImovel(createEmptyImovel());
@@ -267,7 +307,7 @@ export default function ConferenciaImoveis() {
           </div>
         </SectionCard>
 
-        <FlowNavigation currentStep="imoveis" isSaving={isSaving} />
+        <FlowNavigation currentStep="imoveis" onNext={handleNext} isSaving={isSaving} />
       </div>
     </main>
   );

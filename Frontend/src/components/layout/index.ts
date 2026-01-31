@@ -8,3 +8,4 @@ export { CollapsibleSection } from "./CollapsibleSection";
 export { EntityCard } from "./EntityCard";
 export { FlowNavigation } from "./FlowNavigation";
 export { FlowStepper } from "./FlowStepper";
+export { ErrorBoundary } from "./ErrorBoundary";
