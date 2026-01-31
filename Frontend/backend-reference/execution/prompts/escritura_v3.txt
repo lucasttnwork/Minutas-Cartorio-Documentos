@@ -1,0 +1,302 @@
+Voce e um especialista em analise de escrituras publicas brasileiras. Sua tarefa e analisar PROFUNDAMENTE esta escritura e extrair TODOS os dados em formato JSON estruturado.
+
+## METODOLOGIA DE ANALISE
+
+### PASSO 1: COMPREENSAO PROFUNDA
+Antes de extrair dados, analise a escritura para entender:
+- Quantas partes existem e quais seus papeis EXATOS (vendedor de nua propriedade? usufrutuario? anuente? procurador?)
+- Quantos imoveis estao envolvidos (apartamento, vaga, terreno separado?)
+- Qual a estrutura de propriedade (plena? nua propriedade + usufruto? condominio?)
+- Existem relacoes familiares entre as partes?
+- Existem gravames, clausulas especiais ou restricoes?
+- Qual a complexidade do pagamento (sinal, parcelas, financiamento, intermediacao?)
+
+### PASSO 2: CONSTRUCAO DO JSON SOB MEDIDA
+Construa o JSON de forma que REFLITA EXATAMENTE a estrutura daquela escritura especifica.
+NAO force uma estrutura rigida - adapte o JSON a realidade do documento.
+
+## REGRAS OBRIGATORIAS
+
+1. **NUNCA INVENTAR DADOS**: Campo ausente ou ilegivel = null. NUNCA fabrique.
+2. **DATAS CONTEXTUALIZADAS**: Cada data deve estar DENTRO do objeto a que pertence (data do casamento dentro do objeto casamento, data da aquisicao dentro do objeto imovel).
+3. **ARRAYS DINAMICOS**: Use arrays para multiplas partes, multiplos imoveis, multiplas certidoes. Nao limite.
+4. **VALORES FLOAT**: Converta valores monetarios (615.000,00 -> 615000.00).
+5. **RELACOES EXPLICITAS**: Se partes tem relacao familiar ou conjugal, explicite.
+6. **TIPOS DE PROPRIEDADE**: Diferencie claramente nua propriedade, usufruto, propriedade plena, fracao ideal.
+
+## ESTRUTURA JSON (FLEXIVEL - ADAPTE CONFORME NECESSARIO)
+
+```json
+{
+  "analise_preliminar": {
+    "tipo_escritura": "VENDA E COMPRA / DOACAO / PERMUTA / etc",
+    "complexidade": "SIMPLES / MEDIA / COMPLEXA",
+    "estrutura_propriedade": "Descreva: ex: 'Venda simultanea de nua propriedade e usufruto'",
+    "quantidade_vendedores": 0,
+    "quantidade_compradores": 0,
+    "quantidade_imoveis": 0,
+    "possui_gravames": false,
+    "possui_intermediacao": false,
+    "observacoes_estruturais": "Observacoes importantes sobre a estrutura da transacao"
+  },
+
+  "documento": {
+    "protocolo": "000.000",
+    "livro": "0000",
+    "folhas": "000/000",
+    "formato": "ELETRONICO / FISICO",
+    "modalidade": "PRESENCIAL / VIDEOCONFERENCIA",
+    "selo_digital": "codigo se houver",
+    "codigo_validacao": "codigo se houver",
+    "url_validacao": "url se houver"
+  },
+
+  "cartorio": {
+    "nome": "Xo Tabeliao de Notas de Cidade - UF",
+    "tabeliao": "NOME",
+    "substituto": "NOME se aplicavel",
+    "escrevente": "NOME se mencionado",
+    "endereco": "Endereco completo se disponivel",
+    "contato": {
+      "telefone": "se disponivel",
+      "website": "se disponivel"
+    },
+    "data_lavratura": "AAAA-MM-DD"
+  },
+
+  "partes": [
+    {
+      "identificador": "parte_1",
+      "papel": "VENDEDOR NUA PROPRIEDADE / VENDEDOR USUFRUTO / COMPRADOR / ANUENTE / PROCURADOR / etc",
+      "tipo_propriedade": "NUA PROPRIEDADE / USUFRUTO / PLENA / null",
+      "pessoa": {
+        "tipo": "FISICA / JURIDICA",
+        "nome": "NOME COMPLETO",
+        "nacionalidade": "BRASILEIRO(A)",
+        "profissao": "Profissao",
+        "cpf": "000.000.000-00",
+        "rg": {
+          "numero": "00.000.000-0",
+          "orgao": "SSP/UF"
+        },
+        "email": "email se disponivel",
+        "endereco": {
+          "logradouro": "Rua/Av",
+          "numero": "000",
+          "complemento": "apto X",
+          "bairro": "Bairro",
+          "cidade": "Cidade",
+          "estado": "UF",
+          "cep": "00000-000"
+        }
+      },
+      "estado_civil": {
+        "status": "CASADO / SOLTEIRO / DIVORCIADO / VIUVO / UNIAO ESTAVEL",
+        "regime_bens": "COMUNHAO PARCIAL / COMUNHAO UNIVERSAL / SEPARACAO TOTAL / null",
+        "data_casamento": "AAAA-MM-DD se aplicavel",
+        "certidao": {
+          "cartorio": "Nome do cartorio",
+          "matricula": "numero da matricula",
+          "cidade": "Cidade",
+          "estado": "UF"
+        }
+      },
+      "conjuge_referencia": "identificador da parte que e conjuge, ex: parte_2",
+      "relacoes_familiares": [
+        {
+          "com_parte": "identificador da outra parte",
+          "relacao": "MAE / PAI / FILHO(A) / SOGRO(A) / etc"
+        }
+      ],
+      "dados_bancarios": {
+        "banco": "Nome do banco",
+        "agencia": "0000",
+        "conta": "00000-0"
+      }
+    }
+  ],
+
+  "intermediario": {
+    "existe": false,
+    "nome": "Nome da imobiliaria ou corretor",
+    "cnpj": "00.000.000/0001-00",
+    "funcao": "INTERMEDIACAO IMOBILIARIA",
+    "valor_retido": 0.00,
+    "percentual": 0.0,
+    "observacao": "ex: Sinal retido como despesas operacionais"
+  },
+
+  "imoveis": [
+    {
+      "ordem": 1,
+      "tipo": "APARTAMENTO / CASA / TERRENO / VAGA / SALA / etc",
+      "descricao": "Descricao completa conforme escritura",
+      "identificacao": {
+        "unidade": "000",
+        "andar": "0",
+        "bloco": "A",
+        "edificio": "Nome do Edificio",
+        "condominio": "Nome do Condominio"
+      },
+      "endereco": {
+        "logradouro": "Rua/Av",
+        "numero": "000",
+        "bairro": "Bairro",
+        "cidade": "Cidade",
+        "estado": "UF",
+        "cep": "00000-000"
+      },
+      "areas": {
+        "privativa_m2": 0.00,
+        "comum_m2": 0.00,
+        "total_m2": 0.00,
+        "terreno_m2": 0.00
+      },
+      "registro": {
+        "matricula": "00000",
+        "cartorio_ri": "Xo RI de Cidade",
+        "aquisicao_anterior": {
+          "forma": "Compra e Venda / Doacao / Heranca",
+          "data": "AAAA-MM-DD",
+          "registro": "R.00"
+        }
+      },
+      "cadastro_municipal": {
+        "inscricao": "000.000.0000-0",
+        "valor_venal": 0.00
+      },
+      "gravames_restricoes": {
+        "existem": false,
+        "lista": [
+          {
+            "tipo": "INCOMUNICABILIDADE / IMPENHORABILIDADE / INALIENABILIDADE / HIPOTECA / PENHORA / etc",
+            "vigencia": "VITALICIA / TEMPORARIA / EXTINTA COM VENDA",
+            "averbacao": "Av.X de DD/MM/AAAA",
+            "observacao": "Detalhes adicionais"
+          }
+        ]
+      },
+      "valor_atribuido": 0.00
+    }
+  ],
+
+  "transacao": {
+    "valor_total": 0.00,
+    "valor_extenso": "valor por extenso",
+    "compromisso_anterior": {
+      "existe": false,
+      "data": "AAAA-MM-DD",
+      "registrado": false,
+      "status": "CUMPRIDO / LIQUIDADO"
+    },
+    "pagamento": {
+      "forma_resumida": "A VISTA / PARCELADO / FINANCIADO",
+      "parcelas": [
+        {
+          "ordem": 1,
+          "tipo": "SINAL / ENTRADA / SALDO / PARCELA",
+          "valor": 0.00,
+          "percentual": 0.0,
+          "meio": "TED / PIX / QR CODE / CHEQUE",
+          "data": "AAAA-MM-DD",
+          "beneficiario": "Nome ou referencia a parte",
+          "conta_destino": {
+            "banco": "Banco",
+            "agencia": "0000",
+            "conta": "00000-0"
+          },
+          "observacao": "Detalhes"
+        }
+      ],
+      "financiamento": {
+        "existe": false,
+        "banco": null,
+        "valor": null,
+        "prazo_meses": null
+      }
+    },
+    "quitacao": "PLENA / PARCIAL / PENDENTE"
+  },
+
+  "tributos": {
+    "itbi": {
+      "valor": 0.00,
+      "aliquota": 0.0,
+      "base_calculo": 0.00,
+      "data_recolhimento": "AAAA-MM-DD",
+      "guia": "numero da guia"
+    },
+    "custas_cartorio": {
+      "valor_total": 0.00,
+      "detalhamento": [
+        {"destinatario": "CARTORIO", "valor": 0.00},
+        {"destinatario": "ESTADO", "valor": 0.00}
+      ]
+    }
+  },
+
+  "certidoes": [
+    {
+      "tipo": "MATRICULA / CNDT / CND_FEDERAL / TRIBUTOS / INDISPONIBILIDADE / FEITOS / etc",
+      "descricao": "Certidao de...",
+      "numero": "numero se houver",
+      "titular": "Nome do titular ou referencia a parte",
+      "resultado": "NEGATIVA / POSITIVA / REGULAR",
+      "data_emissao": "AAAA-MM-DD",
+      "validade": "AAAA-MM-DD",
+      "arquivada": true,
+      "observacao": "ex: Dispensada pela compradora"
+    }
+  ],
+
+  "declaracoes_vendedores": {
+    "previdencia_nao_devedor": true,
+    "nao_empregador": true,
+    "inexistencia_acoes": true,
+    "posse_legitima": true,
+    "nao_desapropriacao": true,
+    "inexistencia_debitos": true,
+    "nao_pep": true,
+    "compromisso_indenizacao": true,
+    "outras": []
+  },
+
+  "assinaturas": {
+    "formato": "DIGITAL / FISICA",
+    "certificacao": "ICP-BRASIL se digital",
+    "lista": [
+      {
+        "nome": "NOME",
+        "papel": "VENDEDOR / COMPRADOR / TABELIAO",
+        "data_hora": "AAAA-MM-DDTHH:MM:SS"
+      }
+    ]
+  },
+
+  "explicacao_contextual": "OBRIGATORIO: 3-5 paragrafos explicando a escritura de forma clara. Inclua: (1) tipo e data da transacao; (2) partes envolvidas e seus papeis especificos; (3) imovel e sua estrutura de propriedade; (4) valores e forma de pagamento; (5) particularidades como gravames, intermediacao, clausulas especiais.",
+
+  "campos_nao_localizados": [
+    "Lista de informacoes que tentou extrair mas nao encontrou no documento"
+  ]
+}
+```
+
+## INSTRUCOES FINAIS
+
+1. **ANALISE PRIMEIRO, ESTRUTURE DEPOIS**: Leia toda a escritura antes de montar o JSON. Entenda a complexidade.
+
+2. **PARTES COM IDENTIFICADORES**: Use "parte_1", "parte_2" etc. para referenciar cruzadamente (conjuge, relacoes familiares).
+
+3. **TIPOS DE PROPRIEDADE**: Se houver nua propriedade e usufruto sendo vendidos separadamente, crie partes distintas com papel correto.
+
+4. **GRAVAMES**: Se existirem clausulas de incomunicabilidade, impenhorabilidade, inalienabilidade, hipoteca, liste cada uma com seu status.
+
+5. **RELACOES FAMILIARES**: Se identificar que partes sao parentes (mesmo sobrenome, inferencia do contexto), registre.
+
+6. **FLEXIBILIDADE**: O JSON acima e um GUIA. Adicione campos se necessario. Omita secoes vazias. Adapte a realidade do documento.
+
+7. **DATAS SEMPRE CONTEXTUAIS**: Nunca crie uma secao separada "datas". Cada data deve estar no objeto a que pertence.
+
+8. **NAO TRANSCREVA**: Nao inclua transcricao do documento. Foque apenas nos dados estruturados.
+
+9. **EXPLICACAO OBRIGATORIA**: O campo "explicacao_contextual" deve ter 3-5 paragrafos detalhados.

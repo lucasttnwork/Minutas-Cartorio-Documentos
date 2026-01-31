@@ -1,0 +1,859 @@
+{
+  "version": "2.0",
+  "description": "Mapeamento de aliases para campos canonicos - permite normalizar nomenclaturas de diferentes fontes",
+  "last_updated": "2026-01-30",
+  "total_aliases": 520,
+  "alias_mappings": {
+    "pn_nome": {
+      "canonical_id": "pn_nome",
+      "aliases": [
+        {"alias": "nome", "context": "any", "priority": 50},
+        {"alias": "nome_completo", "context": "schema", "priority": 100},
+        {"alias": "NOME", "context": "ui", "priority": 60},
+        {"alias": "NOME COMPLETO", "context": "ui", "priority": 70},
+        {"alias": "dados_catalogados.nome_completo", "context": "extraction", "priority": 90},
+        {"alias": "dados_catalogados.nome", "context": "extraction", "priority": 85},
+        {"alias": "outorgante.nome", "context": "extraction", "priority": 80},
+        {"alias": "outorgado.nome", "context": "extraction", "priority": 80},
+        {"alias": "titular.nome", "context": "extraction", "priority": 75}
+      ]
+    },
+    "pn_cpf": {
+      "canonical_id": "pn_cpf",
+      "aliases": [
+        {"alias": "cpf", "context": "any", "priority": 100},
+        {"alias": "CPF", "context": "ui", "priority": 60},
+        {"alias": "numero_cpf", "context": "schema", "priority": 90},
+        {"alias": "dados_catalogados.cpf", "context": "extraction", "priority": 90},
+        {"alias": "outorgante.cpf", "context": "extraction", "priority": 80},
+        {"alias": "outorgado.cpf", "context": "extraction", "priority": 80},
+        {"alias": "titular.cpf", "context": "extraction", "priority": 75}
+      ]
+    },
+    "pn_rg": {
+      "canonical_id": "pn_rg",
+      "aliases": [
+        {"alias": "rg", "context": "any", "priority": 50},
+        {"alias": "RG", "context": "ui", "priority": 60},
+        {"alias": "numero_rg", "context": "schema", "priority": 100},
+        {"alias": "NUMERO DO RG", "context": "ui", "priority": 70},
+        {"alias": "dados_catalogados.numero_rg", "context": "extraction", "priority": 90},
+        {"alias": "dados_catalogados.rg", "context": "extraction", "priority": 85},
+        {"alias": "outorgante.rg", "context": "extraction", "priority": 80},
+        {"alias": "outorgado.rg", "context": "extraction", "priority": 80}
+      ]
+    },
+    "pn_orgao_emissor_rg": {
+      "canonical_id": "pn_orgao_emissor_rg",
+      "aliases": [
+        {"alias": "orgao_emissor_rg", "context": "any", "priority": 100},
+        {"alias": "orgao_expedidor", "context": "schema", "priority": 95},
+        {"alias": "orgao_rg", "context": "schema", "priority": 90},
+        {"alias": "ORGAO EMISSOR RG", "context": "ui", "priority": 60},
+        {"alias": "SSP", "context": "value", "priority": 10},
+        {"alias": "dados_catalogados.orgao_expedidor", "context": "extraction", "priority": 90},
+        {"alias": "dados_catalogados.orgao_emissor_rg", "context": "extraction", "priority": 85},
+        {"alias": "outorgante.orgao_rg", "context": "extraction", "priority": 80}
+      ]
+    },
+    "pn_estado_emissor_rg": {
+      "canonical_id": "pn_estado_emissor_rg",
+      "aliases": [
+        {"alias": "estado_emissor_rg", "context": "any", "priority": 100},
+        {"alias": "uf_expedidor", "context": "schema", "priority": 95},
+        {"alias": "uf_rg", "context": "schema", "priority": 90},
+        {"alias": "UF EMISSOR RG", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.uf_expedidor", "context": "extraction", "priority": 90},
+        {"alias": "dados_catalogados.estado_emissor_rg", "context": "extraction", "priority": 85}
+      ]
+    },
+    "pn_data_emissao_rg": {
+      "canonical_id": "pn_data_emissao_rg",
+      "aliases": [
+        {"alias": "data_emissao_rg", "context": "any", "priority": 100},
+        {"alias": "data_expedicao", "context": "schema", "priority": 95},
+        {"alias": "DATA EMISSAO RG", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.data_expedicao", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pn_nacionalidade": {
+      "canonical_id": "pn_nacionalidade",
+      "aliases": [
+        {"alias": "nacionalidade", "context": "any", "priority": 100},
+        {"alias": "NACIONALIDADE", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.nacionalidade", "context": "extraction", "priority": 90},
+        {"alias": "outorgante.nacionalidade", "context": "extraction", "priority": 80},
+        {"alias": "outorgado.nacionalidade", "context": "extraction", "priority": 80}
+      ]
+    },
+    "pn_profissao": {
+      "canonical_id": "pn_profissao",
+      "aliases": [
+        {"alias": "profissao", "context": "any", "priority": 100},
+        {"alias": "PROFISSAO", "context": "ui", "priority": 60},
+        {"alias": "ocupacao", "context": "schema", "priority": 90},
+        {"alias": "dados_catalogados.profissao", "context": "extraction", "priority": 90},
+        {"alias": "outorgante.profissao", "context": "extraction", "priority": 80},
+        {"alias": "outorgado.profissao", "context": "extraction", "priority": 80}
+      ]
+    },
+    "pn_data_nascimento": {
+      "canonical_id": "pn_data_nascimento",
+      "aliases": [
+        {"alias": "data_nascimento", "context": "any", "priority": 100},
+        {"alias": "DATA NASCIMENTO", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.data_nascimento", "context": "extraction", "priority": 90},
+        {"alias": "nascimento", "context": "schema", "priority": 70}
+      ]
+    },
+    "pn_data_obito": {
+      "canonical_id": "pn_data_obito",
+      "aliases": [
+        {"alias": "data_obito", "context": "any", "priority": 100},
+        {"alias": "DATA OBITO", "context": "ui", "priority": 60},
+        {"alias": "data_falecimento", "context": "schema", "priority": 90},
+        {"alias": "dados_catalogados.data_obito", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pn_cnh": {
+      "canonical_id": "pn_cnh",
+      "aliases": [
+        {"alias": "cnh", "context": "any", "priority": 100},
+        {"alias": "CNH", "context": "ui", "priority": 60},
+        {"alias": "numero_cnh", "context": "schema", "priority": 95},
+        {"alias": "dados_catalogados.numero_cnh", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pn_orgao_emissor_cnh": {
+      "canonical_id": "pn_orgao_emissor_cnh",
+      "aliases": [
+        {"alias": "orgao_emissor_cnh", "context": "any", "priority": 100},
+        {"alias": "ORGAO EMISSOR CNH", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.orgao_emissor_cnh", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pn_estado_civil": {
+      "canonical_id": "pn_estado_civil",
+      "aliases": [
+        {"alias": "estado_civil", "context": "any", "priority": 100},
+        {"alias": "ESTADO CIVIL", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.estado_civil", "context": "extraction", "priority": 90},
+        {"alias": "outorgante.estado_civil", "context": "extraction", "priority": 80},
+        {"alias": "outorgado.estado_civil", "context": "extraction", "priority": 80}
+      ]
+    },
+    "pn_regime_bens": {
+      "canonical_id": "pn_regime_bens",
+      "aliases": [
+        {"alias": "regime_bens", "context": "any", "priority": 100},
+        {"alias": "regime_de_bens", "context": "schema", "priority": 95},
+        {"alias": "REGIME DE BENS", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.regime_bens", "context": "extraction", "priority": 90},
+        {"alias": "outorgante.regime_bens", "context": "extraction", "priority": 80},
+        {"alias": "outorgado.regime_bens", "context": "extraction", "priority": 80}
+      ]
+    },
+    "pn_data_casamento": {
+      "canonical_id": "pn_data_casamento",
+      "aliases": [
+        {"alias": "data_casamento", "context": "any", "priority": 100},
+        {"alias": "DATA CASAMENTO", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.data_casamento", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pn_filiacao_pai": {
+      "canonical_id": "pn_filiacao_pai",
+      "aliases": [
+        {"alias": "filiacao_pai", "context": "any", "priority": 100},
+        {"alias": "nome_pai", "context": "schema", "priority": 95},
+        {"alias": "filiacao.pai", "context": "extraction", "priority": 90},
+        {"alias": "NOME DO PAI", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.nome_pai", "context": "extraction", "priority": 90},
+        {"alias": "dados_catalogados.filiacao.pai", "context": "extraction", "priority": 85},
+        {"alias": "pai", "context": "schema", "priority": 70}
+      ]
+    },
+    "pn_filiacao_mae": {
+      "canonical_id": "pn_filiacao_mae",
+      "aliases": [
+        {"alias": "filiacao_mae", "context": "any", "priority": 100},
+        {"alias": "nome_mae", "context": "schema", "priority": 95},
+        {"alias": "filiacao.mae", "context": "extraction", "priority": 90},
+        {"alias": "NOME DA MAE", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.nome_mae", "context": "extraction", "priority": 90},
+        {"alias": "dados_catalogados.filiacao.mae", "context": "extraction", "priority": 85},
+        {"alias": "mae", "context": "schema", "priority": 70}
+      ]
+    },
+    "pn_naturalidade": {
+      "canonical_id": "pn_naturalidade",
+      "aliases": [
+        {"alias": "naturalidade", "context": "any", "priority": 100},
+        {"alias": "NATURALIDADE", "context": "ui", "priority": 60},
+        {"alias": "local_nascimento", "context": "schema", "priority": 90},
+        {"alias": "dados_catalogados.naturalidade", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pn_domicilio_logradouro": {
+      "canonical_id": "pn_domicilio_logradouro",
+      "aliases": [
+        {"alias": "domicilio_logradouro", "context": "any", "priority": 100},
+        {"alias": "domicilio.logradouro", "context": "extraction", "priority": 95},
+        {"alias": "endereco.logradouro", "context": "extraction", "priority": 90},
+        {"alias": "LOGRADOURO", "context": "ui", "priority": 60},
+        {"alias": "logradouro_domicilio", "context": "schema", "priority": 85},
+        {"alias": "rua", "context": "schema", "priority": 70}
+      ]
+    },
+    "pn_domicilio_numero": {
+      "canonical_id": "pn_domicilio_numero",
+      "aliases": [
+        {"alias": "domicilio_numero", "context": "any", "priority": 100},
+        {"alias": "domicilio.numero", "context": "extraction", "priority": 95},
+        {"alias": "endereco.numero", "context": "extraction", "priority": 90},
+        {"alias": "NUMERO", "context": "ui", "priority": 60},
+        {"alias": "numero_domicilio", "context": "schema", "priority": 85}
+      ]
+    },
+    "pn_domicilio_complemento": {
+      "canonical_id": "pn_domicilio_complemento",
+      "aliases": [
+        {"alias": "domicilio_complemento", "context": "any", "priority": 100},
+        {"alias": "domicilio.complemento", "context": "extraction", "priority": 95},
+        {"alias": "endereco.complemento", "context": "extraction", "priority": 90},
+        {"alias": "COMPLEMENTO", "context": "ui", "priority": 60},
+        {"alias": "complemento_domicilio", "context": "schema", "priority": 85}
+      ]
+    },
+    "pn_domicilio_bairro": {
+      "canonical_id": "pn_domicilio_bairro",
+      "aliases": [
+        {"alias": "domicilio_bairro", "context": "any", "priority": 100},
+        {"alias": "domicilio.bairro", "context": "extraction", "priority": 95},
+        {"alias": "endereco.bairro", "context": "extraction", "priority": 90},
+        {"alias": "BAIRRO", "context": "ui", "priority": 60},
+        {"alias": "bairro_domicilio", "context": "schema", "priority": 85}
+      ]
+    },
+    "pn_domicilio_cidade": {
+      "canonical_id": "pn_domicilio_cidade",
+      "aliases": [
+        {"alias": "domicilio_cidade", "context": "any", "priority": 100},
+        {"alias": "domicilio.cidade", "context": "extraction", "priority": 95},
+        {"alias": "endereco.cidade", "context": "extraction", "priority": 90},
+        {"alias": "CIDADE", "context": "ui", "priority": 60},
+        {"alias": "cidade_domicilio", "context": "schema", "priority": 85},
+        {"alias": "municipio", "context": "schema", "priority": 70}
+      ]
+    },
+    "pn_domicilio_estado": {
+      "canonical_id": "pn_domicilio_estado",
+      "aliases": [
+        {"alias": "domicilio_estado", "context": "any", "priority": 100},
+        {"alias": "domicilio.estado", "context": "extraction", "priority": 95},
+        {"alias": "endereco.estado", "context": "extraction", "priority": 90},
+        {"alias": "ESTADO", "context": "ui", "priority": 60},
+        {"alias": "estado_domicilio", "context": "schema", "priority": 85},
+        {"alias": "uf", "context": "schema", "priority": 70},
+        {"alias": "domicilio.uf", "context": "extraction", "priority": 88}
+      ]
+    },
+    "pn_domicilio_cep": {
+      "canonical_id": "pn_domicilio_cep",
+      "aliases": [
+        {"alias": "domicilio_cep", "context": "any", "priority": 100},
+        {"alias": "domicilio.cep", "context": "extraction", "priority": 95},
+        {"alias": "endereco.cep", "context": "extraction", "priority": 90},
+        {"alias": "CEP", "context": "ui", "priority": 60},
+        {"alias": "cep_domicilio", "context": "schema", "priority": 85}
+      ]
+    },
+    "pn_email": {
+      "canonical_id": "pn_email",
+      "aliases": [
+        {"alias": "email", "context": "any", "priority": 100},
+        {"alias": "E-MAIL", "context": "ui", "priority": 60},
+        {"alias": "e_mail", "context": "schema", "priority": 90},
+        {"alias": "dados_catalogados.email", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pn_telefone": {
+      "canonical_id": "pn_telefone",
+      "aliases": [
+        {"alias": "telefone", "context": "any", "priority": 100},
+        {"alias": "TELEFONE", "context": "ui", "priority": 60},
+        {"alias": "celular", "context": "schema", "priority": 80},
+        {"alias": "dados_catalogados.telefone", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pn_cndt_numero": {
+      "canonical_id": "pn_cndt_numero",
+      "aliases": [
+        {"alias": "cndt_numero", "context": "any", "priority": 100},
+        {"alias": "numero_cndt", "context": "schema", "priority": 95},
+        {"alias": "NUMERO CNDT", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.numero_cndt", "context": "extraction", "priority": 90},
+        {"alias": "cndt.numero", "context": "extraction", "priority": 85}
+      ]
+    },
+    "pn_cndt_data_expedicao": {
+      "canonical_id": "pn_cndt_data_expedicao",
+      "aliases": [
+        {"alias": "cndt_data_expedicao", "context": "any", "priority": 100},
+        {"alias": "data_expedicao_cndt", "context": "schema", "priority": 95},
+        {"alias": "DATA EXPEDICAO CNDT", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.data_expedicao_cndt", "context": "extraction", "priority": 90},
+        {"alias": "cndt.data_expedicao", "context": "extraction", "priority": 85}
+      ]
+    },
+    "pn_cndt_hora_expedicao": {
+      "canonical_id": "pn_cndt_hora_expedicao",
+      "aliases": [
+        {"alias": "cndt_hora_expedicao", "context": "any", "priority": 100},
+        {"alias": "hora_expedicao_cndt", "context": "schema", "priority": 95},
+        {"alias": "HORA EXPEDICAO CNDT", "context": "ui", "priority": 60},
+        {"alias": "cndt.hora_expedicao", "context": "extraction", "priority": 85}
+      ]
+    },
+    "pn_certidao_uniao_tipo": {
+      "canonical_id": "pn_certidao_uniao_tipo",
+      "aliases": [
+        {"alias": "certidao_uniao_tipo", "context": "any", "priority": 100},
+        {"alias": "tipo_certidao_uniao", "context": "schema", "priority": 95},
+        {"alias": "TIPO CERTIDAO UNIAO", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.tipo_certidao", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pn_certidao_uniao_data_emissao": {
+      "canonical_id": "pn_certidao_uniao_data_emissao",
+      "aliases": [
+        {"alias": "certidao_uniao_data_emissao", "context": "any", "priority": 100},
+        {"alias": "data_emissao_certidao_uniao", "context": "schema", "priority": 95},
+        {"alias": "DATA EMISSAO CERTIDAO UNIAO", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.data_emissao", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pn_certidao_uniao_hora_emissao": {
+      "canonical_id": "pn_certidao_uniao_hora_emissao",
+      "aliases": [
+        {"alias": "certidao_uniao_hora_emissao", "context": "any", "priority": 100},
+        {"alias": "HORA EMISSAO CERTIDAO UNIAO", "context": "ui", "priority": 60}
+      ]
+    },
+    "pn_certidao_uniao_validade": {
+      "canonical_id": "pn_certidao_uniao_validade",
+      "aliases": [
+        {"alias": "certidao_uniao_validade", "context": "any", "priority": 100},
+        {"alias": "validade_certidao_uniao", "context": "schema", "priority": 95},
+        {"alias": "VALIDADE CERTIDAO UNIAO", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.validade", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pn_certidao_uniao_codigo_controle": {
+      "canonical_id": "pn_certidao_uniao_codigo_controle",
+      "aliases": [
+        {"alias": "certidao_uniao_codigo_controle", "context": "any", "priority": 100},
+        {"alias": "codigo_controle_certidao", "context": "schema", "priority": 95},
+        {"alias": "CODIGO CONTROLE", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.codigo_controle", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pn_certidao_nascimento_matricula": {
+      "canonical_id": "pn_certidao_nascimento_matricula",
+      "aliases": [
+        {"alias": "certidao_nascimento_matricula", "context": "any", "priority": 100},
+        {"alias": "matricula_certidao_nascimento", "context": "schema", "priority": 95},
+        {"alias": "MATRICULA CERTIDAO NASCIMENTO", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.matricula_certidao", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pn_certidao_nascimento_livro": {
+      "canonical_id": "pn_certidao_nascimento_livro",
+      "aliases": [
+        {"alias": "certidao_nascimento_livro", "context": "any", "priority": 100},
+        {"alias": "livro_certidao_nascimento", "context": "schema", "priority": 95},
+        {"alias": "LIVRO", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.livro", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pn_certidao_nascimento_folha": {
+      "canonical_id": "pn_certidao_nascimento_folha",
+      "aliases": [
+        {"alias": "certidao_nascimento_folha", "context": "any", "priority": 100},
+        {"alias": "folha_certidao_nascimento", "context": "schema", "priority": 95},
+        {"alias": "FOLHA", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.folha", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pn_certidao_nascimento_termo": {
+      "canonical_id": "pn_certidao_nascimento_termo",
+      "aliases": [
+        {"alias": "certidao_nascimento_termo", "context": "any", "priority": 100},
+        {"alias": "termo_certidao_nascimento", "context": "schema", "priority": 95},
+        {"alias": "TERMO", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.termo", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pn_certidao_nascimento_cartorio": {
+      "canonical_id": "pn_certidao_nascimento_cartorio",
+      "aliases": [
+        {"alias": "certidao_nascimento_cartorio", "context": "any", "priority": 100},
+        {"alias": "cartorio_certidao_nascimento", "context": "schema", "priority": 95},
+        {"alias": "CARTORIO", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.cartorio", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pj_denominacao": {
+      "canonical_id": "pj_denominacao",
+      "aliases": [
+        {"alias": "pj_denominacao", "context": "any", "priority": 100},
+        {"alias": "razao_social", "context": "schema", "priority": 95},
+        {"alias": "denominacao", "context": "schema", "priority": 90},
+        {"alias": "RAZAO SOCIAL", "context": "ui", "priority": 60},
+        {"alias": "nome_empresa", "context": "schema", "priority": 80},
+        {"alias": "dados_catalogados.razao_social", "context": "extraction", "priority": 90},
+        {"alias": "dados_catalogados.denominacao", "context": "extraction", "priority": 85}
+      ]
+    },
+    "pj_cnpj": {
+      "canonical_id": "pj_cnpj",
+      "aliases": [
+        {"alias": "pj_cnpj", "context": "any", "priority": 100},
+        {"alias": "cnpj", "context": "schema", "priority": 95},
+        {"alias": "CNPJ", "context": "ui", "priority": 60},
+        {"alias": "numero_cnpj", "context": "schema", "priority": 90},
+        {"alias": "dados_catalogados.cnpj", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pj_nire": {
+      "canonical_id": "pj_nire",
+      "aliases": [
+        {"alias": "pj_nire", "context": "any", "priority": 100},
+        {"alias": "nire", "context": "schema", "priority": 95},
+        {"alias": "NIRE", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.nire", "context": "extraction", "priority": 90}
+      ]
+    },
+    "pj_sede_logradouro": {
+      "canonical_id": "pj_sede_logradouro",
+      "aliases": [
+        {"alias": "pj_sede_logradouro", "context": "any", "priority": 100},
+        {"alias": "sede.logradouro", "context": "extraction", "priority": 95},
+        {"alias": "endereco_sede.logradouro", "context": "extraction", "priority": 90},
+        {"alias": "LOGRADOURO SEDE", "context": "ui", "priority": 60}
+      ]
+    },
+    "pj_sede_numero": {
+      "canonical_id": "pj_sede_numero",
+      "aliases": [
+        {"alias": "pj_sede_numero", "context": "any", "priority": 100},
+        {"alias": "sede.numero", "context": "extraction", "priority": 95},
+        {"alias": "endereco_sede.numero", "context": "extraction", "priority": 90},
+        {"alias": "NUMERO SEDE", "context": "ui", "priority": 60}
+      ]
+    },
+    "pj_sede_complemento": {
+      "canonical_id": "pj_sede_complemento",
+      "aliases": [
+        {"alias": "pj_sede_complemento", "context": "any", "priority": 100},
+        {"alias": "sede.complemento", "context": "extraction", "priority": 95},
+        {"alias": "COMPLEMENTO SEDE", "context": "ui", "priority": 60}
+      ]
+    },
+    "pj_sede_bairro": {
+      "canonical_id": "pj_sede_bairro",
+      "aliases": [
+        {"alias": "pj_sede_bairro", "context": "any", "priority": 100},
+        {"alias": "sede.bairro", "context": "extraction", "priority": 95},
+        {"alias": "BAIRRO SEDE", "context": "ui", "priority": 60}
+      ]
+    },
+    "pj_sede_cidade": {
+      "canonical_id": "pj_sede_cidade",
+      "aliases": [
+        {"alias": "pj_sede_cidade", "context": "any", "priority": 100},
+        {"alias": "sede.cidade", "context": "extraction", "priority": 95},
+        {"alias": "CIDADE SEDE", "context": "ui", "priority": 60}
+      ]
+    },
+    "pj_sede_estado": {
+      "canonical_id": "pj_sede_estado",
+      "aliases": [
+        {"alias": "pj_sede_estado", "context": "any", "priority": 100},
+        {"alias": "sede.estado", "context": "extraction", "priority": 95},
+        {"alias": "sede.uf", "context": "extraction", "priority": 90},
+        {"alias": "ESTADO SEDE", "context": "ui", "priority": 60}
+      ]
+    },
+    "pj_sede_cep": {
+      "canonical_id": "pj_sede_cep",
+      "aliases": [
+        {"alias": "pj_sede_cep", "context": "any", "priority": 100},
+        {"alias": "sede.cep", "context": "extraction", "priority": 95},
+        {"alias": "CEP SEDE", "context": "ui", "priority": 60}
+      ]
+    },
+    "pj_admin_nome": {
+      "canonical_id": "pj_admin_nome",
+      "aliases": [
+        {"alias": "pj_admin_nome", "context": "any", "priority": 100},
+        {"alias": "administrador.nome", "context": "extraction", "priority": 95},
+        {"alias": "socio_administrador.nome", "context": "extraction", "priority": 90},
+        {"alias": "NOME ADMINISTRADOR", "context": "ui", "priority": 60},
+        {"alias": "nome_admin", "context": "schema", "priority": 85}
+      ]
+    },
+    "pj_admin_cpf": {
+      "canonical_id": "pj_admin_cpf",
+      "aliases": [
+        {"alias": "pj_admin_cpf", "context": "any", "priority": 100},
+        {"alias": "administrador.cpf", "context": "extraction", "priority": 95},
+        {"alias": "CPF ADMINISTRADOR", "context": "ui", "priority": 60},
+        {"alias": "cpf_admin", "context": "schema", "priority": 85}
+      ]
+    },
+    "pj_admin_rg": {
+      "canonical_id": "pj_admin_rg",
+      "aliases": [
+        {"alias": "pj_admin_rg", "context": "any", "priority": 100},
+        {"alias": "administrador.rg", "context": "extraction", "priority": 95},
+        {"alias": "RG ADMINISTRADOR", "context": "ui", "priority": 60}
+      ]
+    },
+    "im_matricula_numero": {
+      "canonical_id": "im_matricula_numero",
+      "aliases": [
+        {"alias": "matricula_numero", "context": "any", "priority": 100},
+        {"alias": "matricula", "context": "schema", "priority": 95},
+        {"alias": "numero_matricula", "context": "schema", "priority": 90},
+        {"alias": "MATRICULA", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.matricula", "context": "extraction", "priority": 90},
+        {"alias": "imovel.matricula", "context": "extraction", "priority": 85}
+      ]
+    },
+    "im_matricula_cartorio_numero": {
+      "canonical_id": "im_matricula_cartorio_numero",
+      "aliases": [
+        {"alias": "matricula_cartorio_numero", "context": "any", "priority": 100},
+        {"alias": "cartorio_ri", "context": "schema", "priority": 95},
+        {"alias": "registro_imoveis", "context": "schema", "priority": 90},
+        {"alias": "RI NUMERO", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.cartorio_ri", "context": "extraction", "priority": 90},
+        {"alias": "imovel.cartorio_ri", "context": "extraction", "priority": 85}
+      ]
+    },
+    "im_matricula_cartorio_cidade": {
+      "canonical_id": "im_matricula_cartorio_cidade",
+      "aliases": [
+        {"alias": "matricula_cartorio_cidade", "context": "any", "priority": 100},
+        {"alias": "cidade_ri", "context": "schema", "priority": 95},
+        {"alias": "RI CIDADE", "context": "ui", "priority": 60}
+      ]
+    },
+    "im_matricula_cartorio_estado": {
+      "canonical_id": "im_matricula_cartorio_estado",
+      "aliases": [
+        {"alias": "matricula_cartorio_estado", "context": "any", "priority": 100},
+        {"alias": "estado_ri", "context": "schema", "priority": 95},
+        {"alias": "uf_ri", "context": "schema", "priority": 90},
+        {"alias": "RI ESTADO", "context": "ui", "priority": 60}
+      ]
+    },
+    "im_denominacao": {
+      "canonical_id": "im_denominacao",
+      "aliases": [
+        {"alias": "imovel_denominacao", "context": "any", "priority": 100},
+        {"alias": "tipo_imovel", "context": "schema", "priority": 95},
+        {"alias": "tipo", "context": "schema", "priority": 80},
+        {"alias": "TIPO IMOVEL", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.tipo_imovel", "context": "extraction", "priority": 90},
+        {"alias": "imovel.tipo", "context": "extraction", "priority": 85}
+      ]
+    },
+    "im_area_total": {
+      "canonical_id": "im_area_total",
+      "aliases": [
+        {"alias": "imovel_area_total", "context": "any", "priority": 100},
+        {"alias": "area_total", "context": "schema", "priority": 95},
+        {"alias": "area_total_m2", "context": "schema", "priority": 90},
+        {"alias": "AREA TOTAL", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.area_total", "context": "extraction", "priority": 90},
+        {"alias": "imovel.area_total", "context": "extraction", "priority": 85}
+      ]
+    },
+    "im_area_privativa": {
+      "canonical_id": "im_area_privativa",
+      "aliases": [
+        {"alias": "imovel_area_privativa", "context": "any", "priority": 100},
+        {"alias": "area_privativa", "context": "schema", "priority": 95},
+        {"alias": "area_privativa_m2", "context": "schema", "priority": 90},
+        {"alias": "AREA PRIVATIVA", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.area_privativa", "context": "extraction", "priority": 90},
+        {"alias": "imovel.area_privativa", "context": "extraction", "priority": 85}
+      ]
+    },
+    "im_area_construida": {
+      "canonical_id": "im_area_construida",
+      "aliases": [
+        {"alias": "imovel_area_construida", "context": "any", "priority": 100},
+        {"alias": "area_construida", "context": "schema", "priority": 95},
+        {"alias": "area_construida_m2", "context": "schema", "priority": 90},
+        {"alias": "AREA CONSTRUIDA", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.area_construida", "context": "extraction", "priority": 90}
+      ]
+    },
+    "im_logradouro": {
+      "canonical_id": "im_logradouro",
+      "aliases": [
+        {"alias": "imovel_logradouro", "context": "any", "priority": 100},
+        {"alias": "endereco.logradouro", "context": "extraction", "priority": 90},
+        {"alias": "LOGRADOURO IMOVEL", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.logradouro", "context": "extraction", "priority": 90},
+        {"alias": "imovel.endereco", "context": "extraction", "priority": 80}
+      ]
+    },
+    "im_numero": {
+      "canonical_id": "im_numero",
+      "aliases": [
+        {"alias": "imovel_numero", "context": "any", "priority": 100},
+        {"alias": "endereco.numero", "context": "extraction", "priority": 90},
+        {"alias": "NUMERO IMOVEL", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.numero", "context": "extraction", "priority": 90}
+      ]
+    },
+    "im_complemento": {
+      "canonical_id": "im_complemento",
+      "aliases": [
+        {"alias": "imovel_complemento", "context": "any", "priority": 100},
+        {"alias": "endereco.complemento", "context": "extraction", "priority": 90},
+        {"alias": "COMPLEMENTO IMOVEL", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.complemento", "context": "extraction", "priority": 90},
+        {"alias": "unidade", "context": "schema", "priority": 80}
+      ]
+    },
+    "im_bairro": {
+      "canonical_id": "im_bairro",
+      "aliases": [
+        {"alias": "imovel_bairro", "context": "any", "priority": 100},
+        {"alias": "endereco.bairro", "context": "extraction", "priority": 90},
+        {"alias": "BAIRRO IMOVEL", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.bairro", "context": "extraction", "priority": 90}
+      ]
+    },
+    "im_cidade": {
+      "canonical_id": "im_cidade",
+      "aliases": [
+        {"alias": "imovel_cidade", "context": "any", "priority": 100},
+        {"alias": "endereco.cidade", "context": "extraction", "priority": 90},
+        {"alias": "CIDADE IMOVEL", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.cidade", "context": "extraction", "priority": 90}
+      ]
+    },
+    "im_estado": {
+      "canonical_id": "im_estado",
+      "aliases": [
+        {"alias": "imovel_estado", "context": "any", "priority": 100},
+        {"alias": "endereco.estado", "context": "extraction", "priority": 90},
+        {"alias": "endereco.uf", "context": "extraction", "priority": 85},
+        {"alias": "ESTADO IMOVEL", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.estado", "context": "extraction", "priority": 90}
+      ]
+    },
+    "im_cep": {
+      "canonical_id": "im_cep",
+      "aliases": [
+        {"alias": "imovel_cep", "context": "any", "priority": 100},
+        {"alias": "endereco.cep", "context": "extraction", "priority": 90},
+        {"alias": "CEP IMOVEL", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.cep", "context": "extraction", "priority": 90}
+      ]
+    },
+    "im_sql": {
+      "canonical_id": "im_sql",
+      "aliases": [
+        {"alias": "imovel_sql", "context": "any", "priority": 100},
+        {"alias": "sql", "context": "schema", "priority": 95},
+        {"alias": "cadastro_municipal", "context": "schema", "priority": 90},
+        {"alias": "SQL", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.sql", "context": "extraction", "priority": 90},
+        {"alias": "imovel.sql", "context": "extraction", "priority": 85}
+      ]
+    },
+    "im_descricao_conforme_matricula": {
+      "canonical_id": "im_descricao_conforme_matricula",
+      "aliases": [
+        {"alias": "imovel_descricao_conforme_matricula", "context": "any", "priority": 100},
+        {"alias": "descricao_matricula", "context": "schema", "priority": 95},
+        {"alias": "descricao", "context": "schema", "priority": 80},
+        {"alias": "DESCRICAO MATRICULA", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.descricao", "context": "extraction", "priority": 90},
+        {"alias": "imovel.descricao", "context": "extraction", "priority": 85}
+      ]
+    },
+    "im_valor_venal_iptu": {
+      "canonical_id": "im_valor_venal_iptu",
+      "aliases": [
+        {"alias": "imovel_valor_venal_iptu", "context": "any", "priority": 100},
+        {"alias": "valor_venal_iptu", "context": "schema", "priority": 95},
+        {"alias": "valor_venal", "context": "schema", "priority": 80},
+        {"alias": "VALOR VENAL IPTU", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.valor_venal_iptu", "context": "extraction", "priority": 90}
+      ]
+    },
+    "im_valor_venal_referencia": {
+      "canonical_id": "im_valor_venal_referencia",
+      "aliases": [
+        {"alias": "imovel_valor_venal_referencia", "context": "any", "priority": 100},
+        {"alias": "valor_venal_referencia", "context": "schema", "priority": 95},
+        {"alias": "vvr", "context": "schema", "priority": 90},
+        {"alias": "VALOR VENAL REFERENCIA", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.valor_venal_referencia", "context": "extraction", "priority": 90}
+      ]
+    },
+    "ng_valor_total": {
+      "canonical_id": "ng_valor_total",
+      "aliases": [
+        {"alias": "negocio_valor_total", "context": "any", "priority": 100},
+        {"alias": "valor_total", "context": "schema", "priority": 95},
+        {"alias": "valor_transacao", "context": "schema", "priority": 90},
+        {"alias": "VALOR TOTAL", "context": "ui", "priority": 60},
+        {"alias": "dados_catalogados.valor_transacao", "context": "extraction", "priority": 90},
+        {"alias": "valores.valor_transacao", "context": "extraction", "priority": 85}
+      ]
+    },
+    "ng_alienante_nome": {
+      "canonical_id": "ng_alienante_nome",
+      "aliases": [
+        {"alias": "alienante_nome", "context": "any", "priority": 100},
+        {"alias": "nome_alienante", "context": "schema", "priority": 95},
+        {"alias": "vendedor", "context": "schema", "priority": 90},
+        {"alias": "NOME ALIENANTE", "context": "ui", "priority": 60},
+        {"alias": "outorgante.nome", "context": "extraction", "priority": 85},
+        {"alias": "partes.outorgantes_vendedores[0].nome", "context": "extraction", "priority": 90}
+      ]
+    },
+    "ng_adquirente_nome": {
+      "canonical_id": "ng_adquirente_nome",
+      "aliases": [
+        {"alias": "adquirente_nome", "context": "any", "priority": 100},
+        {"alias": "nome_adquirente", "context": "schema", "priority": 95},
+        {"alias": "comprador", "context": "schema", "priority": 90},
+        {"alias": "NOME ADQUIRENTE", "context": "ui", "priority": 60},
+        {"alias": "outorgado.nome", "context": "extraction", "priority": 85},
+        {"alias": "partes.outorgados_compradores[0].nome", "context": "extraction", "priority": 90}
+      ]
+    },
+    "ng_pagamento_tipo": {
+      "canonical_id": "ng_pagamento_tipo",
+      "aliases": [
+        {"alias": "pagamento_tipo", "context": "any", "priority": 100},
+        {"alias": "tipo_pagamento", "context": "schema", "priority": 95},
+        {"alias": "forma_pagamento", "context": "schema", "priority": 90},
+        {"alias": "TIPO PAGAMENTO", "context": "ui", "priority": 60}
+      ]
+    },
+    "ng_pagamento_modo": {
+      "canonical_id": "ng_pagamento_modo",
+      "aliases": [
+        {"alias": "pagamento_modo", "context": "any", "priority": 100},
+        {"alias": "modo_pagamento", "context": "schema", "priority": 95},
+        {"alias": "MODO PAGAMENTO", "context": "ui", "priority": 60}
+      ]
+    },
+    "ng_itbi_numero_guia": {
+      "canonical_id": "ng_itbi_numero_guia",
+      "aliases": [
+        {"alias": "itbi_numero_guia", "context": "any", "priority": 100},
+        {"alias": "numero_guia_itbi", "context": "schema", "priority": 95},
+        {"alias": "guia_itbi", "context": "schema", "priority": 90},
+        {"alias": "NUMERO GUIA ITBI", "context": "ui", "priority": 60},
+        {"alias": "dados_itbi.numero_guia", "context": "extraction", "priority": 90}
+      ]
+    },
+    "ng_itbi_base_calculo": {
+      "canonical_id": "ng_itbi_base_calculo",
+      "aliases": [
+        {"alias": "itbi_base_calculo", "context": "any", "priority": 100},
+        {"alias": "base_calculo_itbi", "context": "schema", "priority": 95},
+        {"alias": "BASE CALCULO ITBI", "context": "ui", "priority": 60},
+        {"alias": "dados_itbi.base_calculo", "context": "extraction", "priority": 90}
+      ]
+    },
+    "ng_itbi_valor": {
+      "canonical_id": "ng_itbi_valor",
+      "aliases": [
+        {"alias": "itbi_valor", "context": "any", "priority": 100},
+        {"alias": "valor_itbi", "context": "schema", "priority": 95},
+        {"alias": "VALOR ITBI", "context": "ui", "priority": 60},
+        {"alias": "dados_itbi.valor", "context": "extraction", "priority": 90}
+      ]
+    },
+    "ng_itbi_data_pagamento": {
+      "canonical_id": "ng_itbi_data_pagamento",
+      "aliases": [
+        {"alias": "itbi_data_pagamento", "context": "any", "priority": 100},
+        {"alias": "data_pagamento_itbi", "context": "schema", "priority": 95},
+        {"alias": "DATA PAGAMENTO ITBI", "context": "ui", "priority": 60},
+        {"alias": "dados_itbi.data_pagamento", "context": "extraction", "priority": 90}
+      ]
+    }
+  },
+  "path_transformations": {
+    "dados_catalogados.*": {
+      "strip_prefix": "dados_catalogados.",
+      "description": "Remove prefixo dados_catalogados de campos extraidos"
+    },
+    "partes.outorgantes_vendedores[*].*": {
+      "treat_as": "alienante[*].*",
+      "description": "Trata outorgantes_vendedores como alienantes"
+    },
+    "partes.outorgados_compradores[*].*": {
+      "treat_as": "adquirente[*].*",
+      "description": "Trata outorgados_compradores como adquirentes"
+    },
+    "imovel.*": {
+      "strip_prefix": "imovel.",
+      "add_prefix": "im_",
+      "description": "Normaliza campos de imovel"
+    },
+    "filiacao.*": {
+      "flatten_to": "pn_filiacao_{key}",
+      "description": "Achata estrutura de filiacao"
+    },
+    "domicilio.*": {
+      "flatten_to": "pn_domicilio_{key}",
+      "description": "Achata estrutura de domicilio"
+    },
+    "cndt.*": {
+      "flatten_to": "pn_cndt_{key}",
+      "description": "Achata estrutura de CNDT"
+    },
+    "sede.*": {
+      "flatten_to": "pj_sede_{key}",
+      "description": "Achata estrutura de sede PJ"
+    },
+    "administrador.*": {
+      "flatten_to": "pj_admin_{key}",
+      "description": "Achata estrutura de administrador"
+    },
+    "procurador.*": {
+      "flatten_to": "pj_procurador_{key}",
+      "description": "Achata estrutura de procurador"
+    },
+    "matricula.*": {
+      "flatten_to": "im_matricula_{key}",
+      "description": "Achata estrutura de matricula"
+    },
+    "valores.*": {
+      "flatten_to": "ng_{key}",
+      "description": "Achata estrutura de valores do negocio"
+    }
+  },
+  "context_priorities": {
+    "extraction": 100,
+    "schema": 90,
+    "ui": 60,
+    "any": 50,
+    "value": 10
+  }
+}

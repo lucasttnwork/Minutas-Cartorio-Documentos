@@ -1,0 +1,265 @@
+Analise esta Certidao de Casamento brasileira.
+
+REGRAS ANTI-FABRICACAO (CRITICO):
+- NUNCA invente dados que nao estao visiveis no documento
+- Se um campo nao for legivel ou nao existir, use null
+- NUNCA use placeholders como "fff", "ggg", "hhh" ou letras repetidas
+- Para livro/folha/termo: extraia APENAS os digitos numericos reais
+- Se houver duvida sobre um valor, use null em vez de adivinhar
+
+=====================================================
+REGRAS ESPECIAIS PARA NOMES PROPRIOS (MUITO IMPORTANTE)
+=====================================================
+Nomes proprios sao CRITICOS e requerem atencao maxima:
+
+1. LEITURA CUIDADOSA DE CADA LETRA:
+   - Nao confunda: S com Z, T com L, A com O, M com N, I com L
+   - MARTA nao e MARIA
+   - WASILI nao e WASSILI (verifique se ha 1 ou 2 letras S)
+   - ANTONIO nao e ANTENOR
+   - MARGARIDA nao e MAGALHAES
+
+2. SOBRENOMES ESTRANGEIROS:
+   - Preste atencao especial a sobrenomes de origem estrangeira
+   - ORTRIWANO, STEIN, FAEDO - copie EXATAMENTE como aparece
+   - Verifique letra por letra antes de transcrever
+
+3. VERIFICACAO CRUZADA:
+   - Se o mesmo nome aparece mais de uma vez no documento, compare
+   - O nome no cabecalho deve bater com o nome no corpo do texto
+
+=====================================================
+REGRAS PARA CAMPOS DE NOME DOS CONJUGES (CRITICO)
+=====================================================
+ATENCAO: A estrutura de nomes segue esta logica:
+
+- nome_solteiro: O nome ORIGINAL da pessoa ANTES do casamento (campo obrigatorio)
+- nome_completo: O nome ATUAL da pessoa (igual ao nome_solteiro se nao mudou, ou nome de casado se mudou)
+- houve_alteracao_nome: true se a pessoa adotou novo nome apos casamento
+
+EXEMPLO 1 - Pessoa que MUDOU de nome:
+Se a certidao diz "RAQUEL TINEL STEIN passou a usar o nome de RAQUEL STEIN ORTRIWANO":
+- nome_solteiro: "RAQUEL TINEL STEIN" (nome original antes do casamento)
+- nome_completo: "RAQUEL STEIN ORTRIWANO" (nome atual/de casada)
+- houve_alteracao_nome: true
+
+EXEMPLO 2 - Pessoa que MANTEVE o mesmo nome:
+Se a certidao diz "Continua a usar o MESMO NOME":
+- nome_solteiro: "[nome como aparece]"
+- nome_completo: "[mesmo nome]" (igual ao nome_solteiro)
+- houve_alteracao_nome: false
+
+=====================================================
+REGRAS PARA NUMEROS (CARTORIO, SUBDISTRITO, TELEFONE)
+=====================================================
+1. SUBDISTRITO:
+   - Leia com atencao: "2o Subdistrito" e diferente de "9o Subdistrito"
+   - O numero pode estar antes ou depois da palavra "Subdistrito"
+
+2. NUMERO DO CARTORIO DO PACTO ANTENUPCIAL:
+   - "25o Cartorio" NAO e o mesmo que "2o Cartorio"
+   - Verifique se ha dezenas (10, 15, 20, 25) ou unidades (1, 2, 3, 4, 5)
+
+3. TELEFONE:
+   - Formato com hifen: 260-6034
+   - Verifique cada digito individualmente
+   - 260-6034 e diferente de 260-6334
+
+4. LIVRO:
+   - B-001 e diferente de B-0081
+   - Conte os digitos: 001 tem 3 digitos, 0081 tem 4 digitos
+
+=====================================================
+REGRAS PARA DADOS DO VERSO DO DOCUMENTO
+=====================================================
+Se o documento tiver VERSO, examine-o com MUITA ATENCAO:
+- Escrevente/Oficial do reconhecimento pode ser DIFERENTE do da frente
+- Telefone pode aparecer em carimbos no verso
+- Nomes em carimbos podem estar parcialmente legiveis - leia com cuidado
+
+EXEMPLO: "WALDEREZ SAKUMBA" nao e "WALDECIR SARUINHA"
+- Verifique: WALDEREZ vs WALDECIR (final EZ vs IR)
+- Verifique: SAKUMBA vs SARUINHA (letras completamente diferentes)
+
+=====================================================
+REGRAS PARA CODIGOS E SELOS
+=====================================================
+SEMPRE capture TODOS os codigos visiveis:
+- Selo digital (ex: 122044 2PV0000029525022 1)
+- Codigo de verificacao (ex: AA 000069112)
+- Numero do selo/controle na lateral (ex: 11517-0)
+
+Se houver mais de um codigo, capture TODOS no formato:
+"[codigo1] - [codigo2]" ou no campo apropriado
+
+TAREFAS OBRIGATORIAS:
+1. REESCRITA: Transcreva todos os dados da certidao fielmente.
+2. EXPLICACAO: Descreva o casamento, conjuges, regime de bens e situacao atual.
+3. CATALOGACAO: Extraia todos os campos estruturados.
+
+FORMATO DE SAIDA (use exatamente este formato):
+
+## REESCRITA DO DOCUMENTO
+[transcricao completa da certidao - copie todo texto visivel]
+
+## EXPLICACAO CONTEXTUAL
+
+### Resumo do Documento
+[Explique em 2-3 frases: tipo de documento, partes envolvidas, data do casamento e situacao atual do vinculo (se ha averbacoes de separacao/divorcio)]
+
+### Dados do Casamento
+Data do casamento: [data no formato DD/MM/AAAA]
+Local: [cartorio completo, cidade, UF]
+Regime de bens: [comunhao parcial / comunhao universal / separacao total / participacao final nos aquestos]
+Pacto antenupcial: [sim/nao - se sim, indicar cartorio, livro, folhas e data]
+
+### Conjuge 1
+- Nome de solteiro: [nome ORIGINAL antes do casamento]
+- Nome completo atual: [nome atual - igual ao de solteiro se nao mudou]
+- Houve alteracao de nome: [sim/nao]
+- CPF: [numero com pontuacao]
+- Data de nascimento: [DD/MM/AAAA]
+- Naturalidade: [cidade - UF - incluir bairro/subdistrito se mencionado]
+- Filiacao: Pai: [nome] / Mae: [nome]
+
+### Conjuge 2
+- Nome de solteiro: [nome ORIGINAL antes do casamento]
+- Nome completo atual: [nome atual - igual ao de solteiro se nao mudou]
+- Houve alteracao de nome: [sim/nao]
+- CPF: [numero com pontuacao]
+- Data de nascimento: [DD/MM/AAAA]
+- Naturalidade: [cidade - UF - incluir bairro/subdistrito se mencionado]
+- Filiacao: Pai: [nome] / Mae: [nome]
+
+### Averbacoes e Situacao Atual
+[Liste TODAS as averbacoes presentes no documento:]
+- Separacao: [data, processo, vara judicial - se houver]
+- Divorcio: [data, processo, vara judicial - se houver]
+- Alteracao de nome: [quem alterou e para qual nome]
+- Conversao de uniao estavel: [se aplicavel, com base legal]
+- Outras anotacoes: [qualquer outra informacao relevante]
+
+### Dados de Emissao
+- Data de emissao: [DD/MM/AAAA]
+- Escrevente: [nome completo - VERIFICAR LETRA POR LETRA]
+- Oficial: [nome completo]
+- Matricula: [numero completo]
+
+## DADOS CATALOGADOS (JSON)
+```json
+{
+  "tipo_certidao": "CASAMENTO",
+  "cartorio": "[nome completo do cartorio - incluir numero do subdistrito]",
+  "livro": "[apenas numeros, ex: B-0008 ou 0008 - CONTE OS DIGITOS]",
+  "folha": "[apenas numeros, ex: 030]",
+  "termo": "[apenas numeros, ex: 1370]",
+  "matricula": "[numero completo da matricula]",
+  "data_casamento": "[DD/MM/AAAA]",
+  "local_casamento": "[Cidade - UF]",
+  "regime_bens": "[COMUNHAO PARCIAL DE BENS / COMUNHAO UNIVERSAL DE BENS / SEPARACAO TOTAL DE BENS / PARTICIPACAO FINAL NOS AQUESTOS / SEPARACAO OBRIGATORIA DE BENS]",
+  "pacto_antenupcial": {
+    "existe": false,
+    "cartorio": "[VERIFICAR NUMERO: 2o, 5o, 15o, 25o - leia com atencao]",
+    "livro": null,
+    "folhas": null,
+    "data": null
+  },
+  "conjuge1": {
+    "nome_solteiro": "[NOME ORIGINAL ANTES DO CASAMENTO - verificar letra por letra]",
+    "nome_completo": "[NOME ATUAL - igual ao nome_solteiro se nao mudou, ou nome de casado se mudou]",
+    "houve_alteracao_nome": false,
+    "cpf": "[000.000.000-00]",
+    "data_nascimento": "[DD/MM/AAAA - verificar ANO com atencao]",
+    "naturalidade": "[Cidade - UF - incluir bairro se mencionado]",
+    "filiacao": {
+      "pai": "[NOME DO PAI - verificar letra por letra]",
+      "mae": "[NOME DA MAE - verificar letra por letra]"
+    }
+  },
+  "conjuge2": {
+    "nome_solteiro": "[NOME ORIGINAL ANTES DO CASAMENTO - verificar letra por letra]",
+    "nome_completo": "[NOME ATUAL - igual ao nome_solteiro se nao mudou, ou nome de casado se mudou]",
+    "houve_alteracao_nome": false,
+    "cpf": "[000.000.000-00]",
+    "data_nascimento": "[DD/MM/AAAA - verificar ANO com atencao]",
+    "naturalidade": "[Cidade - UF - incluir bairro se mencionado]",
+    "filiacao": {
+      "pai": "[NOME DO PAI - verificar letra por letra]",
+      "mae": "[NOME DA MAE - verificar letra por letra]"
+    }
+  },
+  "averbacoes": [
+    {
+      "tipo": "[SEPARACAO CONSENSUAL / SEPARACAO LITIGIOSA / DIVORCIO CONSENSUAL / DIVORCIO LITIGIOSO / CONVERSAO UNIAO ESTAVEL / OBITO / ALTERACAO NOME / OUTRA]",
+      "data": "[DD/MM/AAAA da averbacao]",
+      "data_transito_julgado": "[DD/MM/AAAA se aplicavel]",
+      "processo": "[numero do processo]",
+      "vara": "[vara judicial]",
+      "juiz": "[nome do juiz se visivel]",
+      "descricao": "[texto descritivo da averbacao]"
+    }
+  ],
+  "conversao_uniao_estavel": {
+    "ocorreu": false,
+    "base_legal": null,
+    "data_inicio_uniao": null
+  },
+  "situacao_atual_vinculo": "[CASADOS / SEPARADOS / DIVORCIADOS / VIUVO(A)]",
+  "data_emissao_certidao": "[DD/MM/AAAA]",
+  "responsaveis": {
+    "oficial": "[nome do oficial]",
+    "escrevente": "[nome do escrevente - VERIFICAR CADA LETRA]"
+  },
+  "selo_digital": "[TODOS os codigos visiveis, separados por ' - ' se mais de um]"
+}
+```
+
+INSTRUCOES ESPECIFICAS:
+
+1. LIVRO/FOLHA/TERMO - ATENCAO MAXIMA:
+   - Extraia APENAS os numeros que aparecem no documento
+   - Formato correto: "B-0008", "030", "1370"
+   - Formato ERRADO: "ffff(0003)", "ggg (050)" - NUNCA use isso
+   - Se nao conseguir ler, use null
+   - CONTE OS DIGITOS: B-001 (3 digitos) vs B-0081 (4 digitos)
+
+2. AVERBACOES - CAPTURE TODAS:
+   - Procure na secao "AVERBACOES/ANOTACOES" e no verso do documento
+   - Separacao judicial: identifique data, processo, vara
+   - Divorcio: identifique data do transito em julgado, processo
+   - Conversao de uniao estavel: capture a base legal (ex: Art. 8 Lei 9278/96)
+   - Alteracao de nome: indique nome anterior e novo nome
+
+3. REGIME DE BENS E PACTO ANTENUPCIAL:
+   - Identifique o regime exato
+   - Se mencionar "ESCRITURA DE PACTO ANTENUPCIAL", extraia: cartorio, livro, folhas, data
+   - ATENCAO ao numero do cartorio: "25o" NAO e "2o"
+   - Comunhao Universal COM pacto e uma situacao comum
+
+4. NOMES DOS CONJUGES - REGRA CLARA:
+   - nome_solteiro: SEMPRE o nome ORIGINAL antes do casamento
+   - nome_completo: nome ATUAL (igual ao solteiro se nao mudou, ou o novo nome se mudou)
+   - houve_alteracao_nome: true APENAS se adotou novo nome
+   - VERIFIQUE CADA LETRA DO NOME antes de transcrever
+
+5. SITUACAO ATUAL DO VINCULO:
+   - CASADOS: se nao ha averbacao de separacao ou divorcio
+   - SEPARADOS: se ha averbacao de separacao mas nao de divorcio
+   - DIVORCIADOS: se ha averbacao de divorcio
+   - VIUVO(A): se ha averbacao de obito de um dos conjuges
+
+6. CAMPOS NULL:
+   - Use null para qualquer campo que NAO esteja visivel no documento
+   - NAO invente informacoes
+   - NAO use "Informacao Ausente" - use null
+
+7. NATURALIDADE - INCLUA DETALHES:
+   - Se mencionar bairro ou subdistrito de nascimento, inclua
+   - Exemplo: "Sao Paulo - SP (Casa Verde)" ou "Sao Paulo - SP (Subdistrito Vila Mariana)"
+
+VALIDACOES AUTOMATICAS (o modelo deve verificar):
+- CPF: formato XXX.XXX.XXX-XX
+- Datas: formato DD/MM/AAAA
+- Data de nascimento deve ser anterior a data de casamento
+- Data de emissao deve ser posterior a data de casamento
+- Nomes: verificar letra por letra antes de finalizar

@@ -1,0 +1,637 @@
+# Pipeline de Processamento
+
+Este documento descreve as 3 fases de processamento de documentos cartoriais.
+
+---
+
+## Visão Geral
+
+```
+ENTRADA: Pasta com documentos de uma escritura
+
+    ↓ FASE 1: CATALOGAÇÃO E CLASSIFICAÇÃO
+    │   Scripts: inventory_files.py, classify_with_gemini.py, generate_catalog.py
+    │   Saída: .tmp/catalogos/{caso_id}.json
+    │
+    ↓ FASE 3: EXTRAÇÃO ESTRUTURADA (Gemini 3 Flash)
+    │   Script: extract_with_gemini.py
+    │   Saída: .tmp/contextual/{caso_id}/*.json
+    │
+    ↓ FASE 4: MAPEAMENTO PARA MINUTA
+    │   Script: map_to_fields.py
+    │   Saída: .tmp/mapped/{caso_id}.json
+
+SAÍDA: Dados estruturados prontos para preencher minuta
+```
+
+---
+
+## Fase 1: Catalogação e Classificação
+
+### 1.1 Objetivo
+Identificar e catalogar todos os tipos de documentos em uma escritura usando classificação visual via Gemini.
+
+### 1.2 Por Que Classificação Visual?
+Nomes de arquivos frequentemente NÃO refletem o conteúdo real:
+- `WhatsApp Image 2023-10-25 at 16.44.43.jpeg` → MATRICULA_IMOVEL
+- `PSX_20230819_105401.jpg` → CERTIDAO_NASCIMENTO
+- `Summary.pdf` → ASSINATURA_DIGITAL
+
+### 1.3 Etapas
+
+#### Etapa 1.1: Inventário Bruto
+**Script:** `execution/inventory_files.py`
+
+**Função:**
+- Percorre recursivamente a pasta da escritura
+- Exclui subpastas similares ao nome da pasta mãe (contêm documentos finais)
+- Coleta metadados: nome, extensão, tamanho, caminho relativo, subpasta
+- Gera lista bruta de arquivos
+
+**Saída:** `.tmp/inventarios/{caso_id}_bruto.json`
+
+#### Etapa 1.2: Classificação Visual via Gemini
+**Script:** `execution/classify_with_gemini.py`
+
+**Função:**
+- Lê inventário bruto
+- Pré-classifica documentos com nomes óbvios (sem usar API)
+- Para arquivos que precisam de API: carrega imagem/PDF e envia ao Gemini
+- Recebe: tipo de documento, confiança, pessoa relacionada, observação
+
+**Otimizações de Performance (Padrão - Plano Pago 150 RPM):**
+
+> **NOTA:** Este projeto utiliza exclusivamente o plano pago do Gemini.
+> Todas as configurações abaixo já são o PADRÃO do script.
+
+1. **Pré-classificação por Nome de Arquivo:**
+   - Documentos com nomes óbvios (RG_, CNDT_, ITBI_, etc.) são classificados localmente
+   - Reduz chamadas à API em ~30-50%
+   - Só usa pré-classificação quando confiança é Alta
+
+2. **Workers Paralelos para API (padrão: 5):**
+   - Múltiplos workers fazem chamadas simultâneas ao Gemini
+   - Rate limit global de 0.5s entre requests (150 RPM)
+   - Configurável via `--api-workers` se necessário
+
+3. **Batch Processing (padrão: 4 imagens):**
+   - Agrupa múltiplas imagens em um único request
+   - Reduz overhead de conexão e acelera processamento
+   - Configurável via `--batch-size` se necessário
+
+**Modos de Execução:**
+```bash
+# Modo padrão (já otimizado para plano pago)
+python classify_with_gemini.py --parallel FC_515_124
+
+# Teste sem API (classifica por nome de arquivo)
+python classify_with_gemini.py --mock FC_515_124
+
+# Limitar quantidade para testes
+python classify_with_gemini.py --parallel --limit N FC_515_124
+```
+
+**Tempos Estimados (39 documentos):**
+
+| Configuração | Tempo Estimado |
+|--------------|----------------|
+| Serial (antigo) | ~6 minutos |
+| Paralelo + Batch | ~1-2 minutos |
+| Com pré-classificação | ~40-60 segundos |
+
+**Saída:** `.tmp/classificacoes/{caso_id}_classificacao.json`
+
+#### Tratamento de Documentos Não Reconhecidos na Classificação
+
+Quando o Gemini não consegue classificar um documento nos 26 tipos conhecidos, ele deve:
+
+**1. Responder com tipo `DESCONHECIDO`:**
+```json
+{
+  "tipo": "DESCONHECIDO",
+  "confianca": 0.0,
+  "tipo_sugerido": "INVENTARIO_EXTRAJUDICIAL",
+  "descricao_documento": "Documento de partilha de bens com lista de herdeiros",
+  "categoria_recomendada": "Documentos do Negócio",
+  "caracteristicas_identificadoras": [
+    "Título contendo 'Inventário' ou 'Partilha'",
+    "Lista de herdeiros com qualificação completa",
+    "Relação de bens com valores atribuídos",
+    "Assinatura de advogado com OAB"
+  ],
+  "pessoa_relacionada": "ESPÓLIO DE FULANO DE TAL",
+  "observacao": "Documento não catalogado - sugestão de novo tipo"
+}
+```
+
+**2. Campos obrigatórios para DESCONHECIDO:**
+
+| Campo | Obrigatório | Descrição |
+|-------|-------------|-----------|
+| `tipo` | Sim | Sempre "DESCONHECIDO" |
+| `confianca` | Sim | Sempre 0.0 para não reconhecidos |
+| `tipo_sugerido` | Sim | Nome sugerido em MAIÚSCULAS_COM_UNDERSCORE |
+| `descricao_documento` | Sim | O que o documento parece ser (1-2 frases) |
+| `categoria_recomendada` | Sim | Uma das 5 categorias existentes |
+| `caracteristicas_identificadoras` | Sim | Lista de 3-5 características visuais |
+| `pessoa_relacionada` | Não | Nome da pessoa se identificável |
+| `observacao` | Não | Contexto adicional |
+
+**3. Fluxo de processamento para DESCONHECIDO:**
+
+```
+Documento classificado como DESCONHECIDO
+        │
+        ▼
+┌─────────────────────────────────────────┐
+│ Salvar em .tmp/novos_tipos/{caso_id}/   │
+│  - Copiar documento original            │
+│  - Salvar classificação com sugestões   │
+└─────────────────────────────────────────┘
+        │
+        ▼
+┌─────────────────────────────────────────┐
+│ Continuar pipeline normalmente          │
+│  - Documento vai para catálogo          │
+│  - Marcado para revisão manual          │
+│  - Extração usa prompt genérico         │
+└─────────────────────────────────────────┘
+        │
+        ▼
+┌─────────────────────────────────────────┐
+│ Ao final do processamento:              │
+│  - Gerar relatório de não reconhecidos  │
+│  - Agregar sugestões de tipos novos     │
+│  - Alertar operador para revisão        │
+└─────────────────────────────────────────┘
+```
+
+**4. Critérios para classificar como DESCONHECIDO:**
+
+- Nenhum dos 26 tipos se aplica
+- Confiança em qualquer tipo seria < 50%
+- Documento claramente é de um tipo novo (não é lixo ou duplicata)
+- Documento tem dados úteis para a escritura
+
+**5. Quando NÃO usar DESCONHECIDO:**
+
+- Documento é claramente lixo (página em branco, propaganda)
+- Documento é ilegível (usar `ILEGIVEL` como observação em `OUTRO`)
+- Documento é duplicata de outro já classificado
+- Documento poderia ser classificado com confiança >= 50%
+
+#### Etapa 1.3: Geração do Catálogo Final
+**Script:** `execution/generate_catalog.py`
+
+**Função:**
+- Combina inventário + classificação + contexto de subpasta
+- Gera estatísticas: total, alta/média/baixa confiança
+- Lista arquivos para revisão manual
+
+**Saída:** `.tmp/catalogos/{caso_id}.json`
+
+### 1.4 Regras de Exclusão
+
+Subpastas cujo nome é similar ao da pasta mãe devem ser IGNORADAS:
+- `FC515 - 124/` dentro de `FC 515 - 124 p280509/`
+- `GS 357 - 11/` dentro de `GS 357 - 11 p.281773/`
+
+**Motivo:** Contêm apenas documentos finais da escritura já lavrada.
+
+---
+
+## Fase 3: Extração Contextual com Gemini 3 Flash
+
+### 3.1 Objetivo
+Extrair dados estruturados diretamente de documentos visuais usando Gemini 3 Flash.
+
+### 3.2 Arquitetura
+
+```
++------------------+     +---------------------+     +------------------+
+|   Documento      | --> | Gemini 3 Flash      | --> | Saída            |
+|   Original       |     | (Prompt Espec.)     |     | Estruturada      |
++------------------+     +---------------------+     +------------------+
+        |                        |                        |
+        v                        v                        v
+   Arquivo PDF/IMG         Interpretação            JSON + Markdown
+   (Direto - sem OCR)      Contextual               Catalogado
+```
+
+**IMPORTANTE:** O OCR foi removido. Gemini 3 Flash processa diretamente PDFs e imagens.
+
+### 3.3 Script Principal
+**Script:** `execution/extract_with_gemini.py`
+
+**Função:**
+- Carrega documento original (PDF/imagem) diretamente
+- Seleciona prompt apropriado para o tipo de documento
+- Envia para Gemini 3 Flash (multimodal)
+- Processa resposta em 3 outputs: reescrita, explicação, JSON
+- Salva arquivos estruturados
+
+**Modos de Execução:**
+- Serial: Processamento sequencial
+- `--parallel`: Processamento paralelo com rate limiting
+- `--workers N`: Número de workers paralelos
+- `--rpm N`: Rate limit configurável
+
+**Saída:** `.tmp/contextual/{caso_id}/*.json`
+
+### 3.4 Processamento de Arquivos
+
+| Extensão | Processamento |
+|----------|--------------|
+| .pdf | Extrai todas as páginas e concatena verticalmente |
+| .docx | Converte para PDF, depois extrai páginas |
+| .jpg, .jpeg, .png | Leitura direta |
+| .tiff, .bmp | Conversão para JPEG |
+
+**Zoom Adaptativo:**
+- ≤10 páginas: zoom 2.0
+- >10 páginas: zoom 1.5
+
+### 3.5 Regras Críticas de Extração
+
+#### REGRA #1: NUNCA FABRICAR DADOS
+- Se ilegível, retornar `null`
+- PROIBIDO: "EXEMPLO DE NOME", "01/01/XXXX", dados por suposição
+- Preferir `null` a dados incorretos
+
+#### REGRA #2: EXPLICAÇÃO CONTEXTUAL OBRIGATÓRIA
+- Campo `explicacao_contextual` deve ter 3-5 parágrafos
+- Identificar o que é o documento
+- Descrever dados principais
+- Explicar situação/contexto
+- Listar observações relevantes
+
+#### REGRA #3: VALIDAÇÃO DE VALORES FINANCEIROS
+Em contratos de compra e venda:
+```
+sinal + saldo = preco_total
+```
+Não confundir entrada com valor total.
+
+#### REGRA #4: CÓDIGO DE AUTENTICAÇÃO
+Campo OBRIGATÓRIO em comprovantes de pagamento.
+Procurar em: página 2, rodapé, área de validação.
+
+#### REGRA #5: ÔNUS EM MATRÍCULAS
+- Capturar TODOS os ônus (ativos e históricos)
+- Verificar status: QUITADA, BAIXADA, EM VIGÊNCIA
+- Estruturar em `onus_ativos` e `onus_historicos`
+
+#### REGRA #6: DISTINGUIR PESSOAS
+- TITULAR: pessoa do documento (quem é identificado/certificado)
+- AUTORIDADE: oficial que emite/assina
+- Nunca retornar nome da autoridade como titular
+
+### 3.6 Prompts Especializados
+
+| Tipo de Documento | Arquivo de Prompt |
+|-------------------|-------------------|
+| RG | `execution/prompts/rg.txt` |
+| CNH | `execution/prompts/cnh.txt` |
+| CNDT | `execution/prompts/cndt.txt` |
+| MATRICULA_IMOVEL | `execution/prompts/matricula_imovel.txt` |
+| MATRICULA_IMOVEL (>2MB) | `execution/prompts/matricula_imovel_compact.txt` |
+| COMPROMISSO_COMPRA_VENDA | `execution/prompts/compromisso_compra_venda.txt` |
+| IPTU | `execution/prompts/iptu.txt` |
+| ITBI | `execution/prompts/itbi.txt` |
+| (outros) | `execution/prompts/generic.txt` |
+
+---
+
+## Fase 4: Mapeamento para Campos da Minuta
+
+### 4.1 Objetivo
+Mapear dados extraídos para os 180+ campos padronizados da minuta, consolidando informações de múltiplas fontes.
+
+### 4.2 Script Principal
+**Script:** `execution/map_to_fields.py`
+
+**Função:**
+- Carrega todos os JSONs de dados extraídos
+- Identifica alienantes (vendedores) e adquirentes (compradores)
+- Mapeia campos específicos de cada tipo de documento
+- Resolve conflitos entre fontes usando sistema de prioridades
+- Normaliza formatos (CPF, valores monetários, áreas)
+- Rastreia origem de cada campo
+- Gera arquivo consolidado com metadados
+
+**Saída:** `.tmp/mapped/{caso_id}.json`
+
+### 4.3 Estrutura da Saída
+
+```json
+{
+  "metadata": {
+    "caso_id": "FC_515_124_p280509",
+    "documentos_processados": 37,
+    "campos_preenchidos": 85,
+    "campos_faltantes": ["alienante[0].naturalidade", ...]
+  },
+  "alienantes": [...],
+  "adquirentes": [...],
+  "imovel": {...},
+  "negocio": {...},
+  "certidoes": {...}
+}
+```
+
+### 4.4 Sistema de Resolução de Conflitos
+
+Quando o mesmo dado aparece em múltiplos documentos, usar esta prioridade:
+
+| Prioridade | Tipo de Documento | Justificativa |
+|------------|-------------------|---------------|
+| 100 | RG | Documento oficial de identificação |
+| 95 | CERTIDAO_NASCIMENTO | Oficial estado civil |
+| 90 | CERTIDAO_CASAMENTO | Oficial matrimonial |
+| 85 | COMPROMISSO_COMPRA_VENDA | Assinado pelas partes |
+| 80 | MATRICULA_IMOVEL | Oficial do RI |
+| 75 | CNDT | Certidão oficial trabalhista |
+| 70 | ITBI | Oficial tributo municipal |
+| 65 | IPTU | Oficial cadastro municipal |
+| 60 | VVR | Oficial avaliação municipal |
+| 55 | CND_MUNICIPAL | Certidão municipal |
+| 50 | ESCRITURA | Referência |
+| 40 | COMPROVANTE_PAGAMENTO | Auxiliar |
+| 30 | PROTOCOLO_ONR | Controle administrativo |
+| 20 | ASSINATURA_DIGITAL | Certificado técnico |
+| 10 | OUTRO | Não classificado |
+
+### 4.5 Rastreamento de Fontes
+
+Cada campo registra de qual documento veio:
+
+```json
+{
+  "nome": "FULANO DE TAL SILVA",
+  "cpf": "123.456.789-00",
+  "_fontes": {
+    "nome": ["001_RG.json", "005_COMPROMISSO.json"],
+    "cpf": ["005_COMPROMISSO.json"]
+  }
+}
+```
+
+### 4.6 Normalização de Dados
+
+| Tipo | Formato de Saída | Exemplo |
+|------|------------------|---------|
+| CPF | XXX.XXX.XXX-XX | 123.456.789-00 |
+| Valores | R$ X.XXX.XXX,XX | R$ 615.000,00 |
+| Áreas | XX,XX m2 | 85,50 m2 |
+| Datas | DD/MM/AAAA | 27/01/2026 |
+
+### 4.7 Identificação de Papéis
+
+O script identifica quem vende (alienante) e quem compra (adquirente):
+
+**Estratégia 1: Compromisso de Compra e Venda (Principal)**
+- `vendedores[]` → Alienantes
+- `compradores[]` → Adquirentes
+
+**Estratégia 2: Catálogo (Fallback)**
+- Campo `papel_inferido` baseado na subpasta (VENDEDORES/, COMPRADORA/)
+
+### 4.8 Regras Avançadas de Mapeamento (CRÍTICO)
+
+Estas regras foram aprendidas através de auditorias e correções de bugs:
+
+#### REGRA #1: Merge de Proprietários por Imóvel
+Quando há múltiplas fontes de proprietários para o mesmo imóvel:
+- **NÃO sobrescrever** - fazer merge por CPF ou nome
+- Evitar duplicatas usando CPF como chave única
+- Quando CPF não disponível, usar nome em maiúsculas
+- Se proprietário já existe, apenas atualizar campos vazios
+
+```python
+# ERRADO: sobrescreve proprietários
+imovel.proprietarios = proprietarios_novos
+
+# CORRETO: merge inteligente
+for prop_novo in proprietarios_novos:
+    if prop_novo['cpf'] not in cpfs_existentes:
+        imovel.proprietarios.append(prop_novo)
+```
+
+#### REGRA #2: Priorização Temporal de RGs
+Quando há múltiplos RGs para a mesma pessoa:
+- Priorizar o RG com `data_expedicao` mais recente
+- Se RG atual tem data e novo não tem, manter atual
+- Usar atribuição direta (não `set_field`) para forçar atualização quando priorização temporal indica
+
+#### REGRA #3: Tipo de Imóvel Específico vs Genérico
+Para o campo `tipo_imovel`, aplicar lógica especial:
+- Valores específicos (`apartamento`, `vaga_garagem`) têm prioridade sobre genéricos (`outro`, `desconhecido`)
+- MATRICULA_IMOVEL é a fonte mais confiável para tipo de imóvel
+- Se compromisso diz "outro" e matrícula diz "vaga_garagem", usar "vaga_garagem"
+
+#### REGRA #4: Estado Civil Atual vs Histórico
+Quando há múltiplas certidões de casamento:
+- Priorizar casamento mais recente por `data_casamento`
+- Casamento de 2022 sobrepõe casamento de 1978
+- Gerar **ALERTA JURÍDICO** quando detectar múltiplos casamentos
+
+#### REGRA #5: Data de Pagamento do ITBI
+Extrair data de pagamento dos comprovantes (`COMPROVANTE_PAGAMENTO`):
+- Campo: `datas.pagamento_efetivo` ou `datas.transacao`
+- Vincular ao guia ITBI correspondente pelo valor
+- Incluir código de autenticação bancária
+
+#### REGRA #6: Extração do Andar
+Quando `andar` não existe como campo direto:
+- Extrair de `descricao_completa` usando regex
+- Padrões: "no 12º andar", "12o andar do Edifício"
+- Retornar no formato "12º"
+
+### 4.9 Alertas Jurídicos
+
+O sistema gera alertas automáticos para situações que requerem atenção:
+
+| Tipo de Alerta | Severidade | Descrição |
+|----------------|------------|-----------|
+| `MULTIPLOS_CASAMENTOS` | ALTA | Pessoa com 2+ certidões de casamento |
+| `ONUS_NAO_CANCELADO` | ALTA | Hipoteca ou outro ônus ainda ativo |
+| `CPF_DIVERGENTE` | MÉDIA | CPF diferente entre documentos |
+| `DATA_INVALIDA` | MÉDIA | Data de casamento posterior a documento |
+
+Os alertas são incluídos no JSON de saída:
+```json
+{
+  "alertas_juridicos": [{
+    "tipo": "MULTIPLOS_CASAMENTOS",
+    "severidade": "ALTA",
+    "pessoa": "FULANO DE TAL",
+    "mensagem": "Detectados 2 casamentos...",
+    "recomendacao": "Solicitar certidão de averbação..."
+  }]
+}
+```
+
+---
+
+## Campos Mapeados por Categoria
+
+### Alienantes/Adquirentes (Pessoas)
+
+**Identificação Pessoal:**
+- nome, cpf, rg, orgao_emissor_rg, estado_emissor_rg, data_emissao_rg, data_nascimento
+
+**Naturalidade e Filiação:**
+- nacionalidade, naturalidade, filiacao_pai, filiacao_mae
+
+**Estado Civil:**
+- estado_civil, regime_bens, data_casamento, conjuge, profissao
+
+**Domicílio:**
+- logradouro, numero, complemento, bairro, cidade, estado, cep
+
+**Certidões:**
+- cndt (numero, data_expedicao, hora_expedicao, validade, status)
+
+### Imóvel
+
+**Matrícula:**
+- numero, registro_imoveis, cidade, estado
+
+**Descrição:**
+- tipo, edificio, unidade, bloco, andar
+- area_total, area_privativa, area_comum, fracao_ideal
+
+**Endereço:**
+- logradouro, numero, complemento, bairro, cidade, estado, cep
+
+**Cadastro Municipal:**
+- sql
+
+**Valores Venais:**
+- iptu, vvr, ano_exercicio
+
+**Ônus:**
+- proprietarios, onus_ativos, onus_historicos
+
+### Negócio Jurídico
+
+**Valores:**
+- total, fracao_alienada
+
+**Forma de Pagamento:**
+- tipo, sinal, saldo, prazo
+
+**ITBI:**
+- numero_guia, base_calculo, valor, data_vencimento, data_pagamento
+
+**Corretagem:**
+- valor, responsavel, intermediador
+
+---
+
+## Configuração do Gemini
+
+### Modelo e Parâmetros
+
+| Parâmetro | Valor | Justificativa |
+|-----------|-------|---------------|
+| Modelo | `gemini-3-flash-preview` | Última versão, melhor performance |
+| Temperature | 0.1 | Respostas determinísticas |
+| Max Output Tokens | 16384 | Documentos longos + explicações |
+
+### Rate Limiting
+
+> **IMPORTANTE:** Este projeto utiliza exclusivamente o **PLANO PAGO** do Gemini API.
+> Todas as configurações padrão estão otimizadas para 150 RPM (plano pago).
+
+| Parâmetro | Valor Padrão | Descrição |
+|-----------|--------------|-----------|
+| RPM | 150 | Requests por minuto (plano pago) |
+| Intervalo | 0.5s | Delay entre requests |
+| API Workers | 5 | Workers para chamadas API paralelas |
+| Batch Size | 4 | Imagens por request |
+| Prep Workers | 10 | Workers para preparação de documentos |
+
+**Comando Padrão (já otimizado para plano pago):**
+```bash
+python classify_with_gemini.py --parallel FC_515_124
+```
+
+**Comando com configurações explícitas:**
+```bash
+python classify_with_gemini.py --parallel --api-workers 5 --batch-size 4 FC_515_124
+```
+
+### Custos Estimados
+
+| Métrica | Valor |
+|---------|-------|
+| Input | $0.50 / 1M tokens |
+| Output | $3.00 / 1M tokens |
+| Documento médio | ~3K tokens in, ~2K tokens out |
+| Custo por documento | ~$0.008 |
+| Escritura (40 docs) | ~$0.32 |
+
+---
+
+## Melhorias e Aprendizados (Janeiro 2026)
+
+### Tratamento de Matrículas Grandes (>2MB)
+
+**Problema Identificado:**
+Matrículas de imóvel com muitos registros geram arquivos grandes (>2MB). O prompt padrão solicita reescrita completa + explicação + JSON, o que pode esgotar o limite de tokens de saída (16384) antes de gerar o JSON estruturado.
+
+**Solução Implementada:**
+1. Criado prompt compacto `matricula_imovel_compact.txt` que:
+   - NÃO solicita reescrita completa
+   - PRIORIZA o JSON estruturado como output principal
+   - Limita explicação contextual a 2 parágrafos
+
+2. Adicionada função `select_prompt()` em `extract_with_gemini.py`:
+   - Se arquivo > 2MB e tipo = MATRICULA_IMOVEL → usa prompt compacto
+   - Caso contrário → usa prompt padrão
+
+### Consolidação de Pessoas com CPFs Divergentes
+
+**Problema Identificado:**
+Erros de OCR podem gerar CPFs levemente diferentes para a mesma pessoa em documentos distintos, criando registros duplicados.
+
+**Solução Implementada:**
+Função `consolidar_pessoas_por_nome()` em `map_to_fields.py` com:
+1. **Validação de dígito verificador**: CPF válido tem prioridade
+2. **Votação por frequência**: CPF que aparece mais vezes é o correto
+3. **Prioridade de fonte**: RG > CNH > Compromisso em empate
+
+### Processamento de CNH
+
+**Problema Identificado:**
+Documentos CNH eram classificados mas não processados - RG e data_nascimento extraídos da CNH não eram mapeados.
+
+**Solução Implementada:**
+1. Criado prompt `execution/prompts/cnh.txt` com estrutura padronizada
+2. Adicionada função `map_cnh_to_pessoa()` em `map_to_fields.py`
+3. Prioridade CNH = 90 (menor que RG direto = 100, mas útil como fonte secundária)
+
+### Cônjuges Anuentes
+
+**Problema Identificado:**
+Cônjuges que anuem na venda têm documentos próprios (RG, Certidão Casamento) mas apareciam apenas como referência no campo "cônjuge" dos alienantes.
+
+**Solução Implementada:**
+1. Criado campo separado `anuentes` na estrutura de saída
+2. Função `identificar_anuentes()` separa cônjuges dos alienantes
+3. Cada anuente tem estrutura completa de PessoaNatural
+4. Campo `anuente_de` indica a qual alienante está vinculado
+
+### Estrutura de Saída Atualizada
+
+```json
+{
+  "metadata": {...},
+  "alienantes": [...],
+  "anuentes": [...],  // NOVO - cônjuges que anuem na venda
+  "adquirentes": [...],
+  "imovel": {...},
+  "negocio": {...}
+}
+```

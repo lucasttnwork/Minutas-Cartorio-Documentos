@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test - EntityCard Styles</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Deep Teal color tokens */
+    :root {
+      --teal-deep: oklch(45% 0.10 180);
+      --teal-medium: oklch(50% 0.08 180);
+      --teal-light: oklch(60% 0.06 180);
+      --teal-glow: oklch(55% 0.12 180);
+
+      --background: oklch(10% 0.010 250);
+      --card: oklch(15% 0.012 250);
+      --foreground: oklch(95% 0.004 250);
+      --muted-foreground: oklch(65% 0.008 250);
+      --border: oklch(25% 0.012 250);
+    }
+
+    .light {
+      --background: oklch(98% 0.004 55);
+      --card: oklch(99% 0.002 55);
+      --foreground: oklch(14% 0.012 250);
+      --muted-foreground: oklch(45% 0.010 250);
+      --border: oklch(90% 0.006 250);
+    }
+
+    body {
+      background: var(--background);
+      color: var(--foreground);
+      font-family: 'Geist', 'Inter', system-ui, sans-serif;
+    }
+
+    /* Entity Card Premium */
+    .entity-card-premium {
+      position: relative;
+      border-radius: 0.875rem;
+      overflow: hidden;
+      background: oklch(from var(--card) l c h / 0.8);
+      backdrop-filter: blur(8px);
+    }
+
+    .entity-card-premium::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 2px;
+      background: linear-gradient(
+        135deg,
+        oklch(from var(--teal-medium) l c h / 0.4) 0%,
+        oklch(from var(--teal-deep) l c h / 0.2) 50%,
+        oklch(from var(--teal-medium) l c h / 0.35) 100%
+      );
+      -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* Header */
+    .entity-card-header-premium {
+      position: relative;
+      padding: 1rem;
+      background: linear-gradient(
+        135deg,
+        oklch(from var(--teal-deep) l c h / 0.12) 0%,
+        oklch(from var(--teal-medium) l c h / 0.06) 50%,
+        oklch(from var(--teal-deep) l c h / 0.08) 100%
+      );
+      border-bottom: 1px solid oklch(from var(--teal-medium) l c h / 0.2);
+    }
+
+    /* Content Premium - FIXED: Clean background for legibility */
+    .entity-card-content-premium {
+      position: relative;
+      overflow: hidden;
+      padding: 1.25rem;
+      /* Clean solid background - no distracting gradients */
+      background: var(--card);
+      border-top: 1px solid oklch(from var(--teal-medium) l c h / 0.2);
+    }
+
+    .dark .entity-card-content-premium {
+      background: oklch(from var(--card) calc(l + 0.02) c h);
+      border-top: 1px solid oklch(from var(--teal-medium) l c h / 0.25);
+    }
+
+    .entity-card-content-premium::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        oklch(from var(--teal-medium) l c h / 0.15) 0%,
+        oklch(from var(--teal-light) l c h / 0.3) 50%,
+        oklch(from var(--teal-medium) l c h / 0.15) 100%
+      );
+    }
+
+    .dark .entity-card-content-premium::before {
+      background: linear-gradient(
+        90deg,
+        oklch(from var(--teal-medium) l c h / 0.2) 0%,
+        oklch(from var(--teal-light) l c h / 0.4) 50%,
+        oklch(from var(--teal-medium) l c h / 0.2) 100%
+      );
+    }
+
+    /* No left border - cleaner */
+    .entity-card-content-premium::after {
+      display: none;
+    }
+
+    /* Editable Field - IMPROVED for legibility */
+    .field-default {
+      padding: 0.625rem 0.75rem;
+      border-radius: 0.5rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--foreground);
+      font-size: 0.875rem;
+      font-weight: 500;
+      box-shadow: 0 1px 2px oklch(0% 0 0 / 0.05);
+    }
+
+    .field-edited {
+      padding: 0.625rem 0.75rem;
+      border-radius: 0.5rem;
+      border: 2px solid oklch(50% 0.10 180 / 0.5);
+      background: linear-gradient(to right, oklch(50% 0.08 180 / 0.12), oklch(55% 0.06 180 / 0.06), transparent);
+      box-shadow: 0 0 0 1px oklch(50% 0.10 180 / 0.2), 0 2px 10px oklch(55% 0.12 180 / 0.12);
+      color: var(--foreground);
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .field-empty {
+      padding: 0.625rem 0.75rem;
+      border-radius: 0.5rem;
+      background: oklch(from var(--card) l c h / 0.3);
+      border: 2px dashed oklch(from var(--border) l c h / 0.5);
+      color: var(--muted-foreground);
+      font-style: italic;
+      font-size: 0.875rem;
+    }
+
+    .label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--muted-foreground);
+      margin-bottom: 0.5rem;
+    }
+
+    .grid-fields {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted-foreground);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid oklch(from var(--border) l c h / 0.3);
+    }
+
+    .toggle-theme {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      padding: 0.5rem 1rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      color: var(--foreground);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="p-8">
+  <button class="toggle-theme" onclick="document.documentElement.classList.toggle('dark'); document.documentElement.classList.toggle('light');">
+    Toggle Light/Dark
+  </button>
+
+  <h1 class="text-2xl font-bold mb-8">EntityCard Content Test - Deep Teal</h1>
+
+  <div class="max-w-4xl mx-auto space-y-8">
+    <!-- EntityCard -->
+    <div class="entity-card-premium">
+      <div class="entity-card-header-premium">
+        <h3 class="font-semibold">Joao Silva Santos</h3>
+        <p class="text-sm" style="color: var(--muted-foreground);">CPF: 123.456.789-00</p>
+      </div>
+
+      <div class="entity-card-content-premium">
+        <div class="section-title">DADOS INDIVIDUAIS</div>
+
+        <div class="grid-fields">
+          <div>
+            <div class="label">Nome Completo</div>
+            <div class="field-default">Joao Silva Santos</div>
+          </div>
+
+          <div>
+            <div class="label">CPF</div>
+            <div class="field-default">123.456.789-00</div>
+          </div>
+
+          <div>
+            <div class="label">RG</div>
+            <div class="field-edited">12.345.678-9 (editado)</div>
+          </div>
+
+          <div>
+            <div class="label">Orgao Emissor RG</div>
+            <div class="field-default">SSP/SP</div>
+          </div>
+
+          <div>
+            <div class="label">Estado Emissor RG</div>
+            <div class="field-empty">Clique para editar</div>
+          </div>
+
+          <div>
+            <div class="label">Data Emissao RG</div>
+            <div class="field-default">15/03/2010</div>
+          </div>
+
+          <div>
+            <div class="label">Nacionalidade</div>
+            <div class="field-default">Brasileiro</div>
+          </div>
+
+          <div>
+            <div class="label">Profissao</div>
+            <div class="field-edited">Engenheiro Civil (editado)</div>
+          </div>
+
+          <div>
+            <div class="label">Data Nascimento</div>
+            <div class="field-default">10/05/1985</div>
+          </div>
+        </div>
+
+        <div class="section-title mt-6">DOMICILIO</div>
+
+        <div class="grid-fields">
+          <div class="col-span-2">
+            <div class="label">Logradouro</div>
+            <div class="field-default">Rua das Flores</div>
+          </div>
+
+          <div>
+            <div class="label">Numero</div>
+            <div class="field-default">123</div>
+          </div>
+
+          <div>
+            <div class="label">Complemento</div>
+            <div class="field-empty">Clique para editar</div>
+          </div>
+
+          <div>
+            <div class="label">Bairro</div>
+            <div class="field-default">Centro</div>
+          </div>
+
+          <div>
+            <div class="label">Cidade</div>
+            <div class="field-default">Sao Paulo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-12 p-4 rounded-lg" style="background: var(--card); border: 1px solid var(--border);">
+    <h2 class="text-lg font-bold mb-4">Problemas Identificados:</h2>
+    <ul class="list-disc pl-6 space-y-2 text-sm" style="color: var(--muted-foreground);">
+      <li>Gradientes de fundo competem com os campos</li>
+      <li>Glow orbs criam areas de baixo contraste</li>
+      <li>Campos se perdem no fundo com gradiente</li>
+      <li>Borda lateral teal distrai da leitura</li>
+      <li>No light mode, efeitos ficam invisiveis ou estranhos</li>
+    </ul>
+  </div>
+</body>
+</html>
