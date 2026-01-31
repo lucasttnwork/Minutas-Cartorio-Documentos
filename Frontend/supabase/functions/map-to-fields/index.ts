@@ -1,7 +1,9 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { corsHeaders } from '../_shared/cors.ts';
 import { createSupabaseClient, createServiceClient } from '../_shared/supabase-client.ts';
+import { startExecution, logSuccess, logError } from '../_shared/execution-logger.ts';
 import type { MappedFields, PessoaNatural, Imovel, NegocioJuridico, AlertaJuridico } from '../_shared/types.ts';
+import { persistMappedFields } from './persistence.ts';
 
 // Document type priorities for conflict resolution
 const TYPE_PRIORITIES: Record<string, number> = {
@@ -40,9 +42,11 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  const serviceClient = createServiceClient();
+  let execution = { id: '', started_at: '' };
+
   try {
     const supabase = createSupabaseClient(req);
-    const serviceClient = createServiceClient();
     const { minuta_id }: RequestBody = await req.json();
 
     // Verify access to minuta
@@ -72,39 +76,40 @@ serve(async (req) => {
       throw new Error('No extracted documents found');
     }
 
-    // Log execution
-    const { data: execution } = await serviceClient
-      .from('agent_executions')
-      .insert({
-        minuta_id,
-        agent_type: 'map',
-        status: 'running',
-        started_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
+    // Start execution logging (no tokens for map as it's deterministic)
+    execution = await startExecution(serviceClient, 'map', {
+      minutaId: minuta_id,
+    });
 
     // Process and map fields
     const result = mapDocumentsToFields(documentos as DocumentRecord[]);
 
-    // Update execution log
-    await serviceClient
-      .from('agent_executions')
-      .update({
-        status: 'success',
-        result,
-        completed_at: new Date().toISOString(),
-        duration_ms: execution ? Date.now() - new Date(execution.started_at).getTime() : 0,
-      })
-      .eq('id', execution?.id);
+    // Persist mapped fields to structured tables
+    const persistenceResult = await persistMappedFields(serviceClient, minuta_id, result);
+    console.log('Persistence result:', persistenceResult);
+
+    // Log successful execution (no token usage for map operation)
+    await logSuccess(serviceClient, execution, {
+      ...result,
+      persistence: persistenceResult,
+    });
 
     return new Response(
-      JSON.stringify({ success: true, result }),
+      JSON.stringify({
+        success: true,
+        result,
+        persistence: persistenceResult,
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
     console.error('Mapping error:', error);
+
+    // Log error in execution tracking
+    if (execution.id) {
+      await logError(serviceClient, execution, error as Error);
+    }
 
     return new Response(
       JSON.stringify({ success: false, error: (error as Error).message }),
@@ -198,21 +203,31 @@ function mapIdentityDocument(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _priority: number
 ) {
-  const cpf = normalizeCPF(dados.cpf as string | undefined);
+  // Handle both nested (RG format: {rg: {...}}) and flat (CNH format: {...}) structures
+  const rgData = dados.rg as Record<string, unknown> | undefined;
+  const isNestedFormat = rgData && typeof rgData === 'object' && 'cpf' in rgData;
+
+  // Get data from the correct location
+  const docData = isNestedFormat ? rgData : dados;
+
+  // For CNH, the field might be 'nome_completo' instead of 'nome'
+  const nome = (docData.nome as string) || (docData.nome_completo as string);
+
+  const cpf = normalizeCPF(docData.cpf as string | undefined);
   if (!cpf) return;
 
   const pessoa: PessoaNatural = {
-    nome: (dados.nome as string)?.toUpperCase(),
+    nome: nome?.toUpperCase(),
     cpf,
-    rg: dados.rg as string | undefined,
-    orgao_emissor_rg: dados.orgao_emissor as string | undefined,
-    estado_emissor_rg: dados.estado_emissor as string | undefined,
-    data_emissao_rg: dados.data_emissao as string | undefined,
-    data_nascimento: dados.data_nascimento as string | undefined,
-    nacionalidade: dados.nacionalidade as string | undefined,
-    naturalidade: dados.naturalidade as string | undefined,
-    filiacao_pai: dados.filiacao_pai as string | undefined,
-    filiacao_mae: dados.filiacao_mae as string | undefined,
+    rg: isNestedFormat ? (docData.numero_rg as string | undefined) : (dados.rg as string | undefined),
+    orgao_emissor_rg: (docData.orgao_emissor as string | undefined) || (docData.orgao_expedidor as string | undefined),
+    estado_emissor_rg: (docData.estado_emissor as string | undefined) || (docData.uf_rg as string | undefined),
+    data_emissao_rg: docData.data_expedicao as string | undefined,
+    data_nascimento: docData.data_nascimento as string | undefined,
+    nacionalidade: docData.nacionalidade as string | undefined,
+    naturalidade: docData.naturalidade as string | undefined,
+    filiacao_pai: (docData.filiacao_pai as string | undefined) || (docData.filiacao as Record<string, unknown>)?.pai as string | undefined,
+    filiacao_mae: (docData.filiacao_mae as string | undefined) || (docData.filiacao as Record<string, unknown>)?.mae as string | undefined,
     _fontes: { cpf: [source], nome: [source] },
   };
 

@@ -361,8 +361,24 @@ inspector_port = 8083
 # The Deno major version to use.
 deno_version = 2
 
-# [edge_runtime.secrets]
-# secret_key = "env(SECRET_VALUE)"
+[edge_runtime.secrets]
+GEMINI_API_KEY = "env(GEMINI_API_KEY)"
+
+# Disable JWT verification for edge functions (local development)
+[functions.classify-document]
+verify_jwt = false
+
+[functions.extract-document]
+verify_jwt = false
+
+[functions.map-to-fields]
+verify_jwt = false
+
+[functions.generate-minuta]
+verify_jwt = false
+
+[functions.bootstrap-admin]
+verify_jwt = false
 
 [analytics]
 enabled = true

@@ -1,15 +1,17 @@
 // src/pages/ConferenciaNegocio.tsx
 import { useEffect, useMemo, useCallback } from "react";
 import { AnimatePresence } from "framer-motion";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Navigate } from "react-router-dom";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FlowStepper } from "@/components/layout/FlowStepper";
 import { FlowNavigation } from "@/components/layout/FlowNavigation";
 import { EntityCard } from "@/components/layout/EntityCard";
 import { SectionCard } from "@/components/layout/SectionCard";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { NegocioJuridicoForm } from "@/components/forms/negocio/NegocioJuridicoForm";
 import { useMinuta } from "@/contexts/MinutaContext";
-import { Briefcase, Home } from "lucide-react";
+import { Briefcase, Home, Loader2, AlertCircle } from "lucide-react";
 import { AnimatedBackground } from "@/components/layout/AnimatedBackground";
 import { validateNegocioJuridico } from "@/schemas/minuta.schemas";
 import { createEmptyNegocioJuridico, createEmptyParticipanteNegocio } from "@/utils/factories";
@@ -19,8 +21,17 @@ import type { NegocioJuridico } from "@/types/minuta";
 export default function ConferenciaNegocio() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { currentMinuta, isSaving, updateNegocioJuridico, updateMinuta } = useMinuta();
+  const {
+    currentMinuta,
+    isSaving,
+    isLoading,
+    syncError,
+    loadMinutaFromDatabase,
+    updateNegocioJuridico,
+    updateMinuta
+  } = useMinuta();
 
+  // Memoize data derived from currentMinuta (always called, regardless of loading state)
   const imoveis = useMemo(() => currentMinuta?.imoveis || [], [currentMinuta?.imoveis]);
   const negocios = useMemo(() => currentMinuta?.negociosJuridicos || [], [currentMinuta?.negociosJuridicos]);
 
@@ -34,6 +45,16 @@ export default function ConferenciaNegocio() {
     ...(currentMinuta?.outorgantes.pessoasJuridicas || []),
     ...(currentMinuta?.outorgados.pessoasJuridicas || []),
   ], [currentMinuta?.outorgantes, currentMinuta?.outorgados]);
+
+  // Track if we're in the initial load phase
+  const needsLoad = id && (!currentMinuta || currentMinuta.id !== id);
+
+  // Load data from database when component mounts with a minutaId
+  useEffect(() => {
+    if (needsLoad) {
+      loadMinutaFromDatabase(id);
+    }
+  }, [id, needsLoad, loadMinutaFromDatabase]);
 
   // Ensure each imovel has a corresponding negocio
   useEffect(() => {
@@ -55,7 +76,7 @@ export default function ConferenciaNegocio() {
   }, [currentMinuta, imoveis, negocios, updateMinuta]);
 
   // Helper to set nested value by path (e.g., "formaPagamentoDetalhada.tipo")
-  const setNestedValue = (obj: NegocioJuridico, path: string, value: unknown): Partial<NegocioJuridico> => {
+  const setNestedValue = useCallback((obj: NegocioJuridico, path: string, value: unknown): Partial<NegocioJuridico> => {
     const parts = path.split('.');
     if (parts.length === 1) {
       return { [path]: value } as Partial<NegocioJuridico>;
@@ -75,7 +96,7 @@ export default function ConferenciaNegocio() {
 
     // Return only the top-level key that changed
     return { [parts[0]]: result[parts[0] as keyof NegocioJuridico] } as Partial<NegocioJuridico>;
-  };
+  }, []);
 
   const handleUpdate = useCallback((negocioId: string, field: string, value: string | boolean | Record<string, boolean>) => {
     const negocio = negocios.find(n => n.id === negocioId);
@@ -87,7 +108,7 @@ export default function ConferenciaNegocio() {
       ...updates,
       camposEditados: [...new Set([...negocio.camposEditados, field])],
     });
-  }, [negocios, updateNegocioJuridico]);
+  }, [negocios, updateNegocioJuridico, setNestedValue]);
 
   // Alienante handlers
   const handleAddAlienante = useCallback((negocioId: string) => {
@@ -176,12 +197,12 @@ export default function ConferenciaNegocio() {
     }, 1500);
   }, [negocios, updateNegocioJuridico]);
 
-  const getImovelName = (imovelId: string) => {
+  const getImovelName = useCallback((imovelId: string) => {
     const imovel = imoveis.find(i => i.id === imovelId);
     return imovel?.descricao.denominacao || imovel?.matricula.numeroMatricula || 'Imovel';
-  };
+  }, [imoveis]);
 
-  const validateAllData = (): boolean => {
+  const validateAllData = useCallback((): boolean => {
     const errors: string[] = [];
 
     // Validate each negocio juridico
@@ -208,13 +229,52 @@ export default function ConferenciaNegocio() {
     }
 
     return errors.length === 0;
-  };
+  }, [negocios]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (validateAllData()) {
       navigate(`/minuta/${id}/minuta`);
     }
-  };
+  }, [validateAllData, navigate, id]);
+
+  // Show loading state - also show if we need to load but haven't started yet
+  if (isLoading || needsLoad) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="text-muted-foreground">Carregando dados...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (syncError) {
+    return (
+      <div className="p-4 md:p-8 min-h-screen bg-background">
+        <div className="max-w-2xl mx-auto">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Erro ao carregar dados</AlertTitle>
+            <AlertDescription>{syncError}</AlertDescription>
+          </Alert>
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() => navigate('/dashboard')}
+          >
+            Voltar ao Dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect if no minuta loaded
+  if (!currentMinuta) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <AnimatedBackground

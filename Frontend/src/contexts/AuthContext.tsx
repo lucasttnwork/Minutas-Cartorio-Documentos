@@ -11,14 +11,19 @@ import {
 } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase, type Profile } from '@/lib/supabase';
+import { getCachedProfile, cacheProfile, clearProfileCache } from '@/lib/profile-cache';
+import { delay, PROFILE_FETCH_DELAYS } from '@/lib/delay';
 
 interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
+  profileLoading: boolean;       // true enquanto busca profile (separado de loading geral)
+  lastProfileSync: Date | null;  // timestamp do último sync bem-sucedido
   isAuthenticated: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>; // força refresh do profile
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -31,37 +36,70 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [lastProfileSync, setLastProfileSync] = useState<Date | null>(null);
 
   // Use ref to track if initial auth check is done to prevent race conditions
   const initCompleteRef = useRef(false);
   // Track if we're currently processing auth to avoid duplicate profile fetches
   const processingAuthRef = useRef(false);
 
-  const fetchProfile = useCallback(async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string, skipCache: boolean = false): Promise<Profile | null> => {
+    // 1. Tentar cache primeiro (unless skipping cache)
+    if (!skipCache) {
+      const cached = getCachedProfile();
+      if (cached && cached.id === userId) {
+        console.log('[Auth] Profile loaded from cache');
+        setLastProfileSync(new Date());
+        return cached;
+      }
+    }
+
+    // 2. Retry exponencial
+    const delays = PROFILE_FETCH_DELAYS;
+    let lastError: Error | null = null;
+
+    setProfileLoading(true);
     try {
-      console.log('[Auth] Fetching profile for user:', userId);
+      for (let attempt = 0; attempt < delays.length; attempt++) {
+        try {
+          console.log('[Auth] Fetching profile for user:', userId, `(attempt ${attempt + 1}/${delays.length})`);
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
 
-      if (error) {
-        console.error('[Auth] Error fetching profile:', error.message, error.code);
-        // Se o profile nao existe, pode ser que o trigger nao criou ainda
-        // Vamos tentar novamente apos um pequeno delay
-        if (error.code === 'PGRST116') {
-          console.log('[Auth] Profile not found, may need to wait for trigger...');
+          if (error) {
+            // PGRST116 = row not found - trigger may not have created profile yet
+            if (error.code === 'PGRST116' && attempt < delays.length - 1) {
+              console.log(`[Auth] Profile not found, retrying in ${delays[attempt]}ms...`);
+              await delay(delays[attempt]);
+              continue;
+            }
+            throw error;
+          }
+
+          // Sucesso - salvar no cache e atualizar lastProfileSync
+          console.log('[Auth] Profile fetched successfully:', data?.email);
+          cacheProfile(data);
+          setLastProfileSync(new Date());
+          return data;
+        } catch (err) {
+          lastError = err as Error;
+          console.error('[Auth] Error fetching profile:', (err as { message?: string; code?: string }).message, (err as { code?: string }).code);
+          if (attempt < delays.length - 1) {
+            console.log(`[Auth] Retrying in ${delays[attempt]}ms...`);
+            await delay(delays[attempt]);
+          }
         }
-        return null;
       }
 
-      console.log('[Auth] Profile fetched successfully:', data?.email);
-      return data;
-    } catch (err) {
-      console.error('[Auth] Exception fetching profile:', err);
+      console.error('[Auth] Failed to fetch profile after retries:', lastError);
       return null;
+    } finally {
+      setProfileLoading(false);
     }
   }, []);
 
@@ -214,10 +252,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 
   const signOut = useCallback(async () => {
+    clearProfileCache();
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
   }, []);
+
+  const refreshProfile = useCallback(async () => {
+    if (!user) {
+      console.log('[Auth] refreshProfile called but no user logged in');
+      return;
+    }
+    console.log('[Auth] refreshProfile called, clearing cache and refetching');
+    clearProfileCache();
+    const userProfile = await fetchProfile(user.id, true); // skipCache = true
+    setProfile(userProfile);
+  }, [user, fetchProfile]);
 
   const isAuthenticated = useMemo(() => !!user, [user]);
 
@@ -226,11 +276,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       user,
       profile,
       loading,
+      profileLoading,
+      lastProfileSync,
       isAuthenticated,
       signIn,
       signOut,
+      refreshProfile,
     }),
-    [user, profile, loading, isAuthenticated, signIn, signOut]
+    [user, profile, loading, profileLoading, lastProfileSync, isAuthenticated, signIn, signOut, refreshProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

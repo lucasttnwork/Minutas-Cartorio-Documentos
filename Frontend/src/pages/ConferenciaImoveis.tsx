@@ -1,6 +1,7 @@
 // src/pages/ConferenciaImoveis.tsx
+import { useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Navigate } from "react-router-dom";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FlowStepper } from "@/components/layout/FlowStepper";
 import { FlowNavigation } from "@/components/layout/FlowNavigation";
@@ -11,6 +12,7 @@ import { SectionCard } from "@/components/layout/SectionCard";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -19,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMinuta } from "@/contexts/MinutaContext";
-import { Home, Plus, Eye } from "lucide-react";
+import { Home, Plus, Eye, Loader2, AlertCircle } from "lucide-react";
 import { AnimatedBackground } from "@/components/layout/AnimatedBackground";
 import type { Imovel } from "@/types/minuta";
 import { createEmptyImovel } from "@/utils/factories";
@@ -29,7 +31,65 @@ import { toast } from "sonner";
 export default function ConferenciaImoveis() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { currentMinuta, isSaving, addImovel, updateImovel, removeImovel } = useMinuta();
+  const {
+    currentMinuta,
+    isSaving,
+    isLoading,
+    syncError,
+    loadMinutaFromDatabase,
+    addImovel,
+    updateImovel,
+    removeImovel
+  } = useMinuta();
+
+  // Track if we're in the initial load phase
+  const needsLoad = id && (!currentMinuta || currentMinuta.id !== id);
+
+  // Load data from database when component mounts with a minutaId
+  useEffect(() => {
+    if (needsLoad) {
+      loadMinutaFromDatabase(id);
+    }
+  }, [id, needsLoad, loadMinutaFromDatabase]);
+
+  // Show loading state - also show if we need to load but haven't started yet
+  if (isLoading || needsLoad) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="text-muted-foreground">Carregando dados...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (syncError) {
+    return (
+      <div className="p-4 md:p-8 min-h-screen bg-background">
+        <div className="max-w-2xl mx-auto">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Erro ao carregar dados</AlertTitle>
+            <AlertDescription>{syncError}</AlertDescription>
+          </Alert>
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() => navigate('/dashboard')}
+          >
+            Voltar ao Dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect if no minuta loaded
+  if (!currentMinuta) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const imoveis = currentMinuta?.imoveis || [];
 

@@ -3,9 +3,14 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { AgenteCard, AgenteFilter } from '@/components/agentes';
+import { ExecutionHistory } from '@/components/agents';
 import { getAgentesByCategoria } from '@/data/agentes';
+import { History, Bot } from 'lucide-react';
+
+type TabType = 'agentes' | 'historico';
 
 export default function DashboardAgentes() {
+  const [activeTab, setActiveTab] = useState<TabType>('agentes');
   const [categoriaAtiva, setCategoriaAtiva] = useState('todos');
   const [busca, setBusca] = useState('');
 
@@ -41,32 +46,68 @@ export default function DashboardAgentes() {
           </p>
         </header>
 
-        {/* Filters */}
-        <AgenteFilter
-          categoriaAtiva={categoriaAtiva}
-          onCategoriaChange={setCategoriaAtiva}
-          busca={busca}
-          onBuscaChange={setBusca}
-        />
-
-        {/* Agents Grid */}
-        {agentesFiltrados.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12 text-muted-foreground"
+        {/* Tab Navigation */}
+        <div className="mb-6 flex gap-2 border-b border-border">
+          <button
+            onClick={() => setActiveTab('agentes')}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
+              activeTab === 'agentes'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
           >
-            <p>Nenhum agente encontrado para "{busca}"</p>
-          </motion.div>
+            <Bot className="w-4 h-4" />
+            Agentes
+          </button>
+          <button
+            onClick={() => setActiveTab('historico')}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
+              activeTab === 'historico'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <History className="w-4 h-4" />
+            Historico de Execucoes
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'agentes' ? (
+          <>
+            {/* Filters */}
+            <AgenteFilter
+              categoriaAtiva={categoriaAtiva}
+              onCategoriaChange={setCategoriaAtiva}
+              busca={busca}
+              onBuscaChange={setBusca}
+            />
+
+            {/* Agents Grid */}
+            {agentesFiltrados.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-12 text-muted-foreground"
+              >
+                <p>Nenhum agente encontrado para "{busca}"</p>
+              </motion.div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {agentesFiltrados.map((agente, index) => (
+                  <AgenteCard
+                    key={agente.id}
+                    agente={agente}
+                    index={index}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {agentesFiltrados.map((agente, index) => (
-              <AgenteCard
-                key={agente.id}
-                agente={agente}
-                index={index}
-              />
-            ))}
+          <div className="bg-card border border-border rounded-lg p-6">
+            <h2 className="text-lg font-semibold mb-4">Ultimas Execucoes de IA</h2>
+            <ExecutionHistory limit={20} />
           </div>
         )}
       </motion.div>

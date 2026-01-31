@@ -1,11 +1,12 @@
 // src/pages/UploadDocumentos.tsx
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SectionCard } from "@/components/layout/SectionCard";
 import { FlowStepper } from "@/components/layout/FlowStepper";
 import { useMinuta } from "@/contexts/MinutaContext";
+import { useDocumentUpload } from "@/hooks/useDocumentUpload";
 import {
   Upload,
   X,
@@ -107,11 +108,45 @@ const formatFileSize = (bytes: number) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
+// Helper to check if an id is a database UUID (not a local timestamp-based id)
+const isDbId = (id: string | undefined): boolean => {
+  if (!id) return false;
+  // UUID format: 8-4-4-4-12 hex characters
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(id);
+};
+
 export default function UploadDocumentos() {
   const navigate = useNavigate();
-  const { currentMinuta, addDocument, removeDocument } = useMinuta();
+  const { currentMinuta, addDocument, removeDocument, createMinutaInDatabase, isLoading: isCreatingMinuta } = useMinuta();
+  const { uploadDocument, uploading: hookUploading, progress: hookProgress, error: uploadError } = useDocumentUpload();
   const [isDragging, setIsDragging] = useState<UploadCategory | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [activeUploads, setActiveUploads] = useState(0);
+  const hasInitialized = useRef(false);
+
+  // Auto-create minuta in database if none exists (handles direct navigation to /minuta/nova)
+  useEffect(() => {
+    const initMinuta = async () => {
+      // Only create if no current minuta or if current minuta is not in database
+      if (!hasInitialized.current && !isCreatingMinuta) {
+        if (!currentMinuta || !isDbId(currentMinuta.id)) {
+          hasInitialized.current = true;
+          const titulo = `Minuta ${new Date().toLocaleDateString('pt-BR')}`;
+          const dbId = await createMinutaInDatabase(titulo);
+          if (dbId) {
+            toast.success('Nova minuta criada');
+          } else {
+            toast.error('Erro ao criar minuta no banco de dados');
+          }
+        }
+      }
+    };
+    initMinuta();
+  }, [currentMinuta, createMinutaInDatabase, isCreatingMinuta]);
+
+  // Track global upload state
+  const isUploading = hookUploading || activeUploads > 0;
   const fileInputRefs = useRef<Record<UploadCategory, HTMLInputElement | null>>({
     outorgantes: null,
     outorgados: null,
@@ -135,39 +170,130 @@ export default function UploadDocumentos() {
     return { valid: true };
   };
 
-  const simulateUpload = useCallback(
-    (file: File, category: UploadCategory) => {
+  /**
+   * Upload de arquivo para Supabase Storage + Database
+   * Mantendo compatibilidade com o estado local do contexto
+   */
+  const handleUploadFile = useCallback(
+    async (file: File, category: UploadCategory) => {
       const validation = validateFile(file);
-      const id = `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+      const tempId = `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 
-      const newDoc: UploadedDocument = {
-        id,
+      if (!validation.valid) {
+        // Arquivo invalido - adicionar ao estado local com erro
+        const errorDoc: UploadedDocument = {
+          id: tempId,
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type,
+          category,
+          status: 'error',
+          progress: 0,
+          errorMessage: validation.error,
+        };
+        addDocument(errorDoc);
+        toast.error(`Erro: ${validation.error}`);
+        return;
+      }
+
+      // Adicionar documento em estado "uploading" ao contexto local
+      const uploadingDoc: UploadedDocument = {
+        id: tempId,
         fileName: file.name,
         fileSize: file.size,
         fileType: file.type,
         category,
-        status: validation.valid ? 'complete' : 'error',
-        progress: 100,
-        errorMessage: validation.error,
+        status: 'uploading',
+        progress: 0,
       };
+      addDocument(uploadingDoc);
+      setActiveUploads(prev => prev + 1);
 
-      addDocument(newDoc);
+      // Verificar se temos uma minuta valida para upload (deve ser um UUID do banco)
+      if (!currentMinuta?.id || !isDbId(currentMinuta.id)) {
+        // Se nao houver minuta no banco, manter comportamento local (mock)
+        // Atualizar para complete apos simular upload
+        setTimeout(() => {
+          removeDocument(tempId);
+          const completeDoc: UploadedDocument = {
+            id: tempId,
+            fileName: file.name,
+            fileSize: file.size,
+            fileType: file.type,
+            category,
+            status: 'complete',
+            progress: 100,
+          };
+          addDocument(completeDoc);
+          setActiveUploads(prev => Math.max(0, prev - 1));
+          toast.success(`${file.name} adicionado (modo local)`);
+        }, 500);
+        return;
+      }
 
-      if (!validation.valid) {
-        toast.error(`Erro: ${validation.error}`);
-      } else {
-        toast.success(`${file.name} adicionado`);
+      // Upload real para Supabase
+      try {
+        const result = await uploadDocument(file, currentMinuta.id, category);
+
+        // Remover documento temporario
+        removeDocument(tempId);
+
+        if (result) {
+          // Adicionar documento com ID real do banco
+          const completeDoc: UploadedDocument = {
+            id: result.id,
+            fileName: file.name,
+            fileSize: file.size,
+            fileType: file.type,
+            category,
+            status: 'complete',
+            progress: 100,
+          };
+          addDocument(completeDoc);
+          toast.success(`${file.name} enviado com sucesso`);
+        } else {
+          // Erro no upload - adicionar com status de erro
+          const errorDoc: UploadedDocument = {
+            id: tempId,
+            fileName: file.name,
+            fileSize: file.size,
+            fileType: file.type,
+            category,
+            status: 'error',
+            progress: 0,
+            errorMessage: uploadError || 'Erro ao fazer upload',
+          };
+          addDocument(errorDoc);
+          toast.error(`Erro ao enviar ${file.name}`);
+        }
+      } catch (_err) {
+        // Erro inesperado - error already captured in uploadError
+        removeDocument(tempId);
+        const errorDoc: UploadedDocument = {
+          id: tempId,
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type,
+          category,
+          status: 'error',
+          progress: 0,
+          errorMessage: 'Erro inesperado ao fazer upload',
+        };
+        addDocument(errorDoc);
+        toast.error(`Erro inesperado ao enviar ${file.name}`);
+      } finally {
+        setActiveUploads(prev => Math.max(0, prev - 1));
       }
     },
-    [addDocument]
+    [addDocument, removeDocument, currentMinuta?.id, uploadDocument, uploadError]
   );
 
   const handleFiles = useCallback(
     (files: FileList | null, category: UploadCategory) => {
       if (!files) return;
-      Array.from(files).forEach((file) => simulateUpload(file, category));
+      Array.from(files).forEach((file) => handleUploadFile(file, category));
     },
-    [simulateUpload]
+    [handleUploadFile]
   );
 
   const handleDrop = useCallback(
@@ -195,7 +321,9 @@ export default function UploadDocumentos() {
     }
   };
 
-  const totalDocs = documents.length;
+  // Count only successfully uploaded documents (not errors)
+  const validDocs = documents.filter(d => d.status === 'complete');
+  const totalDocs = validDocs.length;
 
   return (
     <main className="min-h-screen p-6 md:p-10">
@@ -219,6 +347,13 @@ export default function UploadDocumentos() {
           <p className="text-muted-foreground text-lg">
             Envie os documentos separados por categoria
           </p>
+          {/* Upload Progress Indicator */}
+          {isUploading && (
+            <div className="mt-4 flex items-center gap-3 text-sm text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Enviando... {hookProgress > 0 && `${hookProgress}%`}</span>
+            </div>
+          )}
         </header>
 
         {/* Stepper */}
@@ -314,6 +449,9 @@ export default function UploadDocumentos() {
                                 <p className="text-sm font-medium truncate">{doc.fileName}</p>
                                 <p className="text-xs text-muted-foreground">
                                   {formatFileSize(doc.fileSize)}
+                                  {doc.status === 'error' && doc.errorMessage && (
+                                    <span className="text-destructive ml-2">- {doc.errorMessage}</span>
+                                  )}
                                 </p>
                               </div>
                               {doc.status === 'complete' && (

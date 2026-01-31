@@ -47,14 +47,15 @@ Responda APENAS em JSON valido, sem markdown:
 export async function loadExtractionPrompt(tipoDocumento: string, fileSize?: number): Promise<string> {
   const supabase = createServiceClient();
 
-  const tipo = tipoDocumento.toLowerCase();
+  // Keep original case - database stores tipo_documento in UPPERCASE
+  const tipo = tipoDocumento.toUpperCase();
 
   // For large matriculas, try compact version first
-  if (tipo === 'matricula_imovel' && fileSize && fileSize > 2_000_000) {
+  if (tipo === 'MATRICULA_IMOVEL' && fileSize && fileSize > 2_000_000) {
     const { data: compact } = await supabase
       .from('agent_prompts')
       .select('prompt_text')
-      .eq('tipo_documento', 'matricula_imovel_compact')
+      .eq('tipo_documento', 'MATRICULA_IMOVEL_COMPACT')
       .eq('ativo', true)
       .order('versao', { ascending: false })
       .limit(1)
@@ -79,7 +80,7 @@ export async function loadExtractionPrompt(tipoDocumento: string, fileSize?: num
   const { data: generic } = await supabase
     .from('agent_prompts')
     .select('prompt_text')
-    .eq('tipo_documento', 'generic')
+    .eq('tipo_documento', 'GENERIC')
     .eq('ativo', true)
     .limit(1)
     .single();

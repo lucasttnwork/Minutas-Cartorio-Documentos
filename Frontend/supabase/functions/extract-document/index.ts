@@ -1,8 +1,9 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { corsHeaders } from '../_shared/cors.ts';
-import { createSupabaseClient, createServiceClient } from '../_shared/supabase-client.ts';
-import { callGemini, parseGeminiJson } from '../_shared/gemini-client.ts';
+import { createServiceClient } from '../_shared/supabase-client.ts';
+import { callGemini, parseGeminiJson, arrayBufferToBase64 } from '../_shared/gemini-client.ts';
 import { loadExtractionPrompt } from '../_shared/prompts.ts';
+import { startExecution, logSuccess, logError } from '../_shared/execution-logger.ts';
 import type { ExtractionResult } from '../_shared/types.ts';
 
 interface RequestBody {
@@ -14,19 +15,25 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  const serviceClient = createServiceClient();
+  let execution = { id: '', started_at: '' };
+
   try {
-    const supabase = createSupabaseClient(req);
-    const serviceClient = createServiceClient();
     const { documento_id }: RequestBody = await req.json();
 
-    // Get document info
-    const { data: documento, error: docError } = await supabase
+    if (!documento_id) {
+      throw new Error('documento_id is required');
+    }
+
+    // Get document info using service client (bypasses RLS)
+    const { data: documento, error: docError } = await serviceClient
       .from('documentos')
       .select('*')
       .eq('id', documento_id)
       .single();
 
     if (docError || !documento) {
+      console.error('Document fetch error:', docError);
       throw new Error(`Document not found: ${documento_id}`);
     }
 
@@ -46,19 +53,12 @@ serve(async (req) => {
       documento.tamanho_bytes
     );
 
-    // Log execution
-    const { data: execution } = await serviceClient
-      .from('agent_executions')
-      .insert({
-        documento_id,
-        minuta_id: documento.minuta_id,
-        agent_type: 'extract',
-        status: 'running',
-        started_at: new Date().toISOString(),
-        prompt_used: prompt,
-      })
-      .select()
-      .single();
+    // Start execution logging
+    execution = await startExecution(serviceClient, 'extract', {
+      documentoId: documento_id,
+      minutaId: documento.minuta_id,
+      promptUsed: prompt,
+    });
 
     // Download file
     const { data: fileData } = await serviceClient.storage
@@ -69,8 +69,9 @@ serve(async (req) => {
       throw new Error('Failed to download file');
     }
 
+    // Convert to base64 (using safe method for large files)
     const arrayBuffer = await fileData.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    const base64 = arrayBufferToBase64(arrayBuffer);
 
     // Call Gemini with extraction prompt
     const { text, usage } = await callGemini(
@@ -80,30 +81,25 @@ serve(async (req) => {
       { maxTokens: 16384 }
     );
 
-    // Parse result
-    const result = parseGeminiJson<ExtractionResult>(text);
+    // Parse result - Gemini returns the extracted data directly (e.g., {"rg": {...}})
+    // The structure varies by document type, so we store the entire result
+    const result = parseGeminiJson<Record<string, unknown>>(text);
 
     // Update document with extracted data
+    // Store the entire parsed result as dados_extraidos
     await serviceClient
       .from('documentos')
       .update({
-        dados_extraidos: result.dados_estruturados,
+        dados_extraidos: result,
         status: 'extraido',
       })
       .eq('id', documento_id);
 
-    // Update execution log
-    await serviceClient
-      .from('agent_executions')
-      .update({
-        status: 'success',
-        result,
-        input_tokens: usage.inputTokens,
-        output_tokens: usage.outputTokens,
-        completed_at: new Date().toISOString(),
-        duration_ms: execution ? Date.now() - new Date(execution.started_at).getTime() : 0,
-      })
-      .eq('id', execution?.id);
+    // Log successful execution with token usage and cost
+    await logSuccess(serviceClient, execution, result, {
+      inputTokens: usage.inputTokens,
+      outputTokens: usage.outputTokens,
+    });
 
     return new Response(
       JSON.stringify({ success: true, result }),
@@ -112,6 +108,11 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Extraction error:', error);
+
+    // Log error in execution tracking
+    if (execution.id) {
+      await logError(serviceClient, execution, error as Error);
+    }
 
     return new Response(
       JSON.stringify({ success: false, error: (error as Error).message }),

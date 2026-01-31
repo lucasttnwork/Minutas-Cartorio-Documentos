@@ -29,6 +29,13 @@ export type Database = {
           status: Database['public']['Enums']['status_minuta']
           dados_estruturados: Json | null
           texto_final: string | null
+          // Generation fields (Phase 7.1)
+          conteudo_gerado: string | null
+          template_usado: string | null
+          geracao_status: Database['public']['Enums']['geracao_status'] | null
+          gerado_em: string | null
+          geracao_erro: string | null
+          prompt_versao: number | null
           created_at: string
           updated_at: string
         }
@@ -40,6 +47,13 @@ export type Database = {
           status?: Database['public']['Enums']['status_minuta']
           dados_estruturados?: Json | null
           texto_final?: string | null
+          // Generation fields (Phase 7.1)
+          conteudo_gerado?: string | null
+          template_usado?: string | null
+          geracao_status?: Database['public']['Enums']['geracao_status'] | null
+          gerado_em?: string | null
+          geracao_erro?: string | null
+          prompt_versao?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -51,6 +65,13 @@ export type Database = {
           status?: Database['public']['Enums']['status_minuta']
           dados_estruturados?: Json | null
           texto_final?: string | null
+          // Generation fields (Phase 7.1)
+          conteudo_gerado?: string | null
+          template_usado?: string | null
+          geracao_status?: Database['public']['Enums']['geracao_status'] | null
+          gerado_em?: string | null
+          geracao_erro?: string | null
+          prompt_versao?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -424,6 +445,80 @@ export type Database = {
         }
         Relationships: []
       }
+      // Phase 7.1: Minuta templates table
+      minuta_templates: {
+        Row: {
+          id: string
+          nome: string
+          tipo_negocio: string
+          versao: number
+          template_text: string
+          variaveis: Json | null
+          descricao: string | null
+          ativo: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          nome: string
+          tipo_negocio: string
+          versao?: number
+          template_text: string
+          variaveis?: Json | null
+          descricao?: string | null
+          ativo?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          nome?: string
+          tipo_negocio?: string
+          versao?: number
+          template_text?: string
+          variaveis?: Json | null
+          descricao?: string | null
+          ativo?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      // Phase 7.1: Agent prompts table (includes generation prompts)
+      agent_prompts: {
+        Row: {
+          id: string
+          tipo_documento: string
+          versao: number
+          prompt_text: string
+          descricao: string | null
+          ativo: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tipo_documento: string
+          versao?: number
+          prompt_text: string
+          descricao?: string | null
+          ativo?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tipo_documento?: string
+          versao?: number
+          prompt_text?: string
+          descricao?: string | null
+          ativo?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -434,6 +529,7 @@ export type Database = {
     Enums: {
       status_minuta: 'rascunho' | 'processando' | 'revisao' | 'concluida' | 'cancelada'
       status_documento: 'pendente' | 'classificando' | 'extraindo' | 'concluido' | 'erro'
+      geracao_status: 'pendente' | 'gerando' | 'gerado' | 'erro'
       tipo_documento:
         | 'rg'
         | 'cpf'

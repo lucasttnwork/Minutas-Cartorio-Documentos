@@ -1,5 +1,8 @@
 // src/types/minuta.ts
 
+// === Fonte Tracking (source of extracted data) ===
+export type FontesCampos = Record<string, string[]>;
+
 // === Pessoa Natural ===
 export interface PessoaNatural {
   id: string;
@@ -21,6 +24,8 @@ export interface PessoaNatural {
   cndt: CertidaoCNDT;
   certidaoUniao: CertidaoUniao;
   camposEditados: string[];
+  /** Source documents for each field, e.g. { cpf: ["CNH - Fernando.pdf"], nome: ["RG - Maria.pdf"] } */
+  fontes?: FontesCampos;
 }
 
 // === Pessoa Juridica ===

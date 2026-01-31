@@ -2,6 +2,8 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import type { Minuta, MinutaStep, UploadedDocument, PessoaNatural, PessoaJuridica, Imovel, NegocioJuridico, RepresentanteAdministrador, RepresentanteProcurador, ParticipanteNegocio } from '@/types/minuta';
+import { useMinutaDatabase } from '@/hooks/useMinutaDatabase';
+import { useAutoSave } from '@/hooks/useAutoSave';
 
 interface MinutaContextType {
   minutas: Minuta[];
@@ -58,6 +60,17 @@ interface MinutaContextType {
   updateMinutaTexto: (texto: string) => void;
   finalizarMinuta: () => void;
   isSaving: boolean;
+
+  // Database sync states
+  isLoading: boolean;
+  isSyncing: boolean;
+  syncError: string | null;
+  lastSyncedAt: Date | null;
+
+  // Database sync functions
+  createMinutaInDatabase: (titulo: string) => Promise<string | null>;
+  loadMinutaFromDatabase: (id: string) => Promise<boolean>;
+  forceSync: () => Promise<void>;
 }
 
 const MinutaContext = createContext<MinutaContextType | null>(null);
@@ -107,6 +120,69 @@ export function MinutaProvider({ children }: { children: ReactNode }) {
   const [isSaving, setIsSaving] = useState(false);
   const isInitialMount = useRef(true);
 
+  // Database sync states
+  const [isLoading, setIsLoading] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null);
+
+  // Database hook
+  const db = useMinutaDatabase();
+
+  // Helper to check if an id is a database UUID (not a local timestamp-based id)
+  const isDbId = useCallback((id: string | undefined): boolean => {
+    if (!id) return false;
+    // UUID format: 8-4-4-4-12 hex characters
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(id);
+  }, []);
+
+  // Auto-save hook for database sync
+  const { triggerSave, forceSave, isSaving: isSyncing } = useAutoSave<Minuta>({
+    delay: 500,
+    onSave: async (minuta: Minuta) => {
+      if (!minuta.id || !isDbId(minuta.id)) return;
+
+      // Sync status/step
+      await db.updateMinutaStatus(minuta.id, minuta.status, minuta.currentStep);
+
+      // Sync pessoas naturais outorgantes
+      for (const pn of minuta.outorgantes.pessoasNaturais) {
+        await db.syncPessoaNatural(pn, minuta.id, 'outorgante');
+      }
+
+      // Sync pessoas juridicas outorgantes
+      for (const pj of minuta.outorgantes.pessoasJuridicas) {
+        await db.syncPessoaJuridica(pj, minuta.id, 'outorgante');
+      }
+
+      // Sync pessoas naturais outorgados
+      for (const pn of minuta.outorgados.pessoasNaturais) {
+        await db.syncPessoaNatural(pn, minuta.id, 'outorgado');
+      }
+
+      // Sync pessoas juridicas outorgados
+      for (const pj of minuta.outorgados.pessoasJuridicas) {
+        await db.syncPessoaJuridica(pj, minuta.id, 'outorgado');
+      }
+
+      // Sync imoveis
+      for (const imovel of minuta.imoveis) {
+        await db.syncImovel(imovel, minuta.id);
+      }
+
+      // Sync negocios (requires imovelId - using first imovel as default)
+      const defaultImovelId = minuta.imoveis[0]?.id || '';
+      for (const negocio of minuta.negociosJuridicos) {
+        await db.syncNegocio(negocio, minuta.id, negocio.imovelId || defaultImovelId);
+      }
+
+      setLastSyncedAt(new Date());
+    },
+    onError: (error: Error) => {
+      setSyncError(error.message);
+    },
+  });
+
   // Save to localStorage when minutas change (skip initial mount)
   // This pattern is intentional for showing save indicator during debounced localStorage writes
   useEffect(() => {
@@ -125,6 +201,13 @@ export function MinutaProvider({ children }: { children: ReactNode }) {
   }, [minutas]);
 
   const currentMinuta = minutas.find(m => m.id === currentMinutaId) || null;
+
+  // Trigger auto-save when currentMinuta changes (if it has a database id)
+  useEffect(() => {
+    if (currentMinuta && isDbId(currentMinuta.id)) {
+      triggerSave(currentMinuta);
+    }
+  }, [currentMinuta, triggerSave, isDbId]);
 
   const updateMinutaInList = useCallback((id: string, updates: Partial<Minuta>) => {
     setMinutas(prev => prev.map(m =>
@@ -165,20 +248,26 @@ export function MinutaProvider({ children }: { children: ReactNode }) {
   }, [currentMinutaId, updateMinutaInList]);
 
   const addDocument = useCallback((doc: UploadedDocument) => {
-    if (currentMinuta) {
-      updateMinutaInList(currentMinutaId!, {
-        documentos: [...currentMinuta.documentos, doc],
-      });
+    if (currentMinutaId) {
+      // Use functional update to avoid stale closure issues with concurrent uploads
+      setMinutas(prev => prev.map(m =>
+        m.id === currentMinutaId
+          ? { ...m, documentos: [...m.documentos, doc], dataAtualizacao: new Date().toISOString() }
+          : m
+      ));
     }
-  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+  }, [currentMinutaId]);
 
   const removeDocument = useCallback((docId: string) => {
-    if (currentMinuta) {
-      updateMinutaInList(currentMinutaId!, {
-        documentos: currentMinuta.documentos.filter(d => d.id !== docId),
-      });
+    if (currentMinutaId) {
+      // Use functional update to avoid stale closure issues
+      setMinutas(prev => prev.map(m =>
+        m.id === currentMinutaId
+          ? { ...m, documentos: m.documentos.filter(d => d.id !== docId), dataAtualizacao: new Date().toISOString() }
+          : m
+      ));
     }
-  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+  }, [currentMinutaId]);
 
   // Outorgantes - Pessoa Natural
   const addPessoaNaturalOutorgante = useCallback((pessoa: PessoaNatural) => {
@@ -695,6 +784,112 @@ export function MinutaProvider({ children }: { children: ReactNode }) {
     }
   }, [currentMinutaId, updateMinutaInList]);
 
+  // ============================================================================
+  // Database Sync Functions
+  // ============================================================================
+
+  /**
+   * Create a new minuta in the database and set it as current
+   */
+  const createMinutaInDatabase = useCallback(async (titulo: string): Promise<string | null> => {
+    setIsLoading(true);
+    setSyncError(null);
+
+    try {
+      const dbId = await db.createMinuta(titulo);
+      if (dbId) {
+        // Create a new minuta with the database id
+        const now = new Date().toISOString();
+        const newMinuta: Minuta = {
+          id: dbId,
+          titulo,
+          dataCriacao: now,
+          dataAtualizacao: now,
+          status: 'rascunho',
+          currentStep: 'upload',
+          documentos: [],
+          outorgantes: { pessoasNaturais: [], pessoasJuridicas: [] },
+          outorgados: { pessoasNaturais: [], pessoasJuridicas: [] },
+          imoveis: [],
+          parecer: { relatorioMatricula: '', matriculaApta: null, pontosAtencao: '' },
+          negociosJuridicos: [],
+          minutaTexto: '',
+        };
+        setMinutas(prev => [newMinuta, ...prev]);
+        setCurrentMinutaId(dbId);
+        setLastSyncedAt(new Date());
+        return dbId;
+      }
+      return null;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao criar minuta no banco';
+      setSyncError(message);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [db]);
+
+  /**
+   * Load a minuta from the database and populate local state
+   */
+  const loadMinutaFromDatabase = useCallback(async (id: string): Promise<boolean> => {
+    setIsLoading(true);
+    setSyncError(null);
+
+    try {
+      const data = await db.loadMinuta(id);
+      if (data) {
+        // Create a Minuta from the database data
+        const now = new Date().toISOString();
+        const loadedMinuta: Minuta = {
+          id: data.id,
+          titulo: data.titulo,
+          dataCriacao: now,
+          dataAtualizacao: now,
+          status: data.status as 'rascunho' | 'concluida',
+          currentStep: data.currentStep as MinutaStep,
+          documentos: [],
+          outorgantes: data.outorgantes,
+          outorgados: data.outorgados,
+          imoveis: data.imoveis,
+          parecer: { relatorioMatricula: '', matriculaApta: null, pontosAtencao: '' },
+          negociosJuridicos: data.negociosJuridicos,
+          minutaTexto: data.minutaTexto,
+        };
+
+        // Add or update in local list
+        setMinutas(prev => {
+          const exists = prev.some(m => m.id === id);
+          if (exists) {
+            return prev.map(m => m.id === id ? loadedMinuta : m);
+          }
+          return [loadedMinuta, ...prev];
+        });
+        setCurrentMinutaId(id);
+        setLastSyncedAt(new Date());
+        setIsLoading(false);
+        return true;
+      }
+      setIsLoading(false);
+      return false;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao carregar minuta do banco';
+      setSyncError(message);
+      setIsLoading(false);
+      return false;
+    }
+  }, [db]);
+
+  /**
+   * Force immediate sync to database
+   */
+  const forceSync = useCallback(async (): Promise<void> => {
+    if (currentMinuta && isDbId(currentMinuta.id)) {
+      await forceSave(currentMinuta);
+    }
+  }, [currentMinuta, forceSave, isDbId]);
+
   return (
     <MinutaContext.Provider
       value={{
@@ -746,6 +941,15 @@ export function MinutaProvider({ children }: { children: ReactNode }) {
         updateMinutaTexto,
         finalizarMinuta,
         isSaving,
+        // Database sync states
+        isLoading,
+        isSyncing,
+        syncError,
+        lastSyncedAt,
+        // Database sync functions
+        createMinutaInDatabase,
+        loadMinutaFromDatabase,
+        forceSync,
       }}
     >
       {children}

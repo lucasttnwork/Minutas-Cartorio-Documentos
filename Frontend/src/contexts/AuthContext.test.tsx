@@ -4,6 +4,24 @@ import type { ReactNode } from 'react';
 import type { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import type { Database } from '@/types/database.types';
 
+// Mock profile cache functions
+const mockGetCachedProfile = vi.fn();
+const mockCacheProfile = vi.fn();
+const mockClearProfileCache = vi.fn();
+
+vi.mock('@/lib/profile-cache', () => ({
+  getCachedProfile: () => mockGetCachedProfile(),
+  cacheProfile: (profile: Database['public']['Tables']['profiles']['Row']) => mockCacheProfile(profile),
+  clearProfileCache: () => mockClearProfileCache(),
+}));
+
+// Mock delay function to make tests fast
+const mockDelay = vi.fn();
+vi.mock('@/lib/delay', () => ({
+  delay: (ms: number) => mockDelay(ms),
+  PROFILE_FETCH_DELAYS: [500, 1000, 2000],
+}));
+
 // Mock user data
 const mockUser: User = {
   id: 'user-123',
@@ -75,6 +93,10 @@ const resetAllMocks = () => {
   mockSignOut.mockReset();
   mockOnAuthStateChange.mockReset();
   mockFromSelect.mockReset();
+  mockGetCachedProfile.mockReset();
+  mockCacheProfile.mockReset();
+  mockClearProfileCache.mockReset();
+  mockDelay.mockReset();
 };
 
 const wrapper = ({ children }: { children: ReactNode }) => (
@@ -429,6 +451,469 @@ describe('AuthContext', () => {
       expect(result.current.user).toEqual(mockUser);
       expect(result.current.profile).toBe(null);
       expect(result.current.isAuthenticated).toBe(true);
+    });
+  });
+
+  describe('fetchProfile with Cache and Retry', () => {
+    beforeEach(() => {
+      // Reset cache mocks to default behavior
+      mockGetCachedProfile.mockReturnValue(null);
+      mockCacheProfile.mockImplementation(() => {});
+      mockClearProfileCache.mockImplementation(() => {});
+      // Mock delay to resolve immediately (no actual waiting)
+      mockDelay.mockResolvedValue(undefined);
+    });
+
+    it('should return profile from cache if valid and matches userId', async () => {
+      // Setup: cache returns a valid profile for the user
+      mockGetCachedProfile.mockReturnValue(mockProfile);
+
+      mockGetSession.mockResolvedValue({
+        data: { session: mockSession },
+        error: null,
+      });
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      await waitFor(() => {
+        expect(result.current.profile).toEqual(mockProfile);
+      });
+
+      // Should have used cache instead of fetching from Supabase
+      expect(mockGetCachedProfile).toHaveBeenCalled();
+    });
+
+    it('should retry with exponential backoff when PGRST116 error occurs', async () => {
+      const singleMock = vi.fn()
+        .mockResolvedValueOnce({ data: null, error: { message: 'Profile not found', code: 'PGRST116' } })
+        .mockResolvedValueOnce({ data: null, error: { message: 'Profile not found', code: 'PGRST116' } })
+        .mockResolvedValueOnce({ data: mockProfile, error: null });
+
+      mockFromSelect.mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: singleMock,
+          }),
+        }),
+      });
+
+      mockGetSession.mockResolvedValue({
+        data: { session: mockSession },
+        error: null,
+      });
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      await waitFor(() => {
+        expect(result.current.profile).toEqual(mockProfile);
+      });
+
+      // Should have made 3 attempts
+      expect(singleMock).toHaveBeenCalledTimes(3);
+      // Should have called delay with correct values (500ms, 1000ms)
+      expect(mockDelay).toHaveBeenCalledWith(500);
+      expect(mockDelay).toHaveBeenCalledWith(1000);
+    });
+
+    it('should save profile to cache after successful fetch', async () => {
+      mockGetCachedProfile.mockReturnValue(null); // No cache
+
+      mockFromSelect.mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: mockProfile, error: null }),
+          }),
+        }),
+      });
+
+      mockGetSession.mockResolvedValue({
+        data: { session: mockSession },
+        error: null,
+      });
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      await waitFor(() => {
+        expect(result.current.profile).toEqual(mockProfile);
+      });
+
+      // Profile should be cached after fetch
+      expect(mockCacheProfile).toHaveBeenCalledWith(mockProfile);
+    });
+
+    it('should return null after 3 failed retry attempts', async () => {
+      const singleMock = vi.fn()
+        .mockResolvedValue({ data: null, error: { message: 'Profile not found', code: 'PGRST116' } });
+
+      mockFromSelect.mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: singleMock,
+          }),
+        }),
+      });
+
+      mockGetSession.mockResolvedValue({
+        data: { session: mockSession },
+        error: null,
+      });
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      // Wait for all retries to complete
+      await waitFor(() => {
+        expect(singleMock).toHaveBeenCalledTimes(3);
+      });
+
+      // Profile should be null after all retries failed
+      expect(result.current.profile).toBe(null);
+      // Should have called delay twice (between attempts 1-2 and 2-3)
+      expect(mockDelay).toHaveBeenCalledWith(500);
+      expect(mockDelay).toHaveBeenCalledWith(1000);
+    });
+
+    it('should not use cache if cached profile has different userId', async () => {
+      // Cache has profile for a different user
+      const differentUserProfile = { ...mockProfile, id: 'different-user-id' };
+      mockGetCachedProfile.mockReturnValue(differentUserProfile);
+
+      mockFromSelect.mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: mockProfile, error: null }),
+          }),
+        }),
+      });
+
+      mockGetSession.mockResolvedValue({
+        data: { session: mockSession },
+        error: null,
+      });
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      await waitFor(() => {
+        expect(result.current.profile).toEqual(mockProfile);
+      });
+
+      // Should have fetched from Supabase since cache didn't match
+      expect(mockFromSelect).toHaveBeenCalledWith('profiles');
+      // Should have cached the new profile
+      expect(mockCacheProfile).toHaveBeenCalledWith(mockProfile);
+    });
+
+    it('should clear cache on signOut', async () => {
+      mockGetSession.mockResolvedValue({
+        data: { session: mockSession },
+        error: null,
+      });
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      await waitFor(() => {
+        expect(result.current.user).toEqual(mockUser);
+      });
+
+      await act(async () => {
+        await result.current.signOut();
+      });
+
+      expect(mockClearProfileCache).toHaveBeenCalled();
+    });
+  });
+
+  describe('profileLoading and lastProfileSync states', () => {
+    beforeEach(() => {
+      mockGetCachedProfile.mockReturnValue(null);
+      mockCacheProfile.mockImplementation(() => {});
+      mockClearProfileCache.mockImplementation(() => {});
+      mockDelay.mockResolvedValue(undefined);
+    });
+
+    it('should have profileLoading as false initially', async () => {
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      // Initial state before any async operations complete
+      expect(result.current.profileLoading).toBe(false);
+    });
+
+    it('should have lastProfileSync as null initially', async () => {
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      // Initial state
+      expect(result.current.lastProfileSync).toBe(null);
+    });
+
+    it('should set profileLoading to true during fetch and false after', async () => {
+      // Track profileLoading states during fetch
+      const profileLoadingStates: boolean[] = [];
+
+      // Create a promise we can control to track profileLoading states
+      let resolveProfileFetch: (value: { data: typeof mockProfile; error: null }) => void;
+      const profileFetchPromise = new Promise<{ data: typeof mockProfile; error: null }>((resolve) => {
+        resolveProfileFetch = resolve;
+      });
+
+      const singleMock = vi.fn().mockReturnValue(profileFetchPromise);
+
+      mockFromSelect.mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: singleMock,
+          }),
+        }),
+      });
+
+      mockGetSession.mockResolvedValue({
+        data: { session: mockSession },
+        error: null,
+      });
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      // Wait for loading to be false (Supabase fires INITIAL_SESSION immediately and sets loading false)
+      // and wait for profile fetch to have started
+      await waitFor(() => {
+        expect(singleMock).toHaveBeenCalled();
+      });
+
+      // Capture profileLoading state while fetch is in progress
+      profileLoadingStates.push(result.current.profileLoading);
+
+      // Resolve the profile fetch
+      await act(async () => {
+        resolveProfileFetch!({ data: mockProfile, error: null });
+      });
+
+      // Wait for profile to be set
+      await waitFor(() => {
+        expect(result.current.profile).toEqual(mockProfile);
+      });
+
+      // profileLoading should have been true during fetch
+      expect(profileLoadingStates[0]).toBe(true);
+
+      // profileLoading should be false after fetch completes
+      expect(result.current.profileLoading).toBe(false);
+    });
+
+    it('should update lastProfileSync after successful profile fetch', async () => {
+      mockFromSelect.mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: mockProfile, error: null }),
+          }),
+        }),
+      });
+
+      mockGetSession.mockResolvedValue({
+        data: { session: mockSession },
+        error: null,
+      });
+
+      const beforeFetch = new Date();
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      await waitFor(() => {
+        expect(result.current.profile).toEqual(mockProfile);
+      });
+
+      // lastProfileSync should be updated after successful fetch
+      expect(result.current.lastProfileSync).not.toBe(null);
+      expect(result.current.lastProfileSync!.getTime()).toBeGreaterThanOrEqual(beforeFetch.getTime());
+    });
+
+    it('should not update lastProfileSync after failed profile fetch', async () => {
+      const singleMock = vi.fn()
+        .mockResolvedValue({ data: null, error: { message: 'Profile not found', code: 'PGRST116' } });
+
+      mockFromSelect.mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: singleMock,
+          }),
+        }),
+      });
+
+      mockGetSession.mockResolvedValue({
+        data: { session: mockSession },
+        error: null,
+      });
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      // Wait for all retries to complete
+      await waitFor(() => {
+        expect(singleMock).toHaveBeenCalledTimes(3);
+      });
+
+      // lastProfileSync should remain null after failed fetch
+      expect(result.current.lastProfileSync).toBe(null);
+    });
+  });
+
+  describe('refreshProfile', () => {
+    beforeEach(() => {
+      mockGetCachedProfile.mockReturnValue(null);
+      mockCacheProfile.mockImplementation(() => {});
+      mockClearProfileCache.mockImplementation(() => {});
+      mockDelay.mockResolvedValue(undefined);
+    });
+
+    it('should be a function', async () => {
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(typeof result.current.refreshProfile).toBe('function');
+    });
+
+    it('should clear cache and refetch profile when called', async () => {
+      mockFromSelect.mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: mockProfile, error: null }),
+          }),
+        }),
+      });
+
+      mockGetSession.mockResolvedValue({
+        data: { session: mockSession },
+        error: null,
+      });
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      await waitFor(() => {
+        expect(result.current.profile).toEqual(mockProfile);
+      });
+
+      // Clear mock call counts
+      mockClearProfileCache.mockClear();
+      mockFromSelect.mockClear();
+
+      // Reset profile fetch mock
+      mockFromSelect.mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: { ...mockProfile, nome: 'Updated Name' }, error: null }),
+          }),
+        }),
+      });
+
+      await act(async () => {
+        await result.current.refreshProfile();
+      });
+
+      // Should have cleared cache
+      expect(mockClearProfileCache).toHaveBeenCalled();
+
+      // Should have refetched profile
+      expect(mockFromSelect).toHaveBeenCalledWith('profiles');
+    });
+
+    it('should do nothing if no user is logged in', async () => {
+      mockGetSession.mockResolvedValue({
+        data: { session: null },
+        error: null,
+      });
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.user).toBe(null);
+
+      // Clear mock call counts
+      mockClearProfileCache.mockClear();
+      mockFromSelect.mockClear();
+
+      await act(async () => {
+        await result.current.refreshProfile();
+      });
+
+      // Should not have cleared cache or fetched profile
+      expect(mockClearProfileCache).not.toHaveBeenCalled();
+      expect(mockFromSelect).not.toHaveBeenCalled();
+    });
+
+    it('should update lastProfileSync after refresh', async () => {
+      mockFromSelect.mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: mockProfile, error: null }),
+          }),
+        }),
+      });
+
+      mockGetSession.mockResolvedValue({
+        data: { session: mockSession },
+        error: null,
+      });
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      await waitFor(() => {
+        expect(result.current.profile).toEqual(mockProfile);
+      });
+
+      const firstSyncTime = result.current.lastProfileSync;
+
+      // Wait a bit to ensure different timestamp
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      await act(async () => {
+        await result.current.refreshProfile();
+      });
+
+      // lastProfileSync should be updated after refresh
+      expect(result.current.lastProfileSync).not.toBe(null);
+      expect(result.current.lastProfileSync!.getTime()).toBeGreaterThan(firstSyncTime!.getTime());
     });
   });
 });
