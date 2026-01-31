@@ -67,30 +67,14 @@ logger = logging.getLogger(__name__)
 TEST_DOCS_DIR = ROOT_DIR / 'Test-Docs' / 'Documentos-isolados-tipo'
 PROMPTS_DIR = ROOT_DIR / 'execution' / 'prompts'
 
-# Mapeamento de pasta -> tipo de prompt
-# Quando a pasta tem nome diferente do prompt, ou quando nao existe prompt especifico
-FOLDER_TO_PROMPT_MAPPING = {
-    # Mapeamentos diretos (pasta = prompt)
-    'ASSINATURA_DIGITAL': 'assinatura_digital',
-    'CERTIDAO_CASAMENTO': 'certidao_casamento',
-    'CERTIDAO_NASCIMENTO': 'certidao_nascimento',
-    'CNDT': 'cndt',
-    'CNH': 'cnh',
-    'COMPROMISSO_COMPRA_VENDA': 'compromisso_compra_venda',
-    'COMPROVANTE_PAGAMENTO': 'comprovante_pagamento',
-    'IPTU': 'iptu',
-    'ITBI': 'itbi',
-    'MATRICULA_IMOVEL': 'matricula_imovel',
-    'PROTOCOLO_ONR': 'protocolo_onr',
-    'RG': 'rg',
-    'VVR': 'vvr',
-
+# Mapeamento APENAS para casos especiais onde a pasta tem nome diferente do prompt
+# Para todos os outros casos, o prompt_loader detecta automaticamente a versao mais recente
+# Ex: pasta 'RG' -> prompt_loader encontra rg_v2.txt automaticamente
+FOLDER_SPECIAL_MAPPING = {
     # Mapeamentos especiais (pasta != prompt ou usa generic)
-    'ESCRITURA': 'escritura_v3',  # Usa versao V3 (mais flexivel)
     'CND_IMOVEL': 'cnd_municipal',  # Usa prompt de CND municipal como base
     'DADOS_CADASTRAIS': 'generic',  # Sem prompt especifico
     'OUTRO': 'generic',  # Documentos nao classificados
-    'DESCONHECIDO': 'desconhecido',  # Usa prompt de desconhecido
 
     # Pastas que normalmente estao vazias mas podem ter documentos
     'CERTIDAO_OBITO': 'generic',
@@ -101,16 +85,51 @@ FOLDER_TO_PROMPT_MAPPING = {
 }
 
 
+def get_prompt_for_folder(folder_name: str) -> str:
+    """
+    Retorna o tipo de prompt a usar para uma pasta.
+
+    Usa deteccao automatica de versao via prompt_loader.
+    Para a maioria das pastas, o prompt e o mesmo nome da pasta (em minusculo),
+    e o prompt_loader encontra a versao mais recente automaticamente.
+
+    Args:
+        folder_name: Nome da pasta (ex: 'RG', 'ESCRITURA')
+
+    Returns:
+        Nome base do prompt (ex: 'rg', 'escritura')
+    """
+    folder_upper = folder_name.upper()
+
+    # Verifica mapeamentos especiais primeiro
+    if folder_upper in FOLDER_SPECIAL_MAPPING:
+        return FOLDER_SPECIAL_MAPPING[folder_upper]
+
+    # Caso padrao: usa o nome da pasta em minusculo
+    # O prompt_loader vai encontrar a versao mais recente automaticamente
+    # Ex: 'RG' -> 'rg' -> prompt_loader encontra rg_v2.txt
+    return folder_name.lower()
+
+
 def get_available_prompts() -> List[str]:
-    """Lista prompts disponiveis."""
-    if not PROMPTS_DIR.exists():
-        return []
+    """
+    Lista prompts disponiveis.
 
-    prompts = []
-    for file in PROMPTS_DIR.glob("*.txt"):
-        prompts.append(file.stem.lower())
+    Usa prompt_loader para detectar todas as versoes automaticamente.
+    """
+    try:
+        from execution.prompt_loader import list_available_prompts
+        return [p.lower() for p in list_available_prompts(PROMPTS_DIR)]
+    except ImportError:
+        # Fallback
+        if not PROMPTS_DIR.exists():
+            return []
 
-    return sorted(prompts)
+        prompts = []
+        for file in PROMPTS_DIR.glob("*.txt"):
+            prompts.append(file.stem.lower())
+
+        return sorted(prompts)
 
 
 def get_folders_with_files() -> Dict[str, List[Path]]:
@@ -208,14 +227,23 @@ def process_folder_batch(
     """
     start_time = datetime.now()
 
-    # Determina o tipo de prompt a usar
-    prompt_type = FOLDER_TO_PROMPT_MAPPING.get(folder_name, 'generic')
+    # Determina o tipo de prompt a usar (com deteccao automatica de versao)
+    prompt_type = get_prompt_for_folder(folder_name)
 
-    # Verifica se prompt existe
+    # Verifica se prompt existe (prompt_loader vai encontrar a versao mais recente)
     available_prompts = get_available_prompts()
-    if prompt_type not in available_prompts:
+    if prompt_type not in available_prompts and prompt_type != 'generic':
         logger.warning(f"Prompt '{prompt_type}' nao encontrado, usando 'generic'")
         prompt_type = 'generic'
+
+    # Informa qual versao sera usada
+    try:
+        from execution.prompt_loader import get_latest_prompt_version
+        version_info = get_latest_prompt_version(prompt_type, PROMPTS_DIR)
+        if version_info and version_info['version'] > 1:
+            logger.info(f"  Usando versao mais recente: {version_info['filename']}")
+    except ImportError:
+        pass
 
     # Cria diretorio de output
     output_dir = OUTPUT_BASE_DIR / folder_name.lower()
@@ -497,10 +525,14 @@ Exemplos:
   # Modo verbose
   python execution/batch_test_extraction.py --verbose
 
-Mapeamento de pastas para prompts:
-  A maioria das pastas usa o prompt com mesmo nome (RG -> rg.txt).
-  Excecoes:
-    - ESCRITURA -> escritura_v3.txt (versao mais flexivel)
+  # Ver versoes de prompts disponiveis
+  python execution/batch_test_extraction.py --list-versions
+
+Deteccao automatica de versao:
+  O script detecta automaticamente a versao mais recente de cada prompt.
+  Por exemplo, se existirem rg.txt e rg_v2.txt, usa rg_v2.txt automaticamente.
+
+  Mapeamentos especiais (pasta != prompt):
     - CND_IMOVEL -> cnd_municipal.txt
     - DADOS_CADASTRAIS -> generic.txt
     - OUTRO -> generic.txt
@@ -526,9 +558,9 @@ Mapeamento de pastas para prompts:
     )
 
     parser.add_argument(
-        '--list-mapping',
+        '--list-versions',
         action='store_true',
-        help='Lista mapeamento pasta->prompt e sai'
+        help='Lista versoes de prompts disponiveis e sai'
     )
 
     parser.add_argument(
@@ -557,11 +589,21 @@ Mapeamento de pastas para prompts:
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    # Lista mapeamento
-    if args.list_mapping:
-        print("\nMapeamento Pasta -> Prompt:")
+    # Lista versoes de prompts
+    if args.list_versions:
+        try:
+            from execution.prompt_loader import print_prompt_versions_report
+            print_prompt_versions_report(PROMPTS_DIR)
+        except ImportError:
+            print("\nPrompts disponiveis:")
+            print("-" * 50)
+            for prompt in get_available_prompts():
+                print(f"  {prompt}")
+            print("-" * 50)
+
+        print("\nMapeamentos especiais (pasta -> prompt):")
         print("-" * 50)
-        for pasta, prompt in sorted(FOLDER_TO_PROMPT_MAPPING.items()):
+        for pasta, prompt in sorted(FOLDER_SPECIAL_MAPPING.items()):
             print(f"  {pasta:30} -> {prompt}")
         print("-" * 50)
         sys.exit(0)
