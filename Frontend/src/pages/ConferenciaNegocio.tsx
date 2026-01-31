@@ -10,6 +10,7 @@ import { SectionCard } from "@/components/layout/SectionCard";
 import { NegocioJuridicoForm } from "@/components/forms/negocio/NegocioJuridicoForm";
 import { useMinuta } from "@/contexts/MinutaContext";
 import { Briefcase, Home } from "lucide-react";
+import { AnimatedBackground } from "@/components/layout/AnimatedBackground";
 import { validateNegocioJuridico } from "@/schemas/minuta.schemas";
 import { createEmptyNegocioJuridico, createEmptyParticipanteNegocio } from "@/utils/factories";
 import { toast } from "sonner";
@@ -216,16 +217,21 @@ export default function ConferenciaNegocio() {
   };
 
   return (
-    <main className="min-h-screen p-4 md:p-8 pb-24">
-      <div className="max-w-7xl mx-auto">
-        <PageHeader
-          title="NEGOCIO JURIDICO"
-          instruction="Defina os termos da transacao para cada imovel."
-        />
+    <AnimatedBackground
+      starCount={50}
+      showGradient={true}
+      className="min-h-screen"
+    >
+      <main className="p-4 md:p-8 pb-24">
+        <div className="max-w-7xl mx-auto form-container-elevated">
+          <PageHeader
+            title="NEGOCIO JURIDICO"
+            instruction="Defina os termos da transacao para cada imovel."
+          />
 
-        <div className="mb-8 bg-card rounded-xl p-4 border border-border">
-          <FlowStepper currentStep="negocio" />
-        </div>
+          <div className="mb-8 bg-card/90 backdrop-blur-sm rounded-xl p-4 border border-border shadow-md">
+            <FlowStepper currentStep="negocio" />
+          </div>
 
         <SectionCard
           title={
@@ -275,8 +281,9 @@ export default function ConferenciaNegocio() {
           </div>
         </SectionCard>
 
-        <FlowNavigation currentStep="negocio" onNext={handleNext} isSaving={isSaving} />
-      </div>
-    </main>
+          <FlowNavigation currentStep="negocio" onNext={handleNext} isSaving={isSaving} />
+        </div>
+      </main>
+    </AnimatedBackground>
   );
 }

@@ -2,12 +2,13 @@
 // Premium global navigation with glassmorphism and theme switcher
 // Inspired by Apple, Vercel, and Linear design patterns
 
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Menu, X, FileText, Sparkles } from "lucide-react";
+import { Home, Menu, X, FileText, Sparkles, LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { ThemeSwitcherCompact } from "@/components/ui/theme-switcher";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
@@ -15,7 +16,14 @@ const navItems = [
 
 export function GlobalNavigation() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, profile, signOut, isAuthenticated } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   return (
     <>
@@ -132,6 +140,38 @@ export function GlobalNavigation() {
 
             {/* Theme Switcher */}
             <ThemeSwitcherCompact />
+
+            {/* User info and Logout - Only show when authenticated */}
+            {isAuthenticated && (
+              <>
+                {/* Divider */}
+                <div className="w-px h-6 bg-border/50" />
+
+                {/* User display */}
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <User className="w-4 h-4" />
+                  <span className="max-w-[120px] truncate">
+                    {profile?.nome || user?.email?.split('@')[0] || 'Usuario'}
+                  </span>
+                </div>
+
+                {/* Logout Button */}
+                <button
+                  onClick={handleLogout}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-1.5 rounded-lg",
+                    "text-sm font-medium text-muted-foreground",
+                    "transition-all duration-200",
+                    "hover:bg-destructive/10 hover:text-destructive",
+                    "active:scale-[0.98]"
+                  )}
+                  title="Sair do sistema"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden xl:inline">Sair</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </motion.nav>
@@ -307,12 +347,50 @@ export function GlobalNavigation() {
                   </motion.div>
                 </div>
 
-                {/* Footer with Theme Switcher */}
-                <div className="pt-6 border-t border-border/50">
+                {/* Footer with Theme Switcher and Logout */}
+                <div className="pt-6 border-t border-border/50 space-y-4">
+                  {/* User info - Mobile */}
+                  {isAuthenticated && (
+                    <div className="flex items-center gap-3 px-2">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
+                        <User className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-foreground">
+                          {profile?.nome || 'Usuario'}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {user?.email}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Tema</span>
                     <ThemeSwitcherCompact />
                   </div>
+
+                  {/* Logout Button - Mobile */}
+                  {isAuthenticated && (
+                    <button
+                      onClick={() => {
+                        setIsOpen(false);
+                        handleLogout();
+                      }}
+                      className={cn(
+                        "flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl",
+                        "text-sm font-medium",
+                        "bg-destructive/10 text-destructive",
+                        "transition-all duration-200",
+                        "hover:bg-destructive/20",
+                        "active:scale-[0.98]"
+                      )}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Sair</span>
+                    </button>
+                  )}
                 </div>
               </div>
             </motion.nav>

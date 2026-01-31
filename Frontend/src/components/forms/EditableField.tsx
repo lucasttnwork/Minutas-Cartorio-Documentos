@@ -183,13 +183,16 @@ export function EditableField({
           {label}
         </Label>
 
-        {/* User Edit Indicator */}
+        {/* User Edit Indicator - Premium Deep Teal Badge */}
         {hasUserEdited && (
           <SimpleTooltip content="Campo alterado pelo usuario">
             <span className={cn(
-              "inline-flex items-center gap-1 px-1.5 py-0.5",
-              "text-xs font-medium rounded-md",
-              "text-primary bg-primary/10",
+              "inline-flex items-center gap-1 px-2 py-0.5",
+              "text-xs font-semibold rounded-full",
+              "bg-gradient-to-r from-[oklch(50%_0.10_180_/_0.25)] to-[oklch(55%_0.08_180_/_0.12)]",
+              "text-[oklch(45%_0.12_180)] dark:text-[oklch(70%_0.10_180)]",
+              "border border-[oklch(50%_0.10_180_/_0.35)]",
+              "shadow-[0_0_10px_oklch(55%_0.12_180_/_0.25)]",
               "transition-all duration-200"
             )}>
               <Pencil className="w-3 h-3" />
@@ -256,49 +259,68 @@ export function EditableField({
             </div>
           </div>
         ) : (
-          /* View Mode with subtle fade transition */
+          /* View Mode - Premium Field States */
           <button
             type="button"
             onClick={handleStartEdit}
             disabled={disabled}
             className={cn(
               "group/value w-full text-left",
-              "px-3 py-2 rounded-lg",
-              "border border-transparent",
+              "px-3 py-2.5 rounded-lg",
               "transition-all duration-200 ease-out",
               "animate-in fade-in-0 duration-150",
-              // Hover state
-              !disabled && [
-                "hover:bg-accent/50 hover:border-border/50",
-                "hover:shadow-sm",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+
+              // BASE STATE: Campos preenchidos - solido e com bom contraste
+              value ? [
+                "bg-card border border-border",
+                "shadow-sm",
+              ] : [
+                // EMPTY STATE: Campos vazios - visiveis mas distintos
+                "bg-muted/30 border-2 border-dashed border-border/50",
               ],
+
+              // Hover state - elevacao sutil
+              !disabled && [
+                "hover:bg-card hover:border-border",
+                "hover:shadow-md",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-1",
+              ],
+
               // Disabled state
               disabled && "cursor-not-allowed opacity-60 bg-muted/30",
-              // Error state
-              hasError && "border-destructive/30 bg-destructive/5",
-              // User edited indicator
-              hasUserEdited && !hasError && "border-primary/20 bg-primary/5"
+
+              // Error state - prioridade alta
+              hasError && "border-destructive/50 bg-destructive/5 shadow-none",
+
+              // USER EDITED STATE: Highlight premium Deep Teal
+              hasUserEdited && !hasError && [
+                "border-2 border-[oklch(50%_0.10_180_/_0.5)]",
+                "bg-gradient-to-r from-[oklch(50%_0.08_180_/_0.12)] via-[oklch(55%_0.06_180_/_0.06)] to-transparent",
+                "shadow-[0_0_0_1px_oklch(50%_0.10_180_/_0.2),_0_2px_10px_oklch(55%_0.12_180_/_0.12)]",
+                "hover:border-[oklch(55%_0.12_180_/_0.6)] hover:shadow-[0_0_0_1px_oklch(55%_0.12_180_/_0.3),_0_4px_16px_oklch(55%_0.12_180_/_0.18)]",
+              ]
             )}
           >
             <div className="flex items-center justify-between gap-2">
               <span
                 className={cn(
                   "text-sm truncate",
-                  value ? "text-foreground" : "text-muted-foreground/60 italic"
+                  value ? "text-foreground font-medium" : "text-muted-foreground italic",
+                  hasUserEdited && "text-foreground font-semibold"
                 )}
               >
                 {value || emptyText}
               </span>
 
-              {/* Edit Icon - shown on hover */}
+              {/* Edit Icon - shown on hover with state-aware styling */}
               {!disabled && (
                 <Pencil
                   className={cn(
                     "w-3.5 h-3.5 shrink-0",
-                    "text-muted-foreground/40",
-                    "opacity-0 group-hover/value:opacity-100",
-                    "transition-opacity duration-150"
+                    "transition-all duration-150",
+                    hasUserEdited
+                      ? "text-[oklch(50%_0.10_180_/_0.7)] opacity-100"
+                      : "text-muted-foreground/40 opacity-0 group-hover/value:opacity-100"
                   )}
                 />
               )}

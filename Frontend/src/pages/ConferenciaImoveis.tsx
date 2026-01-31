@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { useMinuta } from "@/contexts/MinutaContext";
 import { Home, Plus, Eye } from "lucide-react";
+import { AnimatedBackground } from "@/components/layout/AnimatedBackground";
 import type { Imovel } from "@/types/minuta";
 import { createEmptyImovel } from "@/utils/factories";
 import { validateImovel } from "@/schemas/minuta.schemas";
@@ -90,16 +91,21 @@ export default function ConferenciaImoveis() {
   };
 
   return (
-    <main className="min-h-screen p-4 md:p-8 pb-24">
-      <div className="max-w-7xl mx-auto">
-        <PageHeader
-          title="CONFERENCIA DOS IMOVEIS"
-          instruction="Confira os dados de cada imovel envolvido na transacao."
-        />
+    <AnimatedBackground
+      starCount={50}
+      showGradient={true}
+      className="min-h-screen"
+    >
+      <main className="p-4 md:p-8 pb-24">
+        <div className="max-w-7xl mx-auto form-container-elevated">
+          <PageHeader
+            title="CONFERENCIA DOS IMOVEIS"
+            instruction="Confira os dados de cada imovel envolvido na transacao."
+          />
 
-        <div className="mb-8 bg-card rounded-xl p-4 border border-border">
-          <FlowStepper currentStep="imoveis" />
-        </div>
+          <div className="mb-8 bg-card/90 backdrop-blur-sm rounded-xl p-4 border border-border shadow-md">
+            <FlowStepper currentStep="imoveis" />
+          </div>
 
         <SectionCard
           title={
@@ -472,8 +478,9 @@ export default function ConferenciaImoveis() {
           </div>
         </SectionCard>
 
-        <FlowNavigation currentStep="imoveis" onNext={handleNext} isSaving={isSaving} />
-      </div>
-    </main>
+          <FlowNavigation currentStep="imoveis" onNext={handleNext} isSaving={isSaving} />
+        </div>
+      </main>
+    </AnimatedBackground>
   );
 }

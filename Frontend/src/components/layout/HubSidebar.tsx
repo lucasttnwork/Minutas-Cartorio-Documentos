@@ -2,11 +2,12 @@
 // Premium sidebar navigation for Dashboard hub
 // Inspired by Linear's clean sidebar design
 
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, Bot, ChevronLeft, LayoutGrid } from "lucide-react";
+import { FileText, Bot, ChevronLeft, LayoutGrid, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface NavItem {
   to: string;
@@ -41,6 +42,17 @@ export function HubSidebar({
 }: HubSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { profile, signOut } = useAuth();
+
+  const userName = profile?.nome || 'Usuario';
+  const userEmail = profile?.email || '';
+  const userInitial = userName.charAt(0).toUpperCase();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   return (
     <motion.aside
@@ -249,17 +261,31 @@ export function HubSidebar({
                   "text-primary text-xs font-bold"
                 )}
               >
-                U
+                {userInitial}
               </div>
               <div className="flex flex-col flex-1 min-w-0">
                 <span className="text-sm font-medium text-foreground truncate">
-                  Usuário
+                  {userName}
                 </span>
                 <span className="text-[10px] text-muted-foreground truncate">
-                  usuario@cartorio.com
+                  {userEmail}
                 </span>
               </div>
             </div>
+
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className={cn(
+                "flex items-center gap-2 w-full mt-2 px-3 py-2 rounded-lg",
+                "text-muted-foreground hover:text-foreground",
+                "hover:bg-destructive/10 hover:text-destructive",
+                "transition-all duration-200"
+              )}
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="text-sm">Sair</span>
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

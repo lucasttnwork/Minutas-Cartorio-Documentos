@@ -2,10 +2,13 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { MinutaProvider } from "./contexts/MinutaContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import { Toaster } from "./components/ui/sonner";
 import { GlobalNavigation, ErrorBoundary } from "./components/layout";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 // Lazy load all pages for code splitting
+const Login = lazy(() => import("./pages/Login"));
 const DashboardHub = lazy(() => import("./pages/DashboardHub"));
 const DashboardMinutas = lazy(() => import("./pages/DashboardMinutas"));
 const DashboardAgentes = lazy(() => import("./pages/DashboardAgentes"));
@@ -34,40 +37,115 @@ function PageLoader() {
 function App() {
   return (
     <ErrorBoundary>
-      <MinutaProvider>
-        <Router>
-          <div className="min-h-screen bg-background">
-            <GlobalNavigation />
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                {/* Root redirect to dashboard */}
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Router>
+        <AuthProvider>
+          <MinutaProvider>
+            <div className="min-h-screen bg-background">
+              <GlobalNavigation />
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  {/* Public routes */}
+                  <Route path="/login" element={<Login />} />
 
-                {/* Dashboard Hub with nested routes */}
-                <Route path="/dashboard" element={<DashboardHub />}>
-                  <Route index element={<Navigate to="/dashboard/minutas" replace />} />
-                  <Route path="minutas" element={<DashboardMinutas />} />
-                  <Route path="agentes" element={<DashboardAgentes />} />
-                </Route>
+                  {/* Root redirect to dashboard */}
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-                {/* Agentes individual pages */}
-                <Route path="/agentes/:tipo" element={<AgenteExtrator />} />
+                  {/* Protected routes */}
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <DashboardHub />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route index element={<Navigate to="/dashboard/minutas" replace />} />
+                    <Route path="minutas" element={<DashboardMinutas />} />
+                    <Route path="agentes" element={<DashboardAgentes />} />
+                  </Route>
 
-                {/* Minuta Flow */}
-                <Route path="/minuta/nova" element={<UploadDocumentos />} />
-                <Route path="/minuta/:id/processando" element={<Processando />} />
-                <Route path="/minuta/:id/outorgantes" element={<ConferenciaOutorgantes />} />
-                <Route path="/minuta/:id/outorgados" element={<ConferenciaOutorgados />} />
-                <Route path="/minuta/:id/imoveis" element={<ConferenciaImoveis />} />
-                <Route path="/minuta/:id/parecer" element={<ParecerJuridico />} />
-                <Route path="/minuta/:id/negocio" element={<ConferenciaNegocio />} />
-                <Route path="/minuta/:id/minuta" element={<MinutaFinal />} />
-              </Routes>
-            </Suspense>
-            <Toaster position="top-right" richColors closeButton />
-          </div>
-        </Router>
-      </MinutaProvider>
+                  {/* Agentes individual pages */}
+                  <Route
+                    path="/agentes/:tipo"
+                    element={
+                      <ProtectedRoute>
+                        <AgenteExtrator />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  {/* Minuta Flow - all protected */}
+                  <Route
+                    path="/minuta/nova"
+                    element={
+                      <ProtectedRoute>
+                        <UploadDocumentos />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/minuta/:id/processando"
+                    element={
+                      <ProtectedRoute>
+                        <Processando />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/minuta/:id/outorgantes"
+                    element={
+                      <ProtectedRoute>
+                        <ConferenciaOutorgantes />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/minuta/:id/outorgados"
+                    element={
+                      <ProtectedRoute>
+                        <ConferenciaOutorgados />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/minuta/:id/imoveis"
+                    element={
+                      <ProtectedRoute>
+                        <ConferenciaImoveis />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/minuta/:id/parecer"
+                    element={
+                      <ProtectedRoute>
+                        <ParecerJuridico />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/minuta/:id/negocio"
+                    element={
+                      <ProtectedRoute>
+                        <ConferenciaNegocio />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/minuta/:id/minuta"
+                    element={
+                      <ProtectedRoute>
+                        <MinutaFinal />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Routes>
+              </Suspense>
+              <Toaster position="top-right" richColors closeButton />
+            </div>
+          </MinutaProvider>
+        </AuthProvider>
+      </Router>
     </ErrorBoundary>
   );
 }

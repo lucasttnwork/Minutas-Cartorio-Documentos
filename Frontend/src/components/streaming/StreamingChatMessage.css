@@ -1,0 +1,154 @@
+/* StreamingChatMessage Component Styles */
+
+.chat-message {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+  animation: slideInMessage 0.3s ease-out;
+  gap: 0.5rem;
+}
+
+.chat-message-user {
+  align-items: flex-end;
+}
+
+.chat-message-assistant {
+  align-items: flex-start;
+}
+
+/* Message Container */
+.message-body {
+  display: flex;
+  flex-direction: column;
+  max-width: 85%;
+  gap: 0.5rem;
+}
+
+.chat-message-user .message-body {
+  align-items: flex-end;
+}
+
+.chat-message-assistant .message-body {
+  align-items: flex-start;
+}
+
+/* Message Content */
+.message-content {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.chat-message-user .message-content {
+  background-color: #007bff;
+  color: white;
+  border-radius: 12px 12px 4px 12px;
+}
+
+.chat-message-assistant .message-content {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: inherit;
+  border-radius: 12px 12px 12px 4px;
+}
+
+.message-text {
+  margin: 0;
+  padding: 0;
+}
+
+/* Thinking Section */
+.message-thinking {
+  width: 100%;
+  max-width: 400px;
+}
+
+.chat-message-assistant .message-thinking {
+  margin-left: 0;
+}
+
+/* Status Indicators */
+.message-status {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.message-complete {
+  padding: 0.25rem;
+  color: #10b981;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.complete-indicator {
+  display: inline-block;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Slide In Animation */
+@keyframes slideInMessage {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .chat-message-assistant .message-content {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: inherit;
+  }
+
+  .chat-message-user .message-content {
+    background-color: #0056b3;
+    color: white;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .message-body {
+    max-width: 95%;
+  }
+
+  .message-content {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.95rem;
+  }
+
+  .message-thinking {
+    max-width: 100%;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .chat-message,
+  .complete-indicator {
+    animation: none;
+  }
+}
+
+/* Prevent text selection during streaming */
+.chat-message-assistant .message-content {
+  user-select: text;
+}

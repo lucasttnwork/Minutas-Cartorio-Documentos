@@ -16,6 +16,7 @@ serve(async (req) => {
   try {
     const supabase = createSupabaseClient(req);
     const serviceClient = createServiceClient();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { minuta_id, template: _template }: RequestBody = await req.json();
 
     // Verify access

@@ -11,6 +11,7 @@ import { SectionCard } from "@/components/layout/SectionCard";
 import { Button } from "@/components/ui/button";
 import { useMinuta } from "@/contexts/MinutaContext";
 import { User, Building2, Plus } from "lucide-react";
+import { AnimatedBackground } from "@/components/layout/AnimatedBackground";
 import type { Endereco, Contato, DadosFamiliares, CertidaoCNDT, CertidaoUniao, RegistroVigente, CertidaoEmpresa } from "@/types/minuta";
 import { createEmptyPessoaNatural, createEmptyPessoaJuridica, createEmptyRepresentanteAdministrador, createEmptyRepresentanteProcurador } from "@/utils/factories";
 import { validatePessoaNatural, validatePessoaJuridica } from "@/schemas/minuta.schemas";
@@ -185,17 +186,22 @@ export default function ConferenciaOutorgantes() {
   };
 
   return (
-    <main className="min-h-screen p-4 md:p-8 pb-24">
-      <div className="max-w-7xl mx-auto">
-        <PageHeader
-          title="CONFERENCIA E COMPLEMENTACAO"
-          subtitle="(POLO OUTORGANTE)"
-          instruction="Confira todos os dados e preencha os campos faltantes."
-        />
+    <AnimatedBackground
+      starCount={50}
+      showGradient={true}
+      className="min-h-screen"
+    >
+      <main className="p-4 md:p-8 pb-24">
+        <div className="max-w-7xl mx-auto form-container-elevated">
+          <PageHeader
+            title="CONFERENCIA E COMPLEMENTACAO"
+            subtitle="(POLO OUTORGANTE)"
+            instruction="Confira todos os dados e preencha os campos faltantes."
+          />
 
-        <div className="mb-8 bg-card rounded-xl p-4 border border-border">
-          <FlowStepper currentStep="outorgantes" />
-        </div>
+          <div className="mb-8 bg-card/90 backdrop-blur-sm rounded-xl p-4 border border-border shadow-md">
+            <FlowStepper currentStep="outorgantes" />
+          </div>
 
         {/* Pessoas Naturais */}
         <SectionCard
@@ -284,8 +290,9 @@ export default function ConferenciaOutorgantes() {
           </div>
         </SectionCard>
 
-        <FlowNavigation currentStep="outorgantes" onNext={handleNext} isSaving={isSaving} />
-      </div>
-    </main>
+          <FlowNavigation currentStep="outorgantes" onNext={handleNext} isSaving={isSaving} />
+        </div>
+      </main>
+    </AnimatedBackground>
   );
 }

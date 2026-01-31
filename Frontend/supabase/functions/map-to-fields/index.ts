@@ -193,7 +193,9 @@ function mapIdentityDocument(
   dados: Record<string, unknown>,
   source: string,
   alienantes: Map<string, PessoaNatural>,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _adquirentes: Map<string, PessoaNatural>,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _priority: number
 ) {
   const cpf = normalizeCPF(dados.cpf as string | undefined);
@@ -229,6 +231,7 @@ function mapMarriageCertificate(
   source: string,
   alienantes: Map<string, PessoaNatural>,
   adquirentes: Map<string, PessoaNatural>,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _alertas: AlertaJuridico[]
 ) {
   // Update marriage info for known persons

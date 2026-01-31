@@ -59,6 +59,7 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-accent-vivid: var(--accent-vivid);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
@@ -845,6 +846,20 @@
   animation: spin 1s linear infinite;
 }
 
+/* Blink animation for streaming cursor */
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
 /* =============================================================================
    ACCESSIBILITY
    ============================================================================= */
@@ -905,6 +920,387 @@
     font-size: 0.8em;
     color: #666;
   }
+}
+
+/* =============================================================================
+   STARRY NIGHT BACKGROUND SYSTEM - Elegant Twinkling Stars
+   ============================================================================= */
+
+/* Star twinkle animation - subtle fade in/out */
+@keyframes star-twinkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes star-twinkle-slow {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  30% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+  70% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes star-glow {
+  0%, 100% {
+    opacity: 0.6;
+    box-shadow: 0 0 2px oklch(from var(--foreground) l c h / 0.3);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 6px oklch(from var(--foreground) l c h / 0.5),
+                0 0 12px oklch(from var(--accent-vivid) l c h / 0.2);
+  }
+}
+
+/* Starry sky container */
+.starry-sky-container {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Base star styles */
+.star {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+/* Star sizes */
+.star--tiny {
+  width: 1px;
+  height: 1px;
+}
+
+.star--small {
+  width: 2px;
+  height: 2px;
+}
+
+.star--medium {
+  width: 3px;
+  height: 3px;
+}
+
+/* Star brightness - Light mode (subtle) */
+.star--dim {
+  background: oklch(from var(--foreground) l c h / 0.15);
+  animation: star-twinkle-slow 4s ease-in-out infinite;
+}
+
+.star--normal {
+  background: oklch(from var(--foreground) l c h / 0.25);
+  animation: star-twinkle 3s ease-in-out infinite;
+}
+
+.star--bright {
+  background: oklch(from var(--foreground) l c h / 0.4);
+  animation: star-glow 2.5s ease-in-out infinite;
+}
+
+/* Star brightness - Dark mode (more visible) */
+.dark .star--dim {
+  background: oklch(from var(--foreground) l c h / 0.25);
+}
+
+.dark .star--normal {
+  background: oklch(from var(--foreground) l c h / 0.45);
+}
+
+.dark .star--bright {
+  background: oklch(from var(--foreground) l c h / 0.7);
+}
+
+/* Medium stars get slight glow in dark mode */
+.dark .star--medium.star--bright {
+  box-shadow: 0 0 4px oklch(from var(--foreground) l c h / 0.3);
+}
+
+/* Champagne accent stars (rare, premium feel) */
+.dark .star--medium.star--normal:nth-child(5n) {
+  background: oklch(from var(--accent-vivid) l c h / 0.5);
+  box-shadow: 0 0 3px oklch(from var(--accent-vivid) l c h / 0.25);
+}
+
+/* =============================================================================
+   PREMIUM ENTITY CARD SYSTEM - Luxurious Collapsible Cards
+   ============================================================================= */
+
+/* Premium accent colors for EntityCard with Deep Teal gradients and depth */
+.entity-card-premium {
+  position: relative;
+  border-radius: 0.875rem;
+  overflow: hidden;
+  transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Luxurious border with Deep Teal gradient glow */
+.entity-card-premium::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(
+    135deg,
+    oklch(from var(--teal-medium) l c h / 0.4) 0%,
+    oklch(from var(--teal-deep) l c h / 0.2) 50%,
+    oklch(from var(--teal-medium) l c h / 0.35) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.8;
+  transition: opacity 300ms ease;
+}
+
+.entity-card-premium:hover::before {
+  opacity: 1;
+}
+
+/* Premium floating shadow effect with teal glow */
+.entity-card-premium {
+  box-shadow:
+    0 4px 6px -1px oklch(from var(--foreground) l c h / 0.05),
+    0 10px 20px -5px oklch(from var(--foreground) l c h / 0.08),
+    0 0 0 1px oklch(from var(--border) l c h / 0.5);
+}
+
+.entity-card-premium:hover {
+  box-shadow:
+    0 8px 12px -2px oklch(from var(--foreground) l c h / 0.08),
+    0 16px 32px -8px oklch(from var(--foreground) l c h / 0.12),
+    0 0 45px -12px oklch(from var(--teal-glow) l c h / 0.2),
+    0 0 0 1px oklch(from var(--border) l c h / 0.6);
+  transform: translateY(-2px);
+}
+
+/* Dark mode premium card adjustments */
+.dark .entity-card-premium {
+  box-shadow:
+    0 4px 6px -1px oklch(0% 0 0 / 0.3),
+    0 10px 20px -5px oklch(0% 0 0 / 0.4),
+    0 0 0 1px oklch(from var(--border) l c h / 0.5),
+    inset 0 1px 0 oklch(100% 0 0 / 0.03);
+}
+
+.dark .entity-card-premium:hover {
+  box-shadow:
+    0 8px 12px -2px oklch(0% 0 0 / 0.4),
+    0 16px 32px -8px oklch(0% 0 0 / 0.5),
+    0 0 55px -15px oklch(from var(--teal-glow) l c h / 0.35),
+    0 0 0 1px oklch(from var(--border) l c h / 0.6),
+    inset 0 1px 0 oklch(100% 0 0 / 0.04);
+}
+
+/* Premium header with Deep Teal gradient background */
+.entity-card-header-premium {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    oklch(from var(--teal-deep) l c h / 0.08) 0%,
+    oklch(from var(--teal-medium) l c h / 0.04) 50%,
+    oklch(from var(--teal-deep) l c h / 0.06) 100%
+  );
+  border-bottom: 1px solid oklch(from var(--teal-medium) l c h / 0.15);
+}
+
+.dark .entity-card-header-premium {
+  background: linear-gradient(
+    135deg,
+    oklch(from var(--teal-deep) l c h / 0.12) 0%,
+    oklch(from var(--teal-medium) l c h / 0.06) 50%,
+    oklch(from var(--teal-deep) l c h / 0.08) 100%
+  );
+  border-bottom: 1px solid oklch(from var(--teal-medium) l c h / 0.2);
+}
+
+/* Subtle shimmer on premium header - only on direct header hover */
+.entity-card-header-premium::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 20%,
+    oklch(from var(--teal-light) l c h / 0.06) 40%,
+    oklch(from var(--teal-glow) l c h / 0.12) 50%,
+    oklch(from var(--teal-light) l c h / 0.06) 60%,
+    transparent 80%
+  );
+  background-size: 200% 100%;
+  opacity: 0;
+  transition: opacity 300ms ease;
+  pointer-events: none;
+}
+
+/* Shimmer ONLY on direct header hover, not whole card */
+.entity-card-header-premium:hover::after {
+  opacity: 1;
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+
+/* Premium icon container with Deep Teal glow */
+.entity-card-icon-premium {
+  position: relative;
+  background: linear-gradient(
+    145deg,
+    oklch(from var(--teal-medium) l c h / 0.2) 0%,
+    oklch(from var(--teal-deep) l c h / 0.12) 100%
+  );
+  box-shadow:
+    0 2px 8px oklch(from var(--teal-glow) l c h / 0.2),
+    inset 0 1px 0 oklch(100% 0 0 / 0.1);
+  border: 1px solid oklch(from var(--teal-medium) l c h / 0.25);
+}
+
+.dark .entity-card-icon-premium {
+  background: linear-gradient(
+    145deg,
+    oklch(from var(--teal-light) l c h / 0.25) 0%,
+    oklch(from var(--teal-medium) l c h / 0.15) 100%
+  );
+  box-shadow:
+    0 2px 12px oklch(from var(--teal-glow) l c h / 0.3),
+    inset 0 1px 0 oklch(100% 0 0 / 0.08);
+  border: 1px solid oklch(from var(--teal-light) l c h / 0.3);
+}
+
+/* =============================================================================
+   PREMIUM FORM CONTENT - Clean & Readable with Subtle Teal Accents
+   Prioritizes LEGIBILITY over decoration. Teal accents only on borders.
+   ============================================================================= */
+
+/* Deep Teal color tokens */
+:root {
+  --teal-deep: oklch(45% 0.10 180);
+  --teal-medium: oklch(50% 0.08 180);
+  --teal-light: oklch(60% 0.06 180);
+  --teal-glow: oklch(55% 0.12 180);
+}
+
+/* Premium content area - CLEAN background for maximum legibility */
+.entity-card-content-premium {
+  position: relative;
+  overflow: hidden;
+
+  /* Clean, solid background - no distracting gradients */
+  background: var(--card);
+  border-top: 1px solid oklch(from var(--teal-medium) l c h / 0.2);
+}
+
+/* Subtle teal accent line at top only */
+.entity-card-content-premium::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    oklch(from var(--teal-medium) l c h / 0.15) 0%,
+    oklch(from var(--teal-light) l c h / 0.3) 50%,
+    oklch(from var(--teal-medium) l c h / 0.15) 100%
+  );
+  pointer-events: none;
+}
+
+/* Remove the distracting left border - cleaner look */
+.entity-card-content-premium::after {
+  display: none;
+}
+
+/* Dark mode - slightly elevated background for depth */
+.dark .entity-card-content-premium {
+  background: oklch(from var(--card) calc(l + 0.02) c h);
+  border-top: 1px solid oklch(from var(--teal-medium) l c h / 0.25);
+}
+
+.dark .entity-card-content-premium::before {
+  background: linear-gradient(
+    90deg,
+    oklch(from var(--teal-medium) l c h / 0.2) 0%,
+    oklch(from var(--teal-light) l c h / 0.4) 50%,
+    oklch(from var(--teal-medium) l c h / 0.2) 100%
+  );
+}
+
+/* =============================================================================
+   PREMIUM PAGE BACKGROUND COMPOSITION
+   ============================================================================= */
+
+/* Main page background with dots and gradient */
+.bg-premium-page {
+  position: relative;
+  background: var(--background);
+}
+
+.bg-premium-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(
+    circle at center,
+    oklch(from var(--foreground) l c h / 0.025) 1px,
+    transparent 1px
+  );
+  background-size: 32px 32px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dark .bg-premium-page::before {
+  background-image: radial-gradient(
+    circle at center,
+    oklch(from var(--foreground) l c h / 0.04) 1px,
+    transparent 1px
+  );
+}
+
+/* Gradient overlay for premium depth */
+.bg-premium-page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, oklch(from var(--accent) l c h / 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse 80% 50% at 100% 50%, oklch(from var(--accent-vivid) l c h / 0.02) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 0% 80%, oklch(from var(--primary-soft) l c h / 0.02) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dark .bg-premium-page::after {
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, oklch(from var(--accent) l c h / 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse 80% 50% at 100% 50%, oklch(from var(--accent-vivid) l c h / 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 0% 80%, oklch(from var(--primary-soft) l c h / 0.03) 0%, transparent 50%);
+}
+
+/* Form container that floats above background */
+.form-container-elevated {
+  position: relative;
+  z-index: 1;
 }
 
 /* =============================================================================
