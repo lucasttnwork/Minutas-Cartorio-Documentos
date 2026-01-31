@@ -9,53 +9,8 @@ import { SectionCard } from "@/components/layout/SectionCard";
 import { Button } from "@/components/ui/button";
 import { useMinuta } from "@/contexts/MinutaContext";
 import { User, Building2, Plus } from "lucide-react";
-import type { PessoaNatural, PessoaJuridica, Endereco, Contato } from "@/types/minuta";
-
-function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-}
-
-function createEmptyEndereco(): Endereco {
-  return { logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', estado: '', cep: '' };
-}
-
-function createEmptyContato(): Contato {
-  return { email: '', telefone: '' };
-}
-
-function createEmptyPessoaNatural(): PessoaNatural {
-  return {
-    id: generateId(),
-    nome: '',
-    cpf: '',
-    rg: '',
-    orgaoEmissorRg: '',
-    estadoEmissorRg: '',
-    dataEmissaoRg: '',
-    nacionalidade: 'Brasileira',
-    profissao: '',
-    dataNascimento: '',
-    estadoCivil: '',
-    regimeBens: '',
-    domicilio: createEmptyEndereco(),
-    contato: createEmptyContato(),
-    camposEditados: [],
-  };
-}
-
-function createEmptyPessoaJuridica(): PessoaJuridica {
-  return {
-    id: generateId(),
-    razaoSocial: '',
-    cnpj: '',
-    inscricaoEstadual: '',
-    dataConstituicao: '',
-    endereco: createEmptyEndereco(),
-    contato: createEmptyContato(),
-    representantes: [],
-    camposEditados: [],
-  };
-}
+import type { Endereco, Contato } from "@/types/minuta";
+import { createEmptyPessoaNatural, createEmptyPessoaJuridica } from "@/utils/factories";
 
 export default function ConferenciaOutorgados() {
   const {

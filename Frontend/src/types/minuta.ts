@@ -160,7 +160,9 @@ export interface Contato {
 // === Upload ===
 export interface UploadedDocument {
   id: string;
-  file: File;
+  fileName: string;
+  fileSize: number;
+  fileType: string;
   category: 'outorgantes' | 'outorgados' | 'imoveis' | 'negocio' | 'outros';
   status: 'uploading' | 'complete' | 'error';
   progress: number;

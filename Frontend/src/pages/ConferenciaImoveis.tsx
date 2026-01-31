@@ -1,6 +1,5 @@
 // src/pages/ConferenciaImoveis.tsx
 import { AnimatePresence } from "framer-motion";
-import { useParams } from "react-router-dom";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FlowStepper } from "@/components/layout/FlowStepper";
 import { FlowNavigation } from "@/components/layout/FlowNavigation";
@@ -11,67 +10,9 @@ import { Button } from "@/components/ui/button";
 import { useMinuta } from "@/contexts/MinutaContext";
 import { Home, Plus } from "lucide-react";
 import type { Imovel } from "@/types/minuta";
-
-function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-}
-
-function createEmptyImovel(): Imovel {
-  return {
-    id: generateId(),
-    matricula: {
-      numeroMatricula: '',
-      numeroRegistroImoveis: '',
-      cidadeRegistroImoveis: '',
-      estadoRegistroImoveis: '',
-      numeroNacionalMatricula: '',
-    },
-    descricao: {
-      denominacao: '',
-      areaTotalM2: '',
-      areaPrivativaM2: '',
-      areaConstruida: '',
-      endereco: {
-        logradouro: '',
-        numero: '',
-        complemento: '',
-        bairro: '',
-        cidade: '',
-        estado: '',
-        cep: '',
-      },
-      descricaoConformeMatricula: '',
-    },
-    cadastro: {
-      cadastroMunicipalSQL: '',
-      dataExpedicaoCertidao: '',
-    },
-    valoresVenais: {
-      valorVenalIPTU: '',
-      valorVenalReferenciaITBI: '',
-    },
-    negativaIPTU: {
-      numeroCertidao: '',
-      dataExpedicao: '',
-      certidaoValida: '',
-    },
-    certidaoMatricula: {
-      certidaoMatricula: '',
-      dataExpedicao: '',
-      certidaoValida: '',
-    },
-    proprietarios: [],
-    onus: [],
-    ressalvas: {
-      existeRessalva: '',
-      descricaoRessalva: '',
-    },
-    camposEditados: [],
-  };
-}
+import { createEmptyImovel } from "@/utils/factories";
 
 export default function ConferenciaImoveis() {
-  useParams(); // Route param available for future use
   const { currentMinuta, isSaving, addImovel, updateImovel, removeImovel } = useMinuta();
 
   const imoveis = currentMinuta?.imoveis || [];

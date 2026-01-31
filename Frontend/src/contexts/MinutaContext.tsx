@@ -28,7 +28,9 @@ interface MinutaContextType {
   addImovel: (imovel: Imovel) => void;
   updateImovel: (id: string, updates: Partial<Imovel>) => void;
   removeImovel: (id: string) => void;
+  addNegocioJuridico: (negocio: NegocioJuridico) => void;
   updateNegocioJuridico: (id: string, updates: Partial<NegocioJuridico>) => void;
+  removeNegocioJuridico: (id: string) => void;
   updateMinutaTexto: (texto: string) => void;
   finalizarMinuta: () => void;
   isSaving: boolean;
@@ -39,7 +41,7 @@ const MinutaContext = createContext<MinutaContextType | null>(null);
 const STORAGE_KEY = 'minutas-cartorio';
 
 function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 }
 
 function createEmptyMinuta(): Minuta {
@@ -324,12 +326,28 @@ export function MinutaProvider({ children }: { children: ReactNode }) {
   }, [currentMinuta, currentMinutaId, updateMinutaInList]);
 
   // Negocios
+  const addNegocioJuridico = useCallback((negocio: NegocioJuridico) => {
+    if (currentMinuta) {
+      updateMinutaInList(currentMinutaId!, {
+        negociosJuridicos: [...currentMinuta.negociosJuridicos, negocio],
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
   const updateNegocioJuridico = useCallback((id: string, updates: Partial<NegocioJuridico>) => {
     if (currentMinuta) {
       updateMinutaInList(currentMinutaId!, {
         negociosJuridicos: currentMinuta.negociosJuridicos.map(n =>
           n.id === id ? { ...n, ...updates } : n
         ),
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
+  const removeNegocioJuridico = useCallback((id: string) => {
+    if (currentMinuta) {
+      updateMinutaInList(currentMinutaId!, {
+        negociosJuridicos: currentMinuta.negociosJuridicos.filter(n => n.id !== id),
       });
     }
   }, [currentMinuta, currentMinutaId, updateMinutaInList]);
@@ -374,7 +392,9 @@ export function MinutaProvider({ children }: { children: ReactNode }) {
         addImovel,
         updateImovel,
         removeImovel,
+        addNegocioJuridico,
         updateNegocioJuridico,
+        removeNegocioJuridico,
         updateMinutaTexto,
         finalizarMinuta,
         isSaving,

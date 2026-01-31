@@ -28,6 +28,14 @@ import type { UploadedDocument } from "@/types/minuta";
 
 type UploadCategory = UploadedDocument['category'];
 
+const CATEGORY_COLORS: Record<string, { text: string; bg: string }> = {
+  blue: { text: 'text-blue-500', bg: 'bg-blue-500/10' },
+  green: { text: 'text-green-500', bg: 'bg-green-500/10' },
+  yellow: { text: 'text-yellow-500', bg: 'bg-yellow-500/10' },
+  purple: { text: 'text-purple-500', bg: 'bg-purple-500/10' },
+  gray: { text: 'text-gray-500', bg: 'bg-gray-500/10' },
+};
+
 interface CategoryConfig {
   id: UploadCategory;
   title: string;
@@ -130,11 +138,13 @@ export default function UploadDocumentos() {
   const simulateUpload = useCallback(
     (file: File, category: UploadCategory) => {
       const validation = validateFile(file);
-      const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const id = `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 
       const newDoc: UploadedDocument = {
         id,
-        file,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
         category,
         status: validation.valid ? 'complete' : 'error',
         progress: 100,
@@ -231,7 +241,7 @@ export default function UploadDocumentos() {
                 <SectionCard
                   title={
                     <div className="flex items-center gap-2">
-                      <Icon className={cn('w-5 h-5', `text-${category.color}-500`)} />
+                      <Icon className={cn('w-5 h-5', CATEGORY_COLORS[category.color].text)} />
                       <span>{category.title}</span>
                       {categoryDocs.length > 0 && (
                         <span className="text-sm font-normal text-muted-foreground">
@@ -283,7 +293,7 @@ export default function UploadDocumentos() {
                     <div className="mt-4 space-y-2">
                       <AnimatePresence>
                         {categoryDocs.map((doc) => {
-                          const FileIcon = getFileIcon(doc.file.type);
+                          const FileIcon = getFileIcon(doc.fileType);
                           return (
                             <motion.div
                               key={doc.id}
@@ -301,9 +311,9 @@ export default function UploadDocumentos() {
                             >
                               <FileIcon className="w-5 h-5 text-muted-foreground" />
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">{doc.file.name}</p>
+                                <p className="text-sm font-medium truncate">{doc.fileName}</p>
                                 <p className="text-xs text-muted-foreground">
-                                  {formatFileSize(doc.file.size)}
+                                  {formatFileSize(doc.fileSize)}
                                 </p>
                               </div>
                               {doc.status === 'complete' && (

@@ -37,12 +37,23 @@ export default function Dashboard() {
     }
   };
 
-  const handleDeleteMinuta = (e: React.MouseEvent, id: string) => {
+  const handleDeleteMinuta = (e: React.MouseEvent, id: string, titulo: string) => {
     e.stopPropagation();
-    if (confirm('Tem certeza que deseja excluir esta minuta?')) {
-      deleteMinuta(id);
-      toast.success('Minuta excluída');
-    }
+    toast.warning(`Excluir "${titulo}"?`, {
+      description: 'Esta ação não pode ser desfeita.',
+      action: {
+        label: 'Excluir',
+        onClick: () => {
+          deleteMinuta(id);
+          toast.success('Minuta excluída com sucesso');
+        },
+      },
+      cancel: {
+        label: 'Cancelar',
+        onClick: () => {},
+      },
+      duration: 10000,
+    });
   };
 
   const formatDate = (dateString: string) => {
@@ -145,7 +156,7 @@ export default function Dashboard() {
                           </div>
                         </div>
                         <button
-                          onClick={(e) => handleDeleteMinuta(e, minuta.id)}
+                          onClick={(e) => handleDeleteMinuta(e, minuta.id, minuta.titulo)}
                           className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors opacity-0 group-hover:opacity-100"
                         >
                           <Trash2 className="w-4 h-4" />
