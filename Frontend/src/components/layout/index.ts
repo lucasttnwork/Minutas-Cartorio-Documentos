@@ -9,3 +9,4 @@ export { EntityCard } from "./EntityCard";
 export { FlowNavigation } from "./FlowNavigation";
 export { FlowStepper } from "./FlowStepper";
 export { ErrorBoundary } from "./ErrorBoundary";
+export { HubSidebar } from "./HubSidebar";
