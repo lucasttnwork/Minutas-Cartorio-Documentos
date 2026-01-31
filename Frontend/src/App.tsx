@@ -1,12 +1,15 @@
 // src/App.tsx
 import { lazy, Suspense } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { MinutaProvider } from "./contexts/MinutaContext";
 import { Toaster } from "./components/ui/sonner";
 import { GlobalNavigation, ErrorBoundary } from "./components/layout";
 
 // Lazy load all pages for code splitting
-const Dashboard = lazy(() => import("./pages/Dashboard"));
+const DashboardHub = lazy(() => import("./pages/DashboardHub"));
+const DashboardMinutas = lazy(() => import("./pages/DashboardMinutas"));
+const DashboardAgentes = lazy(() => import("./pages/DashboardAgentes"));
+const AgenteExtrator = lazy(() => import("./pages/AgenteExtrator"));
 const UploadDocumentos = lazy(() => import("./pages/UploadDocumentos"));
 const Processando = lazy(() => import("./pages/Processando"));
 const ConferenciaOutorgantes = lazy(() => import("./pages/ConferenciaOutorgantes"));
@@ -37,8 +40,18 @@ function App() {
             <GlobalNavigation />
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                {/* Dashboard */}
-                <Route path="/" element={<Dashboard />} />
+                {/* Root redirect to dashboard */}
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+                {/* Dashboard Hub with nested routes */}
+                <Route path="/dashboard" element={<DashboardHub />}>
+                  <Route index element={<Navigate to="/dashboard/minutas" replace />} />
+                  <Route path="minutas" element={<DashboardMinutas />} />
+                  <Route path="agentes" element={<DashboardAgentes />} />
+                </Route>
+
+                {/* Agentes individual pages */}
+                <Route path="/agentes/:tipo" element={<AgenteExtrator />} />
 
                 {/* Minuta Flow */}
                 <Route path="/minuta/nova" element={<UploadDocumentos />} />
