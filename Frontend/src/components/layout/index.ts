@@ -5,3 +5,4 @@ export { NavigationBar } from "./NavigationBar";
 export { ProgressStepper } from "./ProgressStepper";
 export { GlobalNavigation } from "./GlobalNavigation";
 export { CollapsibleSection } from "./CollapsibleSection";
+export { EntityCard } from "./EntityCard";
