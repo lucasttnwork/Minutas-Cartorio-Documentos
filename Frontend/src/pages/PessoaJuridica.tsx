@@ -358,9 +358,9 @@ export default function PessoaJuridica() {
                 />
                 <FormField
                   label="CNPJ"
+                  type="cnpj"
                   value={data.cnpj}
                   onChange={(v) => updateField("cnpj", v)}
-                  placeholder="00.000.000/0001-00"
                 />
                 <FormField
                   label="NIRE"
@@ -457,12 +457,13 @@ export default function PessoaJuridica() {
                   />
                   <FormField
                     label="CPF"
+                    type="cpf"
                     value={data.administrador.dadosPessoais.cpf}
                     onChange={(v) => updateAdministradorDadosPessoais("cpf", v)}
-                    placeholder="000.000.000-00"
                   />
                   <FormField
                     label="RG"
+                    type="rg"
                     value={data.administrador.dadosPessoais.rg}
                     onChange={(v) => updateAdministradorDadosPessoais("rg", v)}
                   />
@@ -599,12 +600,13 @@ export default function PessoaJuridica() {
                   />
                   <FormField
                     label="CPF"
+                    type="cpf"
                     value={data.procurador.dadosPessoais.cpf}
                     onChange={(v) => updateProcuradorDadosPessoais("cpf", v)}
-                    placeholder="000.000.000-00"
                   />
                   <FormField
                     label="RG"
+                    type="rg"
                     value={data.procurador.dadosPessoais.rg}
                     onChange={(v) => updateProcuradorDadosPessoais("rg", v)}
                   />

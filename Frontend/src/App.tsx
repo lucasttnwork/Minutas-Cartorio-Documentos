@@ -5,6 +5,7 @@ import PessoaJuridica from "./pages/PessoaJuridica";
 import Imovel from "./pages/Imovel";
 import NegocioJuridico from "./pages/NegocioJuridico";
 import Upload from "./pages/Upload";
+import { Toaster } from "./components/ui/sonner";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/negocio-juridico" element={<NegocioJuridico />} />
           <Route path="/upload" element={<Upload />} />
         </Routes>
+        <Toaster position="top-right" richColors closeButton />
       </div>
     </Router>
   );

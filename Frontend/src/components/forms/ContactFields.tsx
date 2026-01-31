@@ -25,10 +25,9 @@ export function ContactFields({ values, onChange, disabled }: ContactFieldsProps
       />
       <FormField
         label="Telefone"
-        type="tel"
+        type="phone"
         value={values.telefone}
         onChange={(v) => onChange("telefone", v)}
-        placeholder="+55 (11) 99999-9999"
         disabled={disabled}
       />
     </FieldGrid>

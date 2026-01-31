@@ -88,6 +88,13 @@
   }
 }
 
+/* Shimmer animation for skeletons */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 /* Custom scrollbar for dark theme */
 @layer utilities {
   .scrollbar-thin {

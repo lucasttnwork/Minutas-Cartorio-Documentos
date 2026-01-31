@@ -92,9 +92,9 @@ export function AddressFields({ values, onChange, disabled }: AddressFieldsProps
       />
       <FormField
         label="CEP"
+        type="cep"
         value={values.cep}
         onChange={(v) => onChange("cep", v)}
-        placeholder="00000-000"
         disabled={disabled}
       />
     </FieldGrid>

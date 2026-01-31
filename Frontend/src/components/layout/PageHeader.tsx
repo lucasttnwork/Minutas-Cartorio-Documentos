@@ -1,12 +1,22 @@
 import { motion } from "framer-motion";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import type { BreadcrumbItem } from "@/components/ui/breadcrumbs";
 
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
   instruction?: string;
+  breadcrumbs?: BreadcrumbItem[];
+  showBreadcrumbs?: boolean;
 }
 
-export function PageHeader({ title, subtitle, instruction }: PageHeaderProps) {
+export function PageHeader({ 
+  title, 
+  subtitle, 
+  instruction,
+  breadcrumbs,
+  showBreadcrumbs = true,
+}: PageHeaderProps) {
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
@@ -14,6 +24,13 @@ export function PageHeader({ title, subtitle, instruction }: PageHeaderProps) {
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="mb-8"
     >
+      {/* Breadcrumbs */}
+      {showBreadcrumbs && (
+        <div className="mb-4">
+          <Breadcrumbs items={breadcrumbs} />
+        </div>
+      )}
+      
       <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
         {title}
       </h1>

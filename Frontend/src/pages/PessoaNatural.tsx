@@ -160,12 +160,13 @@ export default function PessoaNatural() {
               />
               <FormField
                 label="CPF"
+                type="cpf"
                 value={data.cpf}
                 onChange={(v) => updateField("cpf", v)}
-                placeholder="000.000.000-00"
               />
               <FormField
                 label="RG"
+                type="rg"
                 value={data.rg}
                 onChange={(v) => updateField("rg", v)}
               />
