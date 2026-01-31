@@ -1,11 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { 
-  Users, 
-  Building2, 
-  FileText, 
-  Briefcase, 
-  Upload, 
+import {
   Home,
   Menu,
   X
@@ -15,11 +10,6 @@ import { useState } from "react";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: Home },
-  { href: "/pessoa-natural", label: "Pessoa Natural", icon: Users },
-  { href: "/pessoa-juridica", label: "Pessoa Jurídica", icon: Building2 },
-  { href: "/imovel", label: "Imóvel", icon: FileText },
-  { href: "/negocio-juridico", label: "Negócio Jurídico", icon: Briefcase },
-  { href: "/upload", label: "Upload", icon: Upload },
 ];
 
 export function GlobalNavigation() {

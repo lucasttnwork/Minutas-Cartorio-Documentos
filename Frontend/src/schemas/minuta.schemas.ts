@@ -43,6 +43,217 @@ export const ContatoSchema = z.object({
 });
 
 // =============================================================================
+// CERTIDOES SCHEMAS
+// =============================================================================
+
+export const CertidaoCNDTSchema = z.object({
+  numeroCNDT: z.string().default(''),
+  dataExpedicao: z.string().default(''),
+  horaExpedicao: z.string().default(''),
+});
+
+export const CertidaoUniaoSchema = z.object({
+  tipoCertidao: z.string().default(''),
+  dataEmissao: z.string().default(''),
+  horaEmissao: z.string().default(''),
+  validade: z.string().default(''),
+  codigoControle: z.string().default(''),
+});
+
+// =============================================================================
+// DADOS FAMILIARES SCHEMAS
+// =============================================================================
+
+export const DadosFamiliaresSchema = z.object({
+  estadoCivil: z.string().default(''),
+  regimeBens: z.string().default(''),
+  dataCasamento: z.string().default(''),
+  dataSeparacao: z.string().default(''),
+  dataDivorcio: z.string().default(''),
+  dataFalecimentoConjuge: z.string().default(''),
+  uniaoEstavel: z.boolean().default(false),
+  dataUniaoEstavel: z.string().default(''),
+  dataExtincaoUniaoEstavel: z.string().default(''),
+  regimeBensUniao: z.string().default(''),
+});
+
+// =============================================================================
+// PESSOA JURIDICA - REGISTRO E REPRESENTACAO SCHEMAS
+// =============================================================================
+
+export const RegistroVigenteSchema = z.object({
+  instrumentoConstitutivo: z.string().default(''),
+  juntaComercial: z.string().default(''),
+  numeroRegistro: z.string().default(''),
+  dataSessaoRegistro: z.string().default(''),
+});
+
+export const CertidaoEmpresaSchema = z.object({
+  dataExpedicaoFichaCadastral: z.string().default(''),
+  dataExpedicaoCertidaoRegistro: z.string().default(''),
+});
+
+export const RepresentanteAdministradorSchema = z.object({
+  id: z.string().default(''),
+  nome: z
+    .string()
+    .refine((val) => val === '' || val.length >= 2, {
+      message: 'Nome deve ter pelo menos 2 caracteres',
+    })
+    .default(''),
+  cpf: z
+    .string()
+    .refine((val) => val === '' || CPF_REGEX.test(val), {
+      message: 'CPF inválido (formato: 000.000.000-00)',
+    })
+    .default(''),
+  rg: z.string().default(''),
+  orgaoEmissorRg: z.string().default(''),
+  estadoEmissorRg: z
+    .string()
+    .refine((val) => val === '' || ESTADO_REGEX.test(val), {
+      message: 'Estado deve ter 2 letras maiúsculas (ex: SP, RJ)',
+    })
+    .default(''),
+  dataEmissaoRg: z.string().default(''),
+  nacionalidade: z.string().default('Brasileira'),
+  profissao: z.string().default(''),
+  domicilio: EnderecoSchema.default(() => ({
+    logradouro: '',
+    numero: '',
+    complemento: '',
+    bairro: '',
+    cidade: '',
+    estado: '',
+    cep: '',
+  })),
+  contato: ContatoSchema.default(() => ({
+    email: '',
+    telefone: '',
+  })),
+  instrumentoNomeacao: z.string().default(''),
+  dataInstrumento: z.string().default(''),
+  numeroRegistro: z.string().default(''),
+  dataRegistro: z.string().default(''),
+});
+
+export const RepresentanteProcuradorSchema = z.object({
+  id: z.string().default(''),
+  nome: z
+    .string()
+    .refine((val) => val === '' || val.length >= 2, {
+      message: 'Nome deve ter pelo menos 2 caracteres',
+    })
+    .default(''),
+  cpf: z
+    .string()
+    .refine((val) => val === '' || CPF_REGEX.test(val), {
+      message: 'CPF inválido (formato: 000.000.000-00)',
+    })
+    .default(''),
+  rg: z.string().default(''),
+  orgaoEmissorRg: z.string().default(''),
+  estadoEmissorRg: z
+    .string()
+    .refine((val) => val === '' || ESTADO_REGEX.test(val), {
+      message: 'Estado deve ter 2 letras maiúsculas (ex: SP, RJ)',
+    })
+    .default(''),
+  dataEmissaoRg: z.string().default(''),
+  nacionalidade: z.string().default('Brasileira'),
+  profissao: z.string().default(''),
+  domicilio: EnderecoSchema.default(() => ({
+    logradouro: '',
+    numero: '',
+    complemento: '',
+    bairro: '',
+    cidade: '',
+    estado: '',
+    cep: '',
+  })),
+  contato: ContatoSchema.default(() => ({
+    email: '',
+    telefone: '',
+  })),
+  livro: z.string().default(''),
+  folha: z.string().default(''),
+  tabelionato: z.string().default(''),
+  cidade: z.string().default(''),
+  estado: z
+    .string()
+    .refine((val) => val === '' || ESTADO_REGEX.test(val), {
+      message: 'Estado deve ter 2 letras maiúsculas (ex: SP, RJ)',
+    })
+    .default(''),
+  dataProcuracao: z.string().default(''),
+  validadeProcuracao: z.string().default(''),
+});
+
+// =============================================================================
+// NEGOCIO JURIDICO - PARTICIPANTES SCHEMAS
+// =============================================================================
+
+export const TipoPessoaEnum = z.enum(['natural', 'juridica']);
+
+export const ParticipanteNegocioSchema = z.object({
+  id: z.string().default(''),
+  pessoaId: z.string().default(''),
+  tipoPessoa: TipoPessoaEnum.default('natural'),
+  fracaoIdeal: z.string().default(''),
+  valorParticipacao: z.string().default(''),
+  conjuge: z.string().optional(),
+  qualidade: z.string().default(''),
+});
+
+export const DadosBancariosSchema = z.object({
+  banco: z.string().default(''),
+  agencia: z.string().default(''),
+  conta: z.string().default(''),
+});
+
+export const FormaPagamentoDetalhadaSchema = z.object({
+  tipo: z.string().default(''),
+  data: z.string().default(''),
+  modo: z.string().default(''),
+  contaOrigem: DadosBancariosSchema.default(() => ({
+    banco: '',
+    agencia: '',
+    conta: '',
+  })),
+  contaDestino: DadosBancariosSchema.default(() => ({
+    banco: '',
+    agencia: '',
+    conta: '',
+  })),
+});
+
+export const TermosEspeciaisSchema = z.object({
+  termosPromessa: z.string().default(''),
+  termosEspeciais: z.string().default(''),
+  condicaoResolutiva: z.string().default(''),
+});
+
+export const ResultadoIndisponibilidadeSchema = z.object({
+  id: z.string().default(''),
+  nome: z.string().default(''),
+  documento: z.string().default(''),
+  situacao: z.string().default(''),
+  dataRegistro: z.string().default(''),
+});
+
+export const IndisponibilidadeBensSchema = z.object({
+  consultaRealizada: z.boolean().default(false),
+  dataConsulta: z.string().default(''),
+  resultados: z.array(ResultadoIndisponibilidadeSchema).default([]),
+});
+
+export const ImpostoTransmissaoSchema = z.object({
+  numeroGuiaITBI: z.string().default(''),
+  baseCalculo: z.string().default(''),
+  valorGuia: z.string().default(''),
+});
+
+// =============================================================================
 // PESSOA NATURAL SCHEMAS
 // =============================================================================
 
@@ -89,8 +300,21 @@ export const PessoaNaturalSchema = z.object({
   nacionalidade: z.string().default('Brasileira'),
   profissao: z.string().default(''),
   dataNascimento: z.string().default(''),
-  estadoCivil: EstadoCivilEnum.default(''),
-  regimeBens: RegimeBensEnum.default(''),
+  dataObito: z.string().default(''),
+  cnh: z.string().default(''),
+  orgaoEmissorCnh: z.string().default(''),
+  dadosFamiliares: DadosFamiliaresSchema.default(() => ({
+    estadoCivil: '',
+    regimeBens: '',
+    dataCasamento: '',
+    dataSeparacao: '',
+    dataDivorcio: '',
+    dataFalecimentoConjuge: '',
+    uniaoEstavel: false,
+    dataUniaoEstavel: '',
+    dataExtincaoUniaoEstavel: '',
+    regimeBensUniao: '',
+  })),
   domicilio: EnderecoSchema.default(() => ({
     logradouro: '',
     numero: '',
@@ -103,6 +327,18 @@ export const PessoaNaturalSchema = z.object({
   contato: ContatoSchema.default(() => ({
     email: '',
     telefone: '',
+  })),
+  cndt: CertidaoCNDTSchema.default(() => ({
+    numeroCNDT: '',
+    dataExpedicao: '',
+    horaExpedicao: '',
+  })),
+  certidaoUniao: CertidaoUniaoSchema.default(() => ({
+    tipoCertidao: '',
+    dataEmissao: '',
+    horaEmissao: '',
+    validade: '',
+    codigoControle: '',
   })),
   camposEditados: z.array(z.string()).default([]),
 });
@@ -142,6 +378,7 @@ export const PessoaJuridicaSchema = z.object({
       message: 'CNPJ inválido (formato: 00.000.000/0000-00)',
     })
     .default(''),
+  nire: z.string().default(''),
   inscricaoEstadual: z.string().default(''),
   dataConstituicao: z.string().default(''),
   endereco: EnderecoSchema.default(() => ({
@@ -157,7 +394,31 @@ export const PessoaJuridicaSchema = z.object({
     email: '',
     telefone: '',
   })),
+  registroVigente: RegistroVigenteSchema.default(() => ({
+    instrumentoConstitutivo: '',
+    juntaComercial: '',
+    numeroRegistro: '',
+    dataSessaoRegistro: '',
+  })),
+  certidaoEmpresa: CertidaoEmpresaSchema.default(() => ({
+    dataExpedicaoFichaCadastral: '',
+    dataExpedicaoCertidaoRegistro: '',
+  })),
   representantes: z.array(RepresentanteLegalSchema).default([]),
+  administradores: z.array(RepresentanteAdministradorSchema).default([]),
+  procuradores: z.array(RepresentanteProcuradorSchema).default([]),
+  cndt: CertidaoCNDTSchema.default(() => ({
+    numeroCNDT: '',
+    dataExpedicao: '',
+    horaExpedicao: '',
+  })),
+  certidaoUniao: CertidaoUniaoSchema.default(() => ({
+    tipoCertidao: '',
+    dataEmissao: '',
+    horaEmissao: '',
+    validade: '',
+    codigoControle: '',
+  })),
   camposEditados: z.array(z.string()).default([]),
 });
 
@@ -314,8 +575,44 @@ export const NegocioJuridicoSchema = z.object({
   id: z.string().default(''),
   imovelId: z.string().default(''),
   tipoAto: TipoAtoEnum.default(''),
+  fracaoIdealAlienada: z.string().default(''),
+  valorTotalAlienacao: z.string().default(''),
   valorNegocio: z.string().default(''),
   formaPagamento: z.string().default(''),
+  formaPagamentoDetalhada: FormaPagamentoDetalhadaSchema.default(() => ({
+    tipo: '',
+    data: '',
+    modo: '',
+    contaOrigem: {
+      banco: '',
+      agencia: '',
+      conta: '',
+    },
+    contaDestino: {
+      banco: '',
+      agencia: '',
+      conta: '',
+    },
+  })),
+  alienantes: z.array(ParticipanteNegocioSchema).default([]),
+  adquirentes: z.array(ParticipanteNegocioSchema).default([]),
+  termosEspeciais: TermosEspeciaisSchema.default(() => ({
+    termosPromessa: '',
+    termosEspeciais: '',
+    condicaoResolutiva: '',
+  })),
+  declaracoes: z.record(z.string(), z.boolean()).default({}),
+  dispensas: z.record(z.string(), z.boolean()).default({}),
+  indisponibilidade: IndisponibilidadeBensSchema.default(() => ({
+    consultaRealizada: false,
+    dataConsulta: '',
+    resultados: [],
+  })),
+  impostoTransmissao: ImpostoTransmissaoSchema.default(() => ({
+    numeroGuiaITBI: '',
+    baseCalculo: '',
+    valorGuia: '',
+  })),
   condicoesEspeciais: z.string().default(''),
   clausulasAdicionais: z.string().default(''),
   camposEditados: z.array(z.string()).default([]),
@@ -415,6 +712,21 @@ export const MinutaSchema = z.object({
 
 export type EnderecoValidated = z.infer<typeof EnderecoSchema>;
 export type ContatoValidated = z.infer<typeof ContatoSchema>;
+
+export type CertidaoCNDTValidated = z.infer<typeof CertidaoCNDTSchema>;
+export type CertidaoUniaoValidated = z.infer<typeof CertidaoUniaoSchema>;
+export type DadosFamiliaresValidated = z.infer<typeof DadosFamiliaresSchema>;
+export type RegistroVigenteValidated = z.infer<typeof RegistroVigenteSchema>;
+export type CertidaoEmpresaValidated = z.infer<typeof CertidaoEmpresaSchema>;
+export type RepresentanteAdministradorValidated = z.infer<typeof RepresentanteAdministradorSchema>;
+export type RepresentanteProcuradorValidated = z.infer<typeof RepresentanteProcuradorSchema>;
+export type ParticipanteNegocioValidated = z.infer<typeof ParticipanteNegocioSchema>;
+export type DadosBancariosValidated = z.infer<typeof DadosBancariosSchema>;
+export type FormaPagamentoDetalhadaValidated = z.infer<typeof FormaPagamentoDetalhadaSchema>;
+export type TermosEspeciaisValidated = z.infer<typeof TermosEspeciaisSchema>;
+export type ResultadoIndisponibilidadeValidated = z.infer<typeof ResultadoIndisponibilidadeSchema>;
+export type IndisponibilidadeBensValidated = z.infer<typeof IndisponibilidadeBensSchema>;
+export type ImpostoTransmissaoValidated = z.infer<typeof ImpostoTransmissaoSchema>;
 
 export type PessoaNaturalValidated = z.infer<typeof PessoaNaturalSchema>;
 export type RepresentanteLegalValidated = z.infer<typeof RepresentanteLegalSchema>;
@@ -521,6 +833,114 @@ export function validateUploadedDocument(data: unknown) {
  */
 export function validateMinuta(data: unknown) {
   return MinutaSchema.safeParse(data);
+}
+
+/**
+ * Validates a CertidaoCNDT object
+ * @param data - Unknown data to validate
+ * @returns SafeParseReturnType with success status and data or error
+ */
+export function validateCertidaoCNDT(data: unknown) {
+  return CertidaoCNDTSchema.safeParse(data);
+}
+
+/**
+ * Validates a CertidaoUniao object
+ * @param data - Unknown data to validate
+ * @returns SafeParseReturnType with success status and data or error
+ */
+export function validateCertidaoUniao(data: unknown) {
+  return CertidaoUniaoSchema.safeParse(data);
+}
+
+/**
+ * Validates a DadosFamiliares object
+ * @param data - Unknown data to validate
+ * @returns SafeParseReturnType with success status and data or error
+ */
+export function validateDadosFamiliares(data: unknown) {
+  return DadosFamiliaresSchema.safeParse(data);
+}
+
+/**
+ * Validates a RegistroVigente object
+ * @param data - Unknown data to validate
+ * @returns SafeParseReturnType with success status and data or error
+ */
+export function validateRegistroVigente(data: unknown) {
+  return RegistroVigenteSchema.safeParse(data);
+}
+
+/**
+ * Validates a CertidaoEmpresa object
+ * @param data - Unknown data to validate
+ * @returns SafeParseReturnType with success status and data or error
+ */
+export function validateCertidaoEmpresa(data: unknown) {
+  return CertidaoEmpresaSchema.safeParse(data);
+}
+
+/**
+ * Validates a RepresentanteAdministrador object
+ * @param data - Unknown data to validate
+ * @returns SafeParseReturnType with success status and data or error
+ */
+export function validateRepresentanteAdministrador(data: unknown) {
+  return RepresentanteAdministradorSchema.safeParse(data);
+}
+
+/**
+ * Validates a RepresentanteProcurador object
+ * @param data - Unknown data to validate
+ * @returns SafeParseReturnType with success status and data or error
+ */
+export function validateRepresentanteProcurador(data: unknown) {
+  return RepresentanteProcuradorSchema.safeParse(data);
+}
+
+/**
+ * Validates a ParticipanteNegocio object
+ * @param data - Unknown data to validate
+ * @returns SafeParseReturnType with success status and data or error
+ */
+export function validateParticipanteNegocio(data: unknown) {
+  return ParticipanteNegocioSchema.safeParse(data);
+}
+
+/**
+ * Validates a FormaPagamentoDetalhada object
+ * @param data - Unknown data to validate
+ * @returns SafeParseReturnType with success status and data or error
+ */
+export function validateFormaPagamentoDetalhada(data: unknown) {
+  return FormaPagamentoDetalhadaSchema.safeParse(data);
+}
+
+/**
+ * Validates a TermosEspeciais object
+ * @param data - Unknown data to validate
+ * @returns SafeParseReturnType with success status and data or error
+ */
+export function validateTermosEspeciais(data: unknown) {
+  return TermosEspeciaisSchema.safeParse(data);
+}
+
+/**
+ * Validates an IndisponibilidadeBens object
+ * @param data - Unknown data to validate
+ * @returns SafeParseReturnType with success status and data or error
+ */
+export function validateIndisponibilidadeBens(data: unknown) {
+  return IndisponibilidadeBensSchema.safeParse(data);
+}
+
+/**
+ * Validates an ImpostoTransmissao object
+ * @param data - Unknown data to validate
+ * @returns SafeParseReturnType with success status and data or error
+ */
+export function validateImpostoTransmissao(data: unknown) {
+  return ImpostoTransmissaoSchema.safeParse(data);
 }
 
 // =============================================================================

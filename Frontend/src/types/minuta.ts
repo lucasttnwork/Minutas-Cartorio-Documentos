@@ -12,10 +12,14 @@ export interface PessoaNatural {
   nacionalidade: string;
   profissao: string;
   dataNascimento: string;
-  estadoCivil: string;
-  regimeBens: string;
+  dataObito: string;
+  cnh: string;
+  orgaoEmissorCnh: string;
+  dadosFamiliares: DadosFamiliares;
   domicilio: Endereco;
   contato: Contato;
+  cndt: CertidaoCNDT;
+  certidaoUniao: CertidaoUniao;
   camposEditados: string[];
 }
 
@@ -24,11 +28,18 @@ export interface PessoaJuridica {
   id: string;
   razaoSocial: string;
   cnpj: string;
+  nire: string;
   inscricaoEstadual: string;
   dataConstituicao: string;
   endereco: Endereco;
   contato: Contato;
+  registroVigente: RegistroVigente;
+  certidaoEmpresa: CertidaoEmpresa;
   representantes: RepresentanteLegal[];
+  administradores: RepresentanteAdministrador[];
+  procuradores: RepresentanteProcurador[];
+  cndt: CertidaoCNDT;
+  certidaoUniao: CertidaoUniao;
   camposEditados: string[];
 }
 
@@ -134,8 +145,18 @@ export interface NegocioJuridico {
   id: string;
   imovelId: string;
   tipoAto: string;
+  fracaoIdealAlienada: string;
+  valorTotalAlienacao: string;
   valorNegocio: string;
   formaPagamento: string;
+  formaPagamentoDetalhada: FormaPagamentoDetalhada;
+  alienantes: ParticipanteNegocio[];
+  adquirentes: ParticipanteNegocio[];
+  termosEspeciais: TermosEspeciais;
+  declaracoes: Record<string, boolean>;
+  dispensas: Record<string, boolean>;
+  indisponibilidade: IndisponibilidadeBens;
+  impostoTransmissao: ImpostoTransmissao;
   condicoesEspeciais: string;
   clausulasAdicionais: string;
   camposEditados: string[];
@@ -155,6 +176,138 @@ export interface Endereco {
 export interface Contato {
   email: string;
   telefone: string;
+}
+
+// === Certidoes ===
+export interface CertidaoCNDT {
+  numeroCNDT: string;
+  dataExpedicao: string;
+  horaExpedicao: string;
+}
+
+export interface CertidaoUniao {
+  tipoCertidao: string;
+  dataEmissao: string;
+  horaEmissao: string;
+  validade: string;
+  codigoControle: string;
+}
+
+// === Dados Familiares (Pessoa Natural) ===
+export interface DadosFamiliares {
+  estadoCivil: string;
+  regimeBens: string;
+  dataCasamento: string;
+  dataSeparacao: string;
+  dataDivorcio: string;
+  dataFalecimentoConjuge: string;
+  uniaoEstavel: boolean;
+  dataUniaoEstavel: string;
+  dataExtincaoUniaoEstavel: string;
+  regimeBensUniao: string;
+}
+
+// === Pessoa Juridica - Registro e Representacao ===
+export interface RegistroVigente {
+  instrumentoConstitutivo: string;
+  juntaComercial: string;
+  numeroRegistro: string;
+  dataSessaoRegistro: string;
+}
+
+export interface CertidaoEmpresa {
+  dataExpedicaoFichaCadastral: string;
+  dataExpedicaoCertidaoRegistro: string;
+}
+
+export interface RepresentanteAdministrador {
+  id: string;
+  nome: string;
+  cpf: string;
+  rg: string;
+  orgaoEmissorRg: string;
+  estadoEmissorRg: string;
+  dataEmissaoRg: string;
+  nacionalidade: string;
+  profissao: string;
+  domicilio: Endereco;
+  contato: Contato;
+  instrumentoNomeacao: string;
+  dataInstrumento: string;
+  numeroRegistro: string;
+  dataRegistro: string;
+}
+
+export interface RepresentanteProcurador {
+  id: string;
+  nome: string;
+  cpf: string;
+  rg: string;
+  orgaoEmissorRg: string;
+  estadoEmissorRg: string;
+  dataEmissaoRg: string;
+  nacionalidade: string;
+  profissao: string;
+  domicilio: Endereco;
+  contato: Contato;
+  livro: string;
+  folha: string;
+  tabelionato: string;
+  cidade: string;
+  estado: string;
+  dataProcuracao: string;
+  validadeProcuracao: string;
+}
+
+// === Negocio Juridico - Participantes ===
+export interface ParticipanteNegocio {
+  id: string;
+  pessoaId: string;
+  tipoPessoa: 'natural' | 'juridica';
+  fracaoIdeal: string;
+  valorParticipacao: string;
+  conjuge?: string;
+  qualidade: string;
+}
+
+export interface FormaPagamentoDetalhada {
+  tipo: string;
+  data: string;
+  modo: string;
+  contaOrigem: DadosBancarios;
+  contaDestino: DadosBancarios;
+}
+
+export interface DadosBancarios {
+  banco: string;
+  agencia: string;
+  conta: string;
+}
+
+export interface TermosEspeciais {
+  termosPromessa: string;
+  termosEspeciais: string;
+  condicaoResolutiva: string;
+}
+
+export interface IndisponibilidadeBens {
+  consultaRealizada: boolean;
+  dataConsulta: string;
+  resultados: ResultadoIndisponibilidade[];
+}
+
+export interface ResultadoIndisponibilidade {
+  id: string;
+  nome: string;
+  documento: string;
+  situacao: string;
+  dataRegistro: string;
+}
+
+export interface ImpostoTransmissao {
+  numeroGuiaITBI: string;
+  baseCalculo: string;
+  valorGuia: string;
 }
 
 // === Upload ===

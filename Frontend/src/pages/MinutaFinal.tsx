@@ -33,7 +33,7 @@ export default function MinutaFinal() {
     if (!currentMinuta) return '<p>Carregando...</p>';
 
     const outorgantes = currentMinuta.outorgantes.pessoasNaturais
-      .map(p => `<p><strong>${p.nome || '[NOME]'}</strong>, ${p.nacionalidade || '[NACIONALIDADE]'}, ${p.profissao || '[PROFISSAO]'}, ${p.estadoCivil || '[ESTADO CIVIL]'}, portador(a) do RG no ${p.rg || '[RG]'} e CPF no ${p.cpf || '[CPF]'}, residente e domiciliado(a) em ${p.domicilio?.logradouro || '[ENDERECO]'}, no ${p.domicilio?.numero || '[No]'}, ${p.domicilio?.bairro || '[BAIRRO]'}, ${p.domicilio?.cidade || '[CIDADE]'}-${p.domicilio?.estado || '[UF]'}.</p>`)
+      .map(p => `<p><strong>${p.nome || '[NOME]'}</strong>, ${p.nacionalidade || '[NACIONALIDADE]'}, ${p.profissao || '[PROFISSAO]'}, ${p.dadosFamiliares?.estadoCivil || '[ESTADO CIVIL]'}, portador(a) do RG no ${p.rg || '[RG]'} e CPF no ${p.cpf || '[CPF]'}, residente e domiciliado(a) em ${p.domicilio?.logradouro || '[ENDERECO]'}, no ${p.domicilio?.numero || '[No]'}, ${p.domicilio?.bairro || '[BAIRRO]'}, ${p.domicilio?.cidade || '[CIDADE]'}-${p.domicilio?.estado || '[UF]'}.</p>`)
       .join('');
 
     const outorgantesJuridicos = currentMinuta.outorgantes.pessoasJuridicas
@@ -41,7 +41,7 @@ export default function MinutaFinal() {
       .join('');
 
     const outorgados = currentMinuta.outorgados.pessoasNaturais
-      .map(p => `<p><strong>${p.nome || '[NOME]'}</strong>, ${p.nacionalidade || '[NACIONALIDADE]'}, ${p.profissao || '[PROFISSAO]'}, ${p.estadoCivil || '[ESTADO CIVIL]'}, portador(a) do RG no ${p.rg || '[RG]'} e CPF no ${p.cpf || '[CPF]'}, residente e domiciliado(a) em ${p.domicilio?.logradouro || '[ENDERECO]'}, no ${p.domicilio?.numero || '[No]'}, ${p.domicilio?.bairro || '[BAIRRO]'}, ${p.domicilio?.cidade || '[CIDADE]'}-${p.domicilio?.estado || '[UF]'}.</p>`)
+      .map(p => `<p><strong>${p.nome || '[NOME]'}</strong>, ${p.nacionalidade || '[NACIONALIDADE]'}, ${p.profissao || '[PROFISSAO]'}, ${p.dadosFamiliares?.estadoCivil || '[ESTADO CIVIL]'}, portador(a) do RG no ${p.rg || '[RG]'} e CPF no ${p.cpf || '[CPF]'}, residente e domiciliado(a) em ${p.domicilio?.logradouro || '[ENDERECO]'}, no ${p.domicilio?.numero || '[No]'}, ${p.domicilio?.bairro || '[BAIRRO]'}, ${p.domicilio?.cidade || '[CIDADE]'}-${p.domicilio?.estado || '[UF]'}.</p>`)
       .join('');
 
     const outorgadosJuridicos = currentMinuta.outorgados.pessoasJuridicas

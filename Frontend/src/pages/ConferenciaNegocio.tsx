@@ -1,19 +1,19 @@
 // src/pages/ConferenciaNegocio.tsx
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useCallback } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FlowStepper } from "@/components/layout/FlowStepper";
 import { FlowNavigation } from "@/components/layout/FlowNavigation";
 import { EntityCard } from "@/components/layout/EntityCard";
-import { EditableField } from "@/components/forms/EditableField";
 import { SectionCard } from "@/components/layout/SectionCard";
+import { NegocioJuridicoForm } from "@/components/forms/negocio/NegocioJuridicoForm";
 import { useMinuta } from "@/contexts/MinutaContext";
 import { Briefcase, Home } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { validateNegocioJuridico } from "@/schemas/minuta.schemas";
+import { createEmptyNegocioJuridico, createEmptyParticipanteNegocio } from "@/utils/factories";
 import { toast } from "sonner";
+import type { NegocioJuridico } from "@/types/minuta";
 
 export default function ConferenciaNegocio() {
   const { id } = useParams();
@@ -23,6 +23,17 @@ export default function ConferenciaNegocio() {
   const imoveis = useMemo(() => currentMinuta?.imoveis || [], [currentMinuta?.imoveis]);
   const negocios = useMemo(() => currentMinuta?.negociosJuridicos || [], [currentMinuta?.negociosJuridicos]);
 
+  // Get all pessoas for participant lookup
+  const pessoasNaturais = useMemo(() => [
+    ...(currentMinuta?.outorgantes.pessoasNaturais || []),
+    ...(currentMinuta?.outorgados.pessoasNaturais || []),
+  ], [currentMinuta?.outorgantes, currentMinuta?.outorgados]);
+
+  const pessoasJuridicas = useMemo(() => [
+    ...(currentMinuta?.outorgantes.pessoasJuridicas || []),
+    ...(currentMinuta?.outorgados.pessoasJuridicas || []),
+  ], [currentMinuta?.outorgantes, currentMinuta?.outorgados]);
+
   // Ensure each imovel has a corresponding negocio
   useEffect(() => {
     if (!currentMinuta || imoveis.length === 0) return;
@@ -31,14 +42,8 @@ export default function ConferenciaNegocio() {
     const newNegocios = imoveis
       .filter(i => !existingImovelIds.includes(i.id))
       .map(imovel => ({
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        ...createEmptyNegocioJuridico(),
         imovelId: imovel.id,
-        tipoAto: '',
-        valorNegocio: '',
-        formaPagamento: '',
-        condicoesEspeciais: '',
-        clausulasAdicionais: '',
-        camposEditados: [] as string[],
       }));
 
     if (newNegocios.length > 0) {
@@ -48,15 +53,127 @@ export default function ConferenciaNegocio() {
     }
   }, [currentMinuta, imoveis, negocios, updateMinuta]);
 
-  const handleUpdate = (negocioId: string, field: string, value: string) => {
+  // Helper to set nested value by path (e.g., "formaPagamentoDetalhada.tipo")
+  const setNestedValue = (obj: NegocioJuridico, path: string, value: unknown): Partial<NegocioJuridico> => {
+    const parts = path.split('.');
+    if (parts.length === 1) {
+      return { [path]: value } as Partial<NegocioJuridico>;
+    }
+
+    // Deep clone the nested object structure
+    const result = { ...obj };
+    let current: Record<string, unknown> = result as unknown as Record<string, unknown>;
+
+    for (let i = 0; i < parts.length - 1; i++) {
+      const key = parts[i];
+      current[key] = { ...(current[key] as Record<string, unknown>) };
+      current = current[key] as Record<string, unknown>;
+    }
+
+    current[parts[parts.length - 1]] = value;
+
+    // Return only the top-level key that changed
+    return { [parts[0]]: result[parts[0] as keyof NegocioJuridico] } as Partial<NegocioJuridico>;
+  };
+
+  const handleUpdate = useCallback((negocioId: string, field: string, value: string | boolean | Record<string, boolean>) => {
+    const negocio = negocios.find(n => n.id === negocioId);
+    if (!negocio) return;
+
+    const updates = setNestedValue(negocio, field, value);
+
+    updateNegocioJuridico(negocioId, {
+      ...updates,
+      camposEditados: [...new Set([...negocio.camposEditados, field])],
+    });
+  }, [negocios, updateNegocioJuridico]);
+
+  // Alienante handlers
+  const handleAddAlienante = useCallback((negocioId: string) => {
+    const negocio = negocios.find(n => n.id === negocioId);
+    if (!negocio) return;
+
+    const newAlienante = createEmptyParticipanteNegocio();
+    updateNegocioJuridico(negocioId, {
+      alienantes: [...negocio.alienantes, newAlienante],
+    });
+  }, [negocios, updateNegocioJuridico]);
+
+  const handleUpdateAlienante = useCallback((negocioId: string, alienanteId: string, field: string, value: string) => {
+    const negocio = negocios.find(n => n.id === negocioId);
+    if (!negocio) return;
+
+    const updatedAlienantes = negocio.alienantes.map(a =>
+      a.id === alienanteId ? { ...a, [field]: value } : a
+    );
+
+    updateNegocioJuridico(negocioId, {
+      alienantes: updatedAlienantes,
+    });
+  }, [negocios, updateNegocioJuridico]);
+
+  const handleRemoveAlienante = useCallback((negocioId: string, alienanteId: string) => {
     const negocio = negocios.find(n => n.id === negocioId);
     if (!negocio) return;
 
     updateNegocioJuridico(negocioId, {
-      [field]: value,
-      camposEditados: [...new Set([...negocio.camposEditados, field])],
+      alienantes: negocio.alienantes.filter(a => a.id !== alienanteId),
     });
-  };
+  }, [negocios, updateNegocioJuridico]);
+
+  // Adquirente handlers
+  const handleAddAdquirente = useCallback((negocioId: string) => {
+    const negocio = negocios.find(n => n.id === negocioId);
+    if (!negocio) return;
+
+    const newAdquirente = createEmptyParticipanteNegocio();
+    updateNegocioJuridico(negocioId, {
+      adquirentes: [...negocio.adquirentes, newAdquirente],
+    });
+  }, [negocios, updateNegocioJuridico]);
+
+  const handleUpdateAdquirente = useCallback((negocioId: string, adquirenteId: string, field: string, value: string) => {
+    const negocio = negocios.find(n => n.id === negocioId);
+    if (!negocio) return;
+
+    const updatedAdquirentes = negocio.adquirentes.map(a =>
+      a.id === adquirenteId ? { ...a, [field]: value } : a
+    );
+
+    updateNegocioJuridico(negocioId, {
+      adquirentes: updatedAdquirentes,
+    });
+  }, [negocios, updateNegocioJuridico]);
+
+  const handleRemoveAdquirente = useCallback((negocioId: string, adquirenteId: string) => {
+    const negocio = negocios.find(n => n.id === negocioId);
+    if (!negocio) return;
+
+    updateNegocioJuridico(negocioId, {
+      adquirentes: negocio.adquirentes.filter(a => a.id !== adquirenteId),
+    });
+  }, [negocios, updateNegocioJuridico]);
+
+  // Consulta indisponibilidade handler
+  const handleConsultarIndisponibilidade = useCallback((negocioId: string) => {
+    const negocio = negocios.find(n => n.id === negocioId);
+    if (!negocio) return;
+
+    // Simulate API call - in production this would call an actual API
+    toast.info("Realizando consulta de indisponibilidade...");
+
+    // Update with mock response
+    setTimeout(() => {
+      updateNegocioJuridico(negocioId, {
+        indisponibilidade: {
+          consultaRealizada: true,
+          dataConsulta: new Date().toLocaleDateString('pt-BR'),
+          resultados: [], // Empty means no indisponibilidade found
+        },
+      });
+      toast.success("Consulta realizada com sucesso!");
+    }, 1500);
+  }, [negocios, updateNegocioJuridico]);
 
   const getImovelName = (imovelId: string) => {
     const imovel = imoveis.find(i => i.id === imovelId);
@@ -128,59 +245,22 @@ export default function ConferenciaNegocio() {
                   icon={<Home className="w-4 h-4" />}
                   isComplete={!!(negocio.tipoAto && negocio.valorNegocio)}
                   defaultOpen={index === 0}
+                  accentColor="purple"
                 >
-                  <div className="space-y-6">
-                    {/* Dados Principais */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <EditableField
-                        label="Tipo de Ato"
-                        value={negocio.tipoAto}
-                        onChange={(v) => handleUpdate(negocio.id, 'tipoAto', v)}
-                        wasEditedByUser={negocio.camposEditados.includes('tipoAto')}
-                        placeholder="Ex: Compra e Venda, Doacao, Permuta"
-                      />
-                      <EditableField
-                        label="Valor do Negocio (R$)"
-                        value={negocio.valorNegocio}
-                        onChange={(v) => handleUpdate(negocio.id, 'valorNegocio', v)}
-                        wasEditedByUser={negocio.camposEditados.includes('valorNegocio')}
-                        placeholder="Ex: 500.000,00"
-                      />
-                      <EditableField
-                        label="Forma de Pagamento"
-                        value={negocio.formaPagamento}
-                        onChange={(v) => handleUpdate(negocio.id, 'formaPagamento', v)}
-                        wasEditedByUser={negocio.camposEditados.includes('formaPagamento')}
-                        placeholder="Ex: A vista, Financiamento"
-                      />
-                    </div>
-
-                    {/* Condicoes Especiais */}
-                    <div className="pt-4 border-t border-border">
-                      <Label className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2 block">
-                        Condicoes Especiais
-                      </Label>
-                      <Textarea
-                        value={negocio.condicoesEspeciais}
-                        onChange={(e) => handleUpdate(negocio.id, 'condicoesEspeciais', e.target.value)}
-                        placeholder="Descreva condicoes especiais do negocio..."
-                        className="min-h-[100px]"
-                      />
-                    </div>
-
-                    {/* Clausulas Adicionais */}
-                    <div className="pt-4 border-t border-border">
-                      <Label className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2 block">
-                        Clausulas Adicionais
-                      </Label>
-                      <Textarea
-                        value={negocio.clausulasAdicionais}
-                        onChange={(e) => handleUpdate(negocio.id, 'clausulasAdicionais', e.target.value)}
-                        placeholder="Insira clausulas adicionais que devem constar na minuta..."
-                        className="min-h-[100px]"
-                      />
-                    </div>
-                  </div>
+                  <NegocioJuridicoForm
+                    negocio={negocio}
+                    imoveis={imoveis}
+                    pessoasNaturais={pessoasNaturais}
+                    pessoasJuridicas={pessoasJuridicas}
+                    onUpdate={(field, value) => handleUpdate(negocio.id, field, value)}
+                    onAddAlienante={() => handleAddAlienante(negocio.id)}
+                    onUpdateAlienante={(alienanteId, field, value) => handleUpdateAlienante(negocio.id, alienanteId, field, value)}
+                    onRemoveAlienante={(alienanteId) => handleRemoveAlienante(negocio.id, alienanteId)}
+                    onAddAdquirente={() => handleAddAdquirente(negocio.id)}
+                    onUpdateAdquirente={(adquirenteId, field, value) => handleUpdateAdquirente(negocio.id, adquirenteId, field, value)}
+                    onRemoveAdquirente={(adquirenteId) => handleRemoveAdquirente(negocio.id, adquirenteId)}
+                    onConsultarIndisponibilidade={() => handleConsultarIndisponibilidade(negocio.id)}
+                  />
                 </EntityCard>
               ))}
             </AnimatePresence>

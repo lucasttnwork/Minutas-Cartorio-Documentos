@@ -6,10 +6,20 @@ import { FlowStepper } from "@/components/layout/FlowStepper";
 import { FlowNavigation } from "@/components/layout/FlowNavigation";
 import { EntityCard } from "@/components/layout/EntityCard";
 import { EditableField } from "@/components/forms/EditableField";
+import { FormSection } from "@/components/forms/FormSection";
 import { SectionCard } from "@/components/layout/SectionCard";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useMinuta } from "@/contexts/MinutaContext";
-import { Home, Plus } from "lucide-react";
+import { Home, Plus, Eye } from "lucide-react";
 import type { Imovel } from "@/types/minuta";
 import { createEmptyImovel } from "@/utils/factories";
 import { validateImovel } from "@/schemas/minuta.schemas";
@@ -116,186 +126,341 @@ export default function ConferenciaImoveis() {
                   onRemove={() => removeImovel(imovel.id)}
                   defaultOpen={index === 0}
                 >
-                  {/* Matricula */}
-                  <div className="mb-6">
-                    <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase">Dados da Matricula</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <EditableField
-                        label="N Matricula"
-                        value={imovel.matricula.numeroMatricula}
-                        onChange={(v) => handleUpdate(imovel.id, 'matricula.numeroMatricula', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('matricula.numeroMatricula')}
-                      />
-                      <EditableField
-                        label="N Registro de Imoveis"
-                        value={imovel.matricula.numeroRegistroImoveis}
-                        onChange={(v) => handleUpdate(imovel.id, 'matricula.numeroRegistroImoveis', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('matricula.numeroRegistroImoveis')}
-                      />
-                      <EditableField
-                        label="Cidade RI"
-                        value={imovel.matricula.cidadeRegistroImoveis}
-                        onChange={(v) => handleUpdate(imovel.id, 'matricula.cidadeRegistroImoveis', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('matricula.cidadeRegistroImoveis')}
-                      />
-                      <EditableField
-                        label="Estado RI"
-                        value={imovel.matricula.estadoRegistroImoveis}
-                        onChange={(v) => handleUpdate(imovel.id, 'matricula.estadoRegistroImoveis', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('matricula.estadoRegistroImoveis')}
-                      />
-                      <EditableField
-                        label="N Nacional Matricula"
-                        value={imovel.matricula.numeroNacionalMatricula}
-                        onChange={(v) => handleUpdate(imovel.id, 'matricula.numeroNacionalMatricula', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('matricula.numeroNacionalMatricula')}
+                  {/* 1. MATRICULA IMOBILIARIA */}
+                  <FormSection title="MATRICULA IMOBILIARIA" columns={3}>
+                    <EditableField
+                      label="N Matricula"
+                      value={imovel.matricula.numeroMatricula}
+                      onChange={(v) => handleUpdate(imovel.id, 'matricula.numeroMatricula', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('matricula.numeroMatricula')}
+                    />
+                    <EditableField
+                      label="N Registro de Imoveis"
+                      value={imovel.matricula.numeroRegistroImoveis}
+                      onChange={(v) => handleUpdate(imovel.id, 'matricula.numeroRegistroImoveis', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('matricula.numeroRegistroImoveis')}
+                    />
+                    <EditableField
+                      label="Cidade RI"
+                      value={imovel.matricula.cidadeRegistroImoveis}
+                      onChange={(v) => handleUpdate(imovel.id, 'matricula.cidadeRegistroImoveis', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('matricula.cidadeRegistroImoveis')}
+                    />
+                    <EditableField
+                      label="Estado RI"
+                      value={imovel.matricula.estadoRegistroImoveis}
+                      onChange={(v) => handleUpdate(imovel.id, 'matricula.estadoRegistroImoveis', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('matricula.estadoRegistroImoveis')}
+                    />
+                    <EditableField
+                      label="N Nacional Matricula"
+                      value={imovel.matricula.numeroNacionalMatricula}
+                      onChange={(v) => handleUpdate(imovel.id, 'matricula.numeroNacionalMatricula', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('matricula.numeroNacionalMatricula')}
+                    />
+                  </FormSection>
+
+                  {/* 2. DESCRICAO DO IMOVEL */}
+                  <FormSection title="DESCRICAO DO IMOVEL" columns={3}>
+                    <EditableField
+                      label="Denominacao"
+                      value={imovel.descricao.denominacao}
+                      onChange={(v) => handleUpdate(imovel.id, 'descricao.denominacao', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('descricao.denominacao')}
+                    />
+                    <EditableField
+                      label="Area Total (m2)"
+                      value={imovel.descricao.areaTotalM2}
+                      onChange={(v) => handleUpdate(imovel.id, 'descricao.areaTotalM2', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('descricao.areaTotalM2')}
+                    />
+                    <EditableField
+                      label="Area Privativa (m2)"
+                      value={imovel.descricao.areaPrivativaM2}
+                      onChange={(v) => handleUpdate(imovel.id, 'descricao.areaPrivativaM2', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('descricao.areaPrivativaM2')}
+                    />
+                    <EditableField
+                      label="Area Construida"
+                      value={imovel.descricao.areaConstruida}
+                      onChange={(v) => handleUpdate(imovel.id, 'descricao.areaConstruida', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('descricao.areaConstruida')}
+                    />
+                    <EditableField
+                      label="Logradouro"
+                      value={imovel.descricao.endereco.logradouro}
+                      onChange={(v) => handleUpdate(imovel.id, 'descricao.endereco.logradouro', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('descricao.endereco.logradouro')}
+                    />
+                    <EditableField
+                      label="Numero"
+                      value={imovel.descricao.endereco.numero}
+                      onChange={(v) => handleUpdate(imovel.id, 'descricao.endereco.numero', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('descricao.endereco.numero')}
+                    />
+                    <EditableField
+                      label="Complemento"
+                      value={imovel.descricao.endereco.complemento}
+                      onChange={(v) => handleUpdate(imovel.id, 'descricao.endereco.complemento', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('descricao.endereco.complemento')}
+                    />
+                    <EditableField
+                      label="Bairro"
+                      value={imovel.descricao.endereco.bairro}
+                      onChange={(v) => handleUpdate(imovel.id, 'descricao.endereco.bairro', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('descricao.endereco.bairro')}
+                    />
+                    <EditableField
+                      label="Cidade"
+                      value={imovel.descricao.endereco.cidade}
+                      onChange={(v) => handleUpdate(imovel.id, 'descricao.endereco.cidade', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('descricao.endereco.cidade')}
+                    />
+                    <EditableField
+                      label="Estado"
+                      value={imovel.descricao.endereco.estado}
+                      onChange={(v) => handleUpdate(imovel.id, 'descricao.endereco.estado', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('descricao.endereco.estado')}
+                    />
+                    <EditableField
+                      label="CEP"
+                      value={imovel.descricao.endereco.cep}
+                      onChange={(v) => handleUpdate(imovel.id, 'descricao.endereco.cep', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('descricao.endereco.cep')}
+                    />
+                    <div className="col-span-full">
+                      <Label className="text-xs text-muted-foreground mb-2 block">
+                        Descricao Conforme Matricula
+                      </Label>
+                      <Textarea
+                        value={imovel.descricao.descricaoConformeMatricula || ''}
+                        onChange={(e) => handleUpdate(imovel.id, 'descricao.descricaoConformeMatricula', e.target.value)}
+                        placeholder="Descricao completa do imovel conforme consta na matricula..."
+                        className="min-h-[100px]"
                       />
                     </div>
+                  </FormSection>
+
+                  {/* 3. CADASTRO IMOBILIARIO */}
+                  <FormSection title="CADASTRO IMOBILIARIO" columns={2}>
+                    <EditableField
+                      label="Cadastro Municipal/SQL"
+                      value={imovel.cadastro.cadastroMunicipalSQL}
+                      onChange={(v) => handleUpdate(imovel.id, 'cadastro.cadastroMunicipalSQL', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('cadastro.cadastroMunicipalSQL')}
+                    />
+                    <EditableField
+                      label="Data Expedicao Certidao"
+                      value={imovel.cadastro.dataExpedicaoCertidao}
+                      type="date"
+                      onChange={(v) => handleUpdate(imovel.id, 'cadastro.dataExpedicaoCertidao', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('cadastro.dataExpedicaoCertidao')}
+                    />
+                  </FormSection>
+
+                  {/* 4. VALORES VENAIS */}
+                  <FormSection
+                    title="VALORES VENAIS"
+                    columns={2}
+                    action={{
+                      label: "Atualizar",
+                      onClick: () => toast.info("Funcionalidade de atualizacao de valores venais em desenvolvimento")
+                    }}
+                  >
+                    <EditableField
+                      label="Valor Venal IPTU"
+                      value={imovel.valoresVenais.valorVenalIPTU}
+                      onChange={(v) => handleUpdate(imovel.id, 'valoresVenais.valorVenalIPTU', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('valoresVenais.valorVenalIPTU')}
+                    />
+                    <EditableField
+                      label="Valor Referencia ITBI"
+                      value={imovel.valoresVenais.valorVenalReferenciaITBI}
+                      onChange={(v) => handleUpdate(imovel.id, 'valoresVenais.valorVenalReferenciaITBI', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('valoresVenais.valorVenalReferenciaITBI')}
+                    />
+                  </FormSection>
+
+                  {/* 5. NEGATIVA DE IPTU */}
+                  <FormSection
+                    title="NEGATIVA DE IPTU"
+                    columns={3}
+                    action={{
+                      label: "Atualizar",
+                      onClick: () => toast.info("Funcionalidade de atualizacao de certidao IPTU em desenvolvimento")
+                    }}
+                  >
+                    <EditableField
+                      label="N Certidao"
+                      value={imovel.negativaIPTU.numeroCertidao}
+                      onChange={(v) => handleUpdate(imovel.id, 'negativaIPTU.numeroCertidao', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('negativaIPTU.numeroCertidao')}
+                    />
+                    <EditableField
+                      label="Data Expedicao"
+                      value={imovel.negativaIPTU.dataExpedicao}
+                      type="date"
+                      onChange={(v) => handleUpdate(imovel.id, 'negativaIPTU.dataExpedicao', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('negativaIPTU.dataExpedicao')}
+                    />
+                    <EditableField
+                      label="Certidao Valida"
+                      value={imovel.negativaIPTU.certidaoValida}
+                      onChange={(v) => handleUpdate(imovel.id, 'negativaIPTU.certidaoValida', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('negativaIPTU.certidaoValida')}
+                    />
+                  </FormSection>
+
+                  {/* 6. CERTIDAO DA MATRICULA */}
+                  <FormSection title="CERTIDAO DA MATRICULA" columns={3}>
+                    <EditableField
+                      label="Certidao Matricula"
+                      value={imovel.certidaoMatricula.certidaoMatricula}
+                      onChange={(v) => handleUpdate(imovel.id, 'certidaoMatricula.certidaoMatricula', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('certidaoMatricula.certidaoMatricula')}
+                    />
+                    <EditableField
+                      label="Data Expedicao"
+                      value={imovel.certidaoMatricula.dataExpedicao}
+                      type="date"
+                      onChange={(v) => handleUpdate(imovel.id, 'certidaoMatricula.dataExpedicao', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('certidaoMatricula.dataExpedicao')}
+                    />
+                    <EditableField
+                      label="Certidao Valida"
+                      value={imovel.certidaoMatricula.certidaoValida || ''}
+                      onChange={(v) => handleUpdate(imovel.id, 'certidaoMatricula.certidaoValida', v)}
+                      wasEditedByUser={imovel.camposEditados.includes('certidaoMatricula.certidaoValida')}
+                    />
+                  </FormSection>
+
+                  {/* 7. PROPRIETARIOS */}
+                  <div className="pt-4 mt-4 border-t border-border/30">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-xs font-bold tracking-wider text-accent uppercase">
+                        PROPRIETARIOS ({imovel.proprietarios?.length || 0})
+                      </h4>
+                    </div>
+                    {imovel.proprietarios && imovel.proprietarios.length > 0 ? (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-border">
+                              <th className="text-left py-2 px-3 text-muted-foreground font-medium">Nome</th>
+                              <th className="text-left py-2 px-3 text-muted-foreground font-medium">Fracao Ideal</th>
+                              <th className="text-left py-2 px-3 text-muted-foreground font-medium">Registro Aquisicao</th>
+                              <th className="text-left py-2 px-3 text-muted-foreground font-medium">Data Registro</th>
+                              <th className="text-left py-2 px-3 text-muted-foreground font-medium">Titulo</th>
+                              <th className="text-right py-2 px-3"></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {imovel.proprietarios.map((prop) => (
+                              <tr key={prop.id} className="border-b border-border/50 hover:bg-muted/30">
+                                <td className="py-2 px-3">{prop.nome || '-'}</td>
+                                <td className="py-2 px-3">{prop.fracaoIdeal || '-'}</td>
+                                <td className="py-2 px-3">{prop.registroAquisicao || '-'}</td>
+                                <td className="py-2 px-3">{prop.dataRegistroAquisicao || '-'}</td>
+                                <td className="py-2 px-3">{prop.tituloAquisicao || '-'}</td>
+                                <td className="py-2 px-3 text-right">
+                                  <Button size="sm" variant="ghost" className="h-7">
+                                    <Eye className="w-3 h-3 mr-1" />
+                                    Ver Dados
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground py-4 text-center">
+                        Nenhum proprietario cadastrado.
+                      </p>
+                    )}
                   </div>
 
-                  {/* Descricao */}
-                  <div className="mb-6 pt-4 border-t border-border">
-                    <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase">Descricao do Imovel</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <EditableField
-                        label="Denominacao"
-                        value={imovel.descricao.denominacao}
-                        onChange={(v) => handleUpdate(imovel.id, 'descricao.denominacao', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('descricao.denominacao')}
-                      />
-                      <EditableField
-                        label="Area Total (m2)"
-                        value={imovel.descricao.areaTotalM2}
-                        onChange={(v) => handleUpdate(imovel.id, 'descricao.areaTotalM2', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('descricao.areaTotalM2')}
-                      />
-                      <EditableField
-                        label="Area Privativa (m2)"
-                        value={imovel.descricao.areaPrivativaM2}
-                        onChange={(v) => handleUpdate(imovel.id, 'descricao.areaPrivativaM2', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('descricao.areaPrivativaM2')}
-                      />
-                      <EditableField
-                        label="Area Construida"
-                        value={imovel.descricao.areaConstruida}
-                        onChange={(v) => handleUpdate(imovel.id, 'descricao.areaConstruida', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('descricao.areaConstruida')}
-                      />
+                  {/* 8. ONUS REGISTRADO(S) */}
+                  <div className="pt-4 mt-4 border-t border-border/30">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-xs font-bold tracking-wider text-accent uppercase">
+                        ONUS REGISTRADO(S) ({imovel.onus?.length || 0})
+                      </h4>
                     </div>
-                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <EditableField
-                        label="Logradouro"
-                        value={imovel.descricao.endereco.logradouro}
-                        onChange={(v) => handleUpdate(imovel.id, 'descricao.endereco.logradouro', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('descricao.endereco.logradouro')}
-                      />
-                      <EditableField
-                        label="Numero"
-                        value={imovel.descricao.endereco.numero}
-                        onChange={(v) => handleUpdate(imovel.id, 'descricao.endereco.numero', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('descricao.endereco.numero')}
-                      />
-                      <EditableField
-                        label="Complemento"
-                        value={imovel.descricao.endereco.complemento}
-                        onChange={(v) => handleUpdate(imovel.id, 'descricao.endereco.complemento', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('descricao.endereco.complemento')}
-                      />
-                      <EditableField
-                        label="Bairro"
-                        value={imovel.descricao.endereco.bairro}
-                        onChange={(v) => handleUpdate(imovel.id, 'descricao.endereco.bairro', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('descricao.endereco.bairro')}
-                      />
-                      <EditableField
-                        label="Cidade"
-                        value={imovel.descricao.endereco.cidade}
-                        onChange={(v) => handleUpdate(imovel.id, 'descricao.endereco.cidade', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('descricao.endereco.cidade')}
-                      />
-                      <EditableField
-                        label="Estado"
-                        value={imovel.descricao.endereco.estado}
-                        onChange={(v) => handleUpdate(imovel.id, 'descricao.endereco.estado', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('descricao.endereco.estado')}
-                      />
-                      <EditableField
-                        label="CEP"
-                        value={imovel.descricao.endereco.cep}
-                        onChange={(v) => handleUpdate(imovel.id, 'descricao.endereco.cep', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('descricao.endereco.cep')}
-                      />
-                    </div>
+                    {imovel.onus && imovel.onus.length > 0 ? (
+                      <div className="space-y-3">
+                        {imovel.onus.map((onus) => (
+                          <div key={onus.id} className="p-3 bg-muted/30 rounded-lg border border-border/50">
+                            <div className="flex justify-between items-start mb-2">
+                              <span className="font-medium text-sm">{onus.tituloOnus || 'Onus sem titulo'}</span>
+                              <span className="text-xs text-muted-foreground">
+                                Registro: {onus.registroOnus || '-'} | Data: {onus.dataRegistroOnus || '-'}
+                              </span>
+                            </div>
+                            {onus.descricaoConformeMatricula && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {onus.descricaoConformeMatricula}
+                              </p>
+                            )}
+                            {onus.titulares && onus.titulares.length > 0 && (
+                              <div className="mt-2 text-xs">
+                                <span className="text-muted-foreground">Titulares: </span>
+                                {onus.titulares.map((t, i) => (
+                                  <span key={t.id}>
+                                    {t.nome}{t.fracaoIdeal ? ` (${t.fracaoIdeal})` : ''}
+                                    {i < onus.titulares.length - 1 ? ', ' : ''}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground py-4 text-center">
+                        Nenhum onus registrado.
+                      </p>
+                    )}
                   </div>
 
-                  {/* Cadastro e Valores */}
-                  <div className="mb-6 pt-4 border-t border-border">
-                    <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase">Cadastro e Valores</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <EditableField
-                        label="Cadastro Municipal/SQL"
-                        value={imovel.cadastro.cadastroMunicipalSQL}
-                        onChange={(v) => handleUpdate(imovel.id, 'cadastro.cadastroMunicipalSQL', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('cadastro.cadastroMunicipalSQL')}
-                      />
-                      <EditableField
-                        label="Data Expedicao Certidao"
-                        value={imovel.cadastro.dataExpedicaoCertidao}
-                        type="date"
-                        onChange={(v) => handleUpdate(imovel.id, 'cadastro.dataExpedicaoCertidao', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('cadastro.dataExpedicaoCertidao')}
-                      />
-                      <EditableField
-                        label="Valor Venal IPTU"
-                        value={imovel.valoresVenais.valorVenalIPTU}
-                        onChange={(v) => handleUpdate(imovel.id, 'valoresVenais.valorVenalIPTU', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('valoresVenais.valorVenalIPTU')}
-                      />
-                      <EditableField
-                        label="Valor Referencia ITBI"
-                        value={imovel.valoresVenais.valorVenalReferenciaITBI}
-                        onChange={(v) => handleUpdate(imovel.id, 'valoresVenais.valorVenalReferenciaITBI', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('valoresVenais.valorVenalReferenciaITBI')}
-                      />
+                  {/* 9. RESSALVAS NA CERTIFICACAO */}
+                  <div className="pt-4 mt-4 border-t border-border/30">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-xs font-bold tracking-wider text-accent uppercase">
+                        RESSALVAS NA CERTIFICACAO
+                      </h4>
                     </div>
-                  </div>
-
-                  {/* Certidoes */}
-                  <div className="pt-4 border-t border-border">
-                    <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase">Certidoes</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <EditableField
-                        label="N Certidao IPTU"
-                        value={imovel.negativaIPTU.numeroCertidao}
-                        onChange={(v) => handleUpdate(imovel.id, 'negativaIPTU.numeroCertidao', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('negativaIPTU.numeroCertidao')}
-                      />
-                      <EditableField
-                        label="Data Expedicao IPTU"
-                        value={imovel.negativaIPTU.dataExpedicao}
-                        type="date"
-                        onChange={(v) => handleUpdate(imovel.id, 'negativaIPTU.dataExpedicao', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('negativaIPTU.dataExpedicao')}
-                      />
-                      <EditableField
-                        label="Certidao Valida?"
-                        value={imovel.negativaIPTU.certidaoValida}
-                        onChange={(v) => handleUpdate(imovel.id, 'negativaIPTU.certidaoValida', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('negativaIPTU.certidaoValida')}
-                      />
-                      <EditableField
-                        label="Certidao Matricula"
-                        value={imovel.certidaoMatricula.certidaoMatricula}
-                        onChange={(v) => handleUpdate(imovel.id, 'certidaoMatricula.certidaoMatricula', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('certidaoMatricula.certidaoMatricula')}
-                      />
-                      <EditableField
-                        label="Data Expedicao Matricula"
-                        value={imovel.certidaoMatricula.dataExpedicao}
-                        type="date"
-                        onChange={(v) => handleUpdate(imovel.id, 'certidaoMatricula.dataExpedicao', v)}
-                        wasEditedByUser={imovel.camposEditados.includes('certidaoMatricula.dataExpedicao')}
-                      />
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <Label className="text-xs text-muted-foreground mb-2 block">
+                          Existe Ressalva
+                        </Label>
+                        <Select
+                          value={imovel.ressalvas?.existeRessalva || ''}
+                          onValueChange={(v) => handleUpdate(imovel.id, 'ressalvas.existeRessalva', v)}
+                        >
+                          <SelectTrigger className="w-full md:w-[200px]">
+                            <SelectValue placeholder="Selecione..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="sim">Sim</SelectItem>
+                            <SelectItem value="nao">Nao</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {imovel.ressalvas?.existeRessalva === 'sim' && (
+                        <div>
+                          <Label className="text-xs text-muted-foreground mb-2 block">
+                            Descricao da Ressalva
+                          </Label>
+                          <Textarea
+                            value={imovel.ressalvas?.descricaoRessalva || ''}
+                            onChange={(e) => handleUpdate(imovel.id, 'ressalvas.descricaoRessalva', e.target.value)}
+                            placeholder="Descreva as ressalvas encontradas na certificacao..."
+                            className="min-h-[100px]"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </EntityCard>

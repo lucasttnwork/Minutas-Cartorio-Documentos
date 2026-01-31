@@ -5,13 +5,14 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { FlowStepper } from "@/components/layout/FlowStepper";
 import { FlowNavigation } from "@/components/layout/FlowNavigation";
 import { EntityCard } from "@/components/layout/EntityCard";
-import { EditableField } from "@/components/forms/EditableField";
+import { PessoaNaturalForm } from "@/components/forms/pessoa/PessoaNaturalForm";
+import { PessoaJuridicaForm } from "@/components/forms/pessoa/PessoaJuridicaForm";
 import { SectionCard } from "@/components/layout/SectionCard";
 import { Button } from "@/components/ui/button";
 import { useMinuta } from "@/contexts/MinutaContext";
 import { User, Building2, Plus } from "lucide-react";
-import type { Endereco, Contato } from "@/types/minuta";
-import { createEmptyPessoaNatural, createEmptyPessoaJuridica } from "@/utils/factories";
+import type { Endereco, Contato, DadosFamiliares, CertidaoCNDT, CertidaoUniao, RegistroVigente, CertidaoEmpresa } from "@/types/minuta";
+import { createEmptyPessoaNatural, createEmptyPessoaJuridica, createEmptyRepresentanteAdministrador, createEmptyRepresentanteProcurador } from "@/utils/factories";
 import { validatePessoaNatural, validatePessoaJuridica } from "@/schemas/minuta.schemas";
 import { toast } from "sonner";
 
@@ -27,6 +28,12 @@ export default function ConferenciaOutorgantes() {
     addPessoaJuridicaOutorgante,
     updatePessoaJuridicaOutorgante,
     removePessoaJuridicaOutorgante,
+    addAdministradorOutorgante,
+    updateAdministradorOutorgante,
+    removeAdministradorOutorgante,
+    addProcuradorOutorgante,
+    updateProcuradorOutorgante,
+    removeProcuradorOutorgante,
   } = useMinuta();
 
   const pessoasNaturais = currentMinuta?.outorgantes.pessoasNaturais || [];
@@ -87,20 +94,38 @@ export default function ConferenciaOutorgantes() {
     addPessoaJuridicaOutorgante(createEmptyPessoaJuridica());
   };
 
-  const handleUpdatePessoaNatural = (pessoaId: string, field: string, value: string) => {
+  const handleUpdatePessoaNatural = (pessoaId: string, field: string, value: string | boolean) => {
     const pessoa = pessoasNaturais.find(p => p.id === pessoaId);
     if (!pessoa) return;
 
     if (field.startsWith('domicilio.')) {
       const subField = field.replace('domicilio.', '') as keyof Endereco;
       updatePessoaNaturalOutorgante(pessoaId, {
-        domicilio: { ...pessoa.domicilio, [subField]: value },
+        domicilio: { ...pessoa.domicilio, [subField]: value as string },
         camposEditados: [...new Set([...pessoa.camposEditados, field])],
       });
     } else if (field.startsWith('contato.')) {
       const subField = field.replace('contato.', '') as keyof Contato;
       updatePessoaNaturalOutorgante(pessoaId, {
-        contato: { ...pessoa.contato, [subField]: value },
+        contato: { ...pessoa.contato, [subField]: value as string },
+        camposEditados: [...new Set([...pessoa.camposEditados, field])],
+      });
+    } else if (field.startsWith('dadosFamiliares.')) {
+      const subField = field.replace('dadosFamiliares.', '') as keyof DadosFamiliares;
+      updatePessoaNaturalOutorgante(pessoaId, {
+        dadosFamiliares: { ...pessoa.dadosFamiliares, [subField]: value },
+        camposEditados: [...new Set([...pessoa.camposEditados, field])],
+      });
+    } else if (field.startsWith('cndt.')) {
+      const subField = field.replace('cndt.', '') as keyof CertidaoCNDT;
+      updatePessoaNaturalOutorgante(pessoaId, {
+        cndt: { ...pessoa.cndt, [subField]: value as string },
+        camposEditados: [...new Set([...pessoa.camposEditados, field])],
+      });
+    } else if (field.startsWith('certidaoUniao.')) {
+      const subField = field.replace('certidaoUniao.', '') as keyof CertidaoUniao;
+      updatePessoaNaturalOutorgante(pessoaId, {
+        certidaoUniao: { ...pessoa.certidaoUniao, [subField]: value as string },
         camposEditados: [...new Set([...pessoa.camposEditados, field])],
       });
     } else {
@@ -125,6 +150,30 @@ export default function ConferenciaOutorgantes() {
       const subField = field.replace('contato.', '') as keyof Contato;
       updatePessoaJuridicaOutorgante(pessoaId, {
         contato: { ...pessoa.contato, [subField]: value },
+        camposEditados: [...new Set([...pessoa.camposEditados, field])],
+      });
+    } else if (field.startsWith('registroVigente.')) {
+      const subField = field.replace('registroVigente.', '') as keyof RegistroVigente;
+      updatePessoaJuridicaOutorgante(pessoaId, {
+        registroVigente: { ...pessoa.registroVigente, [subField]: value },
+        camposEditados: [...new Set([...pessoa.camposEditados, field])],
+      });
+    } else if (field.startsWith('certidaoEmpresa.')) {
+      const subField = field.replace('certidaoEmpresa.', '') as keyof CertidaoEmpresa;
+      updatePessoaJuridicaOutorgante(pessoaId, {
+        certidaoEmpresa: { ...pessoa.certidaoEmpresa, [subField]: value },
+        camposEditados: [...new Set([...pessoa.camposEditados, field])],
+      });
+    } else if (field.startsWith('cndt.')) {
+      const subField = field.replace('cndt.', '') as keyof CertidaoCNDT;
+      updatePessoaJuridicaOutorgante(pessoaId, {
+        cndt: { ...pessoa.cndt, [subField]: value },
+        camposEditados: [...new Set([...pessoa.camposEditados, field])],
+      });
+    } else if (field.startsWith('certidaoUniao.')) {
+      const subField = field.replace('certidaoUniao.', '') as keyof CertidaoUniao;
+      updatePessoaJuridicaOutorgante(pessoaId, {
+        certidaoUniao: { ...pessoa.certidaoUniao, [subField]: value },
         camposEditados: [...new Set([...pessoa.camposEditados, field])],
       });
     } else {
@@ -175,38 +224,11 @@ export default function ConferenciaOutorgantes() {
                   onRemove={() => removePessoaNaturalOutorgante(pessoa.id)}
                   defaultOpen={index === 0}
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <EditableField label="Nome Completo" value={pessoa.nome} onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'nome', v)} wasEditedByUser={pessoa.camposEditados.includes('nome')} />
-                    <EditableField label="CPF" value={pessoa.cpf} onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'cpf', v)} wasEditedByUser={pessoa.camposEditados.includes('cpf')} />
-                    <EditableField label="RG" value={pessoa.rg} onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'rg', v)} wasEditedByUser={pessoa.camposEditados.includes('rg')} />
-                    <EditableField label="Orgao Emissor" value={pessoa.orgaoEmissorRg} onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'orgaoEmissorRg', v)} wasEditedByUser={pessoa.camposEditados.includes('orgaoEmissorRg')} />
-                    <EditableField label="Estado Emissor" value={pessoa.estadoEmissorRg} onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'estadoEmissorRg', v)} wasEditedByUser={pessoa.camposEditados.includes('estadoEmissorRg')} />
-                    <EditableField label="Data Emissao RG" value={pessoa.dataEmissaoRg} type="date" onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'dataEmissaoRg', v)} wasEditedByUser={pessoa.camposEditados.includes('dataEmissaoRg')} />
-                    <EditableField label="Nacionalidade" value={pessoa.nacionalidade} onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'nacionalidade', v)} wasEditedByUser={pessoa.camposEditados.includes('nacionalidade')} />
-                    <EditableField label="Profissao" value={pessoa.profissao} onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'profissao', v)} wasEditedByUser={pessoa.camposEditados.includes('profissao')} />
-                    <EditableField label="Data Nascimento" value={pessoa.dataNascimento} type="date" onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'dataNascimento', v)} wasEditedByUser={pessoa.camposEditados.includes('dataNascimento')} />
-                    <EditableField label="Estado Civil" value={pessoa.estadoCivil} onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'estadoCivil', v)} wasEditedByUser={pessoa.camposEditados.includes('estadoCivil')} />
-                    <EditableField label="Regime de Bens" value={pessoa.regimeBens} onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'regimeBens', v)} wasEditedByUser={pessoa.camposEditados.includes('regimeBens')} />
-                  </div>
-                  <div className="mt-4 pt-4 border-t border-border">
-                    <h4 className="text-sm font-semibold mb-3 text-muted-foreground">Domicilio</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <EditableField label="Logradouro" value={pessoa.domicilio.logradouro} onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'domicilio.logradouro', v)} wasEditedByUser={pessoa.camposEditados.includes('domicilio.logradouro')} />
-                      <EditableField label="Numero" value={pessoa.domicilio.numero} onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'domicilio.numero', v)} wasEditedByUser={pessoa.camposEditados.includes('domicilio.numero')} />
-                      <EditableField label="Complemento" value={pessoa.domicilio.complemento} onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'domicilio.complemento', v)} wasEditedByUser={pessoa.camposEditados.includes('domicilio.complemento')} />
-                      <EditableField label="Bairro" value={pessoa.domicilio.bairro} onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'domicilio.bairro', v)} wasEditedByUser={pessoa.camposEditados.includes('domicilio.bairro')} />
-                      <EditableField label="Cidade" value={pessoa.domicilio.cidade} onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'domicilio.cidade', v)} wasEditedByUser={pessoa.camposEditados.includes('domicilio.cidade')} />
-                      <EditableField label="Estado" value={pessoa.domicilio.estado} onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'domicilio.estado', v)} wasEditedByUser={pessoa.camposEditados.includes('domicilio.estado')} />
-                      <EditableField label="CEP" value={pessoa.domicilio.cep} onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'domicilio.cep', v)} wasEditedByUser={pessoa.camposEditados.includes('domicilio.cep')} />
-                    </div>
-                  </div>
-                  <div className="mt-4 pt-4 border-t border-border">
-                    <h4 className="text-sm font-semibold mb-3 text-muted-foreground">Contato</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <EditableField label="Email" value={pessoa.contato.email} type="email" onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'contato.email', v)} wasEditedByUser={pessoa.camposEditados.includes('contato.email')} />
-                      <EditableField label="Telefone" value={pessoa.contato.telefone} type="tel" onChange={(v) => handleUpdatePessoaNatural(pessoa.id, 'contato.telefone', v)} wasEditedByUser={pessoa.camposEditados.includes('contato.telefone')} />
-                    </div>
-                  </div>
+                  <PessoaNaturalForm
+                    pessoa={pessoa}
+                    onUpdate={(field, value) => handleUpdatePessoaNatural(pessoa.id, field, value)}
+                    camposEditados={pessoa.camposEditados}
+                  />
                 </EntityCard>
               ))}
             </AnimatePresence>
@@ -242,31 +264,17 @@ export default function ConferenciaOutorgantes() {
                   onRemove={() => removePessoaJuridicaOutorgante(pessoa.id)}
                   defaultOpen={index === 0}
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <EditableField label="Razao Social" value={pessoa.razaoSocial} onChange={(v) => handleUpdatePessoaJuridica(pessoa.id, 'razaoSocial', v)} wasEditedByUser={pessoa.camposEditados.includes('razaoSocial')} />
-                    <EditableField label="CNPJ" value={pessoa.cnpj} onChange={(v) => handleUpdatePessoaJuridica(pessoa.id, 'cnpj', v)} wasEditedByUser={pessoa.camposEditados.includes('cnpj')} />
-                    <EditableField label="Inscricao Estadual" value={pessoa.inscricaoEstadual} onChange={(v) => handleUpdatePessoaJuridica(pessoa.id, 'inscricaoEstadual', v)} wasEditedByUser={pessoa.camposEditados.includes('inscricaoEstadual')} />
-                    <EditableField label="Data Constituicao" value={pessoa.dataConstituicao} type="date" onChange={(v) => handleUpdatePessoaJuridica(pessoa.id, 'dataConstituicao', v)} wasEditedByUser={pessoa.camposEditados.includes('dataConstituicao')} />
-                  </div>
-                  <div className="mt-4 pt-4 border-t border-border">
-                    <h4 className="text-sm font-semibold mb-3 text-muted-foreground">Endereco</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <EditableField label="Logradouro" value={pessoa.endereco.logradouro} onChange={(v) => handleUpdatePessoaJuridica(pessoa.id, 'endereco.logradouro', v)} wasEditedByUser={pessoa.camposEditados.includes('endereco.logradouro')} />
-                      <EditableField label="Numero" value={pessoa.endereco.numero} onChange={(v) => handleUpdatePessoaJuridica(pessoa.id, 'endereco.numero', v)} wasEditedByUser={pessoa.camposEditados.includes('endereco.numero')} />
-                      <EditableField label="Complemento" value={pessoa.endereco.complemento} onChange={(v) => handleUpdatePessoaJuridica(pessoa.id, 'endereco.complemento', v)} wasEditedByUser={pessoa.camposEditados.includes('endereco.complemento')} />
-                      <EditableField label="Bairro" value={pessoa.endereco.bairro} onChange={(v) => handleUpdatePessoaJuridica(pessoa.id, 'endereco.bairro', v)} wasEditedByUser={pessoa.camposEditados.includes('endereco.bairro')} />
-                      <EditableField label="Cidade" value={pessoa.endereco.cidade} onChange={(v) => handleUpdatePessoaJuridica(pessoa.id, 'endereco.cidade', v)} wasEditedByUser={pessoa.camposEditados.includes('endereco.cidade')} />
-                      <EditableField label="Estado" value={pessoa.endereco.estado} onChange={(v) => handleUpdatePessoaJuridica(pessoa.id, 'endereco.estado', v)} wasEditedByUser={pessoa.camposEditados.includes('endereco.estado')} />
-                      <EditableField label="CEP" value={pessoa.endereco.cep} onChange={(v) => handleUpdatePessoaJuridica(pessoa.id, 'endereco.cep', v)} wasEditedByUser={pessoa.camposEditados.includes('endereco.cep')} />
-                    </div>
-                  </div>
-                  <div className="mt-4 pt-4 border-t border-border">
-                    <h4 className="text-sm font-semibold mb-3 text-muted-foreground">Contato</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <EditableField label="Email" value={pessoa.contato.email} type="email" onChange={(v) => handleUpdatePessoaJuridica(pessoa.id, 'contato.email', v)} wasEditedByUser={pessoa.camposEditados.includes('contato.email')} />
-                      <EditableField label="Telefone" value={pessoa.contato.telefone} type="tel" onChange={(v) => handleUpdatePessoaJuridica(pessoa.id, 'contato.telefone', v)} wasEditedByUser={pessoa.camposEditados.includes('contato.telefone')} />
-                    </div>
-                  </div>
+                  <PessoaJuridicaForm
+                    pessoa={pessoa}
+                    onUpdate={(field, value) => handleUpdatePessoaJuridica(pessoa.id, field, value)}
+                    onAddAdministrador={() => addAdministradorOutorgante(pessoa.id, createEmptyRepresentanteAdministrador())}
+                    onUpdateAdministrador={(adminId, field, value) => updateAdministradorOutorgante(pessoa.id, adminId, { [field]: value })}
+                    onRemoveAdministrador={(adminId) => removeAdministradorOutorgante(pessoa.id, adminId)}
+                    onAddProcurador={() => addProcuradorOutorgante(pessoa.id, createEmptyRepresentanteProcurador())}
+                    onUpdateProcurador={(procId, field, value) => updateProcuradorOutorgante(pessoa.id, procId, { [field]: value })}
+                    onRemoveProcurador={(procId) => removeProcuradorOutorgante(pessoa.id, procId)}
+                    camposEditados={pessoa.camposEditados}
+                  />
                 </EntityCard>
               ))}
             </AnimatePresence>

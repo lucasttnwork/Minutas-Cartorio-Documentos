@@ -1,7 +1,7 @@
 // src/contexts/MinutaContext.tsx
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
-import type { Minuta, MinutaStep, UploadedDocument, PessoaNatural, PessoaJuridica, Imovel, NegocioJuridico } from '@/types/minuta';
+import type { Minuta, MinutaStep, UploadedDocument, PessoaNatural, PessoaJuridica, Imovel, NegocioJuridico, RepresentanteAdministrador, RepresentanteProcurador, ParticipanteNegocio } from '@/types/minuta';
 
 interface MinutaContextType {
   minutas: Minuta[];
@@ -31,6 +31,30 @@ interface MinutaContextType {
   addNegocioJuridico: (negocio: NegocioJuridico) => void;
   updateNegocioJuridico: (id: string, updates: Partial<NegocioJuridico>) => void;
   removeNegocioJuridico: (id: string) => void;
+  // Administradores - Outorgante
+  addAdministradorOutorgante: (pessoaJuridicaId: string, admin: RepresentanteAdministrador) => void;
+  updateAdministradorOutorgante: (pessoaJuridicaId: string, adminId: string, updates: Partial<RepresentanteAdministrador>) => void;
+  removeAdministradorOutorgante: (pessoaJuridicaId: string, adminId: string) => void;
+  // Procuradores - Outorgante
+  addProcuradorOutorgante: (pessoaJuridicaId: string, proc: RepresentanteProcurador) => void;
+  updateProcuradorOutorgante: (pessoaJuridicaId: string, procId: string, updates: Partial<RepresentanteProcurador>) => void;
+  removeProcuradorOutorgante: (pessoaJuridicaId: string, procId: string) => void;
+  // Administradores - Outorgado
+  addAdministradorOutorgado: (pessoaJuridicaId: string, admin: RepresentanteAdministrador) => void;
+  updateAdministradorOutorgado: (pessoaJuridicaId: string, adminId: string, updates: Partial<RepresentanteAdministrador>) => void;
+  removeAdministradorOutorgado: (pessoaJuridicaId: string, adminId: string) => void;
+  // Procuradores - Outorgado
+  addProcuradorOutorgado: (pessoaJuridicaId: string, proc: RepresentanteProcurador) => void;
+  updateProcuradorOutorgado: (pessoaJuridicaId: string, procId: string, updates: Partial<RepresentanteProcurador>) => void;
+  removeProcuradorOutorgado: (pessoaJuridicaId: string, procId: string) => void;
+  // Alienantes - NegocioJuridico
+  addAlienanteNegocio: (negocioId: string, alienante: ParticipanteNegocio) => void;
+  updateAlienanteNegocio: (negocioId: string, alienanteId: string, updates: Partial<ParticipanteNegocio>) => void;
+  removeAlienanteNegocio: (negocioId: string, alienanteId: string) => void;
+  // Adquirentes - NegocioJuridico
+  addAdquirenteNegocio: (negocioId: string, adquirente: ParticipanteNegocio) => void;
+  updateAdquirenteNegocio: (negocioId: string, adquirenteId: string, updates: Partial<ParticipanteNegocio>) => void;
+  removeAdquirenteNegocio: (negocioId: string, adquirenteId: string) => void;
   updateMinutaTexto: (texto: string) => void;
   finalizarMinuta: () => void;
   isSaving: boolean;
@@ -352,6 +376,312 @@ export function MinutaProvider({ children }: { children: ReactNode }) {
     }
   }, [currentMinuta, currentMinutaId, updateMinutaInList]);
 
+  // Administradores - Outorgante
+  const addAdministradorOutorgante = useCallback((pessoaJuridicaId: string, admin: RepresentanteAdministrador) => {
+    if (currentMinuta) {
+      const updatedPJ = currentMinuta.outorgantes.pessoasJuridicas.map(pj =>
+        pj.id === pessoaJuridicaId
+          ? { ...pj, administradores: [...pj.administradores, admin] }
+          : pj
+      );
+      updateMinutaInList(currentMinutaId!, {
+        outorgantes: {
+          ...currentMinuta.outorgantes,
+          pessoasJuridicas: updatedPJ,
+        },
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
+  const updateAdministradorOutorgante = useCallback((pessoaJuridicaId: string, adminId: string, updates: Partial<RepresentanteAdministrador>) => {
+    if (currentMinuta) {
+      const updatedPJ = currentMinuta.outorgantes.pessoasJuridicas.map(pj =>
+        pj.id === pessoaJuridicaId
+          ? {
+              ...pj,
+              administradores: pj.administradores.map(admin =>
+                admin.id === adminId ? { ...admin, ...updates } : admin
+              ),
+            }
+          : pj
+      );
+      updateMinutaInList(currentMinutaId!, {
+        outorgantes: {
+          ...currentMinuta.outorgantes,
+          pessoasJuridicas: updatedPJ,
+        },
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
+  const removeAdministradorOutorgante = useCallback((pessoaJuridicaId: string, adminId: string) => {
+    if (currentMinuta) {
+      const updatedPJ = currentMinuta.outorgantes.pessoasJuridicas.map(pj =>
+        pj.id === pessoaJuridicaId
+          ? { ...pj, administradores: pj.administradores.filter(admin => admin.id !== adminId) }
+          : pj
+      );
+      updateMinutaInList(currentMinutaId!, {
+        outorgantes: {
+          ...currentMinuta.outorgantes,
+          pessoasJuridicas: updatedPJ,
+        },
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
+  // Procuradores - Outorgante
+  const addProcuradorOutorgante = useCallback((pessoaJuridicaId: string, proc: RepresentanteProcurador) => {
+    if (currentMinuta) {
+      const updatedPJ = currentMinuta.outorgantes.pessoasJuridicas.map(pj =>
+        pj.id === pessoaJuridicaId
+          ? { ...pj, procuradores: [...pj.procuradores, proc] }
+          : pj
+      );
+      updateMinutaInList(currentMinutaId!, {
+        outorgantes: {
+          ...currentMinuta.outorgantes,
+          pessoasJuridicas: updatedPJ,
+        },
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
+  const updateProcuradorOutorgante = useCallback((pessoaJuridicaId: string, procId: string, updates: Partial<RepresentanteProcurador>) => {
+    if (currentMinuta) {
+      const updatedPJ = currentMinuta.outorgantes.pessoasJuridicas.map(pj =>
+        pj.id === pessoaJuridicaId
+          ? {
+              ...pj,
+              procuradores: pj.procuradores.map(proc =>
+                proc.id === procId ? { ...proc, ...updates } : proc
+              ),
+            }
+          : pj
+      );
+      updateMinutaInList(currentMinutaId!, {
+        outorgantes: {
+          ...currentMinuta.outorgantes,
+          pessoasJuridicas: updatedPJ,
+        },
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
+  const removeProcuradorOutorgante = useCallback((pessoaJuridicaId: string, procId: string) => {
+    if (currentMinuta) {
+      const updatedPJ = currentMinuta.outorgantes.pessoasJuridicas.map(pj =>
+        pj.id === pessoaJuridicaId
+          ? { ...pj, procuradores: pj.procuradores.filter(proc => proc.id !== procId) }
+          : pj
+      );
+      updateMinutaInList(currentMinutaId!, {
+        outorgantes: {
+          ...currentMinuta.outorgantes,
+          pessoasJuridicas: updatedPJ,
+        },
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
+  // Administradores - Outorgado
+  const addAdministradorOutorgado = useCallback((pessoaJuridicaId: string, admin: RepresentanteAdministrador) => {
+    if (currentMinuta) {
+      const updatedPJ = currentMinuta.outorgados.pessoasJuridicas.map(pj =>
+        pj.id === pessoaJuridicaId
+          ? { ...pj, administradores: [...pj.administradores, admin] }
+          : pj
+      );
+      updateMinutaInList(currentMinutaId!, {
+        outorgados: {
+          ...currentMinuta.outorgados,
+          pessoasJuridicas: updatedPJ,
+        },
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
+  const updateAdministradorOutorgado = useCallback((pessoaJuridicaId: string, adminId: string, updates: Partial<RepresentanteAdministrador>) => {
+    if (currentMinuta) {
+      const updatedPJ = currentMinuta.outorgados.pessoasJuridicas.map(pj =>
+        pj.id === pessoaJuridicaId
+          ? {
+              ...pj,
+              administradores: pj.administradores.map(admin =>
+                admin.id === adminId ? { ...admin, ...updates } : admin
+              ),
+            }
+          : pj
+      );
+      updateMinutaInList(currentMinutaId!, {
+        outorgados: {
+          ...currentMinuta.outorgados,
+          pessoasJuridicas: updatedPJ,
+        },
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
+  const removeAdministradorOutorgado = useCallback((pessoaJuridicaId: string, adminId: string) => {
+    if (currentMinuta) {
+      const updatedPJ = currentMinuta.outorgados.pessoasJuridicas.map(pj =>
+        pj.id === pessoaJuridicaId
+          ? { ...pj, administradores: pj.administradores.filter(admin => admin.id !== adminId) }
+          : pj
+      );
+      updateMinutaInList(currentMinutaId!, {
+        outorgados: {
+          ...currentMinuta.outorgados,
+          pessoasJuridicas: updatedPJ,
+        },
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
+  // Procuradores - Outorgado
+  const addProcuradorOutorgado = useCallback((pessoaJuridicaId: string, proc: RepresentanteProcurador) => {
+    if (currentMinuta) {
+      const updatedPJ = currentMinuta.outorgados.pessoasJuridicas.map(pj =>
+        pj.id === pessoaJuridicaId
+          ? { ...pj, procuradores: [...pj.procuradores, proc] }
+          : pj
+      );
+      updateMinutaInList(currentMinutaId!, {
+        outorgados: {
+          ...currentMinuta.outorgados,
+          pessoasJuridicas: updatedPJ,
+        },
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
+  const updateProcuradorOutorgado = useCallback((pessoaJuridicaId: string, procId: string, updates: Partial<RepresentanteProcurador>) => {
+    if (currentMinuta) {
+      const updatedPJ = currentMinuta.outorgados.pessoasJuridicas.map(pj =>
+        pj.id === pessoaJuridicaId
+          ? {
+              ...pj,
+              procuradores: pj.procuradores.map(proc =>
+                proc.id === procId ? { ...proc, ...updates } : proc
+              ),
+            }
+          : pj
+      );
+      updateMinutaInList(currentMinutaId!, {
+        outorgados: {
+          ...currentMinuta.outorgados,
+          pessoasJuridicas: updatedPJ,
+        },
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
+  const removeProcuradorOutorgado = useCallback((pessoaJuridicaId: string, procId: string) => {
+    if (currentMinuta) {
+      const updatedPJ = currentMinuta.outorgados.pessoasJuridicas.map(pj =>
+        pj.id === pessoaJuridicaId
+          ? { ...pj, procuradores: pj.procuradores.filter(proc => proc.id !== procId) }
+          : pj
+      );
+      updateMinutaInList(currentMinutaId!, {
+        outorgados: {
+          ...currentMinuta.outorgados,
+          pessoasJuridicas: updatedPJ,
+        },
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
+  // Alienantes - NegocioJuridico
+  const addAlienanteNegocio = useCallback((negocioId: string, alienante: ParticipanteNegocio) => {
+    if (currentMinuta) {
+      const updatedNegocios = currentMinuta.negociosJuridicos.map(negocio =>
+        negocio.id === negocioId
+          ? { ...negocio, alienantes: [...negocio.alienantes, alienante] }
+          : negocio
+      );
+      updateMinutaInList(currentMinutaId!, {
+        negociosJuridicos: updatedNegocios,
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
+  const updateAlienanteNegocio = useCallback((negocioId: string, alienanteId: string, updates: Partial<ParticipanteNegocio>) => {
+    if (currentMinuta) {
+      const updatedNegocios = currentMinuta.negociosJuridicos.map(negocio =>
+        negocio.id === negocioId
+          ? {
+              ...negocio,
+              alienantes: negocio.alienantes.map(alienante =>
+                alienante.id === alienanteId ? { ...alienante, ...updates } : alienante
+              ),
+            }
+          : negocio
+      );
+      updateMinutaInList(currentMinutaId!, {
+        negociosJuridicos: updatedNegocios,
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
+  const removeAlienanteNegocio = useCallback((negocioId: string, alienanteId: string) => {
+    if (currentMinuta) {
+      const updatedNegocios = currentMinuta.negociosJuridicos.map(negocio =>
+        negocio.id === negocioId
+          ? { ...negocio, alienantes: negocio.alienantes.filter(alienante => alienante.id !== alienanteId) }
+          : negocio
+      );
+      updateMinutaInList(currentMinutaId!, {
+        negociosJuridicos: updatedNegocios,
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
+  // Adquirentes - NegocioJuridico
+  const addAdquirenteNegocio = useCallback((negocioId: string, adquirente: ParticipanteNegocio) => {
+    if (currentMinuta) {
+      const updatedNegocios = currentMinuta.negociosJuridicos.map(negocio =>
+        negocio.id === negocioId
+          ? { ...negocio, adquirentes: [...negocio.adquirentes, adquirente] }
+          : negocio
+      );
+      updateMinutaInList(currentMinutaId!, {
+        negociosJuridicos: updatedNegocios,
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
+  const updateAdquirenteNegocio = useCallback((negocioId: string, adquirenteId: string, updates: Partial<ParticipanteNegocio>) => {
+    if (currentMinuta) {
+      const updatedNegocios = currentMinuta.negociosJuridicos.map(negocio =>
+        negocio.id === negocioId
+          ? {
+              ...negocio,
+              adquirentes: negocio.adquirentes.map(adquirente =>
+                adquirente.id === adquirenteId ? { ...adquirente, ...updates } : adquirente
+              ),
+            }
+          : negocio
+      );
+      updateMinutaInList(currentMinutaId!, {
+        negociosJuridicos: updatedNegocios,
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
+  const removeAdquirenteNegocio = useCallback((negocioId: string, adquirenteId: string) => {
+    if (currentMinuta) {
+      const updatedNegocios = currentMinuta.negociosJuridicos.map(negocio =>
+        negocio.id === negocioId
+          ? { ...negocio, adquirentes: negocio.adquirentes.filter(adquirente => adquirente.id !== adquirenteId) }
+          : negocio
+      );
+      updateMinutaInList(currentMinutaId!, {
+        negociosJuridicos: updatedNegocios,
+      });
+    }
+  }, [currentMinuta, currentMinutaId, updateMinutaInList]);
+
   // Minuta texto
   const updateMinutaTexto = useCallback((texto: string) => {
     if (currentMinutaId) {
@@ -395,6 +725,24 @@ export function MinutaProvider({ children }: { children: ReactNode }) {
         addNegocioJuridico,
         updateNegocioJuridico,
         removeNegocioJuridico,
+        addAdministradorOutorgante,
+        updateAdministradorOutorgante,
+        removeAdministradorOutorgante,
+        addProcuradorOutorgante,
+        updateProcuradorOutorgante,
+        removeProcuradorOutorgante,
+        addAdministradorOutorgado,
+        updateAdministradorOutorgado,
+        removeAdministradorOutorgado,
+        addProcuradorOutorgado,
+        updateProcuradorOutorgado,
+        removeProcuradorOutorgado,
+        addAlienanteNegocio,
+        updateAlienanteNegocio,
+        removeAlienanteNegocio,
+        addAdquirenteNegocio,
+        updateAdquirenteNegocio,
+        removeAdquirenteNegocio,
         updateMinutaTexto,
         finalizarMinuta,
         isSaving,
