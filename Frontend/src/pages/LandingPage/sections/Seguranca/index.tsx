@@ -1,0 +1,1 @@
+export { Seguranca } from './Seguranca';

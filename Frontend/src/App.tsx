@@ -21,6 +21,7 @@ const ConferenciaImoveis = lazy(() => import("./pages/ConferenciaImoveis"));
 const ParecerJuridico = lazy(() => import("./pages/ParecerJuridico"));
 const ConferenciaNegocio = lazy(() => import("./pages/ConferenciaNegocio"));
 const MinutaFinal = lazy(() => import("./pages/MinutaFinal"));
+const LandingPage = lazy(() => import("./pages/LandingPage").then(m => ({ default: m.LandingPage })));
 
 // Loading spinner for Suspense fallback
 function PageLoader() {
@@ -46,6 +47,7 @@ function App() {
                 <Routes>
                   {/* Public routes */}
                   <Route path="/login" element={<Login />} />
+                  <Route path="/landing" element={<LandingPage />} />
 
                   {/* Root redirect to dashboard */}
                   <Route path="/" element={<Navigate to="/dashboard" replace />} />
