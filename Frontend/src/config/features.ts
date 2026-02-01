@@ -6,17 +6,6 @@
  */
 export const features = {
   /**
-   * Usar Gemini real para análise de documentos
-   * Se false, usa modo demo com respostas mock
-   */
-  useRealGemini: import.meta.env.VITE_USE_REAL_GEMINI === 'true',
-
-  /**
-   * Modelo do Gemini a ser utilizado
-   */
-  geminiModel: import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.5-flash-preview-05-20',
-
-  /**
    * Máximo de arquivos por análise
    */
   maxFilesPerAnalysis: 10,
@@ -28,26 +17,24 @@ export const features = {
 
   /**
    * Tipos MIME suportados para upload
+   * Inclui formatos nativos do Gemini e formatos que serão convertidos
    */
   supportedMimeTypes: [
+    // PDFs
     'application/pdf',
+    // Images - all formats supported by Gemini
     'image/jpeg',
     'image/png',
     'image/webp',
     'image/gif',
+    'image/heic',
+    'image/heif',
+    'image/bmp',
+    // Office documents (converted to HTML on backend)
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    // Text formats
+    'text/plain',
+    'text/markdown',
+    'text/csv',
   ],
 } as const;
-
-/**
- * Verifica se o Gemini está configurado corretamente
- */
-export function isGeminiConfigured(): boolean {
-  return Boolean(import.meta.env.VITE_GEMINI_API_KEY);
-}
-
-/**
- * Retorna informações sobre o modo de execução atual
- */
-export function getExecutionMode(): 'real' | 'demo' {
-  return features.useRealGemini && isGeminiConfigured() ? 'real' : 'demo';
-}

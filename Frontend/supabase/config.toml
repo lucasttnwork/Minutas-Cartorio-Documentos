@@ -380,6 +380,9 @@ verify_jwt = false
 [functions.bootstrap-admin]
 verify_jwt = false
 
+[functions.agentes-especialistas]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

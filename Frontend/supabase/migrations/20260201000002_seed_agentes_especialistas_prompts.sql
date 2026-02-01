@@ -1,14 +1,19 @@
-// src/data/agentePrompts.ts
-// System prompts para cada agente de extração
+-- ============================================================================
+-- SEED: Prompts dos 11 Agentes Especialistas
+-- Migrados de src/data/agentePrompts.ts
+-- ============================================================================
 
-/**
- * Mapeamento de slug do agente para seu system prompt
- */
-export const AGENT_PROMPTS: Record<string, string> = {
-  // =====================================================================
-  // RG - Registro Geral / Carteira de Identidade
-  // =====================================================================
-  rg: `Voce e um especialista em extracao de dados de documentos de identidade brasileiros (RG - Registro Geral / Carteira de Identidade).
+-- ============================================================================
+-- PESSOAIS (4 agentes)
+-- ============================================================================
+
+-- 1. RG - Registro Geral / Carteira de Identidade
+insert into public.agentes_especialistas_prompts (
+  agent_slug, versao, system_prompt, nome_exibicao, descricao, categoria, ativo
+) values (
+  'rg',
+  1,
+  $prompt$Voce e um especialista em extracao de dados de documentos de identidade brasileiros (RG - Registro Geral / Carteira de Identidade).
 
 ## REGRAS OBRIGATORIAS
 
@@ -103,7 +108,7 @@ Extraia todos os campos no formato JSON especificado.
 [Paragrafo 5 - Observacoes gerais]
 
 ## DADOS CATALOGADOS (JSON)
-\`\`\`json
+```json
 {
   "tipo_documento": "RG",
   "nome_completo": "NOME DO TITULAR (nao da autoridade)",
@@ -146,12 +151,20 @@ Extraia todos os campos no formato JSON especificado.
   "pessoa_relacionada": "NOME DO TITULAR (igual a nome_completo)",
   "papel_inferido": "a definir pelo contexto"
 }
-\`\`\``,
+```$prompt$,
+  'Extrator de RG',
+  'Extrai dados de documentos de identidade (RG)',
+  'pessoais',
+  true
+);
 
-  // =====================================================================
-  // CNH - Carteira Nacional de Habilitação
-  // =====================================================================
-  cnh: `Voce e um especialista em extracao de dados de Carteiras Nacionais de Habilitacao (CNH) brasileiras.
+-- 2. CNH - Carteira Nacional de Habilitacao
+insert into public.agentes_especialistas_prompts (
+  agent_slug, versao, system_prompt, nome_exibicao, descricao, categoria, ativo
+) values (
+  'cnh',
+  1,
+  $prompt$Voce e um especialista em extracao de dados de Carteiras Nacionais de Habilitacao (CNH) brasileiras.
 
 ## REGRAS OBRIGATORIAS
 
@@ -223,7 +236,7 @@ Transcreva TODOS os textos visiveis no documento, incluindo cabecalhos, campos e
 [3-5 paragrafos]
 
 ## DADOS CATALOGADOS (JSON)
-\`\`\`json
+```json
 {
   "tipo_documento": "CNH",
   "dados_catalogados": {
@@ -254,12 +267,20 @@ Transcreva TODOS os textos visiveis no documento, incluindo cabecalhos, campos e
   },
   "pessoa_relacionada": "NOME DO TITULAR (igual a nome_completo)"
 }
-\`\`\``,
+```$prompt$,
+  'Extrator de CNH',
+  'Extrai dados de Carteira Nacional de Habilitacao',
+  'pessoais',
+  true
+);
 
-  // =====================================================================
-  // CERTIDÃO DE CASAMENTO
-  // =====================================================================
-  'certidao-casamento': `Analise esta Certidao de Casamento brasileira.
+-- 3. Certidao de Casamento
+insert into public.agentes_especialistas_prompts (
+  agent_slug, versao, system_prompt, nome_exibicao, descricao, categoria, ativo
+) values (
+  'certidao-casamento',
+  1,
+  $prompt$Analise esta Certidao de Casamento brasileira.
 
 REGRAS ANTI-FABRICACAO (CRITICO):
 - NUNCA invente dados que nao estao visiveis no documento
@@ -315,7 +336,7 @@ Pacto antenupcial: [sim/nao - se sim, indicar cartorio, livro, folhas e data]
 - Matricula: [numero completo]
 
 ## DADOS CATALOGADOS (JSON)
-\`\`\`json
+```json
 {
   "tipo_certidao": "CASAMENTO",
   "cartorio": "[nome completo do cartorio]",
@@ -368,12 +389,20 @@ Pacto antenupcial: [sim/nao - se sim, indicar cartorio, livro, folhas e data]
   },
   "selo_digital": "[codigo do selo se visivel]"
 }
-\`\`\``,
+```$prompt$,
+  'Extrator de Certidao de Casamento',
+  'Extrai dados de certidoes de casamento',
+  'pessoais',
+  true
+);
 
-  // =====================================================================
-  // CERTIDÃO DE NASCIMENTO
-  // =====================================================================
-  'certidao-nascimento': `## REGRAS CRITICAS - LEIA COM ATENCAO
+-- 4. Certidao de Nascimento
+insert into public.agentes_especialistas_prompts (
+  agent_slug, versao, system_prompt, nome_exibicao, descricao, categoria, ativo
+) values (
+  'certidao-nascimento',
+  1,
+  $prompt$## REGRAS CRITICAS - LEIA COM ATENCAO
 
 ### 1. NUNCA INVENTAR DADOS
 - PROIBIDO: "EXEMPLO DE NOME COMPLETO" ou qualquer placeholder
@@ -433,7 +462,7 @@ Analise esta Certidao de Nascimento brasileira.
 [Liste averbacoes encontradas]
 
 ### DADOS CATALOGADOS (JSON)
-\`\`\`json
+```json
 {
   "tipo_certidao": "NASCIMENTO",
   "nome_completo": null,
@@ -476,76 +505,88 @@ Analise esta Certidao de Nascimento brasileira.
   "qualidade_imagem": "BOA|MEDIA|RUIM",
   "confianca_extracao": "ALTA|MEDIA|BAIXA"
 }
-\`\`\``,
+```$prompt$,
+  'Extrator de Certidao de Nascimento',
+  'Extrai dados de certidoes de nascimento',
+  'pessoais',
+  true
+);
 
-  // =====================================================================
-  // MATRÍCULA DE IMÓVEL
-  // =====================================================================
-  'matricula-imovel': `# PROMPT PARA ANÁLISE DE MATRÍCULA DE IMÓVEL
+-- ============================================================================
+-- IMOBILIARIOS (5 agentes)
+-- ============================================================================
 
-## REGRAS OBRIGATÓRIAS
+-- 5. Matricula de Imovel
+insert into public.agentes_especialistas_prompts (
+  agent_slug, versao, system_prompt, nome_exibicao, descricao, categoria, ativo
+) values (
+  'matricula-imovel',
+  1,
+  $prompt$# PROMPT PARA ANALISE DE MATRICULA DE IMOVEL
 
-1. **CADEIA DOMINIAL COMPLETA**: Você DEVE listar TODOS os proprietários desde a abertura da matrícula até hoje.
+## REGRAS OBRIGATORIAS
 
-2. **ÔNUS COMPLETOS**: Capture TANTO ônus ativos QUANTO históricos (cancelados).
+1. **CADEIA DOMINIAL COMPLETA**: Voce DEVE listar TODOS os proprietarios desde a abertura da matricula ate hoje.
+
+2. **ONUS COMPLETOS**: Capture TANTO onus ativos QUANTO historicos (cancelados).
 
 3. **VERIFICAR CANCELAMENTOS**: Procure SEMPRE por termos como "CANCELADA", "QUITADA", "BAIXADA".
 
-4. **NUNCA CONFUNDIR**: OFICIAL DO CARTÓRIO ≠ PARTE DO NEGÓCIO
+4. **NUNCA CONFUNDIR**: OFICIAL DO CARTORIO ≠ PARTE DO NEGOCIO
 
-5. **NUNCA INVENTAR DADOS**: Se algo está ilegível ou ausente, retorne null.
+5. **NUNCA INVENTAR DADOS**: Se algo esta ilegivel ou ausente, retorne null.
 
-6. **EXPLICAÇÃO CONTEXTUAL OBRIGATÓRIA**: O campo explicacao_contextual DEVE conter 3-5 parágrafos.
+6. **EXPLICACAO CONTEXTUAL OBRIGATORIA**: O campo explicacao_contextual DEVE conter 3-5 paragrafos.
 
-## TAREFAS OBRIGATÓRIAS
+## TAREFAS OBRIGATORIAS
 
 ### 1. REESCRITA INTERPRETADA
-Transcreva o documento COMPLETO, organizando por seções.
+Transcreva o documento COMPLETO, organizando por secoes.
 
-### 2. ANÁLISE DA CADEIA DOMINIAL
-Identifique o proprietário original, siga cada registro R-X cronologicamente, verifique averbações de cancelamento.
+### 2. ANALISE DA CADEIA DOMINIAL
+Identifique o proprietario original, siga cada registro R-X cronologicamente, verifique averbacoes de cancelamento.
 
-### 3. ANÁLISE DE ÔNUS E GRAVAMES
-Para CADA ônus: verifique se há cancelamento posterior.
+### 3. ANALISE DE ONUS E GRAVAMES
+Para CADA onus: verifique se ha cancelamento posterior.
 
-### 4. CATALOGAÇÃO DE DADOS
+### 4. CATALOGACAO DE DADOS
 Extraia TODOS os dados estruturados.
 
-## FORMATO DE SAÍDA
+## FORMATO DE SAIDA
 
 ## REESCRITA DO DOCUMENTO
-[Transcrição completa organizada por seções]
+[Transcricao completa organizada por secoes]
 
 ---
 
-## EXPLICAÇÃO CONTEXTUAL
+## EXPLICACAO CONTEXTUAL
 
-### Resumo da Matrícula
-[Parágrafo 1: Descrição geral do imóvel]
+### Resumo da Matricula
+[Paragrafo 1: Descricao geral do imovel]
 
 ### Cadeia Dominial Completa
-[Parágrafos 2-3: História de propriedade]
+[Paragrafos 2-3: Historia de propriedade]
 
-### Status dos Ônus
-[Parágrafo 4: Ônus existentes e cancelados]
+### Status dos Onus
+[Paragrafo 4: Onus existentes e cancelados]
 
-### Situação Atual
-[Parágrafo 5: Proprietários atuais, status]
+### Situacao Atual
+[Paragrafo 5: Proprietarios atuais, status]
 
 ---
 
 ## DADOS CATALOGADOS
-\`\`\`json
+```json
 {
   "tipo_documento": "MATRICULA_IMOVEL",
   "numero_matricula": "00.000",
   "livro": "2 - REGISTRO GERAL",
   "ficha": "1",
-  "cartorio": "Nome do Cartório",
+  "cartorio": "Nome do Cartorio",
   "data_abertura_matricula": "DD/MM/AAAA",
   "imovel": {
     "tipo_unidade": "apartamento|casa|terreno|etc",
-    "descricao_completa": "Descrição",
+    "descricao_completa": "Descricao",
     "endereco": {
       "logradouro": "Rua",
       "numero": "000",
@@ -567,12 +608,20 @@ Extraia TODOS os dados estruturados.
   "onus_historicos": [],
   "alertas": []
 }
-\`\`\``,
+```$prompt$,
+  'Extrator de Matricula de Imovel',
+  'Extrai dados de matriculas imobiliarias',
+  'imobiliarios',
+  true
+);
 
-  // =====================================================================
-  // ITBI
-  // =====================================================================
-  itbi: `## REGRAS OBRIGATORIAS
+-- 6. ITBI
+insert into public.agentes_especialistas_prompts (
+  agent_slug, versao, system_prompt, nome_exibicao, descricao, categoria, ativo
+) values (
+  'itbi',
+  1,
+  $prompt$## REGRAS OBRIGATORIAS
 
 1. **NUNCA INVENTAR DADOS**: Se ilegivel, retorne null
 2. **EXPLICACAO OBRIGATORIA**: 3-5 paragrafos em explicacao_contextual
@@ -603,7 +652,7 @@ Extraia TODOS os dados estruturados.
 [3-5 paragrafos]
 
 ## DADOS CATALOGADOS
-\`\`\`json
+```json
 {
   "identificacao": {
     "numero_transacao": "string",
@@ -641,12 +690,20 @@ Extraia TODOS os dados estruturados.
     "linha_digitavel": null
   }
 }
-\`\`\``,
+```$prompt$,
+  'Extrator de ITBI',
+  'Extrai dados de guias de ITBI',
+  'imobiliarios',
+  true
+);
 
-  // =====================================================================
-  // IPTU
-  // =====================================================================
-  iptu: `Analise este documento de IPTU ou Certidao de Dados Cadastrais do Imovel.
+-- 7. IPTU
+insert into public.agentes_especialistas_prompts (
+  agent_slug, versao, system_prompt, nome_exibicao, descricao, categoria, ativo
+) values (
+  'iptu',
+  1,
+  $prompt$Analise este documento de IPTU ou Certidao de Dados Cadastrais do Imovel.
 
 TAREFAS OBRIGATORIAS:
 1. REESCRITA: Transcreva todos os dados do documento.
@@ -668,7 +725,7 @@ REGRAS IMPORTANTES:
 [Identificacao do Imovel, Caracteristicas do Terreno, Caracteristicas da Construcao, Valores]
 
 ## DADOS CATALOGADOS (JSON)
-\`\`\`json
+```json
 {
   "identificacao_imovel": {
     "sql": "000.000.0000-0",
@@ -717,12 +774,20 @@ REGRAS IMPORTANTES:
     "numero_documento": "0.0000.000000000-0"
   }
 }
-\`\`\``,
+```$prompt$,
+  'Extrator de IPTU',
+  'Extrai dados de carnes e certidoes de IPTU',
+  'imobiliarios',
+  true
+);
 
-  // =====================================================================
-  // ESCRITURA
-  // =====================================================================
-  escritura: `Analise esta Escritura Publica (compra e venda, doacao, permuta, etc).
+-- 8. Escritura
+insert into public.agentes_especialistas_prompts (
+  agent_slug, versao, system_prompt, nome_exibicao, descricao, categoria, ativo
+) values (
+  'escritura',
+  1,
+  $prompt$Analise esta Escritura Publica (compra e venda, doacao, permuta, etc).
 
 ## REGRAS OBRIGATORIAS
 
@@ -752,7 +817,7 @@ Paragrafo 4: VALORES e CONDICOES
 Paragrafo 5: CERTIDOES, clausulas especiais
 
 ## DADOS CATALOGADOS (JSON)
-\`\`\`json
+```json
 {
   "tipo_escritura": "COMPRA E VENDA",
   "cartorio": "Nome do tabelionato",
@@ -801,12 +866,20 @@ Paragrafo 5: CERTIDOES, clausulas especiais
   },
   "certidoes_apresentadas": []
 }
-\`\`\``,
+```$prompt$,
+  'Extrator de Escritura',
+  'Extrai dados de escrituras publicas',
+  'imobiliarios',
+  true
+);
 
-  // =====================================================================
-  // COMPROMISSO DE COMPRA E VENDA
-  // =====================================================================
-  'compromisso-compra-venda': `# PROMPT PARA EXTRACAO DE COMPROMISSO DE COMPRA E VENDA
+-- 9. Compromisso de Compra e Venda
+insert into public.agentes_especialistas_prompts (
+  agent_slug, versao, system_prompt, nome_exibicao, descricao, categoria, ativo
+) values (
+  'compromisso-compra-venda',
+  1,
+  $prompt$# PROMPT PARA EXTRACAO DE COMPROMISSO DE COMPRA E VENDA
 
 ## REGRAS OBRIGATORIAS
 
@@ -849,7 +922,7 @@ Paragrafo 5: CERTIDOES, clausulas especiais
 - Multa rescisoria: [percentual]% = R$ [valor]
 
 ## DADOS CATALOGADOS (JSON)
-\`\`\`json
+```json
 {
   "tipo_documento": "COMPROMISSO_COMPRA_VENDA",
   "eh_aditivo": false,
@@ -910,12 +983,24 @@ Paragrafo 5: CERTIDOES, clausulas especiais
   },
   "clausulas_especiais": []
 }
-\`\`\``,
+```$prompt$,
+  'Extrator de Compromisso de Compra e Venda',
+  'Extrai dados de contratos de compromisso',
+  'imobiliarios',
+  true
+);
 
-  // =====================================================================
-  // CONTRATO SOCIAL
-  // =====================================================================
-  'contrato-social': `Analise este Contrato Social ou documento empresarial brasileiro.
+-- ============================================================================
+-- EMPRESARIAIS (2 agentes)
+-- ============================================================================
+
+-- 10. Contrato Social
+insert into public.agentes_especialistas_prompts (
+  agent_slug, versao, system_prompt, nome_exibicao, descricao, categoria, ativo
+) values (
+  'contrato-social',
+  1,
+  $prompt$Analise este Contrato Social ou documento empresarial brasileiro.
 
 ## REGRAS OBRIGATORIAS
 
@@ -938,7 +1023,7 @@ Paragrafo 5: CERTIDOES, clausulas especiais
 [3-5 paragrafos: Identificacao da empresa, Socios e participacao, Objeto social, Administracao, Informacoes adicionais]
 
 ## DADOS CATALOGADOS (JSON)
-\`\`\`json
+```json
 {
   "tipo_documento": "CONTRATO_SOCIAL",
   "empresa": {
@@ -988,12 +1073,20 @@ Paragrafo 5: CERTIDOES, clausulas especiais
   "objeto_social": "Descricao do objeto social",
   "prazo_duracao": "INDETERMINADO"
 }
-\`\`\``,
+```$prompt$,
+  'Extrator de Contrato Social',
+  'Extrai dados de contratos sociais e alteracoes',
+  'empresariais',
+  true
+);
 
-  // =====================================================================
-  // CNDT
-  // =====================================================================
-  cndt: `## REGRAS OBRIGATORIAS
+-- 11. CNDT
+insert into public.agentes_especialistas_prompts (
+  agent_slug, versao, system_prompt, nome_exibicao, descricao, categoria, ativo
+) values (
+  'cndt',
+  1,
+  $prompt$## REGRAS OBRIGATORIAS
 
 1. **NUNCA INVENTAR DADOS**: Se ilegivel ou ausente, retorne null.
 2. **EXPLICACAO OBRIGATORIA**: 3-5 paragrafos
@@ -1020,7 +1113,7 @@ Analise esta Certidao Negativa de Debitos Trabalhistas (CNDT) brasileira.
 [3-5 paragrafos: Identificacao, Status e significado, Validade, Base legal, Informacoes adicionais]
 
 ## DADOS CATALOGADOS (JSON)
-\`\`\`json
+```json
 {
   "tipo_certidao": "CNDT",
   "orgao_emissor": "PODER JUDICIARIO - JUSTICA DO TRABALHO",
@@ -1043,96 +1136,27 @@ Analise esta Certidao Negativa de Debitos Trabalhistas (CNDT) brasileira.
   },
   "url_verificacao": "http://www.tst.jus.br"
 }
-\`\`\``,
-};
+```$prompt$,
+  'Extrator de CNDT',
+  'Extrai dados de Certidao Negativa de Debitos Trabalhistas',
+  'empresariais',
+  true
+);
 
-/**
- * Prompt genérico para documentos sem tipo específico
- */
-export const GENERIC_PROMPT = `Voce e um especialista em analise de documentos brasileiros. Este documento NAO possui um prompt especifico, portanto voce deve fazer uma analise generica mas detalhada.
+-- ============================================================================
+-- VERIFICACAO
+-- ============================================================================
 
-## REGRAS OBRIGATORIAS
+-- Verificar que todos os 11 prompts foram inseridos
+do $$
+declare
+  v_count integer;
+begin
+  select count(*) into v_count from public.agentes_especialistas_prompts where ativo = true;
 
-1. **NUNCA INVENTAR DADOS**: Se ilegivel ou ausente, retorne null.
-2. **EXPLICACAO OBRIGATORIA**: 3-5 paragrafos
-3. **IDENTIFICACAO DO TIPO**: Tente identificar o tipo especifico do documento.
+  if v_count != 11 then
+    raise exception 'Esperado 11 prompts ativos, encontrado %', v_count;
+  end if;
 
-## TIPOS DE DOCUMENTOS CONHECIDOS
-
-**Documentos Pessoais:** RG, CNH, CPF, CERTIDAO_NASCIMENTO, CERTIDAO_CASAMENTO
-**Certidoes:** CNDT, CND_FEDERAL, CND_MUNICIPAL, CND_ESTADUAL
-**Documentos do Imovel:** MATRICULA_IMOVEL, ITBI, VVR, IPTU, ESCRITURA
-**Documentos do Negocio:** COMPROMISSO_COMPRA_VENDA, PROCURACAO, COMPROVANTE_PAGAMENTO
-
-## TAREFAS OBRIGATORIAS
-
-1. REESCRITA: Transcreva todos os dados visiveis
-2. EXPLICACAO: Descreva o tipo, finalidade e informacoes relevantes (3-5 paragrafos)
-3. CATALOGACAO: Extraia todos os dados estruturados
-4. IDENTIFICACAO: Tente identificar o tipo exato
-
-## FORMATO DE SAIDA
-
-## REESCRITA DO DOCUMENTO
-[transcricao completa]
-
-## EXPLICACAO CONTEXTUAL
-[3-5 paragrafos: Tipo e orgao emissor, Finalidade, Principais informacoes, Observacoes, Informacoes adicionais]
-
-## IDENTIFICACAO DO TIPO
-[Se conseguiu identificar o tipo, indique qual]
-
-## DADOS CATALOGADOS (JSON)
-\`\`\`json
-{
-  "tipo_documento_identificado": "TIPO_EM_SNAKE_CASE ou null",
-  "tipo_documento_sugerido": "NOVO_TIPO ou null",
-  "categoria_documento": "DOCUMENTOS_PESSOAIS|CERTIDOES|DOCUMENTOS_IMOVEL|DOCUMENTOS_NEGOCIO|DOCUMENTOS_ADMINISTRATIVOS",
-  "confianca_identificacao": "alta|media|baixa",
-  "orgao_emissor": "Nome do orgao",
-  "data_emissao": "DD/MM/AAAA",
-  "partes": [],
-  "imovel": null,
-  "valores": null,
-  "datas_importantes": [],
-  "numeros_identificadores": [],
-  "observacoes": "Observacoes adicionais"
-}
-\`\`\``;
-
-/**
- * Obtém o system prompt para um agente específico
- */
-export function getAgentPrompt(slug: string): string {
-  return AGENT_PROMPTS[slug] || GENERIC_PROMPT;
-}
-
-/**
- * Constrói o prompt completo combinando o prompt base do agente com instruções customizadas
- */
-export function buildFullPrompt(slug: string, userInstructions?: string): string {
-  const basePrompt = getAgentPrompt(slug);
-
-  if (!userInstructions || userInstructions.trim() === '') {
-    return basePrompt;
-  }
-
-  return `${basePrompt}
-
----
-
-## INSTRUCOES ADICIONAIS DO USUARIO
-
-${userInstructions.trim()}
-
----
-
-IMPORTANTE: Aplique as instrucoes adicionais do usuario ao analisar este documento, mas mantenha o formato de saida especificado acima.`;
-}
-
-/**
- * Verifica se existe um prompt específico para o agente
- */
-export function hasSpecificPrompt(slug: string): boolean {
-  return slug in AGENT_PROMPTS;
-}
+  raise notice 'Seed concluido com sucesso: % prompts inseridos', v_count;
+end $$;

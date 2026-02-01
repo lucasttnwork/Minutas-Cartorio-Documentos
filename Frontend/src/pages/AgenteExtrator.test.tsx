@@ -27,11 +27,19 @@ const mockCnhAgente = {
 };
 
 // Mock functions
-const mockClassifyDocument = vi.fn();
-const mockExtractDocument = vi.fn();
+const mockExecuteRun = vi.fn();
+const mockReset = vi.fn();
 
-// Estado para controlar shouldUseRealGemini
-let mockUseRealGemini = false;
+// Estado para controlar o mock do useAgentRun
+let mockAgentRunState = {
+  status: 'idle' as const,
+  resultado: '',
+  error: null as string | null,
+  runId: null as string | null,
+  inputTokens: 0,
+  outputTokens: 0,
+  durationMs: 0,
+};
 
 // Mock modules
 vi.mock('@/data/agentes', () => ({
@@ -50,41 +58,11 @@ vi.mock('@/contexts/AuthContext', () => ({
   }),
 }));
 
-vi.mock('@/services/document-processing', () => ({
-  classifyDocument: (...args: unknown[]) => mockClassifyDocument(...args),
-  extractDocument: (...args: unknown[]) => mockExtractDocument(...args),
-}));
-
-vi.mock('@/services/gemini', () => ({
-  shouldUseRealGemini: () => mockUseRealGemini,
-  getGeminiClient: vi.fn(),
-  getModelName: vi.fn().mockReturnValue('gemini-test'),
-  generationConfig: { temperature: 0.1, maxOutputTokens: 16384 },
-}));
-
-vi.mock('@/hooks/useGeminiStream', () => ({
-  useGeminiStream: () => ({
-    status: 'idle',
-    resultado: '',
-    error: null,
-    isStreaming: false,
-    startStream: vi.fn(),
-    stopStream: vi.fn(),
-    reset: vi.fn(),
-  }),
-}));
-
-vi.mock('@/utils/mockStreaming', () => ({
-  getMockResponse: () => 'Mock extraction result from demo mode',
-  simulateStreaming: vi.fn().mockImplementation(
-    async (_text: string, onChunk: (chunk: string) => void, onComplete: () => void) => {
-      onChunk('Mock extraction result from demo mode');
-      onComplete();
-    }
-  ),
-  createAbortableStream: () => ({
-    abort: vi.fn(),
-    isAborted: () => false,
+vi.mock('@/hooks/useAgentRun', () => ({
+  useAgentRun: () => ({
+    ...mockAgentRunState,
+    executeRun: mockExecuteRun,
+    reset: mockReset,
   }),
 }));
 
@@ -112,7 +90,15 @@ const renderWithRouter = (ui: ReactNode, { route = '/agentes/extrator' } = {}) =
 describe('AgenteExtrator', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseRealGemini = false;
+    mockAgentRunState = {
+      status: 'idle',
+      resultado: '',
+      error: null,
+      runId: null,
+      inputTokens: 0,
+      outputTokens: 0,
+      durationMs: 0,
+    };
   });
 
   afterEach(() => {
@@ -159,45 +145,6 @@ describe('AgenteExtrator', () => {
   });
 
   // ==========================================================================
-  // Modo Demo vs Real
-  // ==========================================================================
-  describe('Mode switching (Demo vs Real)', () => {
-    it('exibe badge "Modo Demo" quando Gemini não configurado', () => {
-      mockUseRealGemini = false;
-      renderWithRouter(<AgenteExtrator />);
-
-      expect(screen.getByText('Modo Demo')).toBeInTheDocument();
-    });
-
-    it('não exibe badge quando Gemini configurado', () => {
-      mockUseRealGemini = true;
-      renderWithRouter(<AgenteExtrator />);
-
-      expect(screen.queryByText('Modo Demo')).not.toBeInTheDocument();
-    });
-
-    it('usa mock streaming em modo demo', async () => {
-      mockUseRealGemini = false;
-      const user = userEvent.setup();
-      renderWithRouter(<AgenteExtrator />);
-
-      // Upload a file
-      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
-      const file = new File(['test content'], 'test.pdf', { type: 'application/pdf' });
-      await user.upload(input, file);
-
-      // Click analyze
-      const analyzeButton = screen.getByRole('button', { name: /analisar/i });
-      await user.click(analyzeButton);
-
-      // Should show mock result
-      await waitFor(() => {
-        expect(screen.getByText(/Mock extraction result/i)).toBeInTheDocument();
-      });
-    });
-  });
-
-  // ==========================================================================
   // Analyze Button State
   // ==========================================================================
   describe('Analyze Button State', () => {
@@ -222,29 +169,13 @@ describe('AgenteExtrator', () => {
       const analyzeButton = screen.getByRole('button', { name: /analisar/i });
       expect(analyzeButton).not.toBeDisabled();
     });
-
-    it('should keep button disabled with invalid file type', async () => {
-      const user = userEvent.setup();
-      renderWithRouter(<AgenteExtrator />);
-
-      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
-
-      // Try to upload an unsupported file type
-      const file = new File(['test'], 'test.exe', { type: 'application/x-executable' });
-
-      // O UploadZone deve rejeitar o arquivo, então o botão deve continuar desabilitado
-      await user.upload(input, file);
-
-      // O comportamento depende da implementação do UploadZone
-      // Se ele aceita todos os arquivos, este teste precisa ser ajustado
-    });
   });
 
   // ==========================================================================
   // Analysis Flow
   // ==========================================================================
   describe('Analysis Flow', () => {
-    it('should start analysis when analyze button clicked', async () => {
+    it('should call executeRun when analyze button clicked', async () => {
       const user = userEvent.setup();
       renderWithRouter(<AgenteExtrator />);
 
@@ -257,59 +188,83 @@ describe('AgenteExtrator', () => {
       const analyzeButton = screen.getByRole('button', { name: /analisar/i });
       await user.click(analyzeButton);
 
-      // Should show result
-      await waitFor(() => {
-        expect(screen.getByText(/Mock extraction result/i)).toBeInTheDocument();
-      });
+      // Should call executeRun with correct params
+      expect(mockExecuteRun).toHaveBeenCalledWith(
+        'extrator',
+        [expect.any(File)],
+        ''
+      );
     });
 
-    it('should show result panel after analysis completes', async () => {
+    it('should pass custom instructions to executeRun', async () => {
       const user = userEvent.setup();
       renderWithRouter(<AgenteExtrator />);
 
+      // Upload a file
       const input = document.querySelector('input[type="file"]') as HTMLInputElement;
       const file = new File(['test content'], 'test.pdf', { type: 'application/pdf' });
       await user.upload(input, file);
 
+      // Add custom instructions
+      const textarea = screen.getByPlaceholderText(/Adicione instruções/i);
+      await user.type(textarea, 'Minhas instruções');
+
+      // Click analyze
       const analyzeButton = screen.getByRole('button', { name: /analisar/i });
       await user.click(analyzeButton);
 
-      await waitFor(() => {
-        // Verificar que o resultado está visível
-        expect(screen.getByText(/Mock extraction result/i)).toBeInTheDocument();
-      });
+      expect(mockExecuteRun).toHaveBeenCalledWith(
+        'extrator',
+        [expect.any(File)],
+        'Minhas instruções'
+      );
     });
 
-    it('shows Gerar Novamente button after completion', async () => {
+    it('should show processing state during analysis', () => {
+      mockAgentRunState = {
+        ...mockAgentRunState,
+        status: 'analyzing',
+      };
+      renderWithRouter(<AgenteExtrator />);
+
+      expect(screen.getByText(/Processando/i)).toBeInTheDocument();
+    });
+
+    it('shows Gerar Novamente button after completion', () => {
+      mockAgentRunState = {
+        ...mockAgentRunState,
+        status: 'completed',
+        resultado: 'Resultado da análise',
+      };
+      renderWithRouter(<AgenteExtrator />);
+
+      expect(screen.getByRole('button', { name: /Gerar Novamente/i })).toBeInTheDocument();
+    });
+
+    it('shows Novo Documento button after completion', () => {
+      mockAgentRunState = {
+        ...mockAgentRunState,
+        status: 'completed',
+        resultado: 'Resultado da análise',
+      };
+      renderWithRouter(<AgenteExtrator />);
+
+      expect(screen.getByRole('button', { name: /Novo Documento/i })).toBeInTheDocument();
+    });
+
+    it('should call reset when Novo Documento clicked', async () => {
+      mockAgentRunState = {
+        ...mockAgentRunState,
+        status: 'completed',
+        resultado: 'Resultado da análise',
+      };
       const user = userEvent.setup();
       renderWithRouter(<AgenteExtrator />);
 
-      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
-      const file = new File(['test content'], 'test.pdf', { type: 'application/pdf' });
-      await user.upload(input, file);
+      const newDocButton = screen.getByRole('button', { name: /Novo Documento/i });
+      await user.click(newDocButton);
 
-      const analyzeButton = screen.getByRole('button', { name: /analisar/i });
-      await user.click(analyzeButton);
-
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /Gerar Novamente/i })).toBeInTheDocument();
-      });
-    });
-
-    it('shows Novo Documento button after completion', async () => {
-      const user = userEvent.setup();
-      renderWithRouter(<AgenteExtrator />);
-
-      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
-      const file = new File(['test content'], 'test.pdf', { type: 'application/pdf' });
-      await user.upload(input, file);
-
-      const analyzeButton = screen.getByRole('button', { name: /analisar/i });
-      await user.click(analyzeButton);
-
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /Novo Documento/i })).toBeInTheDocument();
-      });
+      expect(mockReset).toHaveBeenCalled();
     });
   });
 
@@ -367,6 +322,17 @@ describe('AgenteExtrator', () => {
       const textarea = screen.getByPlaceholderText(/Adicione instruções/i);
       expect(textarea).not.toBeDisabled();
     });
+
+    it('textarea is disabled during analysis', () => {
+      mockAgentRunState = {
+        ...mockAgentRunState,
+        status: 'analyzing',
+      };
+      renderWithRouter(<AgenteExtrator />);
+
+      const textarea = screen.getByPlaceholderText(/Adicione instruções/i);
+      expect(textarea).toBeDisabled();
+    });
   });
 
   // ==========================================================================
@@ -416,38 +382,31 @@ describe('AgenteExtrator', () => {
   });
 
   // ==========================================================================
-  // Export buttons (after completion)
-  // ==========================================================================
-  describe('Export functionality', () => {
-    it('shows copy button after analysis', async () => {
-      const user = userEvent.setup();
-      renderWithRouter(<AgenteExtrator />);
-
-      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
-      const file = new File(['test'], 'test.pdf', { type: 'application/pdf' });
-      await user.upload(input, file);
-
-      await user.click(screen.getByRole('button', { name: /analisar/i }));
-
-      await waitFor(() => {
-        // Procurar por botão de cópia (pode ser um ícone ou texto)
-        const copyButtons = screen.getAllByRole('button');
-        expect(copyButtons.length).toBeGreaterThan(0);
-      });
-    });
-  });
-
-  // ==========================================================================
   // Error handling UI
   // ==========================================================================
   describe('Error handling UI', () => {
-    it('shows error state correctly', async () => {
-      // Este teste verifica a estrutura do componente para erros
-      // O erro real viria do hook useGeminiStream
+    it('shows error alert when error occurs', () => {
+      mockAgentRunState = {
+        ...mockAgentRunState,
+        status: 'error',
+        error: 'Erro ao processar documento',
+      };
       renderWithRouter(<AgenteExtrator />);
 
-      // Verificar que existe área para exibir erros (estrutura)
-      expect(screen.getByText('Documentos')).toBeInTheDocument();
+      // The error message appears in multiple places (alert + result panel)
+      const errorMessages = screen.getAllByText('Erro ao processar documento');
+      expect(errorMessages.length).toBeGreaterThan(0);
+    });
+
+    it('shows Tentar Novamente button on error', () => {
+      mockAgentRunState = {
+        ...mockAgentRunState,
+        status: 'error',
+        error: 'Erro ao processar documento',
+      };
+      renderWithRouter(<AgenteExtrator />);
+
+      expect(screen.getByRole('button', { name: /Tentar Novamente/i })).toBeInTheDocument();
     });
   });
 

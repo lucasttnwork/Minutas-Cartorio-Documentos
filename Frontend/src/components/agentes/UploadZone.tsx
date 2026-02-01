@@ -1,9 +1,11 @@
 // src/components/agentes/UploadZone.tsx
 
 import { useCallback, useState } from 'react';
-import { Upload, X, FileText, Image } from 'lucide-react';
+import { Upload, X, FileText, Image, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { DocumentPreviewModal } from './DocumentPreviewModal';
+import { toast } from 'sonner';
 import type { ArquivoUpload } from '@/types/agente';
 
 interface UploadZoneProps {
@@ -14,6 +16,13 @@ interface UploadZoneProps {
 
 export function UploadZone({ arquivos, onArquivosChange, disabled }: UploadZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const [previewArquivo, setPreviewArquivo] = useState<ArquivoUpload | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  const openPreview = useCallback((arquivo: ArquivoUpload) => {
+    setPreviewArquivo(arquivo);
+    setPreviewOpen(true);
+  }, []);
 
   const addFiles = useCallback((files: File[]) => {
     const newArquivos: ArquivoUpload[] = files.map(file => ({
@@ -24,6 +33,13 @@ export function UploadZone({ arquivos, onArquivosChange, disabled }: UploadZoneP
       tipo: file.type,
     }));
     onArquivosChange([...arquivos, ...newArquivos]);
+
+    // Toast de confirmacao
+    if (files.length === 1) {
+      toast.success(`Arquivo "${files[0].name}" adicionado com sucesso`);
+    } else if (files.length > 1) {
+      toast.success(`${files.length} arquivos adicionados com sucesso`);
+    }
   }, [arquivos, onArquivosChange]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -91,12 +107,12 @@ export function UploadZone({ arquivos, onArquivosChange, disabled }: UploadZoneP
             Arraste arquivos ou <span className="text-primary">clique aqui</span>
           </p>
           <p className="text-xs text-muted-foreground/70 mt-1">
-            PDF, JPG, PNG, DOCX
+            PDF, Imagens, DOCX, TXT, Markdown, CSV
           </p>
           <input
             type="file"
             multiple
-            accept=".pdf,.jpg,.jpeg,.png,.docx"
+            accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.heic,.bmp,.docx,.txt,.md,.csv"
             onChange={handleFileInput}
             className="hidden"
           />
@@ -113,27 +129,50 @@ export function UploadZone({ arquivos, onArquivosChange, disabled }: UploadZoneP
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg"
+              className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg group"
             >
               <FileIcon className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{arquivo.nome}</p>
+              <button
+                onClick={() => openPreview(arquivo)}
+                className="flex-1 min-w-0 text-left hover:opacity-80 transition-opacity"
+                aria-label={`Abrir preview do arquivo ${arquivo.nome}`}
+              >
+                <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">
+                  {arquivo.nome}
+                </p>
                 <p className="text-xs text-muted-foreground">
                   {formatFileSize(arquivo.tamanho)}
                 </p>
-              </div>
-              {!disabled && (
+              </button>
+              <div className="flex items-center gap-1">
                 <button
-                  onClick={() => removeFile(arquivo.id)}
-                  className="p-1 hover:bg-destructive/10 rounded transition-colors"
+                  onClick={() => openPreview(arquivo)}
+                  className="p-1.5 hover:bg-primary/10 rounded transition-colors opacity-50 group-hover:opacity-100"
+                  aria-label={`Visualizar arquivo ${arquivo.nome}`}
                 >
-                  <X className="w-4 h-4 text-muted-foreground hover:text-destructive" />
+                  <Eye className="w-4 h-4 text-muted-foreground hover:text-primary" />
                 </button>
-              )}
+                {!disabled && (
+                  <button
+                    onClick={() => removeFile(arquivo.id)}
+                    className="p-1.5 hover:bg-destructive/10 rounded transition-colors"
+                    aria-label={`Remover arquivo ${arquivo.nome}`}
+                  >
+                    <X className="w-4 h-4 text-muted-foreground hover:text-destructive" />
+                  </button>
+                )}
+              </div>
             </motion.div>
           );
         })}
       </AnimatePresence>
+
+      {/* Document Preview Modal */}
+      <DocumentPreviewModal
+        arquivo={previewArquivo}
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+      />
     </div>
   );
 }
