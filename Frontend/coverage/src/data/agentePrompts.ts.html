@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>8/8</span>
+                <span class='fraction'>0/8</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>6/6</span>
+                <span class='fraction'>0/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>3/3</span>
+                <span class='fraction'>0/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>8/8</span>
+                <span class='fraction'>0/8</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -1207,7 +1207,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -2252,7 +2252,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -2307,20 +2307,20 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">13x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">13x</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -2337,7 +2337,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// src/data/agentePrompts.ts
 // System prompts para cada agente de extração
@@ -2345,7 +2345,7 @@
 /**
  * Mapeamento de slug do agente para seu system prompt
  */
-export const AGENT_PROMPTS: Record&lt;string, string&gt; = {
+export const AGENT_PROMPTS: Record&lt;string, string&gt; = <span class="cstat-no" title="statement not covered" >{</span>
   // =====================================================================
   // RG - Registro Geral / Carteira de Identidade
   // =====================================================================
@@ -3390,7 +3390,7 @@ Analise esta Certidao Negativa de Debitos Trabalhistas (CNDT) brasileira.
 /**
  * Prompt genérico para documentos sem tipo específico
  */
-export const GENERIC_PROMPT = `Voce e um especialista em analise de documentos brasileiros. Este documento NAO possui um prompt especifico, portanto voce deve fazer uma analise generica mas detalhada.
+export const GENERIC_PROMPT = <span class="cstat-no" title="statement not covered" >`Voce e um especialista em analise de documentos brasileiros. Este documento NAO possui um prompt especifico, portanto voce deve fazer uma analise generica mas detalhada.</span>
 &nbsp;
 ## REGRAS OBRIGATORIAS
 &nbsp;
@@ -3444,21 +3444,21 @@ export const GENERIC_PROMPT = `Voce e um especialista em analise de documentos b
 /**
  * Obtém o system prompt para um agente específico
  */
-export function getAgentPrompt(slug: string): string {
-  return AGENT_PROMPTS[slug] || GENERIC_PROMPT;
+export function <span class="fstat-no" title="function not covered" >getAgentPrompt(s</span>lug: string): string {
+<span class="cstat-no" title="statement not covered" >  return AGENT_PROMPTS[slug] || GENERIC_PROMPT;</span>
 }
 &nbsp;
 /**
  * Constrói o prompt completo combinando o prompt base do agente com instruções customizadas
  */
-export function buildFullPrompt(slug: string, userInstructions?: string): string {
-  const basePrompt = getAgentPrompt(slug);
+export function <span class="fstat-no" title="function not covered" >buildFullPrompt(s</span>lug: string, userInstructions?: string): string {
+  const basePrompt = <span class="cstat-no" title="statement not covered" >getAgentPrompt(slug);</span>
 &nbsp;
-  if (!userInstructions || userInstructions.trim() === '') {
-    return basePrompt;
+<span class="cstat-no" title="statement not covered" >  if (!userInstructions || userInstructions.trim() === '') {</span>
+<span class="cstat-no" title="statement not covered" >    return basePrompt;</span>
   }
 &nbsp;
-  return `${basePrompt}
+<span class="cstat-no" title="statement not covered" >  return `${basePrompt}</span>
 &nbsp;
 ---
 &nbsp;
@@ -3474,8 +3474,8 @@ IMPORTANTE: Aplique as instrucoes adicionais do usuario ao analisar este documen
 /**
  * Verifica se existe um prompt específico para o agente
  */
-export function hasSpecificPrompt(slug: string): boolean {
-  return slug in AGENT_PROMPTS;
+export function <span class="fstat-no" title="function not covered" >hasSpecificPrompt(s</span>lug: string): boolean {
+<span class="cstat-no" title="statement not covered" >  return slug in AGENT_PROMPTS;</span>
 }
 &nbsp;</pre></td></tr></table></pre>
 
@@ -3484,7 +3484,7 @@ export function hasSpecificPrompt(slug: string): boolean {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-31T15:38:41.166Z
+                at 2026-02-01T10:10:46.462Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

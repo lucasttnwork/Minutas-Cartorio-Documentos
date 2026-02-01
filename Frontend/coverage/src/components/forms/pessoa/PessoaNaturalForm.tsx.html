@@ -25,28 +25,28 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/42</span>
+                <span class='fraction'>0/46</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/2</span>
+                <span class='fraction'>0/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/42</span>
+                <span class='fraction'>0/43</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/42</span>
+                <span class='fraction'>0/45</span>
             </div>
         
             
@@ -166,7 +166,18 @@
 <a name='L101'></a><a href='#L101'>101</a>
 <a name='L102'></a><a href='#L102'>102</a>
 <a name='L103'></a><a href='#L103'>103</a>
-<a name='L104'></a><a href='#L104'>104</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -179,6 +190,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -272,7 +294,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// src/components/forms/pessoa/PessoaNaturalForm.tsx
 import { FormSection } from '../FormSection';
 import { EditableField } from '../EditableField';
-import type { PessoaNatural } from '@/types/minuta';
+import type { PessoaNatural, FontesCampos } from '@/types/minuta';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 &nbsp;
@@ -282,29 +304,40 @@ interface PessoaNaturalFormProps {
   camposEditados: string[];
 }
 &nbsp;
+/**
+ * Helper to get fonte array for a field from the fontes object
+ * The fontes object maps field names to arrays of source document names
+ */
+function <span class="fstat-no" title="function not covered" >getFonte(f</span>ontes: FontesCampos | undefined, field: string): string[] | undefined {
+<span class="cstat-no" title="statement not covered" >  if (!fontes) <span class="cstat-no" title="statement not covered" >return undefined;</span></span>
+<span class="cstat-no" title="statement not covered" >  return fontes[field];</span>
+}
+&nbsp;
 export function <span class="fstat-no" title="function not covered" >PessoaNaturalForm({</span> pessoa, onUpdate, camposEditados }: PessoaNaturalFormProps) {
+  const fontes = <span class="cstat-no" title="statement not covered" >pessoa.fontes;</span>
+&nbsp;
 <span class="cstat-no" title="statement not covered" >  return (</span>
     &lt;div className="space-y-2"&gt;
       {/* DADOS INDIVIDUAIS */}
       &lt;FormSection title="DADOS INDIVIDUAIS" columns={3}&gt;
-        &lt;EditableField label="Nome Completo" value={pessoa.nome} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('nome', v)} w</span>asEditedByUser={camposEditados.includes('nome')} /&gt;
-        &lt;EditableField label="CPF" value={pessoa.cpf} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('cpf', v)} w</span>asEditedByUser={camposEditados.includes('cpf')} /&gt;
-        &lt;EditableField label="RG" value={pessoa.rg} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('rg', v)} w</span>asEditedByUser={camposEditados.includes('rg')} /&gt;
-        &lt;EditableField label="Orgao Emissor RG" value={pessoa.orgaoEmissorRg} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('orgaoEmissorRg', v)} w</span>asEditedByUser={camposEditados.includes('orgaoEmissorRg')} /&gt;
-        &lt;EditableField label="Estado Emissor RG" value={pessoa.estadoEmissorRg} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('estadoEmissorRg', v)} w</span>asEditedByUser={camposEditados.includes('estadoEmissorRg')} /&gt;
-        &lt;EditableField label="Data Emissao RG" value={pessoa.dataEmissaoRg} type="date" onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('dataEmissaoRg', v)} w</span>asEditedByUser={camposEditados.includes('dataEmissaoRg')} /&gt;
-        &lt;EditableField label="Nacionalidade" value={pessoa.nacionalidade} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('nacionalidade', v)} w</span>asEditedByUser={camposEditados.includes('nacionalidade')} /&gt;
-        &lt;EditableField label="Profissao" value={pessoa.profissao} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('profissao', v)} w</span>asEditedByUser={camposEditados.includes('profissao')} /&gt;
-        &lt;EditableField label="Data Nascimento" value={pessoa.dataNascimento} type="date" onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('dataNascimento', v)} w</span>asEditedByUser={camposEditados.includes('dataNascimento')} /&gt;
-        &lt;EditableField label="Data Obito" value={pessoa.dataObito} type="date" onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('dataObito', v)} w</span>asEditedByUser={camposEditados.includes('dataObito')} /&gt;
-        &lt;EditableField label="CNH" value={pessoa.cnh} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('cnh', v)} w</span>asEditedByUser={camposEditados.includes('cnh')} /&gt;
-        &lt;EditableField label="Orgao Emissor CNH" value={pessoa.orgaoEmissorCnh} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('orgaoEmissorCnh', v)} w</span>asEditedByUser={camposEditados.includes('orgaoEmissorCnh')} /&gt;
+        &lt;EditableField label="Nome Completo" value={pessoa.nome} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('nome', v)} w</span>asEditedByUser={camposEditados.includes('nome')} fonte={getFonte(fontes, 'nome')} /&gt;
+        &lt;EditableField label="CPF" value={pessoa.cpf} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('cpf', v)} w</span>asEditedByUser={camposEditados.includes('cpf')} fonte={getFonte(fontes, 'cpf')} /&gt;
+        &lt;EditableField label="RG" value={pessoa.rg} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('rg', v)} w</span>asEditedByUser={camposEditados.includes('rg')} fonte={getFonte(fontes, 'rg')} /&gt;
+        &lt;EditableField label="Orgao Emissor RG" value={pessoa.orgaoEmissorRg} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('orgaoEmissorRg', v)} w</span>asEditedByUser={camposEditados.includes('orgaoEmissorRg')} fonte={getFonte(fontes, 'orgao_emissor_rg')} /&gt;
+        &lt;EditableField label="Estado Emissor RG" value={pessoa.estadoEmissorRg} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('estadoEmissorRg', v)} w</span>asEditedByUser={camposEditados.includes('estadoEmissorRg')} fonte={getFonte(fontes, 'estado_emissor_rg')} /&gt;
+        &lt;EditableField label="Data Emissao RG" value={pessoa.dataEmissaoRg} type="date" onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('dataEmissaoRg', v)} w</span>asEditedByUser={camposEditados.includes('dataEmissaoRg')} fonte={getFonte(fontes, 'data_emissao_rg')} /&gt;
+        &lt;EditableField label="Nacionalidade" value={pessoa.nacionalidade} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('nacionalidade', v)} w</span>asEditedByUser={camposEditados.includes('nacionalidade')} fonte={getFonte(fontes, 'nacionalidade')} /&gt;
+        &lt;EditableField label="Profissao" value={pessoa.profissao} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('profissao', v)} w</span>asEditedByUser={camposEditados.includes('profissao')} fonte={getFonte(fontes, 'profissao')} /&gt;
+        &lt;EditableField label="Data Nascimento" value={pessoa.dataNascimento} type="date" onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('dataNascimento', v)} w</span>asEditedByUser={camposEditados.includes('dataNascimento')} fonte={getFonte(fontes, 'data_nascimento')} /&gt;
+        &lt;EditableField label="Data Obito" value={pessoa.dataObito} type="date" onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('dataObito', v)} w</span>asEditedByUser={camposEditados.includes('dataObito')} fonte={getFonte(fontes, 'data_obito')} /&gt;
+        &lt;EditableField label="CNH" value={pessoa.cnh} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('cnh', v)} w</span>asEditedByUser={camposEditados.includes('cnh')} fonte={getFonte(fontes, 'cnh')} /&gt;
+        &lt;EditableField label="Orgao Emissor CNH" value={pessoa.orgaoEmissorCnh} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('orgaoEmissorCnh', v)} w</span>asEditedByUser={camposEditados.includes('orgaoEmissorCnh')} fonte={getFonte(fontes, 'orgao_emissor_cnh')} /&gt;
       &lt;/FormSection&gt;
 &nbsp;
       {/* DADOS FAMILIARES */}
       &lt;FormSection title="DADOS FAMILIARES" columns={3}&gt;
-        &lt;EditableField label="Estado Civil" value={pessoa.dadosFamiliares.estadoCivil} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('dadosFamiliares.estadoCivil', v)} w</span>asEditedByUser={camposEditados.includes('dadosFamiliares.estadoCivil')} /&gt;
-        &lt;EditableField label="Regime de Bens" value={pessoa.dadosFamiliares.regimeBens} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('dadosFamiliares.regimeBens', v)} w</span>asEditedByUser={camposEditados.includes('dadosFamiliares.regimeBens')} /&gt;
+        &lt;EditableField label="Estado Civil" value={pessoa.dadosFamiliares.estadoCivil} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('dadosFamiliares.estadoCivil', v)} w</span>asEditedByUser={camposEditados.includes('dadosFamiliares.estadoCivil')} fonte={getFonte(fontes, 'estado_civil')} /&gt;
+        &lt;EditableField label="Regime de Bens" value={pessoa.dadosFamiliares.regimeBens} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('dadosFamiliares.regimeBens', v)} w</span>asEditedByUser={camposEditados.includes('dadosFamiliares.regimeBens')} fonte={getFonte(fontes, 'regime_bens')} /&gt;
         &lt;EditableField label="Data Casamento" value={pessoa.dadosFamiliares.dataCasamento} type="date" onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('dadosFamiliares.dataCasamento', v)} w</span>asEditedByUser={camposEditados.includes('dadosFamiliares.dataCasamento')} /&gt;
         &lt;EditableField label="Data Separacao" value={pessoa.dadosFamiliares.dataSeparacao} type="date" onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('dadosFamiliares.dataSeparacao', v)} w</span>asEditedByUser={camposEditados.includes('dadosFamiliares.dataSeparacao')} /&gt;
         &lt;EditableField label="Data Divorcio" value={pessoa.dadosFamiliares.dataDivorcio} type="date" onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('dadosFamiliares.dataDivorcio', v)} w</span>asEditedByUser={camposEditados.includes('dadosFamiliares.dataDivorcio')} /&gt;
@@ -352,9 +385,9 @@ export function <span class="fstat-no" title="function not covered" >PessoaNatur
         columns={3}
         action={{ label: 'Atualizar', onClick: <span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >c</span>onsole.log('Atualizar CNDT') }</span>}
       &gt;
-        &lt;EditableField label="Numero CNDT" value={pessoa.cndt.numeroCNDT} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('cndt.numeroCNDT', v)} w</span>asEditedByUser={camposEditados.includes('cndt.numeroCNDT')} /&gt;
-        &lt;EditableField label="Data Expedicao" value={pessoa.cndt.dataExpedicao} type="date" onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('cndt.dataExpedicao', v)} w</span>asEditedByUser={camposEditados.includes('cndt.dataExpedicao')} /&gt;
-        &lt;EditableField label="Hora Expedicao" value={pessoa.cndt.horaExpedicao} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('cndt.horaExpedicao', v)} w</span>asEditedByUser={camposEditados.includes('cndt.horaExpedicao')} /&gt;
+        &lt;EditableField label="Numero CNDT" value={pessoa.cndt.numeroCNDT} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('cndt.numeroCNDT', v)} w</span>asEditedByUser={camposEditados.includes('cndt.numeroCNDT')} fonte={getFonte(fontes, 'cndt')} /&gt;
+        &lt;EditableField label="Data Expedicao" value={pessoa.cndt.dataExpedicao} type="date" onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('cndt.dataExpedicao', v)} w</span>asEditedByUser={camposEditados.includes('cndt.dataExpedicao')} fonte={getFonte(fontes, 'cndt')} /&gt;
+        &lt;EditableField label="Hora Expedicao" value={pessoa.cndt.horaExpedicao} onChange={<span class="fstat-no" title="function not covered" >(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >onUpdate('cndt.horaExpedicao', v)} w</span>asEditedByUser={camposEditados.includes('cndt.horaExpedicao')} fonte={getFonte(fontes, 'cndt')} /&gt;
       &lt;/FormSection&gt;
 &nbsp;
       {/* CERTIDAO DA UNIAO */}
@@ -379,7 +412,7 @@ export function <span class="fstat-no" title="function not covered" >PessoaNatur
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-31T15:38:41.166Z
+                at 2026-02-01T10:10:46.462Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>
