@@ -1,0 +1,268 @@
+{
+  "tipo_documento": "MATRICULA_IMOVEL",
+  "versao": "1.0",
+  "descricao": "Schema de extracao para Certidao de Matricula do Registro de Imoveis",
+  "complexidade": "MUITO_ALTA",
+  "campos": [
+    {
+      "nome": "numero_matricula",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "\\d{1,6}",
+      "exemplo": "123456",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Numero da matricula do imovel"
+    },
+    {
+      "nome": "cartorio",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": "1o OFICIAL DE REGISTRO DE IMOVEIS DE SAO PAULO",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Nome do cartorio de registro de imoveis"
+    },
+    {
+      "nome": "livro",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d+",
+      "exemplo": "2",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Numero do livro (Livro 2 = Registro Geral)"
+    },
+    {
+      "nome": "numero_ficha",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d+",
+      "exemplo": "12345",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Numero da ficha"
+    },
+    {
+      "nome": "descricao_imovel",
+      "tipo": "object",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": {"tipo": "APARTAMENTO", "numero": "101", "andar": "1", "edificio": "SOLAR DAS FLORES"},
+      "nivel_extracao": 3,
+      "confianca_esperada": "media",
+      "descricao": "Descricao detalhada do imovel",
+      "campos_internos": [
+        {"nome": "tipo", "tipo": "string", "exemplo": "APARTAMENTO|CASA|TERRENO|LOJA|SALA|VAGA"},
+        {"nome": "numero", "tipo": "string"},
+        {"nome": "andar", "tipo": "string"},
+        {"nome": "edificio", "tipo": "string"},
+        {"nome": "bloco", "tipo": "string"},
+        {"nome": "torre", "tipo": "string"},
+        {"nome": "descricao_completa", "tipo": "string"}
+      ]
+    },
+    {
+      "nome": "endereco",
+      "tipo": "object",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": {"logradouro": "RUA DAS FLORES", "numero": "123", "subdistrito": "CONSOLACAO"},
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Endereco do imovel",
+      "campos_internos": [
+        {"nome": "logradouro", "tipo": "string"},
+        {"nome": "numero", "tipo": "string"},
+        {"nome": "complemento", "tipo": "string"},
+        {"nome": "bairro", "tipo": "string"},
+        {"nome": "subdistrito", "tipo": "string"},
+        {"nome": "distrito", "tipo": "string"},
+        {"nome": "municipio", "tipo": "string"},
+        {"nome": "uf", "tipo": "string"},
+        {"nome": "cep", "tipo": "string"}
+      ]
+    },
+    {
+      "nome": "contribuinte_municipal",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d{3}\\.\\d{3}\\.\\d{4}-\\d",
+      "exemplo": "000.000.0000-0",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "SQL - Setor Quadra Lote (cadastro municipal)"
+    },
+    {
+      "nome": "areas",
+      "tipo": "object",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": {"util": 65.00, "comum": 25.00, "total": 90.00, "terreno": 150.00},
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Areas do imovel em metros quadrados",
+      "campos_internos": [
+        {"nome": "privativa", "tipo": "number", "unidade": "m2"},
+        {"nome": "util", "tipo": "number", "unidade": "m2"},
+        {"nome": "comum", "tipo": "number", "unidade": "m2"},
+        {"nome": "total", "tipo": "number", "unidade": "m2"},
+        {"nome": "terreno", "tipo": "number", "unidade": "m2"},
+        {"nome": "construida", "tipo": "number", "unidade": "m2"}
+      ]
+    },
+    {
+      "nome": "fracao_ideal",
+      "tipo": "number",
+      "obrigatorio": false,
+      "regex": "\\d+[,.]\\d+",
+      "exemplo": "0.0125",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Fracao ideal do terreno"
+    },
+    {
+      "nome": "quota_parte",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "1,25% ou 1/80",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Quota parte em percentual ou fracao"
+    },
+    {
+      "nome": "proprietarios",
+      "tipo": "array",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": [{"nome": "JOAO DA SILVA", "cpf": "123.456.789-00", "percentual": 50}],
+      "nivel_extracao": 3,
+      "confianca_esperada": "media",
+      "descricao": "Lista de proprietarios atuais",
+      "campos_internos": [
+        {"nome": "nome", "tipo": "string"},
+        {"nome": "nacionalidade", "tipo": "string"},
+        {"nome": "estado_civil", "tipo": "string"},
+        {"nome": "regime_bens", "tipo": "string"},
+        {"nome": "profissao", "tipo": "string"},
+        {"nome": "rg", "tipo": "string"},
+        {"nome": "cpf", "tipo": "string"},
+        {"nome": "endereco", "tipo": "string"},
+        {"nome": "percentual", "tipo": "number"},
+        {"nome": "conjuge", "tipo": "object"}
+      ]
+    },
+    {
+      "nome": "registros",
+      "tipo": "array",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": [{"numero": "R.1", "tipo": "COMPRA E VENDA", "data": "15/03/2020", "valor": 500000}],
+      "nivel_extracao": 3,
+      "confianca_esperada": "media",
+      "descricao": "Historico de registros (R.1, R.2, etc)",
+      "campos_internos": [
+        {"nome": "numero", "tipo": "string", "exemplo": "R.1"},
+        {"nome": "tipo_ato", "tipo": "string"},
+        {"nome": "data", "tipo": "date"},
+        {"nome": "valor", "tipo": "number"},
+        {"nome": "transmitentes", "tipo": "array"},
+        {"nome": "adquirentes", "tipo": "array"},
+        {"nome": "texto_completo", "tipo": "string"}
+      ]
+    },
+    {
+      "nome": "averbacoes",
+      "tipo": "array",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": [{"numero": "Av.1", "tipo": "CONSTRUCAO", "data": "20/05/2015"}],
+      "nivel_extracao": 3,
+      "confianca_esperada": "media",
+      "descricao": "Lista de averbacoes (Av.1, Av.2, etc)",
+      "campos_internos": [
+        {"nome": "numero", "tipo": "string", "exemplo": "Av.1"},
+        {"nome": "tipo", "tipo": "string"},
+        {"nome": "data", "tipo": "date"},
+        {"nome": "texto_completo", "tipo": "string"}
+      ]
+    },
+    {
+      "nome": "onus",
+      "tipo": "array",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": [{"tipo": "HIPOTECA", "credor": "CAIXA ECONOMICA FEDERAL", "valor": 300000, "status": "ATIVO"}],
+      "nivel_extracao": 3,
+      "confianca_esperada": "media",
+      "descricao": "Lista de onus e gravames",
+      "campos_internos": [
+        {"nome": "tipo", "tipo": "string", "exemplo": "HIPOTECA|PENHORA|ALIENACAO FIDUCIARIA|USUFRUTO"},
+        {"nome": "credor", "tipo": "string"},
+        {"nome": "devedor", "tipo": "string"},
+        {"nome": "valor", "tipo": "number"},
+        {"nome": "data_constituicao", "tipo": "date"},
+        {"nome": "data_cancelamento", "tipo": "date"},
+        {"nome": "status", "tipo": "string", "exemplo": "ATIVO|CANCELADO"}
+      ]
+    },
+    {
+      "nome": "indisponibilidades",
+      "tipo": "array",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": [],
+      "nivel_extracao": 3,
+      "confianca_esperada": "media",
+      "descricao": "Indisponibilidades judiciais (CNIB)"
+    },
+    {
+      "nome": "metadados_certidao",
+      "tipo": "object",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": {"data_emissao": "27/01/2026", "validade_dias": 30},
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Metadados da certidao",
+      "campos_internos": [
+        {"nome": "tipo_certidao", "tipo": "string", "exemplo": "INTEIRO TEOR|ONUS REAIS|NEGATIVA"},
+        {"nome": "data_emissao", "tipo": "date"},
+        {"nome": "data_validade", "tipo": "date"},
+        {"nome": "validade_dias", "tipo": "number"},
+        {"nome": "selo_digital", "tipo": "string"},
+        {"nome": "codigo_verificacao", "tipo": "string"},
+        {"nome": "escrevente", "tipo": "string"},
+        {"nome": "oficial", "tipo": "string"}
+      ]
+    },
+    {
+      "nome": "situacao_imovel",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "(LIVRE|COM ONUS|INDISPONIVEL)",
+      "exemplo": "LIVRE",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Situacao geral do imovel"
+    }
+  ],
+  "padroes_identificacao": [
+    "MATRICULA",
+    "REGISTRO DE IMOVEIS",
+    "OFICIAL DE REGISTRO",
+    "LIVRO 2",
+    "CERTIDAO",
+    "ONUS REAIS",
+    "INTEIRO TEOR"
+  ],
+  "validacoes": [
+    "numero_matricula_valido",
+    "sql_formato_valido",
+    "cpf_digito_verificador",
+    "areas_consistentes",
+    "soma_percentuais_proprietarios_100"
+  ]
+}

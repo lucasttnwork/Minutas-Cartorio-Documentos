@@ -1,0 +1,112 @@
+{
+  "tipo_documento": "CNDT",
+  "versao": "1.0",
+  "descricao": "Schema de extracao para Certidao Negativa de Debitos Trabalhistas",
+  "complexidade": "BAIXA",
+  "campos": [
+    {
+      "nome": "numero_certidao",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "\\d{20,}",
+      "exemplo": "12345678901234567890",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Numero da certidao (20+ digitos)"
+    },
+    {
+      "nome": "nome_pessoa",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "JOAO DA SILVA",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Nome da pessoa ou razao social"
+    },
+    {
+      "nome": "cpf",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}",
+      "exemplo": "123.456.789-00",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "CPF do titular"
+    },
+    {
+      "nome": "cnpj",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}",
+      "exemplo": "12.345.678/0001-90",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "CNPJ se pessoa juridica"
+    },
+    {
+      "nome": "data_expedicao",
+      "tipo": "date",
+      "obrigatorio": true,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "27/01/2026",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data de emissao da certidao"
+    },
+    {
+      "nome": "hora_expedicao",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d{2}:\\d{2}(:\\d{2})?",
+      "exemplo": "10:30:45",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Hora de emissao da certidao"
+    },
+    {
+      "nome": "data_validade",
+      "tipo": "date",
+      "obrigatorio": true,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "26/07/2026",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data de validade (180 dias)"
+    },
+    {
+      "nome": "status_certidao",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "(NADA CONSTA|POSITIVA|NEGATIVA)",
+      "exemplo": "NADA CONSTA",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Resultado da certidao"
+    },
+    {
+      "nome": "orgao_emissor",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "TRIBUNAL SUPERIOR DO TRABALHO",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Orgao emissor (TST)"
+    }
+  ],
+  "padroes_identificacao": [
+    "CNDT",
+    "CERTIDAO NEGATIVA DE DEBITOS TRABALHISTAS",
+    "TRIBUNAL SUPERIOR DO TRABALHO",
+    "TST",
+    "JUSTICA DO TRABALHO",
+    "NADA CONSTA"
+  ],
+  "validacoes": [
+    "cpf_digito_verificador",
+    "cnpj_digito_verificador",
+    "data_validade_futura",
+    "validade_180_dias"
+  ]
+}

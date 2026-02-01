@@ -1,0 +1,24 @@
+-- Seed data for Minutas Cartorio
+-- This file runs after migrations during `supabase db reset`
+
+-- ============================================
+-- NOTA SOBRE USUARIO ADMIN
+-- ============================================
+-- O usuario admin nao pode ser criado diretamente via SQL no seed
+-- porque auth.users e gerenciado pelo Supabase Auth.
+--
+-- Para criar o usuario admin, use uma das opcoes:
+--
+-- 1. Edge Function bootstrap-admin (recomendado):
+--    curl -X POST http://127.0.0.1:54321/functions/v1/bootstrap-admin
+--
+-- 2. Supabase Studio:
+--    http://127.0.0.1:54323 → Authentication → Users → Add user
+--
+-- Credenciais de desenvolvimento:
+--   Email: admin@minutas.local
+--   Password: admin123456
+-- ============================================
+
+-- Aqui podem ser adicionados dados de seed adicionais se necessario
+-- Por exemplo, configuracoes padrao, templates, etc.

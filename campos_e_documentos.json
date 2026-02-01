@@ -420,7 +420,7 @@
   },
 
   "tipos_documentos": {
-    "total": 26,
+    "total": 27,
     "lista": [
       "RG",
       "CNH",
@@ -435,6 +435,7 @@
       "CND_MUNICIPAL",
       "CND_IMOVEL",
       "CND_CONDOMINIO",
+      "CERTIDAO_DISTRIBUIDOR",
       "CONTRATO_SOCIAL",
       "MATRICULA_IMOVEL",
       "ITBI",
@@ -550,6 +551,23 @@
         "pessoa_natural": ["pn_nome"],
         "dados_imovel": ["im_complemento"]
       }
+    },
+    "CERTIDAO_DISTRIBUIDOR": {
+      "descricao": "Certidoes de Distribuidores (Civel, Criminal, Protesto, Falencia, Execucao Fiscal, Interdicao)",
+      "campos_extraiveis": {
+        "pessoa_natural": ["pn_nome", "pn_cpf"],
+        "pessoa_juridica": ["pj_denominacao", "pj_cnpj"]
+      },
+      "campos_especificos": {
+        "certidao": ["cd_tipo", "cd_orgao_emissor", "cd_comarca", "cd_estado", "cd_resultado", "cd_data_emissao", "cd_data_validade", "cd_codigo_verificacao"]
+      },
+      "subtipos": ["civel", "criminal", "protesto", "falencia", "execucao_fiscal", "interdicao"],
+      "observacoes": [
+        "Agrupa varios tipos de certidoes que atestam a situacao juridica do vendedor",
+        "Essencial para due diligence imobiliaria",
+        "Resultado deve ser NADA CONSTA para prosseguir sem ressalvas",
+        "Validade padrao de 90 dias"
+      ]
     },
     "CONTRATO_SOCIAL": {
       "descricao": "Contrato Social de Pessoa Juridica",
@@ -667,23 +685,23 @@
     "correlacoes": {
       "pn_nome": {
         "nome_exibicao": "Nome da Pessoa",
-        "documentos": ["RG", "CNH", "CPF", "CERTIDAO_NASCIMENTO", "CERTIDAO_CASAMENTO", "CERTIDAO_OBITO", "COMPROVANTE_RESIDENCIA", "CNDT", "CND_FEDERAL", "CND_ESTADUAL", "CND_MUNICIPAL", "CND_CONDOMINIO", "MATRICULA_IMOVEL", "ITBI", "IPTU", "ESCRITURA", "COMPROMISSO_COMPRA_VENDA", "PROCURACAO", "COMPROVANTE_PAGAMENTO", "ASSINATURA_DIGITAL"],
-        "total_documentos": 20
+        "documentos": ["RG", "CNH", "CPF", "CERTIDAO_NASCIMENTO", "CERTIDAO_CASAMENTO", "CERTIDAO_OBITO", "COMPROVANTE_RESIDENCIA", "CNDT", "CND_FEDERAL", "CND_ESTADUAL", "CND_MUNICIPAL", "CND_CONDOMINIO", "CERTIDAO_DISTRIBUIDOR", "MATRICULA_IMOVEL", "ITBI", "IPTU", "ESCRITURA", "COMPROMISSO_COMPRA_VENDA", "PROCURACAO", "COMPROVANTE_PAGAMENTO", "ASSINATURA_DIGITAL"],
+        "total_documentos": 21
       },
       "pn_cpf": {
         "nome_exibicao": "CPF",
-        "documentos": ["RG", "CNH", "CPF", "CERTIDAO_CASAMENTO", "CNDT", "CND_FEDERAL", "CND_ESTADUAL", "CND_MUNICIPAL", "MATRICULA_IMOVEL", "ITBI", "IPTU", "ESCRITURA", "COMPROMISSO_COMPRA_VENDA", "PROCURACAO"],
-        "total_documentos": 14
+        "documentos": ["RG", "CNH", "CPF", "CERTIDAO_CASAMENTO", "CNDT", "CND_FEDERAL", "CND_ESTADUAL", "CND_MUNICIPAL", "CERTIDAO_DISTRIBUIDOR", "MATRICULA_IMOVEL", "ITBI", "IPTU", "ESCRITURA", "COMPROMISSO_COMPRA_VENDA", "PROCURACAO"],
+        "total_documentos": 15
       },
       "pj_denominacao": {
         "nome_exibicao": "Razao Social",
-        "documentos": ["CNDT", "CND_FEDERAL", "CND_ESTADUAL", "CND_MUNICIPAL", "CONTRATO_SOCIAL", "MATRICULA_IMOVEL", "ITBI", "ESCRITURA", "COMPROMISSO_COMPRA_VENDA", "PROCURACAO", "COMPROVANTE_PAGAMENTO"],
-        "total_documentos": 11
+        "documentos": ["CNDT", "CND_FEDERAL", "CND_ESTADUAL", "CND_MUNICIPAL", "CERTIDAO_DISTRIBUIDOR", "CONTRATO_SOCIAL", "MATRICULA_IMOVEL", "ITBI", "ESCRITURA", "COMPROMISSO_COMPRA_VENDA", "PROCURACAO", "COMPROVANTE_PAGAMENTO"],
+        "total_documentos": 12
       },
       "pj_cnpj": {
         "nome_exibicao": "CNPJ",
-        "documentos": ["CNDT", "CND_FEDERAL", "CND_ESTADUAL", "CND_MUNICIPAL", "CONTRATO_SOCIAL", "MATRICULA_IMOVEL", "ITBI", "ESCRITURA", "COMPROMISSO_COMPRA_VENDA", "PROCURACAO"],
-        "total_documentos": 10
+        "documentos": ["CNDT", "CND_FEDERAL", "CND_ESTADUAL", "CND_MUNICIPAL", "CERTIDAO_DISTRIBUIDOR", "CONTRATO_SOCIAL", "MATRICULA_IMOVEL", "ITBI", "ESCRITURA", "COMPROMISSO_COMPRA_VENDA", "PROCURACAO"],
+        "total_documentos": 11
       },
       "im_logradouro": {
         "nome_exibicao": "Logradouro do Imovel",

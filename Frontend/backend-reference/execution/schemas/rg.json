@@ -1,0 +1,162 @@
+{
+  "tipo_documento": "RG",
+  "versao": "1.0",
+  "descricao": "Schema de extracao para Carteira de Identidade (Registro Geral)",
+  "complexidade": "ALTA",
+  "campos": [
+    {
+      "nome": "numero_rg",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "\\d{1,2}\\.?\\d{3}\\.?\\d{3}-?[\\dXx]",
+      "exemplo": "12.345.678-9",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Numero do RG com digito verificador"
+    },
+    {
+      "nome": "nome_completo",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "MARINA AYUB",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Nome completo do titular"
+    },
+    {
+      "nome": "data_nascimento",
+      "tipo": "date",
+      "obrigatorio": true,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "10/05/1985",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data de nascimento no formato DD/MM/AAAA"
+    },
+    {
+      "nome": "naturalidade",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ\\s]+/[A-Z]{2}",
+      "exemplo": "SAO PAULO/SP",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Cidade e estado de nascimento"
+    },
+    {
+      "nome": "data_expedicao",
+      "tipo": "date",
+      "obrigatorio": false,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "15/03/2020",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data de emissao do documento"
+    },
+    {
+      "nome": "nome_pai",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "JOSE DA SILVA",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Nome completo do pai"
+    },
+    {
+      "nome": "nome_mae",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇa-zàáâãéêíóôõúç\\s]+",
+      "exemplo": "MARIA DA SILVA",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Nome completo da mae"
+    },
+    {
+      "nome": "cpf",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}",
+      "exemplo": "368.366.718-43",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "CPF impresso no RG (modelos novos)"
+    },
+    {
+      "nome": "doc_origem",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "CERTIDAO DE NASCIMENTO",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Documento de origem (certidao nascimento/casamento)"
+    },
+    {
+      "nome": "orgao_expedidor",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "[A-Z]{2,10}",
+      "exemplo": "SSP",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Orgao emissor (SSP, DETRAN, IFP, etc)"
+    },
+    {
+      "nome": "uf_expedidor",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "[A-Z]{2}",
+      "exemplo": "SP",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "UF do orgao expedidor"
+    },
+    {
+      "nome": "numero_via",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d+[aª]?\\s*[Vv][Ii][Aa]?",
+      "exemplo": "2a VIA",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Numero da via do documento"
+    },
+    {
+      "nome": "titulo_eleitor",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d{12}",
+      "exemplo": "123456789012",
+      "nivel_extracao": 1,
+      "confianca_esperada": "media",
+      "descricao": "Titulo de eleitor (RGs novos)"
+    },
+    {
+      "nome": "cns",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d{15}",
+      "exemplo": "123456789012345",
+      "nivel_extracao": 1,
+      "confianca_esperada": "media",
+      "descricao": "Cartao Nacional de Saude (RGs novos)"
+    }
+  ],
+  "padroes_identificacao": [
+    "REGISTRO GERAL",
+    "CARTEIRA DE IDENTIDADE",
+    "SECRETARIA DE SEGURANCA",
+    "SSP",
+    "IDENTIDADE",
+    "RG"
+  ],
+  "validacoes": [
+    "cpf_digito_verificador",
+    "data_nascimento_valida",
+    "data_expedicao_posterior_nascimento",
+    "uf_valida"
+  ]
+}

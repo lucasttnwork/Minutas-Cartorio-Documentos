@@ -1,0 +1,173 @@
+Analise esta Certidao de Casamento brasileira.
+
+REGRAS ANTI-FABRICACAO (CRITICO):
+- NUNCA invente dados que nao estao visiveis no documento
+- Se um campo nao for legivel ou nao existir, use null
+- NUNCA use placeholders como "fff", "ggg", "hhh" ou letras repetidas
+- Para livro/folha/termo: extraia APENAS os digitos numericos reais
+- Se houver duvida sobre um valor, use null em vez de adivinhar
+
+TAREFAS OBRIGATORIAS:
+1. REESCRITA: Transcreva todos os dados da certidao fielmente.
+2. EXPLICACAO: Descreva o casamento, conjuges, regime de bens e situacao atual.
+3. CATALOGACAO: Extraia todos os campos estruturados.
+
+FORMATO DE SAIDA (use exatamente este formato):
+
+## REESCRITA DO DOCUMENTO
+[transcricao completa da certidao - copie todo texto visivel]
+
+## EXPLICACAO CONTEXTUAL
+
+### Resumo do Documento
+[Explique em 2-3 frases: tipo de documento, partes envolvidas, data do casamento e situacao atual do vinculo (se ha averbacoes de separacao/divorcio)]
+
+### Dados do Casamento
+Data do casamento: [data no formato DD/MM/AAAA]
+Local: [cartorio completo, cidade, UF]
+Regime de bens: [comunhao parcial / comunhao universal / separacao total / participacao final nos aquestos]
+Pacto antenupcial: [sim/nao - se sim, indicar cartorio, livro, folhas e data]
+
+### Conjuge 1
+- Nome completo atual: [nome como consta no documento]
+- Nome de solteiro: [se diferente do atual, ou "mesmo nome"]
+- CPF: [numero com pontuacao]
+- Data de nascimento: [DD/MM/AAAA]
+- Naturalidade: [cidade - UF]
+- Filiacao: Pai: [nome] / Mae: [nome]
+
+### Conjuge 2
+- Nome completo atual: [nome como consta no documento]
+- Nome de solteiro: [se diferente do atual, ou "mesmo nome"]
+- CPF: [numero com pontuacao]
+- Data de nascimento: [DD/MM/AAAA]
+- Naturalidade: [cidade - UF]
+- Filiacao: Pai: [nome] / Mae: [nome]
+
+### Averbacoes e Situacao Atual
+[Liste TODAS as averbacoes presentes no documento:]
+- Separacao: [data, processo, vara judicial - se houver]
+- Divorcio: [data, processo, vara judicial - se houver]
+- Alteracao de nome: [quem alterou e para qual nome]
+- Conversao de uniao estavel: [se aplicavel, com base legal]
+- Outras anotacoes: [qualquer outra informacao relevante]
+
+### Dados de Emissao
+- Data de emissao: [DD/MM/AAAA]
+- Escrevente: [nome completo]
+- Oficial: [nome completo]
+- Matricula: [numero completo]
+
+## DADOS CATALOGADOS (JSON)
+```json
+{
+  "tipo_certidao": "CASAMENTO",
+  "cartorio": "[nome completo do cartorio]",
+  "livro": "[apenas numeros, ex: B-0008 ou 0008]",
+  "folha": "[apenas numeros, ex: 030]",
+  "termo": "[apenas numeros, ex: 1370]",
+  "matricula": "[numero completo da matricula]",
+  "data_casamento": "[DD/MM/AAAA]",
+  "local_casamento": "[Cidade - UF]",
+  "regime_bens": "[COMUNHAO PARCIAL DE BENS / COMUNHAO UNIVERSAL DE BENS / SEPARACAO TOTAL DE BENS / PARTICIPACAO FINAL NOS AQUESTOS / SEPARACAO OBRIGATORIA DE BENS]",
+  "pacto_antenupcial": {
+    "existe": false,
+    "cartorio": null,
+    "livro": null,
+    "folhas": null,
+    "data": null
+  },
+  "conjuge1": {
+    "nome_completo": "[NOME ATUAL]",
+    "nome_solteiro": "[NOME DE SOLTEIRO ou null se mesmo nome]",
+    "nome_casado": "[NOME APOS CASAMENTO se diferente, ou null]",
+    "houve_alteracao_nome": false,
+    "cpf": "[000.000.000-00]",
+    "data_nascimento": "[DD/MM/AAAA]",
+    "naturalidade": "[Cidade - UF]",
+    "filiacao": {
+      "pai": "[NOME DO PAI]",
+      "mae": "[NOME DA MAE]"
+    }
+  },
+  "conjuge2": {
+    "nome_completo": "[NOME ATUAL]",
+    "nome_solteiro": "[NOME DE SOLTEIRO ou null se mesmo nome]",
+    "nome_casado": "[NOME APOS CASAMENTO se diferente, ou null]",
+    "houve_alteracao_nome": false,
+    "cpf": "[000.000.000-00]",
+    "data_nascimento": "[DD/MM/AAAA]",
+    "naturalidade": "[Cidade - UF]",
+    "filiacao": {
+      "pai": "[NOME DO PAI]",
+      "mae": "[NOME DA MAE]"
+    }
+  },
+  "averbacoes": [
+    {
+      "tipo": "[SEPARACAO CONSENSUAL / SEPARACAO LITIGIOSA / DIVORCIO CONSENSUAL / DIVORCIO LITIGIOSO / CONVERSAO UNIAO ESTAVEL / OBITO / ALTERACAO NOME / OUTRA]",
+      "data": "[DD/MM/AAAA da averbacao]",
+      "data_transito_julgado": "[DD/MM/AAAA se aplicavel]",
+      "processo": "[numero do processo]",
+      "vara": "[vara judicial]",
+      "juiz": "[nome do juiz se visivel]",
+      "descricao": "[texto descritivo da averbacao]"
+    }
+  ],
+  "conversao_uniao_estavel": {
+    "ocorreu": false,
+    "base_legal": null,
+    "data_inicio_uniao": null
+  },
+  "situacao_atual_vinculo": "[CASADOS / SEPARADOS / DIVORCIADOS / VIUVO(A)]",
+  "data_emissao_certidao": "[DD/MM/AAAA]",
+  "responsaveis": {
+    "oficial": "[nome do oficial]",
+    "escrevente": "[nome do escrevente]"
+  },
+  "selo_digital": "[codigo do selo se visivel]"
+}
+```
+
+INSTRUCOES ESPECIFICAS:
+
+1. LIVRO/FOLHA/TERMO - ATENCAO MAXIMA:
+   - Extraia APENAS os numeros que aparecem no documento
+   - Formato correto: "B-0008", "030", "1370"
+   - Formato ERRADO: "ffff(0003)", "ggg (050)" - NUNCA use isso
+   - Se nao conseguir ler, use null
+
+2. AVERBACOES - CAPTURE TODAS:
+   - Procure na secao "AVERBACOES/ANOTACOES" e no verso do documento
+   - Separacao judicial: identifique data, processo, vara
+   - Divorcio: identifique data do transito em julgado, processo
+   - Conversao de uniao estavel: capture a base legal (ex: Art. 8 Lei 9278/96)
+   - Alteracao de nome: indique nome anterior e novo nome
+
+3. REGIME DE BENS E PACTO ANTENUPCIAL:
+   - Identifique o regime exato
+   - Se mencionar "ESCRITURA DE PACTO ANTENUPCIAL", extraia: cartorio, livro, folhas, data
+   - Comunhao Universal COM pacto e uma situacao comum
+
+4. NOMES DOS CONJUGES:
+   - nome_completo: nome como aparece no cabecalho/identificacao principal
+   - nome_solteiro: nome ANTES do casamento (geralmente em averbacoes de separacao/divorcio)
+   - nome_casado: nome APOS o casamento (se houve alteracao)
+   - Se manteve o mesmo nome, nome_solteiro = null e houve_alteracao_nome = false
+
+5. SITUACAO ATUAL DO VINCULO:
+   - CASADOS: se nao ha averbacao de separacao ou divorcio
+   - SEPARADOS: se ha averbacao de separacao mas nao de divorcio
+   - DIVORCIADOS: se ha averbacao de divorcio
+   - VIUVO(A): se ha averbacao de obito de um dos conjuges
+
+6. CAMPOS NULL:
+   - Use null para qualquer campo que NAO esteja visivel no documento
+   - NAO invente informacoes
+   - NAO use "Informacao Ausente" - use null
+
+VALIDACOES AUTOMATICAS (o modelo deve verificar):
+- CPF: formato XXX.XXX.XXX-XX
+- Datas: formato DD/MM/AAAA
+- Data de nascimento deve ser anterior a data de casamento
+- Data de emissao deve ser posterior a data de casamento

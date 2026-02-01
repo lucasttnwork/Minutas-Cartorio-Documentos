@@ -1,0 +1,86 @@
+## REGRAS OBRIGATORIAS
+
+1. **NUNCA INVENTAR DADOS**: Se um campo estiver ilegivel ou ausente, retorne null. NUNCA fabrique informacoes.
+2. **EXPLICACAO OBRIGATORIA**: O campo explicacao_contextual DEVE conter 3-5 paragrafos explicando o documento.
+3. **CAMPOS NULOS**: Preferimos null a dados fabricados. Na duvida, use null.
+4. **TRANSCRICAO LITERAL**: Para status da certidao, use EXATAMENTE o termo do documento (ex: "NAO CONSTA", nao "NADA CONSTA").
+
+---
+
+Analise esta Certidao Negativa de Debitos Trabalhistas (CNDT) brasileira.
+
+## CAMPOS CRITICOS A EXTRAIR
+
+Alem dos dados basicos, SEMPRE extraia:
+- **Base Legal**: Artigos da CLT (ex: 642-A, 883-A), leis (ex: Lei 12.440/2011), atos administrativos
+- **Orgao Emissor**: Geralmente "PODER JUDICIARIO - JUSTICA DO TRABALHO"
+- **URL de Verificacao**: Link para validar autenticidade (ex: www.tst.jus.br)
+- **Prazo de Validade**: Quando mencionado em dias (ex: "180 dias")
+- **Resultado da Certidao**: Classifique como "NEGATIVA" (sem debitos) ou "POSITIVA" (com debitos)
+- **Tipo de Pessoa**: Identifique se e "pessoa_fisica" (CPF) ou "pessoa_juridica" (CNPJ)
+
+## TAREFAS OBRIGATORIAS
+
+1. REESCRITA: Transcreva todos os dados da certidao.
+2. EXPLICACAO: Explique o status da certidao e para quem foi emitida (3-5 paragrafos).
+3. CATALOGACAO: Extraia todos os campos estruturados.
+
+## FORMATO DE SAIDA (use exatamente este formato):
+
+## REESCRITA DO DOCUMENTO
+[transcricao completa da certidao, incluindo cabecalho com orgao emissor, dados do certificado, base legal e notas]
+
+## EXPLICACAO CONTEXTUAL
+[MINIMO 3 PARAGRAFOS - Esta secao e OBRIGATORIA e deve ser detalhada]
+
+Paragrafo 1: Identifique o documento, o orgao emissor (PODER JUDICIARIO - JUSTICA DO TRABALHO), para quem foi emitido (nome completo e CPF/CNPJ), e o numero da certidao.
+
+Paragrafo 2: Explique o STATUS da certidao e seu SIGNIFICADO. Se "NAO CONSTA", significa que a pessoa/empresa esta REGULAR e nao possui debitos trabalhistas no Banco Nacional de Devedores Trabalhistas (BNDT). O resultado e uma certidao NEGATIVA. Se "CONSTA", significa que ha debitos registrados e o resultado e uma certidao POSITIVA - detalhe as implicacoes.
+
+Paragrafo 3: Informe sobre a validade da certidao (data de validade e prazo de 180 dias contados da data de expedicao), e a IMPORTANCIA de verificar a autenticidade no portal do TST (www.tst.jus.br).
+
+Paragrafo 4 (recomendado): Mencione a base legal que fundamenta a certidao - artigos da CLT (642-A e 883-A), Leis 12.440/2011 e 13.467/2017, e atos administrativos citados (ex: Ato 01/2022 da CGJT).
+
+Paragrafo 5 (opcional): Informacoes adicionais relevantes como: gratuidade da emissao, responsabilidade dos Tribunais do Trabalho pelos dados, escopo para PJ (a certidao atesta a empresa em relacao a TODOS os seus estabelecimentos, agencias ou filiais), tipos de debitos cobertos pelo BNDT.
+
+## DADOS CATALOGADOS (JSON)
+```json
+{
+  "tipo_certidao": "CNDT",
+  "orgao_emissor": "PODER JUDICIARIO - JUSTICA DO TRABALHO",
+  "nome_pessoa": "NOME COMPLETO",
+  "cpf": "000.000.000-00",
+  "cnpj": null,
+  "tipo_pessoa": "pessoa_fisica",
+  "numero_certidao": "00000000/0000",
+  "data_emissao": "DD/MM/AAAA",
+  "hora_emissao": "00:00:00",
+  "data_validade": "DD/MM/AAAA",
+  "prazo_validade_dias": 180,
+  "status": "NAO CONSTA",
+  "resultado_certidao": "NEGATIVA",
+  "situacao_regular": true,
+  "base_legal": {
+    "artigos_clt": ["642-A", "883-A"],
+    "leis": ["Lei 12.440/2011", "Lei 13.467/2017"],
+    "atos_administrativos": ["Ato 01/2022 da CGJT, de 21 de janeiro de 2022"]
+  },
+  "url_verificacao": "http://www.tst.jus.br",
+  "contato": {
+    "email": "cndt@tst.jus.br"
+  },
+  "observacoes": "Certidao emitida gratuitamente. Dados sob responsabilidade dos Tribunais do Trabalho. Para PJ, atesta todos os estabelecimentos, agencias e filiais."
+}
+```
+
+## NOTAS IMPORTANTES
+
+- O status deve ser EXATAMENTE como aparece no documento: "NAO CONSTA" ou "CONSTA"
+- Classifique resultado_certidao: "NEGATIVA" (NAO CONSTA = sem debitos = BOM) ou "POSITIVA" (CONSTA = com debitos)
+- situacao_regular: true se NAO CONSTA, false se CONSTA
+- Mantenha a formatacao do CPF/CNPJ com pontos e hifens
+- Identifique tipo_pessoa baseado no documento presente (CPF = pessoa_fisica, CNPJ = pessoa_juridica)
+- SEMPRE extraia a base legal quando visivel no documento (artigos CLT, leis, atos)
+- SEMPRE extraia a URL de verificacao (geralmente www.tst.jus.br)
+- O campo observacoes deve incluir informacoes complementares como gratuidade, responsabilidade dos dados, e escopo para PJ
+- Se a base legal nao estiver visivel, use null para o campo base_legal

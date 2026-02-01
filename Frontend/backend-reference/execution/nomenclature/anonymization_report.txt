@@ -1,0 +1,263 @@
+======================================================================
+RELATÓRIO DE ANONIMIZAÇÃO
+======================================================================
+Data: 2026-01-30 12:24:11
+Arquivo: canonical_fields.json
+Modo: APLICAÇÃO REAL
+
+RESUMO:
+  Total de campos: 200
+  Campos com exemplos: 200
+  Campos anonimizados: 56
+  Campos preservados: 144
+
+CAMPOS ANONIMIZADOS (56):
+  - pn_nome:
+      Antes: MARINA AYUB
+      Depois: JOAO SILVA
+      Razão: anonimizado (nome)
+  - pn_cpf:
+      Antes: 368.366.718-43
+      Depois: 111.222.333-44
+      Razão: anonimizado (cpf)
+  - pn_data_emissao_rg:
+      Antes: 15/03/2020
+      Depois: 01/01/2020
+      Razão: anonimizado (data)
+  - pn_data_nascimento:
+      Antes: 10/05/1985
+      Depois: 01/01/1990
+      Razão: anonimizado (data)
+  - pn_data_obito:
+      Antes: 20/01/2025
+      Depois: 01/01/2023
+      Razão: anonimizado (data)
+  - pn_cnh:
+      Antes: 01234567890
+      Depois: 11111111111
+      Razão: anonimizado (cnh)
+  - pn_data_casamento:
+      Antes: 15/06/2010
+      Depois: 01/01/2010
+      Razão: anonimizado (data)
+  - pn_data_separacao:
+      Antes: 20/03/2020
+      Depois: 01/01/2020
+      Razão: anonimizado (data)
+  - pn_data_divorcio:
+      Antes: 10/08/2021
+      Depois: 01/01/2021
+      Razão: anonimizado (data)
+  - pn_data_falecimento_conjuge:
+      Antes: 05/12/2023
+      Depois: 01/01/2024
+      Razão: anonimizado (data)
+  - pn_data_extincao_uniao_estavel:
+      Antes: 30/06/2022
+      Depois: 01/01/2020
+      Razão: anonimizado (data)
+  - pn_domicilio_logradouro:
+      Antes: RUA DAS FLORES
+      Depois: RUA EXEMPLO
+      Razão: anonimizado (logradouro)
+  - pn_domicilio_cep:
+      Antes: 01234-567
+      Depois: 00000-000
+      Razão: anonimizado (cep)
+  - pn_cndt_data_expedicao:
+      Antes: 25/01/2026
+      Depois: 01/01/2021
+      Razão: anonimizado (data)
+  - pn_cndt_hora_expedicao:
+      Antes: 14:30:00
+      Depois: 10:00:00
+      Razão: anonimizado (hora)
+  - pn_certidao_uniao_data_emissao:
+      Antes: 20/01/2026
+      Depois: 01/01/2022
+      Razão: anonimizado (data)
+  - pn_certidao_uniao_hora_emissao:
+      Antes: 10:15:00
+      Depois: 14:00:00
+      Razão: anonimizado (hora)
+  - pn_certidao_uniao_validade:
+      Antes: 20/07/2026
+      Depois: 01/01/2020
+      Razão: anonimizado (data)
+  - pn_certidao_uniao_codigo_controle:
+      Antes: ABCD.1234.EFGH.5678
+      Depois: AAAA.1111.AAAA.1111
+      Razão: anonimizado (codigo)
+  - pj_cnpj:
+      Antes: 12.345.678/0001-90
+      Depois: 11.111.111/0001-11
+      Razão: anonimizado (cnpj)
+  - pj_nire:
+      Antes: 35123456789
+      Depois: 11111111111
+      Razão: anonimizado (nire)
+  - pj_sede_logradouro:
+      Antes: AVENIDA PAULISTA
+      Depois: AVENIDA EXEMPLO
+      Razão: anonimizado (logradouro)
+  - pj_sede_cep:
+      Antes: 01310-100
+      Depois: 00000-000
+      Razão: anonimizado (cep)
+  - pj_data_sessao_registro:
+      Antes: 15/03/2020
+      Depois: 01/01/2023
+      Razão: anonimizado (data)
+  - pj_data_expedicao_ficha_cadastral:
+      Antes: 20/01/2026
+      Depois: 01/01/2020
+      Razão: anonimizado (data)
+  - pj_data_expedicao_certidao_registro:
+      Antes: 22/01/2026
+      Depois: 01/01/2021
+      Razão: anonimizado (data)
+  - pj_admin_cpf:
+      Antes: 123.456.789-00
+      Depois: 222.333.444-55
+      Razão: anonimizado (cpf)
+  - pj_admin_data_emissao_rg:
+      Antes: 15/06/2015
+      Depois: 01/01/2022
+      Razão: anonimizado (data)
+  - pj_admin_cnh:
+      Antes: 01234567890
+      Depois: 22222222222
+      Razão: anonimizado (cnh)
+  - pj_admin_data_nascimento:
+      Antes: 10/05/1980
+      Depois: 01/01/1985
+      Razão: anonimizado (data)
+  - pj_admin_domicilio_cep:
+      Antes: 01234-567
+      Depois: 00000-000
+      Razão: anonimizado (cep)
+  - pj_admin_email:
+      Antes: admin@empresa.com
+      Depois: exemplo@email.com
+      Razão: anonimizado (email)
+  - pj_data_ata_admin:
+      Antes: 10/01/2024
+      Depois: 01/01/2020
+      Razão: anonimizado (data)
+  - pj_procurador_cpf:
+      Antes: 987.654.321-00
+      Depois: 333.444.555-66
+      Razão: anonimizado (cpf)
+  - pj_procurador_rg:
+      Antes: 98.765.432-1
+      Depois: 11.111.111-1
+      Razão: anonimizado (rg)
+  - pj_procurador_data_emissao_rg:
+      Antes: 10/03/2018
+      Depois: 01/01/2023
+      Razão: anonimizado (data)
+  - pj_procurador_cnh:
+      Antes: 09876543210
+      Depois: 33333333333
+      Razão: anonimizado (cnh)
+  - pj_procurador_data_nascimento:
+      Antes: 15/08/1975
+      Depois: 01/01/1980
+      Razão: anonimizado (data)
+  - pj_procurador_domicilio_cep:
+      Antes: 01234-567
+      Depois: 00000-000
+      Razão: anonimizado (cep)
+  - pj_procurador_email:
+      Antes: procurador@email.com
+      Depois: teste@exemplo.com
+      Razão: anonimizado (email)
+  - pj_data_procuracao:
+      Antes: 15/12/2025
+      Depois: 01/01/2020
+      Razão: anonimizado (data)
+  - pj_data_expedicao_certidao_procuracao:
+      Antes: 20/12/2025
+      Depois: 01/01/2020
+      Razão: anonimizado (data)
+  - pj_cndt_data_expedicao:
+      Antes: 25/01/2026
+      Depois: 01/01/2021
+      Razão: anonimizado (data)
+  - pj_cndt_hora_expedicao:
+      Antes: 15:45:00
+      Depois: 16:00:00
+      Razão: anonimizado (hora)
+  - pj_certidao_uniao_data_emissao:
+      Antes: 22/01/2026
+      Depois: 01/01/2022
+      Razão: anonimizado (data)
+  - pj_certidao_uniao_hora_emissao:
+      Antes: 11:30:00
+      Depois: 10:00:00
+      Razão: anonimizado (hora)
+  - pj_certidao_uniao_validade:
+      Antes: 22/07/2026
+      Depois: 01/01/2020
+      Razão: anonimizado (data)
+  - pj_certidao_uniao_codigo_controle:
+      Antes: WXYZ.9876.ABCD.5432
+      Depois: AAAA.1111.AAAA.1111
+      Razão: anonimizado (codigo)
+  - im_cep:
+      Antes: 01234-567
+      Depois: 00000-000
+      Razão: anonimizado (cep)
+  - im_data_certidao_cadastro:
+      Antes: 20/01/2026
+      Depois: 01/01/2020
+      Razão: anonimizado (data)
+  - im_cnd_iptu_data:
+      Antes: 25/01/2026
+      Depois: 01/01/2020
+      Razão: anonimizado (data)
+  - im_proprietario_data_registro:
+      Antes: 15/06/2015
+      Depois: 01/01/2020
+      Razão: anonimizado (data)
+  - im_onus_data_registro:
+      Antes: 20/03/2020
+      Depois: 01/01/2020
+      Razão: anonimizado (data)
+  - im_onus_titular_nome:
+      Antes: BANCO XYZ S.A.
+      Depois: MARIA SANTOS
+      Razão: anonimizado (nome)
+  - ng_pagamento_data:
+      Antes: 25/01/2026
+      Depois: 01/01/2020
+      Razão: anonimizado (data)
+  - ng_itbi_data_pagamento:
+      Antes: 25/01/2026
+      Depois: 01/01/2020
+      Razão: anonimizado (data)
+
+CAMPOS PRESERVADOS (144):
+  - pn_rg: "12.345.678-9" (preservado (rg, já genérico))
+  - pn_orgao_emissor_rg: "SSP" (preservado (unknown, já genérico))
+  - pn_estado_emissor_rg: "SP" (preservado (unknown, já genérico))
+  - pn_nacionalidade: "BRASILEIRO" (preservado (unknown, já genérico))
+  - pn_profissao: "ENGENHEIRO" (preservado (unknown, já genérico))
+  - pn_orgao_emissor_cnh: "DETRAN-SP" (preservado (unknown, já genérico))
+  - pn_estado_civil: "CASADO" (preservado (unknown, já genérico))
+  - pn_regime_bens: "COMUNHAO PARCIAL DE BENS" (preservado (unknown, já genérico))
+  - pn_uniao_estavel: "SIM" (preservado (unknown, já genérico))
+  - pn_regime_bens_uniao_estavel: "COMUNHAO PARCIAL DE BENS" (preservado (unknown, já genérico))
+  - pn_data_uniao_estavel: "01/01/2015" (preservado (data, já genérico))
+  - pn_filiacao_pai: "JOSE DA SILVA" (preservado (unknown, já genérico))
+  - pn_filiacao_mae: "MARIA DA SILVA" (preservado (unknown, já genérico))
+  - pn_naturalidade: "SAO PAULO/SP" (preservado (unknown, já genérico))
+  - pn_domicilio_numero: "123" (preservado (numero_endereco, já genérico))
+  - pn_domicilio_complemento: "APTO 101" (preservado (unknown, já genérico))
+  - pn_domicilio_bairro: "CENTRO" (preservado (unknown, já genérico))
+  - pn_domicilio_cidade: "SAO PAULO" (preservado (unknown, já genérico))
+  - pn_domicilio_estado: "SP" (preservado (unknown, já genérico))
+  - pn_email: "email@exemplo.com" (preservado (email, já genérico))
+  ... e mais 124 campos
+
+======================================================================

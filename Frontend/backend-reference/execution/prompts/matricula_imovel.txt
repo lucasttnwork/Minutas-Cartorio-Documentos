@@ -1,0 +1,484 @@
+# PROMPT PARA ANÁLISE DE MATRÍCULA DE IMÓVEL - v2.0 CORRIGIDO
+
+## REGRAS OBRIGATÓRIAS (LEIA PRIMEIRO!)
+
+1. **CADEIA DOMINIAL COMPLETA**: Você DEVE listar TODOS os proprietários desde a abertura da matrícula até hoje. NUNCA omita o proprietário original.
+
+2. **ÔNUS COMPLETOS**: Capture TANTO ônus ativos QUANTO históricos (cancelados). Use campos separados: `onus_ativos` e `onus_historicos`.
+
+3. **VERIFICAR CANCELAMENTOS**: Procure SEMPRE por termos como "CANCELADA", "QUITADA", "BAIXADA" nas averbações. Um ônus cancelado NÃO deve aparecer em `onus_ativos`.
+
+4. **NUNCA CONFUNDIR**:
+   - OFICIAL DO CARTÓRIO (oficiais, escreventes, etc.) ≠ PARTE DO NEGÓCIO (vendedor, comprador)
+   - O oficial CERTIFICA o documento, ele NÃO É vendedor/comprador
+
+5. **NUNCA INVENTAR DADOS**: Se algo está ilegível ou ausente, retorne `null`. NUNCA invente datas, valores ou nomes.
+
+6. **EXPLICAÇÃO CONTEXTUAL OBRIGATÓRIA**: O campo `explicacao_contextual` DEVE conter 3-5 parágrafos explicando a história do imóvel. NUNCA deixe vazio ou com apenas "#".
+
+---
+
+## CONTEXTO DO DOCUMENTO
+
+Uma **matrícula de imóvel** é o documento oficial que registra toda a história de um imóvel no Brasil. Ela contém:
+- **Descrição do imóvel**: endereço, áreas, confrontações
+- **Proprietários originais**: quem abriu a matrícula
+- **Registros (R-1, R-2, R-3...)**: transmissões de propriedade (vendas, doações, heranças) e ônus (hipotecas, penhoras)
+- **Averbações (AV-1, AV-2...)**: modificações, cancelamentos, alterações de estado civil
+
+**O que são R-X e AV-X?**
+- **R-1, R-2, R-3...** = REGISTROS. Podem ser:
+  - Transmissão de propriedade (venda, doação, herança)
+  - Constituição de ônus (hipoteca, alienação fiduciária, penhora)
+- **AV-1, AV-2...** = AVERBAÇÕES. Podem ser:
+  - Cancelamento de ônus (hipoteca quitada)
+  - Mudança de estado civil
+  - Alteração de denominação social de empresas
+  - Retificação de dados
+
+---
+
+## TAREFAS OBRIGATÓRIAS
+
+### 1. REESCRITA INTERPRETADA
+Transcreva o documento COMPLETO, organizando por seções:
+- Dados de identificação (matrícula, cartório, livro, ficha)
+- Descrição do imóvel
+- Proprietário original (da abertura da matrícula)
+- Todos os registros R-X em ordem
+- Todas as averbações AV-X em ordem
+- Marque claramente se há texto como "(continua no verso)"
+
+### 2. ANÁLISE DA CADEIA DOMINIAL (CRÍTICO!)
+
+**PASSO A PASSO OBRIGATÓRIO:**
+
+a) **Identifique o PROPRIETÁRIO ORIGINAL**:
+   - Está no início da matrícula, após a descrição do imóvel
+   - Geralmente começa com "Proprietário:" ou logo após a descrição
+   - Inclui o TÍTULO AQUISITIVO (ex: "conforme Transcrição nº 00.000")
+
+b) **Siga CADA registro R-X cronologicamente**:
+   - R-1: Quem transmitiu? Para quem? Que tipo de ato? (venda, doação, hipoteca?)
+   - R-2: Mesmo processo
+   - Continue até o último registro
+
+c) **Verifique averbações de cancelamento**:
+   - Procure por "CANCELADA", "QUITADA", "BAIXADA"
+   - Se encontrar, o ônus correspondente está EXTINTO
+
+d) **Determine os PROPRIETÁRIOS ATUAIS**:
+   - São os ÚLTIMOS ADQUIRENTES de uma transmissão de propriedade (não de ônus)
+   - Se não houve nenhuma transmissão após a abertura, é o proprietário original
+
+### 3. ANÁLISE DE ÔNUS E GRAVAMES
+
+**Tipos de ônus comuns:**
+- HIPOTECA: Garantia de empréstimo
+- ALIENAÇÃO FIDUCIÁRIA: O credor é "dono" até quitação
+- PENHORA: Bloqueio judicial
+- USUFRUTO: Direito de uso por terceiro
+- SALDO DEVEDOR: Parcelamento ao vendedor
+
+**Para CADA ônus identificado:**
+1. Verifique se há averbação de cancelamento posterior
+2. Se CANCELADO → vai para `onus_historicos`
+3. Se ATIVO → vai para `onus_ativos`
+4. Se documento truncado ("continua no verso") → marque status como "DESCONHECIDO"
+
+### 4. CATALOGAÇÃO DE DADOS
+
+Extraia TODOS os dados estruturados conforme schema abaixo.
+
+---
+
+## FORMATO DE SAÍDA OBRIGATÓRIO
+
+Use EXATAMENTE este formato:
+
+```
+## REESCRITA DO DOCUMENTO
+
+[Transcrição completa organizada por seções]
+
+---
+
+## EXPLICAÇÃO CONTEXTUAL
+
+### Resumo da Matrícula
+[Parágrafo 1: Descrição geral do imóvel - o que é, onde fica, quando a matrícula foi aberta]
+
+### Cadeia Dominial Completa
+[Parágrafo 2-3: Conte a história de propriedade. Quem era o dono original? Para quem vendeu? Quando? Por quanto? Houve financiamento?]
+
+### Status dos Ônus
+[Parágrafo 4: Quais ônus existiram? Quais foram cancelados? Quais ainda estão ativos?]
+
+### Situação Atual
+[Parágrafo 5: Quem são os proprietários atuais? O imóvel está livre de ônus? Há algum alerta importante?]
+
+---
+
+## DADOS CATALOGADOS
+```json
+{
+  "tipo_documento": "MATRICULA_IMOVEL",
+  "numero_matricula": "00.000",
+  "livro": "2 - REGISTRO GERAL",
+  "ficha": "1",
+  "cartorio": "1º Registro de Imóveis de Cidade",
+  "data_abertura_matricula": "DD/MM/AAAA",
+
+  "imovel": {
+    "tipo_unidade": "apartamento|vaga_garagem|casa|sala_comercial|terreno|outro",
+    "descricao_completa": "Unidade autônoma nº 000 no 0º andar do Edifício Exemplo, Bloco A",
+    "endereco": {
+      "logradouro": "Rua Exemplo",
+      "numero": "000",
+      "complemento": "Apto 000, Bloco A",
+      "edificio": "Edifício Exemplo",
+      "bairro": "Bairro Exemplo",
+      "subdistrito": "0º subdistrito",
+      "cidade": "Cidade",
+      "uf": "UF",
+      "cep": null
+    },
+    "sql": "000.000.0000-0",
+    "area_util_m2": 00.00,
+    "area_comum_m2": 00.00,
+    "area_total_m2": 00.00,
+    "fracao_ideal": "0,00000%"
+  },
+
+  "cadeia_dominial": [
+    {
+      "sequencia": 1,
+      "tipo": "ABERTURA_MATRICULA",
+      "registro": "MATRICULA",
+      "data": "DD/MM/AAAA",
+      "proprietarios": [
+        {
+          "nome": "FULANO DE TAL",
+          "cpf": "000.000.000-00",
+          "rg": "0.000.000-UF",
+          "nacionalidade": "brasileiro",
+          "profissao": "profissao_exemplo",
+          "estado_civil": "casado",
+          "regime_casamento": "comunhão universal de bens, antes da Lei 6515/77",
+          "conjuge": {
+            "nome": "SICRANA DE TAL",
+            "rg": "00000000-0-UF",
+            "profissao": "do lar"
+          },
+          "endereco": "Rua Exemplo, 00, Cidade/UF"
+        }
+      ],
+      "titulo_aquisitivo": {
+        "tipo": "TRANSCRICAO",
+        "numero": "00.000"
+      },
+      "observacoes": "Proprietário original na abertura da matrícula"
+    },
+    {
+      "sequencia": 2,
+      "tipo": "TRANSMISSAO_VENDA",
+      "registro": "R-1/00.000",
+      "data_instrumento": "DD/MM/AAAA",
+      "data_registro": "DD/MM/AAAA",
+      "transmitentes": [
+        {
+          "nome": "FULANO DE TAL",
+          "cpf": "000.000.000-00",
+          "rg": "0.000.000-UF",
+          "estado_civil": "casado",
+          "conjuge": "SICRANA DE TAL"
+        }
+      ],
+      "adquirentes": [
+        {
+          "nome": "BELTRANO DA SILVA",
+          "cpf": "000.000.000-00",
+          "rg": "0.000.000-UF",
+          "nacionalidade": "brasileira",
+          "profissao": "profissao_exemplo",
+          "estado_civil": "solteira",
+          "fracao": "não especificada (presumida 50%)"
+        },
+        {
+          "nome": "CICLANO DOS SANTOS",
+          "cpf": "000.000.000-00",
+          "rg": "0.000.000-UF",
+          "nacionalidade": "brasileiro",
+          "profissao": "profissao_exemplo",
+          "estado_civil": "separado judicialmente",
+          "endereco": "Rua Exemplo, 00, apto 00",
+          "fracao": "não especificada (presumida 50%)"
+        }
+      ],
+      "valor_transacao": {
+        "moeda": "Cr$",
+        "valor": "0.000.000,00",
+        "forma_pagamento": "Cr$ 0.000.000,00 à vista + Cr$ 0.000.000,00 parcelado"
+      },
+      "instrumento": "particular",
+      "observacoes": "Saldo devedor registrado em R-2"
+    }
+  ],
+
+  "registros_averbacoes": [
+    {
+      "numero": "R-1/00.000",
+      "tipo": "TRANSMISSAO_VENDA",
+      "data": "DD/MM/AAAA",
+      "resumo": "Venda de FULANO DE TAL para BELTRANO e CICLANO"
+    },
+    {
+      "numero": "R-2/00.000",
+      "tipo": "CONSTITUICAO_HIPOTECA",
+      "data": "DD/MM/AAAA",
+      "resumo": "Hipoteca de Cr$ 0.000.000,00 para garantir saldo devedor",
+      "status_atual": "CANCELADO por AV-5"
+    },
+    {
+      "numero": "AV-3/00.000",
+      "tipo": "CESSAO_DIREITOS_CREDITORIOS",
+      "data": "DD/MM/AAAA",
+      "resumo": "Cessão dos direitos creditórios do R-2 para BANCO EXEMPLO S/A CRÉDITO IMOBILIÁRIO"
+    },
+    {
+      "numero": "AV-4/00.000",
+      "tipo": "ALTERACAO_DENOMINACAO_SOCIAL",
+      "data": "DD/MM/AAAA",
+      "resumo": "BANCO EXEMPLO S/A CRÉDITO IMOBILIÁRIO passa a se chamar BANCO EXEMPLO S/A"
+    },
+    {
+      "numero": "AV-5/00.000",
+      "tipo": "CANCELAMENTO_HIPOTECA",
+      "data": "DD/MM/AAAA",
+      "resumo": "Hipoteca do R-2 CANCELADA mediante quitação dada pelo BANCO EXEMPLO S/A"
+    }
+  ],
+
+  "proprietarios_atuais": [
+    {
+      "nome": "BELTRANO DA SILVA",
+      "cpf": "000.000.000-00",
+      "rg": "0.000.000-UF",
+      "nacionalidade": "brasileira",
+      "profissao": "profissao_exemplo",
+      "estado_civil": "solteira",
+      "fracao": {
+        "valor": 0.5,
+        "tipo": "presumida",
+        "observacao": "Documento não especifica divisão percentual"
+      },
+      "registro_aquisicao": "R-1/00.000",
+      "data_aquisicao": "DD/MM/AAAA"
+    },
+    {
+      "nome": "CICLANO DOS SANTOS",
+      "cpf": "000.000.000-00",
+      "rg": "0.000.000-UF",
+      "nacionalidade": "brasileiro",
+      "profissao": "profissao_exemplo",
+      "estado_civil": "separado judicialmente",
+      "fracao": {
+        "valor": 0.5,
+        "tipo": "presumida",
+        "observacao": "Documento não especifica divisão percentual"
+      },
+      "registro_aquisicao": "R-1/00.000",
+      "data_aquisicao": "DD/MM/AAAA"
+    }
+  ],
+
+  "onus_ativos": [],
+
+  "onus_historicos": [
+    {
+      "tipo": "HIPOTECA",
+      "registro": "R-2/00.000",
+      "data_constituicao": "DD/MM/AAAA",
+      "valor_original": {
+        "moeda": "Cr$",
+        "valor": "0.000.000,00"
+      },
+      "credores": ["FULANO DE TAL", "SICRANA DE TAL"],
+      "credor_final": "BANCO EXEMPLO S/A",
+      "devedores": ["BELTRANO DA SILVA", "CICLANO DOS SANTOS"],
+      "status": "CANCELADO",
+      "averbacao_cancelamento": "AV-5/00.000",
+      "data_cancelamento": "DD/MM/AAAA",
+      "motivo_cancelamento": "Quitação dada pelo BANCO EXEMPLO S/A a BELTRANO DA SILVA",
+      "observacoes": "Hipoteca tinha como garantia também a matrícula 00.001"
+    }
+  ],
+
+  "matriculas_relacionadas": [
+    {
+      "numero": "00.001",
+      "tipo_relacao": "garantia_solidaria_hipoteca",
+      "registro_referencia": "R-2/00.000",
+      "observacao": "Hipoteca R-2 tinha como garantia também este imóvel"
+    }
+  ],
+
+  "cessoes_direitos": [
+    {
+      "averbacao": "AV-3/00.000",
+      "data": "DD/MM/AAAA",
+      "cedentes": ["FULANO DE TAL", "SICRANA DE TAL"],
+      "cessionario": {
+        "nome": "BANCO EXEMPLO S/A CRÉDITO IMOBILIÁRIO",
+        "cnpj": "00.000.000/0001-00"
+      },
+      "objeto": "Todos os direitos creditórios oriundos do R-2"
+    }
+  ],
+
+  "certidao_metadata": {
+    "tipo": "CERTIDAO_DIGITAL",
+    "protocolo": "000000",
+    "data_emissao": "DD/MM/AAAA",
+    "hora_emissao": "00:00:00",
+    "oficial": "Nome do Oficial",
+    "escrevente": "NOME DO ESCREVENTE",
+    "selo_digital": "0000000000000000000000000",
+    "validade_para_escrituras_dias": 30,
+    "valor_custas": "R$ 0,00",
+    "url_verificacao": null
+  },
+
+  "contexto_pagina": {
+    "pagina_atual": 1,
+    "total_paginas": 3,
+    "conteudo": "frente_e_verso_completos",
+    "documento_completo": true,
+    "alertas_pagina": []
+  },
+
+  "alertas": [
+    {
+      "gravidade": "INFO",
+      "tipo": "IMÓVEL_LIVRE",
+      "mensagem": "Imóvel está livre e desembaraçado. Última hipoteca cancelada em DD/MM/AAAA."
+    }
+  ],
+
+  "data_ultima_atualizacao": "DD/MM/AAAA"
+}
+```
+
+---
+
+## INSTRUÇÕES ESPECÍFICAS POR SITUAÇÃO
+
+### Quando o documento indica "continua no verso":
+```json
+{
+  "contexto_pagina": {
+    "documento_completo": false,
+    "alertas_pagina": ["Documento indica continuação no verso - informações podem estar incompletas"]
+  },
+  "alertas": [
+    {
+      "gravidade": "ALTA",
+      "tipo": "DOCUMENTO_INCOMPLETO",
+      "mensagem": "R-2 incompleto - documento indica continuação no verso. Solicitar página complementar."
+    }
+  ]
+}
+```
+
+### Quando NÃO há transmissão de propriedade (só a abertura):
+O proprietário original É o proprietário atual.
+
+### Quando há múltiplas transmissões (R-1, R-3, R-5...):
+Siga a cadeia até o ÚLTIMO registro de transmissão de propriedade (não de ônus).
+
+### Quando o ônus NÃO tem informação de cancelamento:
+Marque como ATIVO (princípio da cautela):
+```json
+{
+  "onus_ativos": [
+    {
+      "tipo": "HIPOTECA",
+      "registro": "R-2/00.000",
+      "status": "ATIVO",
+      "observacoes": "Sem averbação de cancelamento encontrada no documento"
+    }
+  ]
+}
+```
+
+### Como distinguir OFICIAL DO CARTÓRIO de PARTE DO NEGÓCIO:
+- **OFICIAIS/ESCREVENTES** (IGNORAR como pessoa_relacionada):
+  - Aparecem no FIM do documento, na assinatura/certificação
+  - Exemplos: "Nome do Oficial - Oficial", "Escrevente: NOME DO ESCREVENTE"
+
+- **PARTES DO NEGÓCIO** (INCLUIR como pessoa_relacionada):
+  - Aparecem NOS REGISTROS (R-X) e AVERBAÇÕES (AV-X)
+  - São: vendedores, compradores, doadores, donatários, credores, devedores
+
+### Valores em moedas antigas:
+- Cr$ = Cruzeiros (até 1986)
+- Cz$ = Cruzados (1986-1989)
+- NCz$ = Cruzados Novos (1989-1990)
+- Cr$ = Cruzeiros novamente (1990-1993)
+- CR$ = Cruzeiros Reais (1993-1994)
+- R$ = Reais (1994-atual)
+
+Mantenha o valor ORIGINAL com a moeda da época. Não converta.
+
+---
+
+## VALIDAÇÕES OBRIGATÓRIAS ANTES DE RETORNAR
+
+Antes de retornar o JSON, verifique:
+
+1. [ ] Campo `cadeia_dominial` contém o proprietário original?
+2. [ ] Campo `proprietarios_atuais` está preenchido (não vazio)?
+3. [ ] Todos os ônus com "CANCELADA/QUITADA" estão em `onus_historicos` (não em `onus_ativos`)?
+4. [ ] Campo `explicacao_contextual` tem 3-5 parágrafos (não está vazio ou com "#")?
+5. [ ] O campo `pessoa_relacionada` NÃO contém oficiais do cartório?
+6. [ ] Todas as datas são do documento (não inventadas)?
+7. [ ] Se documento truncado, há alerta em `alertas`?
+
+---
+
+## EXEMPLO COMPLETO DE EXPLICAÇÃO CONTEXTUAL (OBRIGATÓRIO!)
+
+### Modelo que DEVE ser seguido:
+
+```
+## EXPLICAÇÃO CONTEXTUAL
+
+### Resumo da Matrícula
+Esta certidão refere-se à matrícula nº 00.000, aberta em DD/MM/AAAA perante o 1º Registro de Imóveis de Cidade. O imóvel é a unidade autônoma nº 000 (apartamento) localizada no 0º andar do Edifício Exemplo, Bloco A, situado na Rua Exemplo, 000, Bairro Exemplo, Cidade/UF. O apartamento possui 00,00m² de área útil, 00,00m² de área comum, totalizando 00,00m², com fração ideal de 0,00000% no condomínio.
+
+### Cadeia Dominial Completa
+A matrícula foi aberta em nome de FULANO DE TAL e sua esposa SICRANA DE TAL, casados sob o regime de comunhão universal de bens (anterior à Lei 6515/77). O título aquisitivo original foi a Transcrição nº 00.000 (sistema de registro anterior às matrículas).
+
+No mesmo dia da abertura (DD/MM/AAAA), o casal vendeu o imóvel para BELTRANO DA SILVA (profissao_exemplo, solteira) e CICLANO DOS SANTOS (profissao_exemplo, separado judicialmente) pelo valor de Cr$ 0.000.000,00, conforme R-1/00.000. O instrumento foi particular, datado de DD/MM/AAAA.
+
+### Status dos Ônus
+Para garantir o pagamento do saldo devedor de Cr$ 0.000.000,00, foi constituída hipoteca (R-2/00.000) em favor dos vendedores. Os vendedores então cederam seus direitos creditórios ao BANCO EXEMPLO S/A CRÉDITO IMOBILIÁRIO (AV-3/00.000). Após mudança de denominação social do banco para BANCO EXEMPLO S/A (AV-4/00.000), a hipoteca foi QUITADA e formalmente CANCELADA em DD/MM/AAAA (AV-5/00.000).
+
+### Situação Atual
+Atualmente, os proprietários são BELTRANO DA SILVA (CPF 000.000.000-00) e CICLANO DOS SANTOS (CPF 000.000.000-00), em frações presumidamente iguais (50% cada), visto que o documento não especifica divisão percentual. O imóvel encontra-se LIVRE E DESEMBARAÇADO de qualquer ônus ou gravame, estando apto para alienação. A presente certidão foi emitida em DD/MM/AAAA e tem validade de 30 dias para fins de lavratura de escrituras.
+```
+
+---
+
+## LEMBRETE FINAL
+
+Este prompt foi criado para resolver os seguintes problemas críticos identificados:
+1. ❌ Proprietários atuais vazios → ✅ Sempre preencher a partir da cadeia dominial
+2. ❌ Ônus ativos vazios quando há ônus → ✅ Verificar cancelamentos antes de classificar
+3. ❌ Cadeia dominial incompleta → ✅ Incluir SEMPRE o proprietário original
+4. ❌ Oficial do cartório como vendedor → ✅ Distinguir autoridade de parte
+5. ❌ Explicação contextual vazia → ✅ Obrigatório 3-5 parágrafos
+6. ❌ Ônus históricos não capturados → ✅ Campo `onus_historicos` separado
+7. ❌ Matrículas relacionadas ignoradas → ✅ Campo `matriculas_relacionadas`
+
+SIGA ESTAS INSTRUÇÕES COM RIGOR. A precisão jurídica desta análise é CRÍTICA para operações imobiliárias.

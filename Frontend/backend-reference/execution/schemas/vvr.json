@@ -1,0 +1,69 @@
+{
+  "tipo_documento": "VVR",
+  "versao": "1.0",
+  "descricao": "Schema de extracao para Valor Venal de Referencia",
+  "complexidade": "MUITO_BAIXA",
+  "campos": [
+    {
+      "nome": "cadastro_imovel",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "\\d{3}\\.\\d{3}\\.\\d{4}-\\d",
+      "exemplo": "000.000.0000-0",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "SQL - Setor Quadra Lote do imovel"
+    },
+    {
+      "nome": "valor_venal_referencia",
+      "tipo": "number",
+      "obrigatorio": true,
+      "regex": "R\\$\\s*[\\d.,]+",
+      "exemplo": "450000.00",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Valor venal de referencia em reais"
+    },
+    {
+      "nome": "endereco_completo",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "RUA DAS FLORES, 123 - APTO 101",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Endereco completo do imovel"
+    },
+    {
+      "nome": "data_consulta",
+      "tipo": "date",
+      "obrigatorio": false,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "27/01/2026",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data da consulta do VVR"
+    },
+    {
+      "nome": "ano_referencia",
+      "tipo": "number",
+      "obrigatorio": false,
+      "regex": "\\d{4}",
+      "exemplo": "2026",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Ano de referencia do valor"
+    }
+  ],
+  "padroes_identificacao": [
+    "VALOR VENAL DE REFERENCIA",
+    "VVR",
+    "CONSULTA DE VALOR VENAL",
+    "PREFEITURA",
+    "VALOR DE REFERENCIA"
+  ],
+  "validacoes": [
+    "sql_formato_valido",
+    "valor_positivo"
+  ]
+}

@@ -1,0 +1,347 @@
+Analise este comprovante de pagamento (recibo, transferencia, PIX, boleto, guia de arrecadacao, etc).
+
+## REGRAS OBRIGATORIAS
+
+1. **CODIGO DE AUTENTICACAO**: Campo OBRIGATORIO - procurar em TODAS as paginas, especialmente pagina 2 e rodape. Exemplos: "ABCD1234567890EXEMPLO01", "ABCD1234567890EXEMPLO02"
+2. **NUNCA INVENTAR DADOS**: Se ilegivel ou ausente, retorne null. Nao use "Nao Disponivel" - use null ou "Nao Informado no Documento"
+3. **PROCESSAR TODAS AS PAGINAS**: Documentos multi-pagina DEVEM ser lidos completamente. Procure dados em TODAS as paginas
+4. **TIPO LITERAL**: tipo_comprovante = texto EXATO do cabecalho (ex: "Comprovante do Pagamento", "Comprovante de Pagamento", nao simplifique para "Transferencia" ou "Boleto")
+5. **MULTIPLOS PAGAMENTOS**: Se houver mais de um comprovante/pagamento no documento, retorne TODOS em array "pagamentos"
+6. **INSTITUICAO EMISSORA**: Identifique qual banco/instituicao EMITIU o comprovante (logotipo no topo)
+
+## ETAPA 1 - ANALISE ESTRUTURAL (Execute ANTES de extrair dados)
+
+Antes de extrair dados, analise o documento completo:
+1. Quantas PAGINAS existem no documento?
+2. Quantas vezes aparece "COMPROVANTE DE PAGAMENTO" ou "Autenticacao bancaria"?
+3. Quantos valores monetarios DISTINTOS existem?
+4. Se houver mais de um comprovante, estruture como array de pagamentos
+
+## ETAPA 2 - IDENTIFICACAO DO TIPO
+
+Analise os indicadores para classificar corretamente:
+- Codigo de barras comeca com 818 ou 8 = TRIBUTO/GUIA MUNICIPAL (NAO e boleto bancario)
+- Codigo de barras comeca com 341, 237, 033, 104, etc = BOLETO BANCARIO
+- Se tem "Empresa" ou "Convenio" = provavelmente guia de arrecadacao
+- Se recebedor e PM, Prefeitura Municipal = tributo municipal
+- Se tem chave PIX = COMPROVANTE PIX
+
+TIPOS POSSIVEIS (use o texto EXATO do cabecalho quando possivel):
+- "Comprovante do Pagamento" (Banco Exemplo A)
+- "Comprovante de Pagamento" (Banco Exemplo B)
+- "Comprovante de Transferencia PIX"
+- "Comprovante de TED"
+- "Guia de Arrecadacao Municipal"
+- "Boleto Bancario" (apenas para o documento de cobranca, NAO para comprovante de pagamento)
+
+IMPORTANTE: Um BOLETO e um documento de COBRANCA. Um COMPROVANTE DE PAGAMENTO e a PROVA de que algo foi pago. SAO DOCUMENTOS DIFERENTES.
+
+## ETAPA 3 - IDENTIFICACAO DE TRIBUTO (para pagamentos a orgaos publicos)
+
+Para guias/tributos, identifique o tipo:
+1. Analise o NOME DO ARQUIVO (ex: "comprovante ITBI AP.jpg" indica ITBI)
+2. Analise o recebedor (PM = Prefeitura Municipal)
+3. Analise o valor (ITBI: valores mais altos; IPTU: valores menores)
+4. Em contexto cartorial, valores altos para PM geralmente = ITBI
+
+TIPOS DE TRIBUTO: ITBI, IPTU, ISS, LAUDEMIO, TAXA_CARTORIO, CONTRIBUICAO_MELHORIA, OUTRO
+
+## TAREFAS OBRIGATORIAS
+
+1. **REESCRITA**: Transcreva TODOS os dados de TODAS as paginas do comprovante
+2. **EXPLICACAO**: Descreva a transacao com contexto completo (3-5 paragrafos OBRIGATORIOS)
+3. **CATALOGACAO**: Extraia todos os campos estruturados incluindo campos novos obrigatorios
+
+---
+
+## FORMATO DE SAIDA
+
+### REESCRITA DO DOCUMENTO
+
+[Transcricao completa do comprovante - TODAS AS PAGINAS]
+
+Se documento multi-pagina, separar claramente:
+=== PAGINA 1 ===
+[conteudo pagina 1]
+
+=== PAGINA 2 ===
+[conteudo pagina 2]
+
+---
+
+### EXPLICACAO CONTEXTUAL (OBRIGATORIO - 3 a 5 paragrafos)
+
+Este campo NUNCA pode estar vazio ou conter apenas "#". Deve incluir:
+
+**Paragrafo 1 - Contexto do Documento:**
+Descreva o que e este documento, qual instituicao emitiu, quantas paginas tem, se ha multiplos pagamentos.
+
+**Paragrafo 2 - Detalhes da Transacao:**
+Explique os valores, datas, partes envolvidas (pagador e recebedor), forma de pagamento.
+
+**Paragrafo 3 - Finalidade Presumida:**
+Com base no recebedor, valor e contexto, explique a provavel finalidade (ex: "Pagamento de ITBI para lavratura de escritura de compra e venda").
+
+**Paragrafo 4 - Importancia Cartorial (se aplicavel):**
+Explique por que este documento e importante em contexto cartorial (pre-requisito para escritura, comprovacao de quitacao, etc).
+
+**Paragrafo 5 - Observacoes Importantes (se aplicavel):**
+Alertas sobre multiplos pagamentos, valores divergentes, datas proximas ao vencimento, etc.
+
+---
+
+### DADOS CATALOGADOS (JSON)
+
+```json
+{
+  "metadados_documento": {
+    "numero_paginas": 2,
+    "total_pagamentos": 1,
+    "instituicao_emissora": "Banco Exemplo"
+  },
+
+  "tipo_comprovante": "Comprovante do Pagamento",
+  "subtipo_cobranca": "Guia de Arrecadacao Municipal",
+  "tipo_tributo": "ITBI",
+  "confianca_tipo_tributo": "ALTA",
+  "justificativa_tipo_tributo": "Nome do arquivo menciona ITBI, recebedor e PM CIDADE EXEMPLO",
+
+  "valor": 10000.00,
+  "valor_formatado": "R$ 10.000,00",
+  "moeda": "BRL",
+
+  "datas": {
+    "transacao": "DD/MM/AAAA",
+    "pagamento_efetivo": "DD/MM/AAAA",
+    "vencimento": "DD/MM/AAAA"
+  },
+  "hora_transacao": "00:00:00",
+  "status_pagamento": "SUCESSO",
+  "canal_pagamento": "INTERNET_BANKING",
+
+  "codigo_autenticacao": "ABCD1234567890EXEMPLO01",
+  "codigo_transacao": "E00000000000000000000000000000000",
+
+  "codigo_barras": {
+    "linha_digitavel_completa": "00000000000-0 00000000000-0 00000000000-0 00000000000-0",
+    "segmentos": ["00000000000-0", "00000000000-0", "00000000000-0", "00000000000-0"],
+    "codigo_identificacao": "000",
+    "tipo": "TRIBUTO_MUNICIPAL"
+  },
+
+  "convenio_arrecadacao": "00000000000000000000",
+
+  "pagador": {
+    "nome": "FULANO DE TAL",
+    "cpf_cnpj": "***.000.000-**",
+    "banco": "BANCO EXEMPLO S.A.",
+    "agencia": "0000",
+    "conta": "00000-0",
+    "observacao": null
+  },
+
+  "recebedor": {
+    "nome": "PM CIDADE EXEMPLO",
+    "nome_completo": "Prefeitura Municipal de Cidade Exemplo",
+    "tipo_entidade": "PREFEITURA_MUNICIPAL",
+    "cpf_cnpj": null,
+    "chave_pix": null,
+    "banco": null,
+    "agencia": null,
+    "conta": null
+  },
+
+  "descricao": "Pagamento de ITBI (Imposto de Transmissao de Bens Imoveis) para Prefeitura Municipal de Cidade Exemplo, no valor de R$ 10.000,00",
+
+  "finalidade_cartorial": "Comprovante de pagamento de ITBI necessario para lavratura de escritura publica de compra e venda de imovel",
+
+  "importancia_documento": "CRITICA",
+
+  "validacoes": {
+    "status_vencimento": "NO_PRAZO",
+    "diferenca_dias_pagamento_vencimento": 0,
+    "alertas": [],
+    "campos_inferidos": ["tipo_tributo", "recebedor.tipo_entidade"],
+    "confiabilidade_geral": "ALTA"
+  },
+
+  "observacoes": [
+    "Pagamento realizado com sucesso via Internet Banking Banco Exemplo",
+    "Documento de 2 paginas - codigo de autenticacao na pagina 2"
+  ]
+}
+```
+
+---
+
+## ESTRUTURA PARA MULTIPLOS PAGAMENTOS
+
+Se o documento contiver MAIS DE UM pagamento (comum em comprovantes de ITBI para apartamento + vaga), use esta estrutura:
+
+```json
+{
+  "metadados_documento": {
+    "numero_paginas": 2,
+    "total_pagamentos": 2,
+    "instituicao_emissora": "Banco Exemplo",
+    "valor_total": 15000.00,
+    "valor_total_formatado": "R$ 15.000,00"
+  },
+
+  "pagamentos": [
+    {
+      "numero_pagamento": 1,
+      "pagina_origem": 1,
+      "tipo_comprovante": "Comprovante de Pagamento",
+      "subtipo_cobranca": "Guia de Arrecadacao Municipal",
+      "tipo_tributo": "ITBI",
+      "objeto_tributo": "Apartamento",
+      "valor": 10000.00,
+      "valor_formatado": "R$ 10.000,00",
+      "datas": {
+        "transacao": "DD/MM/AAAA",
+        "pagamento_efetivo": "DD/MM/AAAA",
+        "vencimento": "DD/MM/AAAA"
+      },
+      "hora_transacao": "00:00:00",
+      "codigo_autenticacao": "ABCD1234567890EXEMPLO01",
+      "codigo_barras": {
+        "linha_digitavel_completa": "00000000000-0 00000000000-0 00000000000-0 00000000000-0",
+        "tipo": "TRIBUTO_MUNICIPAL"
+      },
+      "convenio_arrecadacao": "00000000000000000000",
+      "pagador": {
+        "banco": "Banco Exemplo"
+      },
+      "recebedor": {
+        "nome": "PM CIDADE EXEMPLO",
+        "tipo_entidade": "PREFEITURA_MUNICIPAL"
+      }
+    },
+    {
+      "numero_pagamento": 2,
+      "pagina_origem": 2,
+      "tipo_comprovante": "Comprovante de Pagamento",
+      "subtipo_cobranca": "Guia de Arrecadacao Municipal",
+      "tipo_tributo": "ITBI",
+      "objeto_tributo": "Vaga de garagem",
+      "valor": 5000.00,
+      "valor_formatado": "R$ 5.000,00",
+      "datas": {
+        "transacao": "DD/MM/AAAA",
+        "pagamento_efetivo": "DD/MM/AAAA",
+        "vencimento": "DD/MM/AAAA"
+      },
+      "hora_transacao": "00:00:00",
+      "codigo_autenticacao": "ABCD1234567890EXEMPLO02",
+      "codigo_barras": {
+        "linha_digitavel_completa": "00000000000-0 00000000000-0 00000000000-0 00000000000-0",
+        "tipo": "TRIBUTO_MUNICIPAL"
+      },
+      "convenio_arrecadacao": "00000000000000000000",
+      "pagador": {
+        "banco": "Banco Exemplo"
+      },
+      "recebedor": {
+        "nome": "PM CIDADE EXEMPLO",
+        "tipo_entidade": "PREFEITURA_MUNICIPAL"
+      }
+    }
+  ],
+
+  "resumo": {
+    "tipo_tributo": "ITBI",
+    "descricao_tributo": "Imposto de Transmissao de Bens Imoveis",
+    "contexto_negocio": "Transacao imobiliaria - Apartamento e vaga de garagem",
+    "beneficiario_unico": "PM CIDADE EXEMPLO"
+  },
+
+  "descricao": "Pagamentos de ITBI (total R$ 15.000,00) referentes a apartamento (R$ 10.000,00) e vaga de garagem (R$ 5.000,00) para Prefeitura Municipal de Cidade Exemplo",
+
+  "explicacao_contextual": "Documento contem DOIS comprovantes de pagamento de ITBI a Prefeitura Municipal de Cidade Exemplo, totalizando R$ 15.000,00. Os pagamentos foram realizados em sequencia no dia DD/MM/AAAA via internet banking Banco Exemplo, com vencimento para DD/MM/AAAA. Pelo nome do arquivo ('ITBI AP E VAGA'), infere-se que os pagamentos referem-se a um apartamento (R$ 10.000,00) e uma vaga de garagem (R$ 5.000,00), em uma mesma transacao imobiliaria. Estes comprovantes sao documentos obrigatorios para apresentacao em cartorio de registro de imoveis como pre-requisito para lavratura de escritura de compra e venda, conforme exigencia legal de quitacao de ITBI antes do registro."
+}
+```
+
+---
+
+## CAMPOS OBRIGATORIOS VS OPCIONAIS
+
+### OBRIGATORIOS (retorne null se nao encontrado, NUNCA omita o campo):
+- codigo_autenticacao (CRITICO - procurar em TODAS as paginas)
+- tipo_comprovante (texto EXATO do cabecalho)
+- valor
+- datas.transacao
+- pagador.banco OU instituicao_emissora
+- recebedor.nome
+- metadados_documento.numero_paginas
+
+### ALTAMENTE RECOMENDADOS:
+- datas.pagamento_efetivo (pode ser diferente de datas.transacao)
+- datas.vencimento
+- codigo_barras (quando presente)
+- convenio_arrecadacao (para tributos)
+- tipo_tributo (para pagamentos a orgaos publicos)
+- codigo_transacao (para PIX/TED)
+- canal_pagamento
+
+### OPCIONAIS:
+- contatos_instituicao
+- observacoes_documento
+- validacoes
+
+---
+
+## EXEMPLOS DE DESCRICOES CORRETAS VS INCORRETAS
+
+INCORRETO: "Pagamento de boleto bancario"
+CORRETO: "Pagamento de ITBI (Imposto de Transmissao de Bens Imoveis) para Prefeitura Municipal de Cidade Exemplo, no valor de R$ 10.000,00"
+
+INCORRETO: "Transferencia"
+CORRETO: "Comprovante do Pagamento de transferencia PIX para Tabeliao De Notas Exemplo, referente a custas cartorias"
+
+INCORRETO: "#" ou vazio
+CORRETO: "Este documento comprova o pagamento de ITBI a Prefeitura Municipal de Cidade Exemplo em duas parcelas, totalizando R$ 15.000,00, referentes a um apartamento e uma vaga de garagem. Os pagamentos foram realizados em DD/MM/AAAA via internet banking Banco Exemplo. Este comprovante e documento obrigatorio para apresentacao em cartorio como pre-requisito para lavrar escritura de compra e venda."
+
+---
+
+## VALIDACOES E ALERTAS
+
+Adicione alertas em "validacoes.alertas" quando:
+- Pagamento em atraso (data_pagamento > data_vencimento)
+- Valor muito alto (> R$ 0.000,00 - definir limite conforme contexto)
+- Datas inconsistentes (data_transacao > data_pagamento_efetivo)
+- codigo_autenticacao ausente (CRITICO)
+- Multiplos pagamentos detectados
+- Divergencia entre valores no mesmo documento
+
+---
+
+## INFERENCIAS PERMITIDAS (sempre indique em "validacoes.campos_inferidos")
+
+1. Tipo de tributo a partir do nome do arquivo ou contexto
+2. Tipo de entidade a partir do nome (PM = Prefeitura Municipal)
+3. Nome completo de entidades (PM SAO PAULO = Prefeitura Municipal de Sao Paulo)
+4. Status de pagamento a partir da comparacao de datas
+
+NUNCA infira:
+- CNPJ de orgaos publicos (use null se nao estiver explicito)
+- Dados do pagador que nao estejam no documento
+- Valores ou datas que nao estejam visiveis
+
+---
+
+## LOCALIZACAO DO CODIGO DE AUTENTICACAO
+
+O codigo de autenticacao pode estar em diferentes locais:
+1. PAGINA 2 - campo "Codigo de autenticacao" ou "Autenticacao bancaria"
+2. RODAPE de qualquer pagina
+3. Proximo ao status "Pagamento realizado com sucesso"
+4. Na secao de dados da transacao
+
+SEMPRE procure em TODAS as paginas antes de retornar null.
+
+Exemplos de formatos de autenticacao:
+- Banco Exemplo A: "ABCD1234567890EXEMPLO01", "ABCD1234567890EXEMPLO02"
+- Banco Exemplo B: combinacoes alfanumericas de 20-30 caracteres
+- Banco Exemplo C: similar ao Banco Exemplo A
+- PIX: codigo E2E (ex: "E00000000000000000000000000000000")

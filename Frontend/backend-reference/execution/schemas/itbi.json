@@ -1,0 +1,195 @@
+{
+  "tipo_documento": "ITBI",
+  "versao": "1.0",
+  "descricao": "Schema de extracao para Guia ou Comprovante de ITBI (Imposto de Transmissao de Bens Imoveis)",
+  "complexidade": "MEDIA",
+  "campos": [
+    {
+      "nome": "numero_transacao",
+      "tipo": "string",
+      "obrigatorio": true,
+      "regex": "[\\d.-]+",
+      "exemplo": "2026.123.456.789",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Numero da guia/transacao"
+    },
+    {
+      "nome": "natureza_transacao",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "(COMPRA E VENDA|PERMUTA|DOACAO|DACAO EM PAGAMENTO|ARREMATACAO|ADJUDICACAO)",
+      "exemplo": "COMPRA E VENDA",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Tipo de transmissao"
+    },
+    {
+      "nome": "dados_imovel",
+      "tipo": "object",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": {"sql": "000.000.0000-0", "endereco": "RUA DAS FLORES, 123"},
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Dados do imovel transmitido",
+      "campos_internos": [
+        {"nome": "sql", "tipo": "string"},
+        {"nome": "endereco", "tipo": "string"},
+        {"nome": "matricula", "tipo": "string"},
+        {"nome": "area", "tipo": "number"}
+      ]
+    },
+    {
+      "nome": "compradores",
+      "tipo": "array",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": [{"nome": "MARIA SANTOS", "cpf": "987.654.321-00", "percentual": 100}],
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Lista de adquirentes/compradores",
+      "campos_internos": [
+        {"nome": "nome", "tipo": "string"},
+        {"nome": "cpf", "tipo": "string"},
+        {"nome": "percentual", "tipo": "number"}
+      ]
+    },
+    {
+      "nome": "vendedores",
+      "tipo": "array",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": [{"nome": "JOAO DA SILVA", "cpf": "123.456.789-00", "percentual": 100}],
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Lista de transmitentes/vendedores",
+      "campos_internos": [
+        {"nome": "nome", "tipo": "string"},
+        {"nome": "cpf", "tipo": "string"},
+        {"nome": "percentual", "tipo": "number"}
+      ]
+    },
+    {
+      "nome": "dados_transacao",
+      "tipo": "object",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": {"valor_total": 500000.00, "data_escritura": "27/01/2026"},
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Dados da transacao",
+      "campos_internos": [
+        {"nome": "valor_total", "tipo": "number"},
+        {"nome": "data_escritura", "tipo": "date"},
+        {"nome": "financiamento", "tipo": "boolean"},
+        {"nome": "valor_financiado", "tipo": "number"},
+        {"nome": "proporcao_adquirida", "tipo": "number"}
+      ]
+    },
+    {
+      "nome": "cartorio_notas",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "1o TABELIAO DE NOTAS DE SAO PAULO",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Tabelionato de notas para lavratura"
+    },
+    {
+      "nome": "cartorio_registro",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "1o OFICIAL DE REGISTRO DE IMOVEIS DE SAO PAULO",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Cartorio de registro de imoveis"
+    },
+    {
+      "nome": "dados_calculo",
+      "tipo": "object",
+      "obrigatorio": true,
+      "regex": null,
+      "exemplo": {"vvr": 450000.00, "base_calculo": 500000.00, "aliquota": 3.0, "imposto": 15000.00},
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Dados do calculo do imposto",
+      "campos_internos": [
+        {"nome": "vvr", "tipo": "number", "descricao": "Valor Venal de Referencia"},
+        {"nome": "valor_declarado", "tipo": "number"},
+        {"nome": "base_calculo", "tipo": "number"},
+        {"nome": "aliquota", "tipo": "number", "unidade": "%"},
+        {"nome": "imposto", "tipo": "number"},
+        {"nome": "descontos", "tipo": "number"},
+        {"nome": "total_devido", "tipo": "number"}
+      ]
+    },
+    {
+      "nome": "codigo_barras",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[\\d\\s]+",
+      "exemplo": "12345.67890 12345.678901 12345.678901 1 12340000015000",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Linha digitavel do boleto"
+    },
+    {
+      "nome": "data_emissao",
+      "tipo": "date",
+      "obrigatorio": true,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "27/01/2026",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data de emissao da guia"
+    },
+    {
+      "nome": "data_vencimento",
+      "tipo": "date",
+      "obrigatorio": false,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "27/02/2026",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data de vencimento da guia"
+    },
+    {
+      "nome": "data_pagamento",
+      "tipo": "date",
+      "obrigatorio": false,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "25/01/2026",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data do pagamento (se pago)"
+    },
+    {
+      "nome": "status_pagamento",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "(PAGO|PENDENTE|VENCIDO|CANCELADO)",
+      "exemplo": "PAGO",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Status do pagamento"
+    }
+  ],
+  "padroes_identificacao": [
+    "ITBI",
+    "IMPOSTO DE TRANSMISSAO",
+    "TRANSMISSAO DE BENS IMOVEIS",
+    "INTER VIVOS",
+    "GUIA DE RECOLHIMENTO",
+    "PREFEITURA"
+  ],
+  "validacoes": [
+    "sql_formato_valido",
+    "cpf_digito_verificador",
+    "calculo_imposto_correto",
+    "base_calculo_maior_ou_igual_vvr",
+    "soma_percentuais_100"
+  ]
+}

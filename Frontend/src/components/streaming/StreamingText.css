@@ -1,0 +1,58 @@
+/* StreamingText Component Styles */
+
+.streaming-text {
+  display: inline;
+  font-family: inherit;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.6;
+  position: relative;
+}
+
+.streaming-text-content {
+  display: inline;
+}
+
+/* Cursor Styles */
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  margin-left: 2px;
+  background-color: currentColor;
+  animation: blink 1s step-end infinite;
+  vertical-align: text-bottom;
+  position: relative;
+  top: 2px;
+}
+
+/* Blinking Animation */
+@keyframes blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .streaming-text {
+    color: inherit;
+  }
+
+  .cursor {
+    background-color: currentColor;
+  }
+}
+
+/* Respects prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    animation: none;
+    opacity: 1;
+  }
+}

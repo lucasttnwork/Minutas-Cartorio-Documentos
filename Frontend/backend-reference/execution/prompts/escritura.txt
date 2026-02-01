@@ -1,0 +1,198 @@
+Analise esta Escritura Publica (compra e venda, doacao, permuta, etc).
+
+## REGRAS OBRIGATORIAS
+
+1. **NUNCA INVENTAR DADOS**: Se um campo estiver ilegivel ou ausente, retorne null. NUNCA fabrique informacoes.
+2. **EXPLICACAO OBRIGATORIA**: O campo explicacao_contextual DEVE conter 3-5 paragrafos explicando a escritura.
+3. **CAMPOS NULOS**: Preferimos null a dados fabricados. Na duvida, use null.
+4. **QUALIFICACAO COMPLETA**: Extraia TODOS os dados de qualificacao das partes (nome, CPF, RG, estado civil, conjuge, endereco).
+5. **VALORES EXATOS**: Extraia valores monetarios exatamente como constam no documento.
+
+## TAREFAS OBRIGATORIAS
+
+1. REESCRITA: Transcreva os principais termos da escritura de forma organizada.
+2. EXPLICACAO: Descreva as partes, objeto, valores e condicoes do negocio juridico (3-5 paragrafos).
+3. CATALOGACAO: Extraia todos os campos estruturados.
+
+## FORMATO DE SAIDA (use exatamente este formato):
+
+## REESCRITA DO DOCUMENTO
+[transcricao organizada da escritura - preambulo, qualificacao das partes, objeto, condicoes, clausulas]
+
+## EXPLICACAO CONTEXTUAL
+[MINIMO 3 PARAGRAFOS - Esta secao e OBRIGATORIA]
+
+Paragrafo 1: Identifique o TIPO de escritura (compra e venda, doacao, permuta, etc), o CARTORIO, a DATA e os dados de identificacao (livro, folhas).
+
+Paragrafo 2: Descreva as PARTES envolvidas - quem sao os outorgantes/vendedores e outorgados/compradores, seus dados principais e relacoes.
+
+Paragrafo 3: Descreva o IMOVEL objeto da escritura - localizacao, matricula, areas, caracteristicas principais.
+
+Paragrafo 4: Explique os VALORES e CONDICOES da transacao - preco, forma de pagamento, ITBI, financiamento se houver.
+
+Paragrafo 5 (opcional): Mencione CERTIDOES apresentadas, clausulas especiais, condicoes suspensivas ou resolutivas, onus ou gravames.
+
+### Dados da Escritura
+- Tipo: [Compra e Venda / Doacao / Permuta / etc]
+- Livro: [numero]
+- Folhas: [numeros]
+- Data: [data]
+- Cartorio: [nome completo]
+- Tabeliao: [nome]
+
+### Partes
+
+**Vendedor(es) / Outorgante(s):**
+1. [Nome completo]
+   - CPF: [numero]
+   - RG: [numero e orgao]
+   - Estado civil: [estado civil]
+   - Regime de bens: [se casado]
+   - Conjuge: [nome e CPF] (se aplicavel)
+   - Endereco: [completo]
+
+**Comprador(es) / Outorgado(s):**
+1. [Nome completo]
+   - CPF: [numero]
+   - RG: [numero e orgao]
+   - Estado civil: [estado civil]
+   - Regime de bens: [se casado]
+   - Conjuge: [nome e CPF] (se aplicavel)
+   - Endereco: [completo]
+
+### Objeto (Imovel)
+- Tipo: [apartamento/casa/terreno/sala comercial/etc]
+- Descricao: [descricao completa]
+- Endereco: [completo com CEP]
+- Matricula: [numero] no [cartorio de registro de imoveis]
+- SQL/Inscricao Municipal: [numero]
+- Area privativa: [m2]
+- Area comum: [m2]
+- Area total: [m2]
+- Fracao ideal: [percentual] (se condominio)
+- Vagas de garagem: [numero e descricao]
+
+### Valores e Condicoes
+- Valor da transacao: R$ [valor]
+- Valor declarado para ITBI: R$ [valor]
+- ITBI recolhido: Sim/Nao - Guia [numero] - Valor R$ [valor]
+- Forma de pagamento: [descricao detalhada]
+- Financiamento: [se houver, detalhar banco, valor financiado, prazo]
+
+### Certidoes Apresentadas
+[Lista de certidoes mencionadas na escritura com datas e validades]
+
+## DADOS CATALOGADOS (JSON)
+```json
+{
+  "tipo_escritura": "COMPRA E VENDA",
+  "cartorio": "Nome completo do tabelionato",
+  "tabeliao": "NOME DO TABELIAO",
+  "livro": "0001",
+  "folhas": "001-010",
+  "data_lavratura": "DD/MM/AAAA",
+  "explicacao_contextual": "OBRIGATORIO: 3-5 paragrafos descrevendo a escritura, partes, imovel, valores e condicoes",
+  "partes": {
+    "outorgantes_vendedores": [
+      {
+        "nome": "NOME COMPLETO",
+        "cpf": "000.000.000-00",
+        "rg": "00.000.000-0 SSP/SP",
+        "estado_civil": "CASADO",
+        "profissao": null,
+        "nacionalidade": "BRASILEIRO",
+        "regime_bens": "COMUNHAO PARCIAL DE BENS",
+        "conjuge": {
+          "nome": "NOME DO CONJUGE",
+          "cpf": "000.000.000-00",
+          "rg": "00.000.000-0 SSP/SP"
+        },
+        "endereco": "Rua Exemplo, 123, Bairro, Cidade - UF, CEP 00000-000"
+      }
+    ],
+    "outorgados_compradores": [
+      {
+        "nome": "NOME COMPLETO",
+        "cpf": "000.000.000-00",
+        "rg": "00.000.000-0 SSP/SP",
+        "estado_civil": "SOLTEIRO",
+        "profissao": null,
+        "nacionalidade": "BRASILEIRO",
+        "regime_bens": null,
+        "conjuge": null,
+        "endereco": "Rua Exemplo, 456, Bairro, Cidade - UF, CEP 00000-000"
+      }
+    ],
+    "procuradores": [],
+    "intervenientes": []
+  },
+  "imovel": {
+    "tipo": "APARTAMENTO",
+    "descricao": "Apartamento residencial",
+    "endereco_completo": "Rua Exemplo, 789, Apto 101, Bairro, Cidade - UF, CEP 00000-000",
+    "matricula": "00000",
+    "cartorio_ri": "Xo Cartorio de Registro de Imoveis de Cidade - UF",
+    "sql_inscricao_municipal": "000.000.0000-0",
+    "contribuinte": null,
+    "area_privativa_m2": 70.00,
+    "area_comum_m2": 10.00,
+    "area_total_m2": 80.00,
+    "area_terreno_m2": null,
+    "fracao_ideal": "0,5000%",
+    "vagas_garagem": 1,
+    "descricao_vagas": "Vaga indeterminada no subsolo",
+    "unidade": "101",
+    "bloco_torre": null,
+    "condominio": "Condominio Edificio Exemplo"
+  },
+  "valores": {
+    "valor_transacao": 500000.00,
+    "valor_declarado_itbi": 500000.00,
+    "valor_venal_referencia": null,
+    "valor_financiado": null,
+    "valor_recursos_proprios": 500000.00,
+    "valor_fgts": null,
+    "moeda": "BRL"
+  },
+  "pagamento": {
+    "forma_pagamento": "A VISTA",
+    "descricao_detalhada": "Pago neste ato mediante transferencia bancaria",
+    "parcelas": null,
+    "banco_financiador": null,
+    "contrato_financiamento": null
+  },
+  "itbi": {
+    "guia_numero": "000000000000",
+    "valor_recolhido": null,
+    "data_recolhimento": null,
+    "aliquota": null
+  },
+  "certidoes_apresentadas": [
+    {
+      "tipo": "CNDT",
+      "descricao": "Certidao Negativa de Debitos Trabalhistas",
+      "data_emissao": null,
+      "validade": null
+    },
+    {
+      "tipo": "CND_FEDERAL",
+      "descricao": "Certidao de Debitos Federais",
+      "data_emissao": null,
+      "validade": null
+    }
+  ],
+  "clausulas_especiais": [],
+  "onus_gravames": null,
+  "observacoes": null
+}
+```
+
+## NOTAS IMPORTANTES
+
+- Extraia TODOS os dados de qualificacao das partes, mesmo que extensos
+- Se houver procurador, identifique tambem o outorgante da procuracao
+- Valores monetarios devem ser convertidos para float (300.000,00 -> 300000.00)
+- Datas devem manter o formato brasileiro DD/MM/AAAA
+- O campo "explicacao_contextual" e OBRIGATORIO e deve ter no minimo 3 paragrafos
+- Se houver financiamento, detalhe banco, valor financiado e condicoes
+- Liste TODAS as certidoes mencionadas na escritura

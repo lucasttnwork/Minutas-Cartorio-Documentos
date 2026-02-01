@@ -1,0 +1,571 @@
+# PROMPT PARA EXTRACAO DE COMPROMISSO DE COMPRA E VENDA DE IMOVEIS
+
+## REGRAS OBRIGATORIAS - LEIA ANTES DE COMECAR
+
+1. **NUNCA INVENTAR DADOS**: Se um campo estiver ilegivel, incompleto ou ausente, retorne null ou "NAO_INFORMADO". JAMAIS fabrique informacoes.
+
+2. **VALIDACAO FINANCEIRA OBRIGATORIA**:
+   - O PRECO TOTAL e o valor COMPLETO do imovel (nao confunda com sinal/entrada!)
+   - SEMPRE valide: sinal_entrada + saldo = valor_total
+   - Se encontrar apenas o sinal, PROCURE o preco total em outras partes do documento
+   - O sinal geralmente e 5-10% do valor total, NAO o valor total!
+
+3. **EXPLICACAO CONTEXTUAL OBRIGATORIA**: A secao de explicacao DEVE ter 3-5 paragrafos descrevendo o contexto completo do documento.
+
+4. **DETECTAR ADITIVOS**:
+   - Se o titulo contiver "ADITIVO", "TERMO ADITIVO", "ADDENDUM", classifique como ADITIVO_COMPROMISSO_COMPRA_VENDA
+   - Extraia referencia ao documento original (envelope_id, data, identificadores)
+
+5. **COMPLETUDE**: Extraia TODAS as informacoes visiveis, mesmo que parecam secundarias.
+
+---
+
+## FASE 1: IDENTIFICACAO DO TIPO DE DOCUMENTO
+
+### 1.1 Classificacao do Documento
+ANTES de qualquer extracao, identifique o tipo exato:
+
+1. Leia o TITULO completo do documento
+2. Identifique palavras-chave estruturantes:
+   - Se contiver: "ADITIVO", "TERMO ADITIVO", "ADDENDUM", "ALTERACAO" -> Documento DERIVADO
+   - Se contiver: "INSTRUMENTO PARTICULAR", "COMPROMISSO", "CONTRATO" -> Documento PRINCIPAL
+
+3. Para documentos DERIVADOS (aditivos):
+   - tipo_documento: "ADITIVO_COMPROMISSO_COMPRA_VENDA"
+   - Preencha o campo documento_referenciado com dados do original
+
+### 1.2 Data do Contrato
+- Procure ao FINAL do documento, antes das assinaturas
+- Formato comum: "Sao Paulo, DD de mes de AAAA"
+- Esta data e ESSENCIAL para calcular todos os prazos contratuais
+- Se nao encontrar data explicita, busque por timestamps de assinatura digital
+
+---
+
+## FASE 2: VALORES FINANCEIROS - ATENCAO CRITICA
+
+### REGRA DE OURO: Sinal != Preco Total
+
+O erro mais comum e confundir o SINAL (entrada) com o PRECO TOTAL do imovel.
+
+**PRECO TOTAL (valor_total):**
+- E o valor COMPLETO do imovel
+- Geralmente aparece em um "Quadro Resumo" ou "Preco e Condicoes de Pagamento"
+- Expressoes comuns: "pelo preco certo e ajustado de R$", "valor do imovel: R$"
+- Valores tipicos: R$ 200.000 a R$ 2.000.000+
+
+**SINAL/ENTRADA (sinal_entrada):**
+- E a PRIMEIRA parcela, geralmente 5-10% do total
+- Expressoes comuns: "a titulo de sinal", "como entrada", "arras"
+- Se for similar a 5-10% do preco total, provavelmente e o sinal
+
+**SALDO (saldo):**
+- E o valor RESTANTE apos o sinal
+- Expressoes: "saldo de", "restante de", "a ser pago na escritura"
+- DEVE ser: valor_total - sinal_entrada
+
+**VALIDACAO OBRIGATORIA:**
+Antes de finalizar, verifique: sinal_entrada + saldo = valor_total
+Se nao bater, revise os valores extraidos!
+
+### Estrutura de Valores
+```json
+{
+  "valores_financeiros": {
+    "preco_total": 500000.00,
+    "sinal_entrada": 50000.00,
+    "saldo": 450000.00,
+    "sinal_percentual_calculado": 10.0,
+    "validacao_valores_ok": true
+  }
+}
+```
+
+---
+
+## FASE 3: QUALIFICACAO DAS PARTES
+
+### 3.1 Vendedores
+Para CADA vendedor, extraia:
+- nome: Nome completo
+- cpf: Formato XXX.XXX.XXX-XX
+- nacionalidade: brasileiro, portugues, etc.
+- profissao: Profissao declarada
+- estado_civil: SOLTEIRO, CASADO, DIVORCIADO, VIUVO, UNIAO_ESTAVEL
+- regime_casamento: comunhao parcial de bens, comunhao universal, separacao de bens (se casado)
+- conjuge: Nome do conjuge (se casado)
+- endereco: Endereco completo
+- proporcao_venda_percentual: Se houver multiplos vendedores
+- dados_bancarios: Estrutura completa (ver abaixo)
+
+### 3.2 Compradores
+Mesma estrutura dos vendedores, exceto dados_bancarios.
+
+### 3.3 Dados Bancarios (CRITICO para pagamento)
+Quando o documento mencionar dados bancarios, extraia:
+```json
+{
+  "dados_bancarios": {
+    "banco": "Nome do Banco",
+    "agencia": "0000",
+    "conta_corrente": "000000000",
+    "tipo_conta": "corrente",
+    "titular": "Nome do Titular",
+    "pix": "chave PIX se houver"
+  }
+}
+```
+
+### 3.4 Intermediadores
+Se houver plataforma ou imobiliaria intermediando:
+```json
+{
+  "intermediador": {
+    "nome": "Nome da Plataforma/Imobiliaria",
+    "razao_social": "Razao Social Ltda",
+    "cnpj": "00.000.000/0000-00",
+    "tipo": "plataforma_digital"
+  }
+}
+```
+
+---
+
+## FASE 4: DESCRICAO DO IMOVEL
+
+### 4.1 Matriculas - TODAS devem ser extraidas
+Varredura completa por TODAS as matriculas mencionadas:
+
+```json
+{
+  "matriculas": [
+    {
+      "numero": "00000",
+      "tipo_unidade": "apartamento",
+      "cartorio": "1o Oficial de Registro de Imoveis",
+      "cidade_cartorio": "Cidade",
+      "status": "principal"
+    },
+    {
+      "numero": "00001",
+      "tipo_unidade": "vaga_garagem",
+      "cartorio": "1o Oficial de Registro de Imoveis",
+      "cidade_cartorio": "Cidade",
+      "status": "adicional_por_aditivo"
+    }
+  ]
+}
+```
+
+Em ADITIVOS, de atencao especial a matriculas sendo ADICIONADAS!
+
+### 4.2 Areas
+Diferencie SEMPRE:
+```json
+{
+  "areas": {
+    "area_privativa_m2": 70.00,
+    "area_comum_m2": 10.00,
+    "area_total_m2": 80.00,
+    "fracao_ideal_terreno": "0,50000%"
+  }
+}
+```
+
+### 4.3 Endereco Completo
+- logradouro
+- numero
+- complemento (Apto, Bloco, etc.)
+- bairro
+- cidade
+- estado
+- cep
+
+---
+
+## FASE 5: PRAZOS E CONDICOES
+
+### 5.1 Prazos Contratuais
+- prazo_pagamento_sinal_dias: X dias uteis
+- prazo_pagamento_saldo_dias: X dias corridos
+- prazo_escritura: "60 dias corridos" ou data especifica
+- prazo_diligencia_dias: Se houver diligencia (ex: QuintoAndar)
+
+### 5.2 Condicoes Associadas aos Prazos
+Capture condicoes como "desde que", "apos", "condicionado a":
+```json
+{
+  "prazo_escritura": "60 DIAS CORRIDOS",
+  "condicoes_prazo_escritura": [
+    "Contados da assinatura do CCV",
+    "Desde que tenha ocorrido o aceite de Diligencia"
+  ]
+}
+```
+
+---
+
+## FASE 6: PENALIDADES E MULTAS
+
+### 6.1 Multa Rescisoria (CRITICO)
+- Busque clausulas sobre rescisao do contrato
+- Geralmente expressa em percentual do preco (ex: 10%)
+- Calcule o valor absoluto: (percentual/100) x valor_total
+
+```json
+{
+  "penalidades": {
+    "multa_rescisoria_percentual": 10.0,
+    "multa_rescisoria_valor_calculado": 50000.00,
+    "multa_moratoria_percentual_dia": 0.1,
+    "juros_mora_percentual_mes": 1.0
+  }
+}
+```
+
+---
+
+## FASE 7: CONDICOES ESPECIFICAS / CLAUSULAS ESPECIAIS
+
+### 7.1 Identificacao de Condicoes Especificas
+Busque secoes intituladas:
+- "Condicoes Especificas"
+- "Clausulas Especiais"
+- "Outras Condicoes"
+- "Das Condicoes Particulares"
+
+ESTAS CLAUSULAS SE SOBREPOEM aos termos gerais do contrato!
+
+### 7.2 Estrutura para Clausulas Especiais
+```json
+{
+  "clausulas_especiais": [
+    {
+      "numero": "12.1",
+      "titulo": "Atualizacao de Matricula",
+      "descricao": "Matricula desatualizada - nao consta averbacao de casamento",
+      "responsavel": "Vendedor",
+      "prazo_dias": 15,
+      "condicionalidade": "Antes da lavratura da Escritura Publica"
+    },
+    {
+      "numero": "12.2",
+      "titulo": "Dilacao de Prazo",
+      "descricao": "Dilacao do prazo de pagamento do saldo para 60 dias corridos",
+      "observacoes": "Condicoes Especificas se sobrepoem aos outros termos do CCV"
+    }
+  ]
+}
+```
+
+---
+
+## FASE 8: RESPONSABILIDADES
+
+```json
+{
+  "responsabilidades": {
+    "itbi": "comprador",
+    "registro_imovel": "comprador",
+    "custas_cartorio": "comprador",
+    "debitos_anteriores": "vendedor",
+    "comissao_corretagem": {
+      "percentual": 6.0,
+      "valor": 30000.00,
+      "responsavel": "vendedor",
+      "beneficiario": "Nome da Imobiliaria/Plataforma"
+    }
+  }
+}
+```
+
+---
+
+## FASE 9: ASSINATURA DIGITAL E AUTENTICACAO
+
+### 9.1 Plataformas de Assinatura
+Identifique: DocuSign, ClickSign, D4Sign, Adobe Sign
+
+```json
+{
+  "assinatura_digital": {
+    "plataforma": "Nome da Plataforma",
+    "envelope_id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+    "status": "completo",
+    "data_assinatura": "DD/MM/AAAA"
+  }
+}
+```
+
+### 9.2 Testemunhas
+```json
+{
+  "testemunhas": [
+    {
+      "nome": "Nome da Testemunha",
+      "cpf": "XXX.XXX.XXX-XX"
+    }
+  ]
+}
+```
+
+---
+
+## FASE 10: PARA ADITIVOS - CAMPOS ADICIONAIS
+
+Se o documento for um ADITIVO, inclua:
+
+```json
+{
+  "eh_aditivo": true,
+  "tipo_documento": "ADITIVO_COMPROMISSO_COMPRA_VENDA",
+  "numero_aditivo": 1,
+  "documento_referenciado": {
+    "tipo": "COMPROMISSO_COMPRA_VENDA",
+    "envelope_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "data": "DD/MM/AAAA",
+    "imovel_id": "000000000"
+  },
+  "motivo_aditivo": "Descricao do motivo do aditivo"
+}
+```
+
+---
+
+## FORMATO DE SAIDA OBRIGATORIO
+
+Use EXATAMENTE este formato:
+
+## REESCRITA DO DOCUMENTO
+[Transcricao fiel dos principais termos, valores, partes e clausulas do contrato.
+Seja detalhado - inclua valores, prazos, condicoes especiais.]
+
+## EXPLICACAO CONTEXTUAL
+
+[OBRIGATORIO: 3-5 paragrafos explicando o contexto completo do documento]
+
+**Paragrafo 1 - Visao Geral:**
+Descreva o tipo de documento, data, e natureza geral da transacao.
+
+**Paragrafo 2 - Partes Envolvidas:**
+Descreva vendedores e compradores com suas qualificacoes.
+
+**Paragrafo 3 - Objeto e Valores:**
+Descreva o imovel e os valores envolvidos (preco total, sinal, saldo).
+
+**Paragrafo 4 - Condicoes e Prazos:**
+Descreva os principais prazos e condicoes do negocio.
+
+**Paragrafo 5 - Clausulas Especiais (se houver):**
+Descreva quaisquer condicoes especificas ou clausulas particulares.
+
+### Partes do Contrato
+**Vendedor(es) / Promitente(s) Vendedor(es):**
+- [Nome completo, CPF, nacionalidade, profissao, estado civil, regime casamento, endereco]
+- Dados bancarios: [Banco, Agencia, Conta, Titular]
+
+**Comprador(es) / Promitente(s) Comprador(es):**
+- [Nome completo, CPF, nacionalidade, profissao, estado civil, endereco]
+
+**Intermediador (se houver):**
+- [Nome, CNPJ, tipo]
+
+### Objeto (Imovel)
+- Tipo: [apartamento/casa/terreno/sala comercial]
+- Endereco completo: [logradouro, numero, complemento, bairro, cidade-UF, CEP]
+- Matricula(s): [numero] - [cartorio] - [cidade]
+- SQL/IPTU: [numero]
+- Areas: Privativa [X]m2, Comum [Y]m2, Total [Z]m2
+- Fracao ideal: [percentual]
+
+### Condicoes do Negocio
+- **PRECO TOTAL DO IMOVEL**: R$ [VALOR TOTAL - NAO CONFUNDIR COM SINAL!]
+- Sinal/Entrada: R$ [valor] ([percentual]% do total)
+- Saldo: R$ [valor] ([percentual]% do total)
+- **VALIDACAO**: Sinal + Saldo = Preco Total? [SIM/NAO]
+- Forma de pagamento sinal: [descricao]
+- Forma de pagamento saldo: [descricao]
+- Prazo para escritura: [dias/data]
+- Beneficiario do sinal: [nome/CNPJ]
+- Beneficiario do saldo: [nome, dados bancarios]
+
+### Penalidades
+- Multa rescisoria: [percentual]% = R$ [valor calculado]
+- Multa moratoria: [percentual]% por dia
+- Juros de mora: [percentual]% ao mes
+
+### Clausulas Especiais / Condicoes Especificas
+[Liste cada clausula especial com numero, titulo e descricao]
+
+### Responsabilidades
+- ITBI: [comprador/vendedor]
+- Registro: [comprador/vendedor]
+- Debitos anteriores: [vendedor]
+- Corretagem: [percentual]% pago pelo [vendedor/comprador]
+
+## DADOS CATALOGADOS (JSON)
+```json
+{
+  "tipo_documento": "COMPROMISSO_COMPRA_VENDA",
+  "eh_aditivo": false,
+  "data_contrato": "AAAA-MM-DD",
+  "local_assinatura": "Cidade",
+
+  "vendedores": [
+    {
+      "nome": "Nome Completo do Vendedor",
+      "cpf": "000.000.000-00",
+      "nacionalidade": "brasileiro",
+      "profissao": "profissao",
+      "estado_civil": "CASADO",
+      "regime_casamento": "comunhao parcial de bens",
+      "conjuge": "Nome do Conjuge",
+      "endereco": "Endereco completo",
+      "proporcao_venda_percentual": 50.0,
+      "dados_bancarios": {
+        "banco": "Nome do Banco",
+        "agencia": "0000",
+        "conta_corrente": "00000000",
+        "tipo_conta": "corrente",
+        "titular": "Nome do Titular"
+      }
+    }
+  ],
+
+  "compradores": [
+    {
+      "nome": "Nome Completo do Comprador",
+      "cpf": "000.000.000-00",
+      "nacionalidade": "brasileiro",
+      "profissao": "profissao",
+      "estado_civil": "SOLTEIRO",
+      "endereco": "Endereco completo"
+    }
+  ],
+
+  "intermediador": {
+    "nome": "Nome da Plataforma/Imobiliaria",
+    "razao_social": "Razao Social Ltda",
+    "cnpj": "00.000.000/0000-00",
+    "tipo": "plataforma_digital"
+  },
+
+  "imovel": {
+    "tipo": "APARTAMENTO",
+    "endereco_completo": "Rua Exemplo, 123, Apto 101, Bairro, Cidade - UF, CEP 00000-000",
+    "logradouro": "Rua Exemplo",
+    "numero": "123",
+    "complemento": "Apto 101",
+    "bloco": "A",
+    "bairro": "Bairro",
+    "cidade": "Cidade",
+    "estado": "SP",
+    "cep": "00000-000",
+    "matriculas": [
+      {
+        "numero": "00000",
+        "tipo_unidade": "apartamento",
+        "cartorio": "1o Oficial de Registro de Imoveis",
+        "cidade_cartorio": "Cidade",
+        "status": "principal"
+      }
+    ],
+    "inscricao_iptu": "000.000.0000-0",
+    "area_privativa_m2": 70.00,
+    "area_comum_m2": 10.00,
+    "area_total_m2": 80.00,
+    "fracao_ideal_terreno": "0,50000%"
+  },
+
+  "valores_financeiros": {
+    "preco_total": 500000.00,
+    "sinal_entrada": 50000.00,
+    "saldo": 450000.00,
+    "sinal_percentual_calculado": 10.0,
+    "validacao_valores_ok": true
+  },
+
+  "forma_pagamento_sinal": "Transferencia bancaria",
+  "forma_pagamento_saldo": "TED",
+
+  "prazos": {
+    "prazo_pagamento_sinal_dias": 4,
+    "prazo_pagamento_saldo_dias": 60,
+    "prazo_escritura": "60 dias corridos",
+    "prazo_diligencia_dias": 10,
+    "transferencia_posse": "No mesmo dia da escritura"
+  },
+
+  "penalidades": {
+    "multa_rescisoria_percentual": 10.0,
+    "multa_rescisoria_valor_calculado": 50000.00,
+    "multa_moratoria_percentual_dia": 0.1,
+    "juros_mora_percentual_mes": 1.0
+  },
+
+  "responsabilidades": {
+    "itbi": "comprador",
+    "registro_imovel": "comprador",
+    "custas_cartorio": "comprador",
+    "debitos_anteriores": "vendedor",
+    "comissao_corretagem": {
+      "percentual": 6.0,
+      "valor": 30000.00,
+      "responsavel": "vendedor",
+      "beneficiario": "Nome da Imobiliaria/Plataforma"
+    }
+  },
+
+  "clausulas_especiais": [
+    {
+      "numero": "12.1",
+      "titulo": "Titulo da Clausula",
+      "descricao": "Descricao completa da clausula especial",
+      "responsavel": "vendedor",
+      "prazo_dias": 15,
+      "condicionalidade": "Condicao para cumprimento"
+    }
+  ],
+
+  "assinatura_digital": {
+    "plataforma": "Nome da Plataforma",
+    "envelope_id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+    "status": "completo",
+    "data_assinatura": "AAAA-MM-DD"
+  },
+
+  "testemunhas": [
+    {
+      "nome": "Nome da Testemunha",
+      "cpf": "000.000.000-00"
+    }
+  ],
+
+  "foro_eleito": "Comarca de Cidade",
+
+  "instrucoes_importantes": [
+    "Conferir dados bancarios antes do pagamento",
+    "Nao aceitar boletos de terceiros"
+  ],
+
+  "documento_referenciado": null
+}
+```
+
+---
+
+## CHECKLIST FINAL DE VALIDACAO
+
+Antes de finalizar, verifique:
+
+[ ] Data do contrato foi extraida?
+[ ] PRECO TOTAL e o valor completo do imovel (nao o sinal)?
+[ ] sinal + saldo = preco_total?
+[ ] Multa rescisoria foi extraida (percentual e valor)?
+[ ] Clausulas especiais foram listadas?
+[ ] Dados bancarios do vendedor foram estruturados?
+[ ] Se for aditivo, foi marcado como eh_aditivo: true?
+[ ] Todas as matriculas foram extraidas?
+[ ] explicacao_contextual tem 3-5 paragrafos?
+
+Se algum campo nao foi encontrado, use null - NUNCA invente dados!

@@ -1,0 +1,157 @@
+{
+  "tipo_documento": "COMPROVANTE_PAGAMENTO",
+  "versao": "1.0",
+  "descricao": "Schema de extracao para Comprovante de Transacao Financeira",
+  "complexidade": "MEDIA",
+  "campos": [
+    {
+      "nome": "banco_origem",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "SANTANDER",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Banco de origem da transacao"
+    },
+    {
+      "nome": "banco_destino",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "BANCO DO BRASIL",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Banco de destino (para TED/DOC)"
+    },
+    {
+      "nome": "valor_pago",
+      "tipo": "number",
+      "obrigatorio": true,
+      "regex": "R\\$\\s*[\\d.,]+",
+      "exemplo": "15000.00",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Valor da transacao"
+    },
+    {
+      "nome": "data_pagamento",
+      "tipo": "date",
+      "obrigatorio": true,
+      "regex": "\\d{2}/\\d{2}/\\d{4}",
+      "exemplo": "27/01/2026",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Data do pagamento"
+    },
+    {
+      "nome": "hora_transacao",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "\\d{2}:\\d{2}(:\\d{2})?",
+      "exemplo": "14:30:00",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Hora da transacao"
+    },
+    {
+      "nome": "codigo_autenticacao",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[A-Z0-9.-]+",
+      "exemplo": "1234.5678.9012.3456",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Codigo de autenticacao bancaria"
+    },
+    {
+      "nome": "tipo_transacao",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "(PIX|TED|DOC|BOLETO|DEPOSITO|TRANSFERENCIA)",
+      "exemplo": "PIX",
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Tipo da transacao"
+    },
+    {
+      "nome": "beneficiario",
+      "tipo": "object",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": {"nome": "PREFEITURA DE SAO PAULO", "cpf_cnpj": "46.395.000/0001-39"},
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Dados do beneficiario",
+      "campos_internos": [
+        {"nome": "nome", "tipo": "string"},
+        {"nome": "cpf_cnpj", "tipo": "string"},
+        {"nome": "banco", "tipo": "string"},
+        {"nome": "agencia", "tipo": "string"},
+        {"nome": "conta", "tipo": "string"}
+      ]
+    },
+    {
+      "nome": "pagador",
+      "tipo": "object",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": {"nome": "MARIA SANTOS", "cpf": "987.654.321-00"},
+      "nivel_extracao": 2,
+      "confianca_esperada": "alta",
+      "descricao": "Dados do pagador",
+      "campos_internos": [
+        {"nome": "nome", "tipo": "string"},
+        {"nome": "cpf_cnpj", "tipo": "string"},
+        {"nome": "banco", "tipo": "string"},
+        {"nome": "agencia", "tipo": "string"},
+        {"nome": "conta", "tipo": "string"}
+      ]
+    },
+    {
+      "nome": "descricao",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "ITBI - GUIA 2026.123.456",
+      "nivel_extracao": 2,
+      "confianca_esperada": "media",
+      "descricao": "Descricao ou referencia do pagamento"
+    },
+    {
+      "nome": "codigo_barras",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": "[\\d\\s.]+",
+      "exemplo": "12345.67890 12345.678901 12345.678901 1 12340000015000",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Linha digitavel (para boletos)"
+    },
+    {
+      "nome": "chave_pix",
+      "tipo": "string",
+      "obrigatorio": false,
+      "regex": null,
+      "exemplo": "12345678000190",
+      "nivel_extracao": 1,
+      "confianca_esperada": "alta",
+      "descricao": "Chave PIX utilizada"
+    }
+  ],
+  "padroes_identificacao": [
+    "COMPROVANTE",
+    "PAGAMENTO",
+    "TRANSFERENCIA",
+    "PIX",
+    "TED",
+    "DOC",
+    "AUTENTICACAO",
+    "RECIBO"
+  ],
+  "validacoes": [
+    "valor_positivo",
+    "data_nao_futura",
+    "cpf_cnpj_digito_verificador"
+  ]
+}

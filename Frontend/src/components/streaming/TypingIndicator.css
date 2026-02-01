@@ -1,0 +1,110 @@
+/* TypingIndicator Component Styles */
+
+.typing-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0;
+}
+
+.typing-indicator-small {
+  gap: 0.25rem;
+}
+
+.typing-indicator-large {
+  gap: 0.6rem;
+}
+
+/* Dot Styles */
+.typing-indicator .dot {
+  display: inline-block;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.4);
+  animation: typing 1.4s infinite;
+}
+
+/* Small Size */
+.typing-indicator-small .dot {
+  width: 4px;
+  height: 4px;
+}
+
+/* Medium Size (Default) */
+.typing-indicator-medium .dot,
+.typing-indicator .dot {
+  width: 8px;
+  height: 8px;
+}
+
+/* Large Size */
+.typing-indicator-large .dot {
+  width: 12px;
+  height: 12px;
+}
+
+/* Staggered Animation */
+.dot-1 {
+  animation-delay: 0s;
+}
+
+.dot-2 {
+  animation-delay: 0.2s;
+}
+
+.dot-3 {
+  animation-delay: 0.4s;
+}
+
+/* Bounce Animation */
+@keyframes typing {
+  0%,
+  60%,
+  100% {
+    opacity: 0.5;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-6px);
+  }
+}
+
+/* Label Text */
+.typing-label {
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.6);
+  margin-left: 0.5rem;
+  font-weight: 500;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .typing-indicator .dot {
+    background-color: rgba(255, 255, 255, 0.4);
+  }
+
+  .typing-label {
+    color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .typing-indicator .dot {
+    animation: none;
+    opacity: 0.8;
+  }
+}
+
+/* Accessibility - Screen Reader Only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
