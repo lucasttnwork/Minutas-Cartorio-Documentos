@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2, Sparkles } from 'lucide-react';
 import { hero } from '../../data/landing-copy';
+import { getAppUrl } from '@/lib/domain';
 
 const premiumEasing = [0.16, 1, 0.3, 1] as const;
 
@@ -62,7 +63,7 @@ export function Hero() {
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 mt-2">
               <motion.a
-                href="#contato"
+                href={getAppUrl('/login')}
                 data-testid="hero-cta-primary"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-200 cursor-pointer"
                 whileHover={{ scale: 1.02, y: -2 }}

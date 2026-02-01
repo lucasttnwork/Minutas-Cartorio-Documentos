@@ -1,3 +1,4 @@
+import { LandingHeader } from './components/LandingHeader';
 import { Hero } from './sections/Hero/Hero';
 import { SocialProofBar } from './sections/SocialProofBar/SocialProofBar';
 import { Transformacoes } from './sections/Transformacoes/Transformacoes';
@@ -13,19 +14,22 @@ import { Footer } from './sections/Footer';
 
 export function LandingPage() {
   return (
-    <main data-testid="landing-page" className="min-h-screen bg-background">
-      <Hero />
-      <SocialProofBar />
-      <Transformacoes />
-      <ProblemaSolucao />
-      <ComoFunciona />
-      <Recursos />
-      <Seguranca />
-      <Depoimentos />
-      <Comparacao />
-      <FAQ />
-      <CTAFinal />
-      <Footer />
-    </main>
+    <>
+      <LandingHeader />
+      <main data-testid="landing-page" className="min-h-screen bg-background pt-16 lg:pt-0">
+        <Hero />
+        <SocialProofBar />
+        <Transformacoes />
+        <ProblemaSolucao />
+        <ComoFunciona />
+        <Recursos />
+        <Seguranca />
+        <Depoimentos />
+        <Comparacao />
+        <FAQ />
+        <CTAFinal />
+        <Footer />
+      </main>
+    </>
   );
 }
