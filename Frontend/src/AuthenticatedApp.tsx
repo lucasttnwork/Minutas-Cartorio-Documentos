@@ -14,6 +14,7 @@ const Login = lazy(() => import("./pages/Login"));
 const DashboardHub = lazy(() => import("./pages/DashboardHub"));
 const DashboardMinutas = lazy(() => import("./pages/DashboardMinutas"));
 const DashboardAgentes = lazy(() => import("./pages/DashboardAgentes"));
+const DashboardMinutasPadrao = lazy(() => import("./pages/DashboardMinutasPadrao"));
 const AgenteExtrator = lazy(() => import("./pages/AgenteExtrator"));
 const UploadDocumentos = lazy(() => import("./pages/UploadDocumentos"));
 const Processando = lazy(() => import("./pages/Processando"));
@@ -63,6 +64,7 @@ export function AuthenticatedApp() {
                   >
                     <Route index element={<Navigate to="/dashboard/minutas" replace />} />
                     <Route path="minutas" element={<DashboardMinutas />} />
+                    <Route path="templates" element={<DashboardMinutasPadrao />} />
                     <Route path="agentes" element={<DashboardAgentes />} />
                   </Route>
 

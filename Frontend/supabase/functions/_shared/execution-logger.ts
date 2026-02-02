@@ -42,6 +42,7 @@ export async function startExecution(
     minutaId?: string;
     documentoId?: string;
     promptUsed?: string;
+    promptVersion?: number;
   } = {}
 ): Promise<ExecutionLog> {
   const { data, error } = await supabase
@@ -51,6 +52,7 @@ export async function startExecution(
       minuta_id: options.minutaId,
       documento_id: options.documentoId,
       prompt_used: options.promptUsed,
+      prompt_version: options.promptVersion,
       status: 'running',
       started_at: new Date().toISOString(),
     })
@@ -149,6 +151,7 @@ export async function withExecutionLogging<T>(
     minutaId?: string;
     documentoId?: string;
     promptUsed?: string;
+    promptVersion?: number;
   },
   operation: () => Promise<{ result: T; usage?: { inputTokens?: number; outputTokens?: number } }>
 ): Promise<T> {

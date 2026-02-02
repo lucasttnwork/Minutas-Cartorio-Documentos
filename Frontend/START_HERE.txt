@@ -1,0 +1,209 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║         EDGE FUNCTIONS ARCHITECTURE - Minuta Canvas Project                 ║
+║                                                                              ║
+║                       START HERE - 5 Documentos                             ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📚 DOCUMENTOS CRIADOS:
+════════════════════════════════════════════════════════════════════════════════
+
+1. README_ARQUITETURA_EDGE_FUNCTIONS.md
+   └─ Este arquivo! Leia isto primeiro para entender o layout
+
+2. QUICK_REFERENCE_EDGE_FUNCTIONS.md
+   └─ TL;DR rápido (5 min) - Template pronto para copiar/colar
+
+3. ARQUITETURA_EDGE_FUNCTIONS_RESUMO.md ⭐
+   └─ TUDO explicado em detalhe (30 min) - Leia este antes de codificar
+
+4. PADROES_CODIGO_EDGE_FUNCTIONS.md
+   └─ 10 padrões de código (20 min) - Use como template
+
+5. SPEC_EXTRACT_TEMPLATE_TEXT.md
+   └─ Spec completa da nova edge function (15 min) - Código pronto
+
+6. DIAGRAMA_ARQUITETURA_EDGE_FUNCTIONS.md
+   └─ Diagramas ASCII (10 min) - Visualize os fluxos
+
+7. INDICE_ARQUITETURA_EDGE_FUNCTIONS.md
+   └─ Índice completo (15 min) - Como navegar tudo
+
+════════════════════════════════════════════════════════════════════════════════
+
+🎯 COMECE POR:
+
+   [Tem 5 minutos?]  → QUICK_REFERENCE_EDGE_FUNCTIONS.md
+   [Tem 30 minutos?] → ARQUITETURA_EDGE_FUNCTIONS_RESUMO.md
+   [Vai codificar?]  → PADROES_CODIGO_EDGE_FUNCTIONS.md
+   [Novo Dev?]       → README_ARQUITETURA_EDGE_FUNCTIONS.md
+
+════════════════════════════════════════════════════════════════════════════════
+
+🚀 3 MINUTOS - ESSENCIAL:
+
+A arquitetura segue este padrão:
+
+   REQUEST
+      ↓
+   [CORS check] ← Sempre!
+      ↓
+   [Validate input]
+      ↓
+   [Start logging]
+      ↓
+   [Fetch from DB]
+      ↓
+   [Download file] ← Use service client
+      ↓
+   [Normalize DOCX?] ← normalizeFilesForGemini()
+      ↓
+   [Convert to Base64] ← arrayBufferToBase64()
+      ↓
+   [Call Gemini API] ← callGemini()
+      ↓
+   [Parse JSON] ← parseGeminiJson() - robusta!
+      ↓
+   [Update DB]
+      ↓
+   [Log success] ← com tokens!
+      ↓
+   [Return response]
+      ↓ [ERROR]
+   [Log error]
+
+════════════════════════════════════════════════════════════════════════════════
+
+⚡ 8 SHARED UTILITIES:
+
+   1. cors.ts
+      └─ corsHeaders para toda resposta
+
+   2. supabase-client.ts
+      └─ createServiceClient() ou createSupabaseClient()
+
+   3. gemini-client.ts
+      └─ callGemini(), parseGeminiJson(), arrayBufferToBase64()
+
+   4. file-normalizer.ts
+      └─ normalizeFilesForGemini() - DOCX → HTML
+
+   5. execution-logger.ts
+      └─ startExecution(), logSuccess(), logError()
+
+   6. prompts.ts
+      └─ loadClassificationPrompt(), loadExtractionPrompt()
+
+   7. templates.ts
+      └─ MINUTA_TEMPLATES, replacePlaceholders()
+
+   8. types.ts
+      └─ DocumentType, ClassificationResult, etc
+
+════════════════════════════════════════════════════════════════════════════════
+
+📋 CHECKLIST - ANTES DE CODIFICAR:
+
+   ☐ Ler QUICK_REFERENCE_EDGE_FUNCTIONS.md (5 min)
+   ☐ Ler ARQUITETURA_EDGE_FUNCTIONS_RESUMO.md (30 min)
+   ☐ Escolher padrão em PADROES_CODIGO_EDGE_FUNCTIONS.md
+   ☐ Entender fluxo em DIAGRAMA_ARQUITETURA_EDGE_FUNCTIONS.md
+   ☐ Estar pronto para implementar!
+
+════════════════════════════════════════════════════════════════════════════════
+
+📁 DIRETÓRIO:
+
+   supabase/functions/
+   ├── _shared/                    ← Importações compartilhadas
+   │   ├── cors.ts
+   │   ├── supabase-client.ts
+   │   ├── gemini-client.ts
+   │   ├── file-normalizer.ts
+   │   ├── execution-logger.ts
+   │   ├── prompts.ts
+   │   ├── templates.ts
+   │   └── types.ts
+   │
+   ├── classify-document/index.ts  ← Classifica tipo
+   ├── extract-document/index.ts   ← Extrai dados
+   ├── generate-minuta/index.ts    ← Gera minuta
+   ├── extract-template-text/      ← ⭐ NOVA (você vai criar)
+   └── map-to-fields/index.ts      ← Mapeia campos
+
+════════════════════════════════════════════════════════════════════════════════
+
+🔑 CONCEITOS-CHAVE:
+
+   SERVICE CLIENT:    createServiceClient()  = Bypass RLS (use para admin)
+   ANON CLIENT:       createSupabaseClient()  = Respeita RLS
+
+   FILE NORMALIZE:    normalizeFilesForGemini()  = DOCX → HTML
+   BASE64 CONVERT:    arrayBufferToBase64()      = Arquivo → String
+
+   GEMINI CALL:       callGemini(prompt, base64, mimeType)
+   PARSE RESULT:      parseGeminiJson<T>(text)  = Robusta contra erro
+
+   LOGGING:           startExecution() → logSuccess()/logError()
+   TOKENS TRACKED:    inputTokens, outputTokens, cost_estimate
+
+   DYNAMIC PROMPTS:   loadExtractionPrompt(tipo) = Do banco!
+
+════════════════════════════════════════════════════════════════════════════════
+
+💰 CUSTO (Gemini 2.0-Flash):
+
+   Input:  $0.25 por 1M tokens
+   Output: $1.25 por 1M tokens
+   Típico: $0.003 - $0.01 por execução
+
+════════════════════════════════════════════════════════════════════════════════
+
+🎯 PRÓXIMAS AÇÕES:
+
+   1. [AGORA]      Ler README_ARQUITETURA_EDGE_FUNCTIONS.md (este arquivo)
+   2. [5 MIN]      Ler QUICK_REFERENCE_EDGE_FUNCTIONS.md
+   3. [30 MIN]     Ler ARQUITETURA_EDGE_FUNCTIONS_RESUMO.md
+   4. [CODING]     PADROES_CODIGO_EDGE_FUNCTIONS.md + SPEC_EXTRACT_TEMPLATE_TEXT.md
+   5. [DEPLOY]     Seguir checklist em INDICE_ARQUITETURA_EDGE_FUNCTIONS.md
+
+════════════════════════════════════════════════════════════════════════════════
+
+📞 LINKS RÁPIDOS:
+
+   Arquitetura geral?        → ARQUITETURA_EDGE_FUNCTIONS_RESUMO.md
+   Exemplos de código?       → PADROES_CODIGO_EDGE_FUNCTIONS.md
+   Criar extract-template?   → SPEC_EXTRACT_TEMPLATE_TEXT.md
+   Ver diagramas?            → DIAGRAMA_ARQUITETURA_EDGE_FUNCTIONS.md
+   Tudo em um lugar?         → INDICE_ARQUITETURA_EDGE_FUNCTIONS.md
+   Cheat sheet?              → QUICK_REFERENCE_EDGE_FUNCTIONS.md
+
+════════════════════════════════════════════════════════════════════════════════
+
+✨ VOCÊ ESTÁ PRONTO PARA:
+
+   ✅ Entender arquitetura completa
+   ✅ Criar novas edge functions
+   ✅ Manter código limpo
+   ✅ Debugar problemas
+   ✅ Otimizar performance
+   ✅ Implementar extract-template-text
+   ✅ Integrar com frontend
+
+════════════════════════════════════════════════════════════════════════════════
+
+🚀 BORA COMEÇAR!
+
+   Primeira parada: QUICK_REFERENCE_EDGE_FUNCTIONS.md (5 minutos)
+   Segunda parada:  ARQUITETURA_EDGE_FUNCTIONS_RESUMO.md (30 minutos)
+
+   Depois disso, você será um expert em edge functions do projeto! 💪
+
+════════════════════════════════════════════════════════════════════════════════
+
+Data: 2026-02-02
+Versão: 1.0
+Status: ✅ Pronto para produção
+
+Criado com ❤️ para o Minuta Canvas Project

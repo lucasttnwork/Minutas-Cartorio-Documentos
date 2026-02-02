@@ -56,7 +56,7 @@ export function LandingHeader() {
         <div className="max-w-7xl mx-auto w-full px-6 flex items-center justify-between">
           {/* Logo / Brand */}
           <a
-            href="/"
+            href="/landing-page"
             className={cn(
               'flex items-center gap-3 group',
               'transition-opacity duration-200 hover:opacity-80'
@@ -175,7 +175,7 @@ export function LandingHeader() {
             exit={{ opacity: 0, x: -10 }}
             className="lg:hidden fixed top-4 left-4 z-50"
           >
-            <a href="/" className="flex items-center gap-2">
+            <a href="/landing-page" className="flex items-center gap-2">
               <div
                 className={cn(
                   'flex items-center justify-center w-10 h-10 rounded-xl',
@@ -221,7 +221,7 @@ export function LandingHeader() {
                 {/* Brand in drawer */}
                 <div className="mb-8 pb-6 border-b border-border/50">
                   <a
-                    href="/"
+                    href="/landing-page"
                     onClick={() => setIsOpen(false)}
                     className="flex items-center gap-3"
                   >

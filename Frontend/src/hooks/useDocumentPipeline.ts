@@ -47,7 +47,7 @@ export interface UseDocumentPipelineReturn {
   processDocument: (documentId: string) => Promise<boolean>;
 
   /** Gera a minuta final para uma minuta */
-  generateMinuta: (minutaId: string, templateType?: string) => Promise<GenerationResult>;
+  generateMinuta: (minutaId: string, templateType?: string, templateId?: string) => Promise<GenerationResult>;
 
   /** Indica se o pipeline esta em execucao */
   isProcessing: boolean;
@@ -205,7 +205,7 @@ export function useDocumentPipeline(
    * Gera a minuta final utilizando a edge function generate-minuta
    */
   const generateMinuta = useCallback(
-    async (minutaId: string, templateType?: string): Promise<GenerationResult> => {
+    async (minutaId: string, templateType?: string, templateId?: string): Promise<GenerationResult> => {
       setIsGenerating(true);
       setGenerationStatus({ status: 'generating' });
 
@@ -223,6 +223,7 @@ export function useDocumentPipeline(
           body: {
             minuta_id: minutaId,
             template_type: templateType || 'VENDA_COMPRA',
+            template_id: templateId,
           },
         });
 

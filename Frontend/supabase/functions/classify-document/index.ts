@@ -2,7 +2,7 @@ import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { corsHeaders } from '../_shared/cors.ts';
 import { createServiceClient } from '../_shared/supabase-client.ts';
 import { callGemini, parseGeminiJson, arrayBufferToBase64 } from '../_shared/gemini-client.ts';
-import { CLASSIFICATION_PROMPT } from '../_shared/prompts.ts';
+import { loadClassificationPrompt } from '../_shared/prompts.ts';
 import { startExecution, logSuccess, logError } from '../_shared/execution-logger.ts';
 import type { ClassificationResult } from '../_shared/types.ts';
 
@@ -49,11 +49,15 @@ serve(async (req) => {
       .update({ status: 'classificando' })
       .eq('id', documento_id);
 
+    // Load prompt from database
+    const { prompt: classificationPrompt, versao: promptVersao } = await loadClassificationPrompt();
+
     // Start execution logging
     execution = await startExecution(serviceClient, 'classify', {
       documentoId: documento_id,
       minutaId: documento.minuta_id,
-      promptUsed: CLASSIFICATION_PROMPT,
+      promptUsed: classificationPrompt,
+      promptVersion: promptVersao,
     });
 
     // Download file from storage
@@ -71,7 +75,7 @@ serve(async (req) => {
 
     // Call Gemini
     const { text, usage } = await callGemini(
-      CLASSIFICATION_PROMPT,
+      classificationPrompt,
       base64,
       documento.mime_type
     );

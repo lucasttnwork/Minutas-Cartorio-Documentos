@@ -4,7 +4,7 @@
 
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, Bot, ChevronLeft, LayoutGrid, LogOut } from "lucide-react";
+import { FileText, Bot, ChevronLeft, LayoutGrid, LogOut, LayoutTemplate } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,6 +22,12 @@ const navItems: NavItem[] = [
     label: "Minutas",
     icon: FileText,
     description: "Gerenciar minutas",
+  },
+  {
+    to: "/dashboard/templates",
+    label: "Templates",
+    icon: LayoutTemplate,
+    description: "Minutas padrão",
   },
   {
     to: "/dashboard/agentes",

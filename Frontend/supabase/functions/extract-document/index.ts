@@ -48,7 +48,7 @@ serve(async (req) => {
       .eq('id', documento_id);
 
     // Load appropriate prompt
-    const prompt = await loadExtractionPrompt(
+    const { prompt: extractionPrompt, versao: promptVersao } = await loadExtractionPrompt(
       documento.tipo_documento,
       documento.tamanho_bytes
     );
@@ -57,7 +57,8 @@ serve(async (req) => {
     execution = await startExecution(serviceClient, 'extract', {
       documentoId: documento_id,
       minutaId: documento.minuta_id,
-      promptUsed: prompt,
+      promptUsed: extractionPrompt,
+      promptVersion: promptVersao,
     });
 
     // Download file
@@ -75,7 +76,7 @@ serve(async (req) => {
 
     // Call Gemini with extraction prompt
     const { text, usage } = await callGemini(
-      prompt,
+      extractionPrompt,
       base64,
       documento.mime_type,
       { maxTokens: 16384 }
