@@ -14,6 +14,7 @@ export interface TemplateGridProps {
   onSelect?: (template: MinutaPadrao) => void;
   onEdit?: (template: MinutaPadrao) => void;
   onDelete?: (template: MinutaPadrao) => void;
+  onViewText?: (template: MinutaPadrao) => void;
 }
 
 function LoadingSkeleton() {
@@ -59,6 +60,7 @@ export function TemplateGrid({
   onSelect,
   onEdit,
   onDelete,
+  onViewText,
 }: TemplateGridProps) {
   // Sort templates: global first, then by name
   const sortedTemplates = useMemo(() => {
@@ -92,6 +94,7 @@ export function TemplateGrid({
           onSelect={onSelect}
           onEdit={!template.is_global ? onEdit : undefined}
           onDelete={!template.is_global ? onDelete : undefined}
+          onViewText={onViewText}
         />
       ))}
     </div>

@@ -8,12 +8,17 @@
  * 4. generate-minuta - Gera a minuta final (opcional, acionado pelo usuario)
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useWorkerPool } from './useWorkerPool';
+import type { WorkerTask } from './useWorkerPool';
+
+const CLASSIFICATION_WORKERS = 10;
+const EXTRACTION_WORKERS = 10;
 
 export interface PipelineStatus {
   documentId: string;
-  step: 'classifying' | 'extracting' | 'mapping' | 'done' | 'error';
+  step: 'queued' | 'classifying' | 'extracting' | 'mapping' | 'done' | 'error';
   progress: number; // 0-100
   error?: string;
 }
@@ -63,15 +68,37 @@ export interface UseDocumentPipelineReturn {
 
   /** Progresso geral (0-100) - media de todos os documentos */
   overallProgress: number;
+
+  /** Numero de workers de classificacao ativos */
+  classificationWorkers: number;
+
+  /** Numero de workers de extracao ativos */
+  extractionWorkers: number;
+
+  /** Numero de documentos na fila de classificacao */
+  classificationQueue: number;
+
+  /** Numero de documentos na fila de extracao */
+  extractionQueue: number;
 }
 
 const PROGRESS_MAP: Record<PipelineStatus['step'], number> = {
+  queued: 0,
   classifying: 0,
   extracting: 33,
   mapping: 66,
   done: 100,
   error: 0,
 };
+
+interface ClassifyResult {
+  tipo_documento: string;
+  confianca: number;
+}
+
+interface ExtractResult {
+  dados_extraidos: Record<string, unknown>;
+}
 
 export function useDocumentPipeline(
   options?: UseDocumentPipelineOptions
@@ -82,6 +109,15 @@ export function useDocumentPipeline(
   const [generationStatus, setGenerationStatus] = useState<GenerationStatus>({
     status: 'idle',
   });
+
+  const minutaIdRef = useRef<string | null>(null);
+  const optionsRef = useRef(options);
+  const sentToExtractionRef = useRef<Set<string>>(new Set());
+
+  // Keep options ref updated
+  useEffect(() => {
+    optionsRef.current = options;
+  }, [options]);
 
   /**
    * Atualiza o status de um documento especifico
@@ -102,6 +138,67 @@ export function useDocumentPipeline(
     []
   );
 
+
+  const extractionProcessor = useCallback(async (docId: string) => {
+    const { data, error } = await supabase.functions.invoke('extract-document', {
+      body: { documento_id: docId }
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  }, []);
+
+  const extractionOnComplete = useCallback((task: WorkerTask<string, ExtractResult>) => {
+    updateStatus(task.id, 'done');
+    optionsRef.current?.onDocumentComplete?.(task.id);
+  }, [updateStatus]);
+
+  const extractionOnError = useCallback((task: WorkerTask<string, ExtractResult>, error: Error) => {
+    updateStatus(task.id, 'error', error.message);
+    optionsRef.current?.onError?.(task.id, error.message);
+  }, [updateStatus]);
+
+  // Pool de extração
+  const extractionPool = useWorkerPool<string, ExtractResult>({
+    maxWorkers: EXTRACTION_WORKERS,
+    processor: extractionProcessor,
+    onTaskComplete: extractionOnComplete,
+    onTaskError: extractionOnError
+  });
+
+  const classificationProcessor = useCallback(async (docId: string) => {
+    updateStatus(docId, 'classifying');
+    const { data, error } = await supabase.functions.invoke('classify-document', {
+      body: { documento_id: docId }
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  }, [updateStatus]);
+
+  const classificationOnError = useCallback((task: WorkerTask<string, ClassifyResult>, error: Error) => {
+    updateStatus(task.id, 'error', error.message);
+    optionsRef.current?.onError?.(task.id, error.message);
+  }, [updateStatus]);
+
+  // Pool de classificação
+  const classificationPool = useWorkerPool<string, ClassifyResult>({
+    maxWorkers: CLASSIFICATION_WORKERS,
+    processor: classificationProcessor,
+    onTaskError: classificationOnError
+  });
+
+  // Observar classificações completadas e adicionar à fila de extração
+  // Usamos completedCount como dependência para garantir que o effect roda quando tarefas completam
+  useEffect(() => {
+    const classifiedTasks = Array.from(classificationPool.tasks.values())
+      .filter(t => t.status === 'completed' && !sentToExtractionRef.current.has(t.id));
+
+    classifiedTasks.forEach(task => {
+      sentToExtractionRef.current.add(task.id);
+      updateStatus(task.id, 'extracting');
+      extractionPool.addTask(task.id, task.id);
+    });
+  }, [classificationPool.tasks, classificationPool.completedCount, extractionPool.addTask, updateStatus]);
+
   /**
    * Processa um unico documento pelo pipeline
    * classify -> extract
@@ -119,7 +216,7 @@ export function useDocumentPipeline(
         if (classifyResult.error) {
           const errorMessage = classifyResult.error.message || 'Classification failed';
           updateStatus(documentId, 'error', errorMessage);
-          options?.onError?.(documentId, errorMessage);
+          optionsRef.current?.onError?.(documentId, errorMessage);
           return false;
         }
 
@@ -133,23 +230,23 @@ export function useDocumentPipeline(
         if (extractResult.error) {
           const errorMessage = extractResult.error.message || 'Extraction failed';
           updateStatus(documentId, 'error', errorMessage);
-          options?.onError?.(documentId, errorMessage);
+          optionsRef.current?.onError?.(documentId, errorMessage);
           return false;
         }
 
         // 3. Marcar como concluido
         updateStatus(documentId, 'done');
-        options?.onDocumentComplete?.(documentId);
+        optionsRef.current?.onDocumentComplete?.(documentId);
 
         return true;
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
         updateStatus(documentId, 'error', errorMessage);
-        options?.onError?.(documentId, errorMessage);
+        optionsRef.current?.onError?.(documentId, errorMessage);
         return false;
       }
     },
-    [updateStatus, options]
+    [updateStatus]
   );
 
   /**
@@ -158,47 +255,34 @@ export function useDocumentPipeline(
   const startPipeline = useCallback(
     async (minutaId: string): Promise<void> => {
       setIsProcessing(true);
+      minutaIdRef.current = minutaId;
 
-      let hasErrors = false;
+      // Reset pools
+      classificationPool.reset();
+      extractionPool.reset();
+      setStatuses(new Map());
+      sentToExtractionRef.current = new Set();
 
-      try {
-        // 1. Buscar documentos pendentes
-        const { data: docs } = await supabase
-          .from('documentos')
-          .select('id')
-          .eq('minuta_id', minutaId)
-          .in('status', ['uploaded', 'pendente']);
+      // Buscar documentos
+      const { data: docs } = await supabase
+        .from('documentos')
+        .select('id')
+        .eq('minuta_id', minutaId)
+        .in('status', ['uploaded', 'pendente']);
 
-        // 2. Processar cada documento sequencialmente
-        for (const doc of docs || []) {
-          const success = await processDocument(doc.id);
-          if (!success) {
-            hasErrors = true;
-          }
-        }
-
-        // 3. Se nao houve erros, executar map-to-fields
-        if (!hasErrors) {
-          await supabase.functions.invoke('map-to-fields', {
-            body: { minuta_id: minutaId },
-          });
-
-          // 4. Atualizar status da minuta
-          await supabase
-            .from('minutas')
-            .update({
-              status: 'revisao',
-              current_step: 'outorgantes',
-            })
-            .eq('id', minutaId);
-
-          options?.onPipelineComplete?.(minutaId);
-        }
-      } finally {
+      if (!docs?.length) {
         setIsProcessing(false);
+        return;
       }
+
+      // Inicializar status e adicionar todos à fila de classificação
+      docs.forEach(doc => {
+        updateStatus(doc.id, 'queued');
+      });
+
+      classificationPool.addTasks(docs.map(d => ({ id: d.id, input: d.id })));
     },
-    [processDocument, options]
+    [classificationPool.reset, classificationPool.addTasks, extractionPool.reset, updateStatus]
   );
 
   /**
@@ -240,7 +324,7 @@ export function useDocumentPipeline(
             })
             .eq('id', minutaId);
 
-          options?.onGenerationError?.(minutaId, errorMessage);
+          optionsRef.current?.onGenerationError?.(minutaId, errorMessage);
 
           return {
             success: false,
@@ -261,7 +345,7 @@ export function useDocumentPipeline(
           })
           .eq('id', minutaId);
 
-        options?.onGenerationComplete?.(minutaId, result);
+        optionsRef.current?.onGenerationComplete?.(minutaId, result);
 
         return result;
       } catch (err) {
@@ -277,7 +361,7 @@ export function useDocumentPipeline(
           })
           .eq('id', minutaId);
 
-        options?.onGenerationError?.(minutaId, errorMessage);
+        optionsRef.current?.onGenerationError?.(minutaId, errorMessage);
 
         return {
           success: false,
@@ -287,22 +371,65 @@ export function useDocumentPipeline(
         setIsGenerating(false);
       }
     },
-    [options]
+    []
   );
 
+  // Verificar quando extraction pool terminou
+  useEffect(() => {
+    const totalExtraction = extractionPool.tasks.size;
+    const completedExtraction = extractionPool.completedCount + extractionPool.failedCount;
+    const allExtractionDone = totalExtraction > 0 && completedExtraction === totalExtraction;
+    const nothingProcessing = !classificationPool.isProcessing && !extractionPool.isProcessing;
+
+    if (isProcessing && allExtractionDone && nothingProcessing) {
+      const hasErrors = extractionPool.failedCount > 0 || classificationPool.failedCount > 0;
+      const hasSuccessfulExtractions = extractionPool.completedCount > 0;
+
+      // Executar map-to-fields se houver pelo menos alguma extracao bem-sucedida
+      // Isso permite que o mapeamento funcione com dados parciais em caso de erros
+      if (hasSuccessfulExtractions && minutaIdRef.current) {
+        console.log('[Pipeline] Executing map-to-fields with', extractionPool.completedCount, 'successful extractions');
+        supabase.functions.invoke('map-to-fields', {
+          body: { minuta_id: minutaIdRef.current }
+        }).then(() => {
+          return supabase.from('minutas').update({
+            status: 'revisao',
+            current_step: 'outorgantes',
+          }).eq('id', minutaIdRef.current);
+        }).then(() => {
+          if (hasErrors) {
+            console.log('[Pipeline] Completed with some errors:', extractionPool.failedCount, 'failed');
+          }
+          optionsRef.current?.onPipelineComplete?.(minutaIdRef.current!);
+          setIsProcessing(false);
+        }).catch((err) => {
+          console.error('[Pipeline] Error in map-to-fields:', err);
+          setIsProcessing(false);
+        });
+      } else {
+        console.log('[Pipeline] No successful extractions, skipping map-to-fields');
+        setIsProcessing(false);
+      }
+    }
+  }, [
+    extractionPool.completedCount,
+    extractionPool.failedCount,
+    extractionPool.tasks.size,
+    extractionPool.isProcessing,
+    classificationPool.isProcessing,
+    classificationPool.failedCount,
+    isProcessing,
+  ]);
+
   /**
-   * Calcula o progresso geral como a media de todos os documentos
+   * Calcula o progresso geral - 50% classificação, 50% extração
    */
   const overallProgress = useMemo(() => {
-    if (statuses.size === 0) return 0;
-
-    let totalProgress = 0;
-    statuses.forEach((status) => {
-      totalProgress += status.progress;
-    });
-
-    return Math.round(totalProgress / statuses.size);
-  }, [statuses]);
+    const totalDocs = classificationPool.tasks.size || 1;
+    const classifyProgress = classificationPool.progress * 0.5;
+    const extractProgress = extractionPool.progress * 0.5;
+    return Math.round(classifyProgress + extractProgress);
+  }, [classificationPool.progress, extractionPool.progress, classificationPool.tasks.size]);
 
   return {
     startPipeline,
@@ -313,5 +440,9 @@ export function useDocumentPipeline(
     statuses,
     generationStatus,
     overallProgress,
+    classificationWorkers: classificationPool.activeWorkers,
+    extractionWorkers: extractionPool.activeWorkers,
+    classificationQueue: classificationPool.queuedCount,
+    extractionQueue: extractionPool.queuedCount,
   };
 }

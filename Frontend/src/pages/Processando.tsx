@@ -4,28 +4,119 @@ import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMinuta } from "@/contexts/MinutaContext";
 import { useDocumentPipeline } from "@/hooks/useDocumentPipeline";
-import { Loader2, FileSearch, CheckCircle2, Brain, AlertCircle } from "lucide-react";
+import type { PipelineStatus } from "@/hooks/useDocumentPipeline";
+import { Loader2, CheckCircle2, Brain, AlertCircle, Clock, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
-const PROCESSING_STEPS = [
-  { id: 1, label: 'Analisando documentos...', icon: FileSearch },
-  { id: 2, label: 'Extraindo dados com IA...', icon: Brain },
-  { id: 3, label: 'Identificando pessoas...', icon: FileSearch },
-  { id: 4, label: 'Identificando imóveis...', icon: FileSearch },
-  { id: 5, label: 'Gerando parecer jurídico...', icon: Brain },
-  { id: 6, label: 'Finalizando...', icon: CheckCircle2 },
-];
+interface DocumentInfo {
+  id: string;
+  nome_original: string;
+}
+
+function DocumentProcessingCard({
+  name,
+  status
+}: {
+  name: string;
+  status?: PipelineStatus;
+}) {
+  const step = status?.step || 'queued';
+
+  const getIcon = () => {
+    switch (step) {
+      case 'queued': return <Clock className="w-4 h-4 text-muted-foreground" />;
+      case 'classifying': return <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />;
+      case 'extracting': return <Loader2 className="w-4 h-4 text-purple-500 animate-spin" />;
+      case 'done': return <CheckCircle2 className="w-4 h-4 text-green-500" />;
+      case 'error': return <AlertCircle className="w-4 h-4 text-destructive" />;
+      default: return <FileText className="w-4 h-4 text-muted-foreground" />;
+    }
+  };
+
+  const getStatusText = () => {
+    switch (step) {
+      case 'queued': return 'Na fila';
+      case 'classifying': return 'Classificando...';
+      case 'extracting': return 'Extraindo dados...';
+      case 'done': return 'Concluído';
+      case 'error': return status?.error || 'Erro';
+      default: return 'Pendente';
+    }
+  };
+
+  const getBgClass = () => {
+    switch (step) {
+      case 'classifying': return 'bg-blue-500/10 border-blue-500/30';
+      case 'extracting': return 'bg-purple-500/10 border-purple-500/30';
+      case 'done': return 'bg-green-500/10 border-green-500/30';
+      case 'error': return 'bg-destructive/10 border-destructive/30';
+      default: return 'bg-muted/50';
+    }
+  };
+
+  return (
+    <div className={`flex items-center gap-3 p-3 rounded-lg border ${getBgClass()}`}>
+      {getIcon()}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium truncate">{name}</p>
+        <p className="text-xs text-muted-foreground">{getStatusText()}</p>
+      </div>
+    </div>
+  );
+}
+
+function WorkerIndicator({
+  label,
+  active,
+  queued,
+  max,
+  color
+}: {
+  label: string;
+  active: number;
+  queued: number;
+  max: number;
+  color: 'blue' | 'purple';
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <div className={`w-2 h-2 rounded-full ${active > 0 ? (color === 'blue' ? 'bg-blue-500 animate-pulse' : 'bg-purple-500 animate-pulse') : 'bg-muted'}`} />
+        <span className="text-sm text-muted-foreground">{label}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className={`text-sm font-medium ${color === 'blue' ? 'text-blue-500' : 'text-purple-500'}`}>
+          {active}/{max}
+        </span>
+        {queued > 0 && (
+          <span className="text-xs text-muted-foreground">
+            (+{queued} na fila)
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function Processando() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { setCurrentStep } = useMinuta();
-  const [currentProcessingStep, setCurrentProcessingStep] = useState(0);
-  const [progress, setProgress] = useState(0);
+  const [documents, setDocuments] = useState<DocumentInfo[]>([]);
   const [pipelineError, setPipelineError] = useState<string | null>(null);
   const pipelineStarted = useRef(false);
 
-  const { startPipeline, isProcessing, overallProgress } = useDocumentPipeline({
+  const {
+    startPipeline,
+    isProcessing,
+    overallProgress,
+    statuses,
+    classificationWorkers,
+    extractionWorkers,
+    classificationQueue,
+    extractionQueue,
+  } = useDocumentPipeline({
     onDocumentComplete: (docId) => {
       console.log(`[Pipeline] Document processed: ${docId}`);
     },
@@ -42,6 +133,20 @@ export default function Processando() {
     },
   });
 
+  // Fetch document information
+  useEffect(() => {
+    if (id) {
+      supabase
+        .from('documentos')
+        .select('id, nome_original')
+        .eq('minuta_id', id)
+        .in('status', ['uploaded', 'pendente'])
+        .then(({ data }) => {
+          if (data) setDocuments(data);
+        });
+    }
+  }, [id]);
+
   // Start the actual document processing pipeline
   useEffect(() => {
     if (id && !pipelineStarted.current) {
@@ -54,57 +159,33 @@ export default function Processando() {
     }
   }, [id, startPipeline]);
 
-  // Update UI progress based on actual pipeline progress
-  useEffect(() => {
-    if (overallProgress > 0) {
-      setProgress(overallProgress);
-      // Map progress to steps
-      const stepIndex = Math.min(
-        Math.floor(overallProgress / (100 / PROCESSING_STEPS.length)),
-        PROCESSING_STEPS.length - 1
-      );
-      setCurrentProcessingStep(stepIndex);
-    }
-  }, [overallProgress]);
-
   // Fallback timeout - if pipeline takes too long or doesn't complete
+  // Increased to 300 seconds (5 minutes) to allow processing of many documents
   useEffect(() => {
     const fallbackTimeout = setTimeout(() => {
       if (!pipelineError && isProcessing) {
-        // Pipeline is taking too long, navigate anyway
-        console.log('[Processando] Fallback timeout - navigating to outorgantes');
+        // Pipeline is taking too long, navigate anyway but log warning
+        console.warn('[Processando] Fallback timeout (5min) - forcing navigation to outorgantes');
         setCurrentStep('outorgantes');
         navigate(`/minuta/${id}/outorgantes`);
       }
-    }, 60000); // 60 second fallback
+    }, 300000); // 300 second (5 minute) fallback for large document batches
 
     return () => clearTimeout(fallbackTimeout);
   }, [id, navigate, setCurrentStep, pipelineError, isProcessing]);
 
-  // If no pipeline is active and no errors, show loading animation
-  useEffect(() => {
-    if (!isProcessing && !pipelineError && overallProgress === 0) {
-      // Show loading animation while pipeline initializes
-      const stepInterval = setInterval(() => {
-        setCurrentProcessingStep((prev) => {
-          if (prev >= PROCESSING_STEPS.length - 1) return 0;
-          return prev + 1;
-        });
-      }, 1500);
-
-      const progressInterval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 95) return 10;
-          return prev + 5;
-        });
-      }, 200);
-
-      return () => {
-        clearInterval(stepInterval);
-        clearInterval(progressInterval);
-      };
+  const getStatusMessage = () => {
+    if (classificationWorkers > 0 && extractionWorkers === 0) {
+      return 'Classificando documentos...';
     }
-  }, [isProcessing, pipelineError, overallProgress]);
+    if (extractionWorkers > 0) {
+      return 'Extraindo dados com IA...';
+    }
+    if (overallProgress === 100) {
+      return 'Finalizando...';
+    }
+    return 'Processando documentos...';
+  };
 
   // If there's an error, show error state with option to continue
   if (pipelineError) {
@@ -158,7 +239,7 @@ export default function Processando() {
         </motion.div>
 
         <h1 className="text-2xl font-bold text-foreground mb-2">
-          Processando Documentos
+          {getStatusMessage()}
         </h1>
         <p className="text-muted-foreground mb-8">
           A IA está analisando seus documentos...
@@ -169,53 +250,38 @@ export default function Processando() {
           <motion.div
             className="h-full bg-primary rounded-full"
             initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
+            animate={{ width: `${overallProgress}%` }}
             transition={{ duration: 0.3 }}
           />
         </div>
 
-        {/* Processing Steps */}
-        <div className="space-y-3 text-left">
-          {PROCESSING_STEPS.map((step, index) => {
-            const Icon = step.icon;
-            const isActive = index === currentProcessingStep;
-            const isComplete = index < currentProcessingStep;
+        {/* Workers Status */}
+        <div className="mb-6 p-4 rounded-lg bg-muted/30 space-y-2">
+          <WorkerIndicator
+            label="Classificação"
+            active={classificationWorkers}
+            queued={classificationQueue}
+            max={10}
+            color="blue"
+          />
+          <WorkerIndicator
+            label="Extração"
+            active={extractionWorkers}
+            queued={extractionQueue}
+            max={10}
+            color="purple"
+          />
+        </div>
 
-            return (
-              <motion.div
-                key={step.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                  isActive
-                    ? 'bg-primary/10 border border-primary/30'
-                    : isComplete
-                    ? 'bg-green-500/10'
-                    : 'bg-muted/50'
-                }`}
-              >
-                {isActive ? (
-                  <Loader2 className="w-5 h-5 text-primary animate-spin" />
-                ) : isComplete ? (
-                  <CheckCircle2 className="w-5 h-5 text-green-500" />
-                ) : (
-                  <Icon className="w-5 h-5 text-muted-foreground" />
-                )}
-                <span
-                  className={`text-sm ${
-                    isActive
-                      ? 'text-primary font-medium'
-                      : isComplete
-                      ? 'text-green-500'
-                      : 'text-muted-foreground'
-                  }`}
-                >
-                  {step.label}
-                </span>
-              </motion.div>
-            );
-          })}
+        {/* Documents List */}
+        <div className="space-y-2 max-h-[300px] overflow-y-auto text-left">
+          {documents.map((doc) => (
+            <DocumentProcessingCard
+              key={doc.id}
+              name={doc.nome_original}
+              status={statuses.get(doc.id)}
+            />
+          ))}
         </div>
 
         <p className="text-xs text-muted-foreground mt-8">

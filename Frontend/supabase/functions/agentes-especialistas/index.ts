@@ -27,11 +27,25 @@ import type {
 
 // Gemini configuration
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-const GEMINI_MODEL = 'gemini-3-flash-preview';
+// Usa variável de ambiente GEMINI_MODEL se configurada, senão usa gemini-3-flash-preview (modelo mais recente)
+const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') || 'gemini-3-flash-preview';
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 // Storage bucket
 const STORAGE_BUCKET = 'agentes-especialistas-docs';
+
+/**
+ * Sanitize filename to remove accents and special characters
+ * Required because Supabase Storage rejects non-ASCII characters in keys
+ */
+function sanitizeFilename(filename: string): string {
+  return filename
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacritical marks (accents)
+    .replace(/[^\w\s.-]/g, '_') // Replace special chars with underscore
+    .replace(/\s+/g, '_') // Replace spaces with underscore
+    .replace(/_+/g, '_'); // Collapse multiple underscores
+}
 
 // Max file size: 20MB
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
@@ -279,7 +293,7 @@ async function handleRun(req: Request): Promise<Response> {
       const arrayBuffer = await file.arrayBuffer();
 
       // Storage path: {user_id}/{run_id}/{filename}
-      const storagePath = `${user.id}/${runId}/${file.name}`;
+      const storagePath = `${user.id}/${runId}/${sanitizeFilename(file.name)}`;
 
       // Upload original file to storage (keep original format for reference)
       const { error: uploadError } = await serviceClient.storage

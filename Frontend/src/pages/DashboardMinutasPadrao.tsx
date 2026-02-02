@@ -18,9 +18,10 @@ import {
   TemplateUploadForm,
   TemplateEditModal,
   TemplateDeleteDialog,
+  TemplateTextReviewModal,
 } from '@/components/minutas-padrao';
 import { cn } from '@/lib/utils';
-import type { MinutaPadrao, TipoNegocio, MinutaPadraoUpdate, MinutaPadraoInsert } from '@/types/minutas-padrao';
+import type { MinutaPadrao, TipoNegocio, MinutaPadraoUpdate, MinutaPadraoInsertUpload, MinutaPadraoInsertText } from '@/types/minutas-padrao';
 
 export function DashboardMinutasPadrao() {
   const {
@@ -29,8 +30,11 @@ export function DashboardMinutasPadrao() {
     error,
     loadTemplates,
     uploadTemplate,
+    createFromText,
     updateTemplate,
     deleteTemplate,
+    saveMarkdown,
+    reExtract,
   } = useMinutasPadrao();
 
   const [activeTab, setActiveTab] = useState<'user' | 'global'>('user');
@@ -40,6 +44,7 @@ export function DashboardMinutasPadrao() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<MinutaPadrao | null>(null);
   const [deletingTemplate, setDeletingTemplate] = useState<MinutaPadrao | null>(null);
+  const [viewingTextTemplate, setViewingTextTemplate] = useState<MinutaPadrao | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Load templates on mount and when filter changes
@@ -53,8 +58,8 @@ export function DashboardMinutasPadrao() {
   const displayedTemplates = activeTab === 'user' ? userTemplates : globalTemplates;
 
   // Handlers
-  const handleUpload = useCallback(async (
-    data: Omit<MinutaPadraoInsert, 'storage_path' | 'nome_original' | 'mime_type' | 'tamanho_bytes'>,
+  const handleUploadFile = useCallback(async (
+    data: Omit<MinutaPadraoInsertUpload, 'storage_path' | 'nome_original' | 'mime_type' | 'tamanho_bytes' | 'status_extracao'>,
     file: File
   ) => {
     setIsSubmitting(true);
@@ -65,6 +70,18 @@ export function DashboardMinutasPadrao() {
       setIsSubmitting(false);
     }
   }, [uploadTemplate]);
+
+  const handleUploadText = useCallback(async (
+    data: Omit<MinutaPadraoInsertText, 'status_extracao'>
+  ) => {
+    setIsSubmitting(true);
+    try {
+      await createFromText(data);
+      setIsUploadModalOpen(false);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [createFromText]);
 
   const handleEdit = useCallback(async (id: string, data: MinutaPadraoUpdate) => {
     setIsSubmitting(true);
@@ -93,6 +110,20 @@ export function DashboardMinutasPadrao() {
   const handleRetry = useCallback(() => {
     loadTemplates(tipoFilter);
   }, [loadTemplates, tipoFilter]);
+
+  const handleSaveMarkdown = useCallback(async (id: string, markdown: string) => {
+    await saveMarkdown(id, markdown);
+    setViewingTextTemplate(null);
+  }, [saveMarkdown]);
+
+  const handleReExtract = useCallback(async (id: string) => {
+    await reExtract(id);
+    // Atualizar o template local
+    const updated = templates.find(t => t.id === id);
+    if (updated) {
+      setViewingTextTemplate(updated);
+    }
+  }, [reExtract, templates]);
 
   // Empty state message
   const emptyMessage = activeTab === 'user'
@@ -190,6 +221,7 @@ export function DashboardMinutasPadrao() {
           emptyMessage={emptyMessage}
           onEdit={activeTab === 'user' ? setEditingTemplate : undefined}
           onDelete={activeTab === 'user' ? setDeletingTemplate : undefined}
+          onViewText={setViewingTextTemplate}
         />
       </div>
 
@@ -199,11 +231,12 @@ export function DashboardMinutasPadrao() {
           <DialogHeader>
             <DialogTitle>Novo Template</DialogTitle>
             <DialogDescription>
-              Faca upload de um arquivo PDF ou DOCX para criar um novo template de minuta.
+              Faça upload de um arquivo PDF/DOCX ou cole o texto diretamente.
             </DialogDescription>
           </DialogHeader>
           <TemplateUploadForm
-            onSubmit={handleUpload}
+            onSubmitFile={handleUploadFile}
+            onSubmitText={handleUploadText}
             onCancel={() => setIsUploadModalOpen(false)}
             isLoading={isSubmitting}
           />
@@ -231,6 +264,15 @@ export function DashboardMinutasPadrao() {
           isLoading={isSubmitting}
         />
       )}
+
+      {/* Text Review Modal */}
+      <TemplateTextReviewModal
+        template={viewingTextTemplate}
+        isOpen={!!viewingTextTemplate}
+        onClose={() => setViewingTextTemplate(null)}
+        onSave={handleSaveMarkdown}
+        onReExtract={handleReExtract}
+      />
     </div>
   );
 }

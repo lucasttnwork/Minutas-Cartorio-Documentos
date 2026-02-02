@@ -9,3 +9,5 @@ export type { TemplateSelectionModalProps } from './TemplateSelectionModal';
 export { TemplateUploadForm, type TemplateUploadFormProps } from './TemplateUploadForm';
 export { TemplateEditModal, type TemplateEditModalProps } from './TemplateEditModal';
 export { TemplateDeleteDialog, type TemplateDeleteDialogProps } from './TemplateDeleteDialog';
+export { ExtractionStatusBadge } from './ExtractionStatusBadge';
+export { TemplateTextReviewModal, type TemplateTextReviewModalProps } from './TemplateTextReviewModal';

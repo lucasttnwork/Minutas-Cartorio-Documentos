@@ -1,11 +1,12 @@
 // src/components/minutas-padrao/TemplateCard.tsx
 
-import { FileText, FileType2, Shield, Pencil, Trash2, BarChart3 } from 'lucide-react';
+import { FileText, FileType2, Shield, Pencil, Trash2, BarChart3, Eye } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { MinutaPadrao } from '@/types/minutas-padrao';
 import { TIPO_NEGOCIO_LABELS } from '@/types/minutas-padrao';
+import { ExtractionStatusBadge } from './ExtractionStatusBadge';
 
 export interface TemplateCardProps {
   template: MinutaPadrao;
@@ -13,6 +14,7 @@ export interface TemplateCardProps {
   onSelect?: (template: MinutaPadrao) => void;
   onEdit?: (template: MinutaPadrao) => void;
   onDelete?: (template: MinutaPadrao) => void;
+  onViewText?: (template: MinutaPadrao) => void;
 }
 
 export function TemplateCard({
@@ -21,10 +23,13 @@ export function TemplateCard({
   onSelect,
   onEdit,
   onDelete,
+  onViewText,
 }: TemplateCardProps) {
   const isPdf = template.mime_type === 'application/pdf';
   const isGlobal = template.is_global;
   const canEdit = !isGlobal && (onEdit || onDelete);
+  const hasText = template.status_extracao === 'extraido' || template.status_extracao === 'revisado';
+  const showViewText = hasText && onViewText;
 
   const handleClick = () => {
     onSelect?.(template);
@@ -38,6 +43,11 @@ export function TemplateCard({
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     onDelete?.(template);
+  };
+
+  const handleViewText = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onViewText?.(template);
   };
 
   return (
@@ -72,6 +82,17 @@ export function TemplateCard({
             </span>
           )}
         </div>
+
+        {/* Extraction Status Badge */}
+        {template.status_extracao && (
+          <div className="mt-2">
+            <ExtractionStatusBadge
+              status={template.status_extracao}
+              errorMessage={template.erro_extracao}
+              showLabel={true}
+            />
+          </div>
+        )}
       </CardHeader>
 
       <CardContent className="space-y-4">
@@ -90,33 +111,48 @@ export function TemplateCard({
             <span>{template.uso_count} uso{template.uso_count !== 1 ? 's' : ''}</span>
           </div>
 
-          {/* Edit/Delete actions (only for user templates) */}
-          {canEdit && (
-            <div className="flex items-center gap-1">
-              {onEdit && (
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  aria-label="Editar template"
-                  onClick={handleEdit}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <Pencil className="w-3.5 h-3.5" />
-                </Button>
-              )}
-              {onDelete && (
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  aria-label="Excluir template"
-                  onClick={handleDelete}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </Button>
-              )}
-            </div>
-          )}
+          {/* Actions */}
+          <div className="flex items-center gap-1">
+            {/* View Text button (when text is available) */}
+            {showViewText && (
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                aria-label="Ver texto extraído"
+                onClick={handleViewText}
+                className="opacity-0 group-hover:opacity-100 transition-opacity text-primary hover:text-primary"
+              >
+                <Eye className="w-3.5 h-3.5" />
+              </Button>
+            )}
+            {/* Edit/Delete actions (only for user templates) */}
+            {canEdit && (
+              <>
+                {onEdit && (
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    aria-label="Editar template"
+                    onClick={handleEdit}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </Button>
+                )}
+                {onDelete && (
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    aria-label="Excluir template"
+                    onClick={handleDelete}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
         </div>
 
         {/* Tipo negocio badge */}

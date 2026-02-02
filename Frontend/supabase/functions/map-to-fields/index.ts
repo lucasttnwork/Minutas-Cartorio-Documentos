@@ -134,8 +134,13 @@ function mapDocumentsToFields(documentos: DocumentRecord[]): MappedFields {
   });
 
   for (const doc of sorted) {
-    const dados = doc.dados_extraidos;
-    if (!dados) continue;
+    // Handle both V2 format (nested in 'dados') and legacy V1 format (flat)
+    const rawDados = doc.dados_extraidos;
+    if (!rawDados) continue;
+
+    const dados = (rawDados?.dados && typeof rawDados.dados === 'object')
+      ? rawDados.dados as Record<string, unknown>
+      : rawDados;
 
     const tipoDoc = doc.tipo_documento;
     const priority = TYPE_PRIORITIES[tipoDoc] ?? 0;
@@ -203,31 +208,96 @@ function mapIdentityDocument(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _priority: number
 ) {
-  // Handle both nested (RG format: {rg: {...}}) and flat (CNH format: {...}) structures
+  // Handle multiple possible structures from extraction:
+  // 1. Nested RG format: {rg: {cpf, nome, numero_rg, ...}}
+  // 2. Flat CNH format: {cpf, nome_completo, rg, orgao_emissor_rg, ...}
+  // 3. V2 extraction format: {dados: {...}, tipo_documento, versao_extracao}
+
   const rgData = dados.rg as Record<string, unknown> | undefined;
-  const isNestedFormat = rgData && typeof rgData === 'object' && 'cpf' in rgData;
+  const isNestedRgFormat = rgData && typeof rgData === 'object' && ('cpf' in rgData || 'numero_rg' in rgData);
 
   // Get data from the correct location
-  const docData = isNestedFormat ? rgData : dados;
+  const docData = isNestedRgFormat ? rgData : dados;
 
-  // For CNH, the field might be 'nome_completo' instead of 'nome'
-  const nome = (docData.nome as string) || (docData.nome_completo as string);
+  // Extract nome - try multiple field names
+  const nome = (docData.nome as string)
+    || (docData.nome_completo as string)
+    || (dados.nome as string)
+    || (dados.nome_completo as string);
 
-  const cpf = normalizeCPF(docData.cpf as string | undefined);
+  // Extract CPF - try multiple locations
+  const cpf = normalizeCPF(
+    (docData.cpf as string | undefined)
+    || (dados.cpf as string | undefined)
+  );
   if (!cpf) return;
+
+  // Extract RG number - handle various field names
+  const rgNumber = (docData.numero_rg as string | undefined)
+    || (docData.rg as string | undefined)
+    || (isNestedRgFormat ? undefined : dados.rg as string | undefined)
+    || (dados.numero_rg as string | undefined);
+
+  // Extract RG issuing authority - try ALL possible field names from prompts
+  const orgaoEmissorRg = (docData.orgao_emissor_rg as string | undefined)
+    || (docData.orgao_emissor as string | undefined)
+    || (docData.orgao_expedidor as string | undefined)
+    || (dados.orgao_emissor_rg as string | undefined)
+    || (dados.orgao_emissor as string | undefined)
+    || (dados.orgao_expedidor as string | undefined);
+
+  // Extract RG state - try ALL possible field names from prompts
+  const estadoEmissorRg = (docData.uf_rg as string | undefined)
+    || (docData.estado_emissor_rg as string | undefined)
+    || (docData.estado_emissor as string | undefined)
+    || (docData.uf_expedidor as string | undefined)
+    || (dados.uf_rg as string | undefined)
+    || (dados.estado_emissor_rg as string | undefined)
+    || (dados.estado_emissor as string | undefined)
+    || (dados.uf_expedidor as string | undefined);
+
+  // Extract RG issue date - try multiple field names
+  const dataEmissaoRg = (docData.data_expedicao as string | undefined)
+    || (docData.data_emissao as string | undefined)
+    || (docData.data_emissao_rg as string | undefined)
+    || (dados.data_expedicao as string | undefined)
+    || (dados.data_emissao as string | undefined);
+
+  // Extract filiacao - handle nested and flat structures
+  const filiacaoObj = (docData.filiacao as Record<string, unknown>) || (dados.filiacao as Record<string, unknown>);
+  const filiacaoPai = (docData.filiacao_pai as string | undefined)
+    || (dados.filiacao_pai as string | undefined)
+    || (filiacaoObj?.pai as string | undefined)
+    || (filiacaoObj?.nome_pai as string | undefined);
+  const filiacaoMae = (docData.filiacao_mae as string | undefined)
+    || (dados.filiacao_mae as string | undefined)
+    || (filiacaoObj?.mae as string | undefined)
+    || (filiacaoObj?.nome_mae as string | undefined);
+
+  // Extract naturalidade - try multiple locations
+  const naturalidade = (docData.naturalidade as string | undefined)
+    || (dados.naturalidade as string | undefined);
+
+  // Extract data_nascimento
+  const dataNascimento = (docData.data_nascimento as string | undefined)
+    || (dados.data_nascimento as string | undefined);
+
+  // Extract nacionalidade
+  const nacionalidade = (docData.nacionalidade as string | undefined)
+    || (dados.nacionalidade as string | undefined);
 
   const pessoa: PessoaNatural = {
     nome: nome?.toUpperCase(),
     cpf,
-    rg: isNestedFormat ? (docData.numero_rg as string | undefined) : (dados.rg as string | undefined),
-    orgao_emissor_rg: (docData.orgao_emissor as string | undefined) || (docData.orgao_expedidor as string | undefined),
-    estado_emissor_rg: (docData.estado_emissor as string | undefined) || (docData.uf_rg as string | undefined),
-    data_emissao_rg: docData.data_expedicao as string | undefined,
-    data_nascimento: docData.data_nascimento as string | undefined,
-    nacionalidade: docData.nacionalidade as string | undefined,
-    naturalidade: docData.naturalidade as string | undefined,
-    filiacao_pai: (docData.filiacao_pai as string | undefined) || (docData.filiacao as Record<string, unknown>)?.pai as string | undefined,
-    filiacao_mae: (docData.filiacao_mae as string | undefined) || (docData.filiacao as Record<string, unknown>)?.mae as string | undefined,
+    rg: rgNumber,
+    orgao_emissor_rg: orgaoEmissorRg,
+    estado_emissor_rg: estadoEmissorRg,
+    data_emissao_rg: dataEmissaoRg,
+    data_nascimento: dataNascimento,
+    nacionalidade: nacionalidade,
+    naturalidade: naturalidade,
+    filiacao_pai: filiacaoPai,
+    filiacao_mae: filiacaoMae,
     _fontes: { cpf: [source], nome: [source] },
   };
 
@@ -235,7 +305,7 @@ function mapIdentityDocument(
   if (!alienantes.has(cpf)) {
     alienantes.set(cpf, pessoa);
   } else {
-    // Merge with existing
+    // Merge with existing - combine data from multiple documents (RG + CNH)
     const existing = alienantes.get(cpf)!;
     mergePersonData(existing, pessoa);
   }

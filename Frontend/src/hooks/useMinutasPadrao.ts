@@ -9,8 +9,11 @@ import { toast } from 'sonner';
 import type {
   MinutaPadrao,
   MinutaPadraoInsert,
+  MinutaPadraoInsertUpload,
+  MinutaPadraoInsertText,
   MinutaPadraoUpdate,
   TipoNegocio,
+  StatusExtracao,
 } from '@/types/minutas-padrao';
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
@@ -26,19 +29,25 @@ export interface UseMinutasPadraoReturn {
   loadTemplates: (tipoNegocio?: TipoNegocio) => Promise<void>;
   uploadTemplate: (
     file: File,
-    data: Omit<MinutaPadraoInsert, 'storage_path' | 'nome_original' | 'mime_type' | 'tamanho_bytes'>
+    data: Omit<MinutaPadraoInsertUpload, 'storage_path' | 'nome_original' | 'mime_type' | 'tamanho_bytes' | 'status_extracao'>
+  ) => Promise<MinutaPadrao>;
+  createFromText: (
+    data: Omit<MinutaPadraoInsertText, 'status_extracao'>
   ) => Promise<MinutaPadrao>;
   updateTemplate: (id: string, data: MinutaPadraoUpdate) => Promise<void>;
   deleteTemplate: (id: string) => Promise<void>;
   getDownloadUrl: (storagePath: string) => Promise<string>;
   incrementUsage: (id: string) => Promise<void>;
+  triggerExtraction: (id: string) => Promise<void>;
+  saveMarkdown: (id: string, markdown: string) => Promise<void>;
+  reExtract: (id: string) => Promise<void>;
 }
 
 /**
  * Hook para gerenciar templates de minutas padrao
  * Integracao completa com Supabase Storage e Database
  */
-export function useMinutasPadrao(): UseMinutasPadraoReturn & { templates: MinutaPadrao[] } {
+export function useMinutasPadrao(): UseMinutasPadraoReturn {
   const [templates, setTemplates] = useState<MinutaPadrao[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,10 +96,11 @@ export function useMinutasPadrao(): UseMinutasPadraoReturn & { templates: Minuta
   /**
    * Faz upload de um arquivo e cria o registro no banco
    * Valida tipo e tamanho do arquivo antes do upload
+   * Dispara extração assíncrona de texto após o upload
    */
   const uploadTemplate = useCallback(async (
     file: File,
-    data: Omit<MinutaPadraoInsert, 'storage_path' | 'nome_original' | 'mime_type' | 'tamanho_bytes'>
+    data: Omit<MinutaPadraoInsertUpload, 'storage_path' | 'nome_original' | 'mime_type' | 'tamanho_bytes' | 'status_extracao'>
   ): Promise<MinutaPadrao> => {
     // Validar tipo de arquivo
     if (!VALID_MIME_TYPES.includes(file.type)) {
@@ -123,7 +133,7 @@ export function useMinutasPadrao(): UseMinutasPadraoReturn & { templates: Minuta
     }
 
     // Inserir registro no banco
-    const insertData: MinutaPadraoInsert = {
+    const insertData: MinutaPadraoInsertUpload = {
       ...data,
       user_id: user.id,
       is_global: false,
@@ -131,6 +141,7 @@ export function useMinutasPadrao(): UseMinutasPadraoReturn & { templates: Minuta
       nome_original: file.name,
       mime_type: file.type,
       tamanho_bytes: file.size,
+      status_extracao: 'pendente',
     };
 
     const { data: template, error: insertError } = await supabase
@@ -142,6 +153,66 @@ export function useMinutasPadrao(): UseMinutasPadraoReturn & { templates: Minuta
     if (insertError) {
       // Rollback do upload em caso de erro
       await supabase.storage.from('minutas-padrao').remove([storagePath]);
+      throw new Error(`Erro ao salvar: ${insertError.message}`);
+    }
+
+    toast.success('Template criado com sucesso!');
+    setTemplates(prev => [template, ...prev]);
+
+    // Disparar extração assíncrona de texto (não bloqueia)
+    supabase.functions.invoke('extract-template-text', {
+      body: { template_id: template.id }
+    }).then(({ error }) => {
+      if (error) {
+        console.error('Erro na extração de texto:', error);
+        toast.error('Falha ao extrair texto do template');
+      } else {
+        toast.success('Texto do template extraído com sucesso!');
+        // Atualizar o template local com o novo status
+        setTemplates(prev =>
+          prev.map(t => t.id === template.id
+            ? { ...t, status_extracao: 'extraido' as StatusExtracao }
+            : t
+          )
+        );
+      }
+    });
+
+    return template;
+  }, []);
+
+  /**
+   * Cria um template a partir de texto colado/escrito diretamente
+   * Não faz upload de arquivo, apenas insere o texto no banco
+   */
+  const createFromText = useCallback(async (
+    data: Omit<MinutaPadraoInsertText, 'status_extracao'>
+  ): Promise<MinutaPadrao> => {
+    // Validar texto
+    if (!data.texto_extraido || data.texto_extraido.trim().length < 50) {
+      throw new Error('O texto do template deve ter pelo menos 50 caracteres');
+    }
+
+    // Obter usuario atual
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Usuario nao autenticado');
+    }
+
+    const insertData: MinutaPadraoInsertText = {
+      ...data,
+      user_id: user.id,
+      is_global: false,
+      status_extracao: 'extraido',
+    };
+
+    const { data: template, error: insertError } = await supabase
+      .from('minutas_padrao')
+      .insert(insertData)
+      .select()
+      .single();
+
+    if (insertError) {
       throw new Error(`Erro ao salvar: ${insertError.message}`);
     }
 
@@ -227,15 +298,111 @@ export function useMinutasPadrao(): UseMinutasPadraoReturn & { templates: Minuta
     await supabase.rpc('increment_template_usage', { template_id: id });
   }, []);
 
+  /**
+   * Dispara extração de texto manualmente
+   */
+  const triggerExtraction = useCallback(async (id: string): Promise<void> => {
+    // Atualizar status local imediatamente
+    setTemplates(prev =>
+      prev.map(t => t.id === id
+        ? { ...t, status_extracao: 'extraindo' as StatusExtracao }
+        : t
+      )
+    );
+
+    const { error } = await supabase.functions.invoke('extract-template-text', {
+      body: { template_id: id }
+    });
+
+    if (error) {
+      setTemplates(prev =>
+        prev.map(t => t.id === id
+          ? { ...t, status_extracao: 'erro' as StatusExtracao, erro_extracao: error.message }
+          : t
+        )
+      );
+      throw new Error(`Erro na extração: ${error.message}`);
+    }
+
+    // Recarregar template atualizado
+    const { data: updated } = await supabase
+      .from('minutas_padrao')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (updated) {
+      setTemplates(prev =>
+        prev.map(t => t.id === id ? updated : t)
+      );
+    }
+
+    toast.success('Texto extraído com sucesso!');
+  }, []);
+
+  /**
+   * Salva texto Markdown editado pelo usuário
+   */
+  const saveMarkdown = useCallback(async (id: string, markdown: string): Promise<void> => {
+    const { error: updateError } = await supabase
+      .from('minutas_padrao')
+      .update({
+        conteudo_markdown: markdown,
+        status_extracao: 'revisado',
+        revisado_em: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id);
+
+    if (updateError) {
+      throw new Error(`Erro ao salvar: ${updateError.message}`);
+    }
+
+    toast.success('Revisão salva com sucesso!');
+    setTemplates(prev =>
+      prev.map(t => t.id === id
+        ? {
+            ...t,
+            conteudo_markdown: markdown,
+            status_extracao: 'revisado' as StatusExtracao,
+            revisado_em: new Date().toISOString(),
+          }
+        : t
+      )
+    );
+  }, []);
+
+  /**
+   * Re-extrai texto do arquivo original (reseta edições)
+   */
+  const reExtract = useCallback(async (id: string): Promise<void> => {
+    // Primeiro resetar o conteudo_markdown para forçar re-extração
+    await supabase
+      .from('minutas_padrao')
+      .update({
+        conteudo_markdown: null,
+        status_extracao: 'pendente',
+        erro_extracao: null,
+      })
+      .eq('id', id);
+
+    // Depois disparar a extração
+    await triggerExtraction(id);
+  }, [triggerExtraction]);
+
   return {
     templates,
     isLoading,
     error,
     loadTemplates,
     uploadTemplate,
+    createFromText,
     updateTemplate,
     deleteTemplate,
     getDownloadUrl,
     incrementUsage,
+    triggerExtraction,
+    saveMarkdown,
+    reExtract,
   };
 }

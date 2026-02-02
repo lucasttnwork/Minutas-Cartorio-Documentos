@@ -12,7 +12,8 @@ beforeAll(() => {
 
 describe('TemplateUploadForm', () => {
   const defaultProps = {
-    onSubmit: vi.fn(),
+    onSubmitFile: vi.fn(),
+    onSubmitText: vi.fn(),
     onCancel: vi.fn(),
     isLoading: false,
   };
@@ -161,7 +162,7 @@ describe('TemplateUploadForm', () => {
   });
 
   describe('Form Submission', () => {
-    it('calls onSubmit with form data and file', async () => {
+    it('calls onSubmitFile with form data and file in upload mode', async () => {
       const user = userEvent.setup();
       render(<TemplateUploadForm {...defaultProps} />);
 
@@ -181,7 +182,7 @@ describe('TemplateUploadForm', () => {
       // Submit
       await user.click(screen.getByRole('button', { name: /salvar/i }));
 
-      expect(defaultProps.onSubmit).toHaveBeenCalledWith(
+      expect(defaultProps.onSubmitFile).toHaveBeenCalledWith(
         expect.objectContaining({
           nome: 'Meu Template',
           descricao: 'Descrição do template',
