@@ -386,18 +386,31 @@
     max-width: 100vw;
   }
 
-  /* Mobile: Prevent any horizontal overflow */
+  /* Mobile: Full screen layout with dynamic viewport */
   @media (max-width: 767px) {
-    html, body {
-      overflow-x: hidden;
-      max-width: 100%;
-      position: relative;
+    html {
+      /* Fallback para navegadores antigos */
+      height: 100%;
+      height: -webkit-fill-available;
     }
 
-    /* Ensure root container doesn't overflow */
-    #root {
+    body {
+      /* Altura mínima que se adapta à barra do navegador */
+      min-height: 100vh;
+      min-height: 100dvh; /* Dynamic viewport height - se adapta quando barra do navegador some */
+      min-height: -webkit-fill-available;
+
       overflow-x: hidden;
-      max-width: 100vw;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Root container */
+    #root {
+      min-height: 100vh;
+      min-height: 100dvh;
+      min-height: -webkit-fill-available;
+      overflow-x: hidden;
       width: 100%;
     }
   }
@@ -1368,45 +1381,42 @@
   min-height: 44px;
 }
 
-/* Mobile tab bar styling - Fixed to bottom with safe area support */
+/* Mobile tab bar styling - Fixed to absolute bottom of screen */
 .mobile-tab-bar {
-  position: fixed !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  z-index: 9999 !important;
-
-  /* Altura inclui safe area para iPhone notch/home indicator */
-  height: calc(68px + env(safe-area-inset-bottom, 0)) !important;
-  min-height: calc(68px + env(safe-area-inset-bottom, 0)) !important;
+  /* Posicionamento fixo na borda inferior real da tela */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
 
   /* Visual */
-  background: oklch(from var(--card) l c h / 0.92);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: oklch(from var(--card) l c h / 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-top: 1px solid oklch(from var(--border) l c h / 0.4);
 
-  /* GPU acceleration para posicionamento consistente */
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
+  /* Safe area padding no bottom para home indicator do iPhone */
+  padding-bottom: env(safe-area-inset-bottom, 0);
 
-  /* Garante que fique acima de tudo */
-  isolation: isolate;
+  /* Força GPU layer para posicionamento correto durante scroll */
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  will-change: transform;
 
-  /* Permite interação */
+  /* Interação */
   pointer-events: auto;
   touch-action: manipulation;
 }
 
-/* Container interno - altura fixa, safe area via padding */
+/* Container interno - altura fixa do conteúdo */
 .mobile-tab-bar-content {
   display: flex;
   align-items: center;
   justify-content: space-around;
   width: 100%;
-  height: 68px;
+  height: 64px;
   padding: 0 8px;
-  /* Safe area fica abaixo do conteúdo, não empurra pra cima */
 }
 
 /* Item individual da tab - otimizado para touch */
@@ -1479,7 +1489,7 @@
 }
 
 .dark .mobile-tab-bar {
-  background: oklch(from var(--card) l c h / 0.88);
+  background: oklch(from var(--card) l c h / 0.92);
   border-top: 1px solid oklch(from var(--border) l c h / 0.3);
 }
 

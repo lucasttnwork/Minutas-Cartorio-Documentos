@@ -23,11 +23,11 @@ export default function DashboardHub() {
       {/* Desktop: Sidebar */}
       {!isMobile && <HubSidebar />}
 
-      {/* Main content - isolado da toolbar */}
+      {/* Main content - com espaço para toolbar mobile */}
       <main
         className={cn(
           'flex-1 min-h-screen w-full',
-          isMobile && 'pb-[calc(84px+env(safe-area-inset-bottom,0))] max-w-full overflow-x-hidden'
+          isMobile && 'pb-[calc(72px+env(safe-area-inset-bottom,0px))] max-w-full overflow-x-hidden'
         )}
       >
         <PageTransition>
