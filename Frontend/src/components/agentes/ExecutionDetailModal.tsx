@@ -457,16 +457,21 @@ export function ExecutionDetailModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[10000] flex items-center justify-center"
+          className={cn(
+            "fixed inset-0 z-[10000]",
+            !isMobile && "flex items-center justify-center" // Só centraliza em desktop
+          )}
         >
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-            onClick={onClose}
-          />
+          {/* Backdrop - só visível em desktop */}
+          {!isMobile && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+              onClick={onClose}
+            />
+          )}
 
           {/* Modal */}
           <motion.div
@@ -475,10 +480,10 @@ export function ExecutionDetailModal({
             exit={{ opacity: 0, scale: isMobile ? 1 : 0.95, y: isMobile ? 20 : 0 }}
             transition={{ duration: 0.2 }}
             className={cn(
-              "relative bg-card flex flex-col overflow-hidden",
+              "bg-card flex flex-col overflow-hidden",
               isMobile
-                ? "w-full h-full rounded-none"
-                : "w-[95vw] h-[90vh] max-w-[1800px] border border-border rounded-xl shadow-2xl"
+                ? "fixed inset-0" // Mobile: fullscreen usando inset-0
+                : "relative w-[95vw] h-[90vh] max-w-[1800px] border border-border rounded-xl shadow-2xl"
             )}
           >
             {/* Header - Mobile */}
