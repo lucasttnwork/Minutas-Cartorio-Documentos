@@ -1,8 +1,9 @@
 // src/AuthenticatedApp.tsx
-// Authenticated app with all protected routes for app.* subdomain
+// Authenticated app with all protected routes under /app/* path
 
 import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { isAppPath } from "./lib/domain";
 import { MinutaProvider } from "./contexts/MinutaContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { Toaster } from "./components/ui/sonner";
@@ -38,9 +39,12 @@ function PageLoader() {
 }
 
 export function AuthenticatedApp() {
+  // Use /app basename when accessing via path (not subdomain)
+  const basename = isAppPath() ? "/app" : undefined;
+
   return (
     <ErrorBoundary>
-      <Router>
+      <Router basename={basename}>
         <AuthProvider>
           <MinutaProvider>
             <div className="min-h-screen bg-background">

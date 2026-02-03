@@ -1,44 +1,40 @@
 // src/lib/domain.ts
-// Domain utilities for hostname-based routing between landing page and app
+// Domain utilities for path-based routing between landing page and app
 
 /**
- * Check if the current hostname is the app subdomain (app.*)
+ * Check if current path is within the app (/app/*)
+ */
+export function isAppPath(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.location.pathname.startsWith('/app');
+}
+
+/**
+ * Legacy: Check if the current hostname is the app subdomain (app.*)
+ * Kept for backwards compatibility during transition
  */
 export function isAppSubdomain(): boolean {
   if (typeof window === 'undefined') return false;
-  return window.location.hostname.startsWith('app.');
+  // Check both: path-based (/app/*) or subdomain (app.*)
+  return isAppPath() || window.location.hostname.startsWith('app.');
 }
 
 /**
- * Get the URL for the app subdomain
+ * Get the URL for the app
  * @param path - Path to append (default: '/')
- * @returns Full URL for app.domain.com
+ * @returns Path for /app/* routes
  */
 export function getAppUrl(path = '/'): string {
-  if (typeof window === 'undefined') return path;
-
-  const { protocol, hostname, port } = window.location;
-  const portSuffix = port ? `:${port}` : '';
-
-  // Remove 'app.' prefix if present to get base domain
-  const baseDomain = hostname.replace(/^app\./, '');
-
-  return `${protocol}//app.${baseDomain}${portSuffix}${path}`;
+  // Normalize path to not have leading slash for concatenation
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `/app${normalizedPath}`;
 }
 
 /**
- * Get the URL for the landing page (main domain without app. subdomain)
+ * Get the URL for the landing page (main domain)
  * @param path - Path to append (default: '/')
- * @returns Full URL for domain.com
+ * @returns Path for landing routes
  */
 export function getLandingUrl(path = '/'): string {
-  if (typeof window === 'undefined') return path;
-
-  const { protocol, hostname, port } = window.location;
-  const portSuffix = port ? `:${port}` : '';
-
-  // Remove 'app.' prefix if present to get base domain
-  const baseDomain = hostname.replace(/^app\./, '');
-
-  return `${protocol}//${baseDomain}${portSuffix}${path}`;
+  return path;
 }
