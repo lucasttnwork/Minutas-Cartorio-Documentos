@@ -8,3 +8,5 @@ export { ResultadoModal } from './ResultadoModal';
 export { DocumentPreviewModal } from './DocumentPreviewModal';
 export { ExecutionHistoryAgentes } from './ExecutionHistoryAgentes';
 export { ExecutionDetailModal } from './ExecutionDetailModal';
+export { MobileAgentHeader } from './MobileAgentHeader';
+export { MobileActionBar } from './MobileActionBar';

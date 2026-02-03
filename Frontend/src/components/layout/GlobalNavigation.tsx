@@ -10,6 +10,7 @@ import { useState } from "react";
 import { ThemeSwitcherCompact } from "@/components/ui/theme-switcher";
 import { useAuth } from "@/contexts/AuthContext";
 import { getLandingUrl } from "@/lib/domain";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
@@ -27,11 +28,19 @@ export function GlobalNavigation() {
   const navigate = useNavigate();
   const { user, profile, signOut, isAuthenticated } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   // Check if we're on the login page
   const isLoginPage = location.pathname === '/login';
   // Show public navigation when on login page and not authenticated
   const showPublicNav = isLoginPage && !isAuthenticated;
+
+  // Check if we're inside the dashboard or agent pages (which have their own mobile navigation)
+  const isInDashboard = location.pathname.startsWith('/dashboard');
+  const isInAgentPage = location.pathname.startsWith('/agentes');
+
+  // Hide mobile nav elements when in dashboard or agent pages on mobile
+  const hideMobileNav = isMobile && (isInDashboard || isInAgentPage);
 
   const handleLogout = async () => {
     await signOut();
@@ -245,24 +254,25 @@ export function GlobalNavigation() {
         </div>
       </motion.nav>
 
-      {/* Mobile Navigation Toggle Button */}
-      <motion.button
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          "lg:hidden fixed top-4 right-4 z-50",
-          "flex items-center justify-center w-11 h-11",
-          "bg-card/85 backdrop-blur-xl backdrop-saturate-150",
-          "border border-border/40 rounded-xl",
-          "shadow-lg shadow-black/10",
-          "transition-all duration-200",
-          isOpen && "bg-secondary/90"
-        )}
-        aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
-      >
+      {/* Mobile Navigation Toggle Button - Hidden in dashboard (has MobileBottomNav) */}
+      {!hideMobileNav && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setIsOpen(!isOpen)}
+          className={cn(
+            "lg:hidden fixed top-4 right-4 z-50",
+            "flex items-center justify-center w-11 h-11",
+            "bg-card/85 backdrop-blur-xl backdrop-saturate-150",
+            "border border-border/40 rounded-xl",
+            "shadow-lg shadow-black/10",
+            "transition-all duration-200",
+            isOpen && "bg-secondary/90"
+          )}
+          aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
+        >
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={isOpen ? "close" : "open"}
@@ -278,49 +288,53 @@ export function GlobalNavigation() {
             )}
           </motion.div>
         </AnimatePresence>
-      </motion.button>
+        </motion.button>
+      )}
 
-      {/* Mobile Logo (visible when menu is closed) */}
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            className="lg:hidden fixed top-4 left-4 z-50"
-          >
-            {showPublicNav ? (
-              <a href={getLandingUrl('/')} className="flex items-center gap-2">
-                <div
-                  className={cn(
-                    "flex items-center justify-center w-10 h-10 rounded-xl",
-                    "bg-gradient-to-br from-primary to-primary/80",
-                    "shadow-md shadow-primary/20"
-                  )}
-                >
-                  <FileText className="w-5 h-5 text-primary-foreground" />
-                </div>
-              </a>
-            ) : (
-              <Link to="/dashboard" className="flex items-center gap-2">
-                <div
-                  className={cn(
-                    "flex items-center justify-center w-10 h-10 rounded-xl",
-                    "bg-gradient-to-br from-primary to-primary/80",
-                    "shadow-md shadow-primary/20"
-                  )}
-                >
-                  <FileText className="w-5 h-5 text-primary-foreground" />
-                </div>
-              </Link>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Mobile Logo (visible when menu is closed) - Hidden in dashboard */}
+      {!hideMobileNav && (
+        <AnimatePresence>
+          {!isOpen && (
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              className="lg:hidden fixed top-4 left-4 z-50"
+            >
+              {showPublicNav ? (
+                <a href={getLandingUrl('/')} className="flex items-center gap-2">
+                  <div
+                    className={cn(
+                      "flex items-center justify-center w-10 h-10 rounded-xl",
+                      "bg-gradient-to-br from-primary to-primary/80",
+                      "shadow-md shadow-primary/20"
+                    )}
+                  >
+                    <FileText className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                </a>
+              ) : (
+                <Link to="/dashboard" className="flex items-center gap-2">
+                  <div
+                    className={cn(
+                      "flex items-center justify-center w-10 h-10 rounded-xl",
+                      "bg-gradient-to-br from-primary to-primary/80",
+                      "shadow-md shadow-primary/20"
+                    )}
+                  >
+                    <FileText className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                </Link>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
 
-      {/* Mobile Navigation Drawer */}
-      <AnimatePresence>
-        {isOpen && (
+      {/* Mobile Navigation Drawer - Hidden in dashboard */}
+      {!hideMobileNav && (
+        <AnimatePresence>
+          {isOpen && (
           <>
             {/* Backdrop */}
             <motion.div
@@ -534,7 +548,8 @@ export function GlobalNavigation() {
             </motion.nav>
           </>
         )}
-      </AnimatePresence>
+        </AnimatePresence>
+      )}
 
     </>
   );

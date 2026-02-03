@@ -380,6 +380,26 @@
 
     /* Prevent layout shift from scrollbar */
     overflow-y: scroll;
+
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* Mobile: Prevent any horizontal overflow */
+  @media (max-width: 767px) {
+    html, body {
+      overflow-x: hidden;
+      max-width: 100%;
+      position: relative;
+    }
+
+    /* Ensure root container doesn't overflow */
+    #root {
+      overflow-x: hidden;
+      max-width: 100vw;
+      width: 100%;
+    }
   }
 
   /* Typography scale - Clear hierarchy */
@@ -1301,6 +1321,269 @@
 .form-container-elevated {
   position: relative;
   z-index: 1;
+}
+
+/* =============================================================================
+   MOBILE iOS-STYLE UTILITIES
+   ============================================================================= */
+
+/* Safe Area Insets for iOS */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+.mb-safe {
+  margin-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Momentum scrolling for iOS */
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
+
+.scroll-touch-x {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: auto;
+}
+
+/* Touch feedback - active state */
+.touch-feedback {
+  transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 100ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.touch-feedback:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
+/* Touch target minimum - Apple HIG recommends 44x44 */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Mobile tab bar styling - Completamente estático e isolado */
+.mobile-tab-bar {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 9999 !important;
+
+  /* Altura totalmente fixa */
+  height: 68px !important;
+  min-height: 68px !important;
+  max-height: 68px !important;
+
+  /* Visual */
+  background: oklch(from var(--card) l c h / 0.92);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-top: 1px solid oklch(from var(--border) l c h / 0.4);
+
+  /* Isolamento total do layout */
+  transform: translate3d(0, 0, 0);
+  contain: layout size style paint;
+  isolation: isolate;
+
+  /* Bloqueia qualquer interferência */
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+/* Container interno para safe area */
+.mobile-tab-bar-content {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  width: 100%;
+  height: 68px;
+  padding: 0 8px;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Item individual da tab */
+.mobile-tab-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 8px 0;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-tab-icon {
+  position: relative;
+  z-index: 10;
+  width: 24px;
+  height: 24px;
+  transition: color 0.2s ease;
+}
+
+.mobile-tab-label {
+  position: relative;
+  z-index: 10;
+  font-size: 10px;
+  font-weight: 500;
+  margin-top: 2px;
+  transition: color 0.2s ease;
+}
+
+.mobile-tab-item.active .mobile-tab-label {
+  font-weight: 600;
+}
+
+/* Logout button styling */
+.mobile-tab-logout {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-tab-logout:active {
+  opacity: 0.7;
+}
+
+.mobile-tab-logout .mobile-tab-icon {
+  transition: color 0.2s ease;
+}
+
+.mobile-tab-logout:hover .mobile-tab-icon,
+.mobile-tab-logout:hover .mobile-tab-label {
+  color: oklch(from var(--destructive) l c h);
+}
+
+.dark .mobile-tab-bar {
+  background: oklch(from var(--card) l c h / 0.88);
+  border-top: 1px solid oklch(from var(--border) l c h / 0.3);
+}
+
+/* =============================================================================
+   LIQUID GLASS INDICATOR - Apple-inspired animated bubble
+   ============================================================================= */
+
+.liquid-glass-indicator {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  border-radius: 14px;
+  z-index: 1;
+  pointer-events: none;
+
+  /* Liquid Glass background */
+  background: linear-gradient(
+    135deg,
+    oklch(from var(--primary) l c h / 0.12) 0%,
+    oklch(from var(--primary) l c h / 0.08) 50%,
+    oklch(from var(--primary) l c h / 0.12) 100%
+  );
+
+  /* Premium border */
+  border: 1px solid oklch(from var(--primary) l c h / 0.2);
+
+  /* Soft glow shadow */
+  box-shadow:
+    0 2px 8px oklch(from var(--primary) l c h / 0.15),
+    0 4px 16px oklch(from var(--primary) l c h / 0.08),
+    inset 0 1px 0 oklch(100% 0 0 / 0.15);
+}
+
+/* Inner shine effect */
+.liquid-glass-indicator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(100% 0 0 / 0.4) 50%,
+    transparent 100%
+  );
+  border-radius: 1px;
+}
+
+/* Subtle gradient overlay */
+.liquid-glass-indicator::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    oklch(100% 0 0 / 0.08) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+}
+
+/* Dark mode adjustments */
+.dark .liquid-glass-indicator {
+  background: linear-gradient(
+    135deg,
+    oklch(from var(--primary) l c h / 0.18) 0%,
+    oklch(from var(--primary) l c h / 0.12) 50%,
+    oklch(from var(--primary) l c h / 0.18) 100%
+  );
+
+  border: 1px solid oklch(from var(--primary) l c h / 0.3);
+
+  box-shadow:
+    0 2px 12px oklch(from var(--primary) l c h / 0.2),
+    0 4px 20px oklch(from var(--primary) l c h / 0.12),
+    inset 0 1px 0 oklch(100% 0 0 / 0.1);
+}
+
+.dark .liquid-glass-indicator::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(100% 0 0 / 0.25) 50%,
+    transparent 100%
+  );
+}
+
+/* Scroll snap for horizontal pills */
+.scroll-snap-x {
+  scroll-snap-type: x mandatory;
+  scroll-padding: 0 16px;
+}
+
+.scroll-snap-item {
+  scroll-snap-align: start;
+}
+
+/* Hide scrollbar but maintain functionality (iOS style) */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Respect reduced motion preference for touch feedback */
+@media (prefers-reduced-motion: reduce) {
+  .touch-feedback:active {
+    transform: none;
+  }
 }
 
 /* =============================================================================

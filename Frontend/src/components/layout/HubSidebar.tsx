@@ -14,9 +14,10 @@ interface NavItem {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   description?: string;
+  isPrimary?: boolean; // Item destacado como função principal
 }
 
-const navItems: NavItem[] = [
+export const navItems: NavItem[] = [
   {
     to: "/dashboard/minutas",
     label: "Minutas",
@@ -24,18 +25,22 @@ const navItems: NavItem[] = [
     description: "Gerenciar minutas",
   },
   {
+    to: "/dashboard/agentes",
+    label: "Agentes",
+    icon: Bot,
+    description: "Agentes de IA",
+    isPrimary: true, // Marca como função principal
+  },
+  {
     to: "/dashboard/templates",
     label: "Templates",
     icon: LayoutTemplate,
     description: "Minutas padrão",
   },
-  {
-    to: "/dashboard/agentes",
-    label: "Agentes",
-    icon: Bot,
-    description: "Agentes de IA",
-  },
 ];
+
+// Re-export for type checking
+export type { NavItem };
 
 interface HubSidebarProps {
   className?: string;
