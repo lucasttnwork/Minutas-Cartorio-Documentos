@@ -1,29 +1,25 @@
 // src/components/layout/MobileBottomNav.tsx
 // Tab bar inferior iOS-style com Liquid Glass effect
 
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LogOut } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { navItems } from './HubSidebar';
-import { useAuth } from '@/contexts/AuthContext';
 
 export function MobileBottomNav() {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { signOut } = useAuth();
 
   // Encontra o índice do item ativo para a animação
-  const activeIndex = navItems.findIndex(
-    (item) =>
-      location.pathname === item.to ||
-      location.pathname.startsWith(item.to + '/')
-  );
-
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/login');
-  };
+  // Inclui a página de settings como possível item ativo
+  const isSettingsActive = location.pathname === '/settings';
+  const activeIndex = isSettingsActive
+    ? -1 // Settings não está em navItems, então -1
+    : navItems.findIndex(
+        (item) =>
+          location.pathname === item.to ||
+          location.pathname.startsWith(item.to + '/')
+      );
 
   return (
     <nav className="mobile-tab-bar">
@@ -81,15 +77,46 @@ export function MobileBottomNav() {
           );
         })}
 
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          className="mobile-tab-item mobile-tab-logout"
-          aria-label="Sair"
+        {/* Settings Link */}
+        <NavLink
+          to="/settings"
+          className={cn(
+            'mobile-tab-item',
+            isSettingsActive && 'active'
+          )}
+          onClick={(e) => {
+            e.currentTarget.blur();
+          }}
         >
-          <LogOut className="mobile-tab-icon text-muted-foreground" />
-          <span className="mobile-tab-label text-muted-foreground">Sair</span>
-        </button>
+          {/* Liquid Glass Bubble for Settings */}
+          {isSettingsActive && (
+            <motion.div
+              layoutId="liquid-glass-bubble"
+              className="liquid-glass-indicator"
+              style={{ pointerEvents: 'none' }}
+              transition={{
+                type: 'spring',
+                stiffness: 380,
+                damping: 32,
+              }}
+            />
+          )}
+
+          <Settings
+            className={cn(
+              'mobile-tab-icon',
+              isSettingsActive ? 'text-primary' : 'text-muted-foreground'
+            )}
+          />
+          <span
+            className={cn(
+              'mobile-tab-label',
+              isSettingsActive ? 'text-primary font-semibold' : 'text-muted-foreground'
+            )}
+          >
+            Ajustes
+          </span>
+        </NavLink>
       </div>
     </nav>
   );

@@ -1461,31 +1461,9 @@
   font-weight: 600;
 }
 
-/* Logout button styling */
-.mobile-tab-logout {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
-.mobile-tab-logout:active {
-  opacity: 0.7;
-}
-
 /* Active state para feedback tátil imediato */
 .mobile-tab-item:active {
   opacity: 0.7;
-}
-
-.mobile-tab-logout .mobile-tab-icon {
-  transition: color 0.2s ease;
-}
-
-.mobile-tab-logout:hover .mobile-tab-icon,
-.mobile-tab-logout:hover .mobile-tab-label {
-  color: oklch(from var(--destructive) l c h);
 }
 
 .dark .mobile-tab-bar {

@@ -25,6 +25,7 @@ const ConferenciaImoveis = lazy(() => import("./pages/ConferenciaImoveis"));
 const ParecerJuridico = lazy(() => import("./pages/ParecerJuridico"));
 const ConferenciaNegocio = lazy(() => import("./pages/ConferenciaNegocio"));
 const MinutaFinal = lazy(() => import("./pages/MinutaFinal"));
+const MobileSettings = lazy(() => import("./pages/MobileSettings"));
 
 // Loading spinner for Suspense fallback
 function PageLoader() {
@@ -144,6 +145,16 @@ export function AuthenticatedApp() {
                     element={
                       <ProtectedRoute>
                         <MinutaFinal />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  {/* Settings page (mobile) */}
+                  <Route
+                    path="/settings"
+                    element={
+                      <ProtectedRoute>
+                        <MobileSettings />
                       </ProtectedRoute>
                     }
                   />
