@@ -3,13 +3,7 @@ import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-  SimpleTooltip
-} from "@/components/ui/tooltip"
+import { SimpleTooltip } from "@/components/ui/tooltip"
 import { Pencil, Check, X, AlertCircle } from "lucide-react"
 
 /* =============================================================================
@@ -99,7 +93,6 @@ export function EditableField({
   alwaysEditing = false,
   variant = "default",
   emptyText = "Clique para editar",
-  fonte,
 }: EditableFieldProps) {
   const [isEditing, setIsEditing] = React.useState(alwaysEditing)
   const [localValue, setLocalValue] = React.useState(value)
