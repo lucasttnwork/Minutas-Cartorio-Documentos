@@ -6,11 +6,14 @@ import type { MappedFields, PessoaNatural, Imovel, NegocioJuridico, AlertaJuridi
 import { persistMappedFields } from './persistence.ts';
 
 // Document type priorities for conflict resolution
+// Higher priority = processed first
+// Identity docs (RG, CNH) should be processed BEFORE marriage certificates
+// so that pessoas already exist when marriage cert tries to update them
 const TYPE_PRIORITIES: Record<string, number> = {
   'RG': 100,
   'CERTIDAO_NASCIMENTO': 95,
-  'CERTIDAO_CASAMENTO': 90,
-  'CNH': 88,
+  'CNH': 90,
+  'CERTIDAO_CASAMENTO': 85,  // Process AFTER identity docs so pessoas exist
   'COMPROMISSO_COMPRA_VENDA': 85,
   'MATRICULA_IMOVEL': 80,
   'CNDT': 75,
@@ -134,8 +137,13 @@ function mapDocumentsToFields(documentos: DocumentRecord[]): MappedFields {
   });
 
   for (const doc of sorted) {
-    const dados = doc.dados_extraidos;
-    if (!dados) continue;
+    // Handle both V2 format (nested in 'dados') and legacy V1 format (flat)
+    const rawDados = doc.dados_extraidos;
+    if (!rawDados) continue;
+
+    const dados = (rawDados?.dados && typeof rawDados.dados === 'object')
+      ? rawDados.dados as Record<string, unknown>
+      : rawDados;
 
     const tipoDoc = doc.tipo_documento;
     const priority = TYPE_PRIORITIES[tipoDoc] ?? 0;
@@ -175,6 +183,10 @@ function mapDocumentsToFields(documentos: DocumentRecord[]): MappedFields {
     }
   }
 
+  // Correlate identity documents (match front/back of RGs, merge nome with CPF)
+  correlateIdentityDocuments(alienantes);
+  correlateIdentityDocuments(adquirentes);
+
   // Identify spouses as anuentes
   identifyAnuentes(alienantes, anuentes);
 
@@ -203,42 +215,144 @@ function mapIdentityDocument(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _priority: number
 ) {
-  // Handle both nested (RG format: {rg: {...}}) and flat (CNH format: {...}) structures
+  // Handle multiple possible structures from extraction:
+  // 1. Nested RG format: {rg: {cpf, nome, numero_rg, ...}}
+  // 2. Flat CNH format: {cpf, nome_completo, rg, orgao_emissor_rg, ...}
+  // 3. V2 extraction format: {dados: {...}, tipo_documento, versao_extracao}
+
   const rgData = dados.rg as Record<string, unknown> | undefined;
-  const isNestedFormat = rgData && typeof rgData === 'object' && 'cpf' in rgData;
+  const isNestedRgFormat = rgData && typeof rgData === 'object' && ('cpf' in rgData || 'numero_rg' in rgData);
 
   // Get data from the correct location
-  const docData = isNestedFormat ? rgData : dados;
+  const docData = isNestedRgFormat ? rgData : dados;
 
-  // For CNH, the field might be 'nome_completo' instead of 'nome'
-  const nome = (docData.nome as string) || (docData.nome_completo as string);
+  // Extract nome - try multiple field names
+  const nome = (docData.nome as string)
+    || (docData.nome_completo as string)
+    || (dados.nome as string)
+    || (dados.nome_completo as string);
 
-  const cpf = normalizeCPF(docData.cpf as string | undefined);
-  if (!cpf) return;
+  // Extract CPF - try multiple locations
+  const cpf = normalizeCPF(
+    (docData.cpf as string | undefined)
+    || (dados.cpf as string | undefined)
+  );
+
+  // Extract RG number - handle various field names
+  const rgNumber = (docData.numero_rg as string | undefined)
+    || (docData.rg as string | undefined)
+    || (isNestedRgFormat ? undefined : dados.rg as string | undefined)
+    || (dados.numero_rg as string | undefined);
+
+  // Skip if we have neither CPF nor nome - nothing useful to map
+  if (!cpf && !nome) return;
+
+  // Extract RG issuing authority - try ALL possible field names from prompts
+  const orgaoEmissorRg = (docData.orgao_emissor_rg as string | undefined)
+    || (docData.orgao_emissor as string | undefined)
+    || (docData.orgao_expedidor as string | undefined)
+    || (dados.orgao_emissor_rg as string | undefined)
+    || (dados.orgao_emissor as string | undefined)
+    || (dados.orgao_expedidor as string | undefined);
+
+  // Extract RG state - try ALL possible field names from prompts
+  const estadoEmissorRg = (docData.uf_rg as string | undefined)
+    || (docData.estado_emissor_rg as string | undefined)
+    || (docData.estado_emissor as string | undefined)
+    || (docData.uf_expedidor as string | undefined)
+    || (dados.uf_rg as string | undefined)
+    || (dados.estado_emissor_rg as string | undefined)
+    || (dados.estado_emissor as string | undefined)
+    || (dados.uf_expedidor as string | undefined);
+
+  // Extract RG issue date - try multiple field names
+  const dataEmissaoRg = (docData.data_expedicao as string | undefined)
+    || (docData.data_emissao as string | undefined)
+    || (docData.data_emissao_rg as string | undefined)
+    || (dados.data_expedicao as string | undefined)
+    || (dados.data_emissao as string | undefined);
+
+  // Extract filiacao - handle nested and flat structures
+  const filiacaoObj = (docData.filiacao as Record<string, unknown>) || (dados.filiacao as Record<string, unknown>);
+  const filiacaoPai = (docData.filiacao_pai as string | undefined)
+    || (dados.filiacao_pai as string | undefined)
+    || (filiacaoObj?.pai as string | undefined)
+    || (filiacaoObj?.nome_pai as string | undefined);
+  const filiacaoMae = (docData.filiacao_mae as string | undefined)
+    || (dados.filiacao_mae as string | undefined)
+    || (filiacaoObj?.mae as string | undefined)
+    || (filiacaoObj?.nome_mae as string | undefined);
+
+  // Extract naturalidade - try multiple locations
+  const naturalidade = (docData.naturalidade as string | undefined)
+    || (dados.naturalidade as string | undefined);
+
+  // Extract data_nascimento
+  const dataNascimento = (docData.data_nascimento as string | undefined)
+    || (dados.data_nascimento as string | undefined);
+
+  // Extract nacionalidade
+  const nacionalidade = (docData.nacionalidade as string | undefined)
+    || (dados.nacionalidade as string | undefined);
 
   const pessoa: PessoaNatural = {
     nome: nome?.toUpperCase(),
-    cpf,
-    rg: isNestedFormat ? (docData.numero_rg as string | undefined) : (dados.rg as string | undefined),
-    orgao_emissor_rg: (docData.orgao_emissor as string | undefined) || (docData.orgao_expedidor as string | undefined),
-    estado_emissor_rg: (docData.estado_emissor as string | undefined) || (docData.uf_rg as string | undefined),
-    data_emissao_rg: docData.data_expedicao as string | undefined,
-    data_nascimento: docData.data_nascimento as string | undefined,
-    nacionalidade: docData.nacionalidade as string | undefined,
-    naturalidade: docData.naturalidade as string | undefined,
-    filiacao_pai: (docData.filiacao_pai as string | undefined) || (docData.filiacao as Record<string, unknown>)?.pai as string | undefined,
-    filiacao_mae: (docData.filiacao_mae as string | undefined) || (docData.filiacao as Record<string, unknown>)?.mae as string | undefined,
-    _fontes: { cpf: [source], nome: [source] },
+    cpf: cpf || undefined,
+    rg: rgNumber,
+    orgao_emissor_rg: orgaoEmissorRg,
+    estado_emissor_rg: estadoEmissorRg,
+    data_emissao_rg: dataEmissaoRg,
+    data_nascimento: dataNascimento,
+    nacionalidade: nacionalidade,
+    naturalidade: naturalidade,
+    filiacao_pai: filiacaoPai,
+    filiacao_mae: filiacaoMae,
+    _fontes: {},
   };
 
-  // For now, add to alienantes (role detection would come from contract)
-  if (!alienantes.has(cpf)) {
-    alienantes.set(cpf, pessoa);
+  // Track sources for the fields we have
+  if (cpf) pessoa._fontes!.cpf = [source];
+  if (nome) pessoa._fontes!.nome = [source];
+
+  // Use CPF as key if available, otherwise use normalized nome
+  const key = cpf || `nome:${nome?.toUpperCase()}`;
+
+  if (!alienantes.has(key)) {
+    alienantes.set(key, pessoa);
   } else {
-    // Merge with existing
-    const existing = alienantes.get(cpf)!;
+    // Merge with existing - combine data from multiple documents (RG front + back)
+    const existing = alienantes.get(key)!;
     mergePersonData(existing, pessoa);
+
+    // If existing had nome-based key and we now have CPF, re-key by CPF
+    if (!key.startsWith('nome:') && cpf && !existing.cpf) {
+      // Found CPF for a nome-keyed entry - update the key
+      const nomeKey = `nome:${existing.nome}`;
+      if (alienantes.has(nomeKey)) {
+        alienantes.delete(nomeKey);
+        existing.cpf = cpf;
+        alienantes.set(cpf, existing);
+      }
+    }
   }
+}
+
+/**
+ * Normalizes a name for matching purposes:
+ * - Removes accents (NFD normalization + diacritic removal)
+ * - Removes common articles (DA, DE, DO, DOS, DAS, E)
+ * - Converts to uppercase
+ * - Normalizes whitespace
+ */
+function normalizeNameForMatching(name: string | undefined | null): string {
+  if (!name) return '';
+  return name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove accents
+    .toUpperCase()
+    .replace(/\b(DA|DE|DO|DOS|DAS|E)\b/g, '') // Remove articles
+    .replace(/\s+/g, ' ') // Normalize spaces
+    .trim();
 }
 
 function mapMarriageCertificate(
@@ -250,25 +364,111 @@ function mapMarriageCertificate(
   _alertas: AlertaJuridico[]
 ) {
   // Update marriage info for known persons
-  const conjuge1 = dados.conjuge1 as Record<string, unknown> | undefined;
-  const conjuge2 = dados.conjuge2 as Record<string, unknown> | undefined;
+  // Handle both field naming conventions: conjuge1/conjuge2 and conjuge_1/conjuge_2
+  const conjuge1 = (dados.conjuge_1 || dados.conjuge1) as Record<string, unknown> | undefined;
+  const conjuge2 = (dados.conjuge_2 || dados.conjuge2) as Record<string, unknown> | undefined;
+
+  if (!conjuge1 && !conjuge2) {
+    console.log('[map-to-fields] Marriage certificate has no conjuge data');
+    return;
+  }
+
+  // Get CPFs if available
   const conjuge1Cpf = normalizeCPF(conjuge1?.cpf as string | undefined);
   const conjuge2Cpf = normalizeCPF(conjuge2?.cpf as string | undefined);
 
-  for (const [cpf, pessoa] of [...alienantes.entries(), ...adquirentes.entries()]) {
-    if (cpf === conjuge1Cpf) {
-      pessoa.estado_civil = 'casado';
-      pessoa.regime_bens = dados.regime_bens as string | undefined;
-      pessoa.data_casamento = dados.data_casamento as string | undefined;
-      pessoa.conjuge = conjuge2?.nome as string | undefined;
-      addSource(pessoa, 'estado_civil', source);
+  // Get names for matching (required since CPF is often not in marriage certificates)
+  const conjuge1Nome = ((conjuge1?.nome_completo as string) || (conjuge1?.nome as string))?.toUpperCase();
+  const conjuge2Nome = ((conjuge2?.nome_completo as string) || (conjuge2?.nome as string))?.toUpperCase();
+
+  // Get filiacao from marriage certificate
+  const conjuge1Filiacao = conjuge1?.filiacao as Record<string, unknown> | undefined;
+  const conjuge2Filiacao = conjuge2?.filiacao as Record<string, unknown> | undefined;
+  const conjuge1Naturalidade = conjuge1?.naturalidade as string | undefined;
+  const conjuge2Naturalidade = conjuge2?.naturalidade as string | undefined;
+  const conjuge1Nacionalidade = conjuge1?.nacionalidade as string | undefined;
+  const conjuge2Nacionalidade = conjuge2?.nacionalidade as string | undefined;
+
+  console.log(`[map-to-fields] Processing marriage certificate: ${conjuge1Nome} + ${conjuge2Nome}`);
+
+  // Debug log for matching
+  console.log('[map-to-fields] Attempting marriage cert match:', {
+    conjuge1Nome,
+    conjuge2Nome,
+    existingPessoas: [...alienantes.values(), ...adquirentes.values()].map(p => p.nome)
+  });
+
+  // Helper to check if pessoa matches a conjuge by name or CPF
+  const matchesConjuge = (pessoa: PessoaNatural, cpf: string | null, nome: string | undefined): boolean => {
+    // Match by CPF if available (first priority)
+    if (cpf && pessoa.cpf === cpf) return true;
+    // Match by name (normalized to handle accents and articles)
+    if (nome && pessoa.nome) {
+      const normalizedPessoaNome = normalizeNameForMatching(pessoa.nome);
+      const normalizedCertNome = normalizeNameForMatching(nome);
+      // Exact match after normalization
+      if (normalizedPessoaNome === normalizedCertNome) return true;
+      // Handle married name vs maiden name differences
+      // Check if first and last name parts match
+      const certParts = normalizedCertNome.split(' ').filter(p => p.length > 0);
+      const pessoaParts = normalizedPessoaNome.split(' ').filter(p => p.length > 0);
+      if (certParts.length > 0 && pessoaParts.length > 0) {
+        const certFirst = certParts[0];
+        const certLast = certParts[certParts.length - 1];
+        const pessoaFirst = pessoaParts[0];
+        const pessoaLast = pessoaParts[pessoaParts.length - 1];
+        // pessoa has cert's first and last name
+        if (normalizedPessoaNome.includes(certFirst) && normalizedPessoaNome.includes(certLast)) return true;
+        // cert has pessoa's first and last name
+        if (normalizedCertNome.includes(pessoaFirst) && normalizedCertNome.includes(pessoaLast)) return true;
+      }
     }
-    if (cpf === conjuge2Cpf) {
+    return false;
+  };
+
+  // Update each person in alienantes and adquirentes
+  for (const [_key, pessoa] of [...alienantes.entries(), ...adquirentes.entries()]) {
+    if (matchesConjuge(pessoa, conjuge1Cpf, conjuge1Nome)) {
       pessoa.estado_civil = 'casado';
       pessoa.regime_bens = dados.regime_bens as string | undefined;
       pessoa.data_casamento = dados.data_casamento as string | undefined;
-      pessoa.conjuge = conjuge1?.nome as string | undefined;
+      pessoa.conjuge = conjuge2Nome;
+      // Map filiacao from marriage certificate if not already set
+      if (!pessoa.filiacao_pai && conjuge1Filiacao?.pai) {
+        pessoa.filiacao_pai = conjuge1Filiacao.pai as string;
+      }
+      if (!pessoa.filiacao_mae && conjuge1Filiacao?.mae) {
+        pessoa.filiacao_mae = conjuge1Filiacao.mae as string;
+      }
+      if (!pessoa.naturalidade && conjuge1Naturalidade) {
+        pessoa.naturalidade = conjuge1Naturalidade;
+      }
+      if (!pessoa.nacionalidade && conjuge1Nacionalidade) {
+        pessoa.nacionalidade = conjuge1Nacionalidade;
+      }
       addSource(pessoa, 'estado_civil', source);
+      console.log(`[map-to-fields] Updated ${pessoa.nome} with marriage info (conjuge: ${conjuge2Nome})`);
+    }
+    if (matchesConjuge(pessoa, conjuge2Cpf, conjuge2Nome)) {
+      pessoa.estado_civil = 'casado';
+      pessoa.regime_bens = dados.regime_bens as string | undefined;
+      pessoa.data_casamento = dados.data_casamento as string | undefined;
+      pessoa.conjuge = conjuge1Nome;
+      // Map filiacao from marriage certificate if not already set
+      if (!pessoa.filiacao_pai && conjuge2Filiacao?.pai) {
+        pessoa.filiacao_pai = conjuge2Filiacao.pai as string;
+      }
+      if (!pessoa.filiacao_mae && conjuge2Filiacao?.mae) {
+        pessoa.filiacao_mae = conjuge2Filiacao.mae as string;
+      }
+      if (!pessoa.naturalidade && conjuge2Naturalidade) {
+        pessoa.naturalidade = conjuge2Naturalidade;
+      }
+      if (!pessoa.nacionalidade && conjuge2Nacionalidade) {
+        pessoa.nacionalidade = conjuge2Nacionalidade;
+      }
+      addSource(pessoa, 'estado_civil', source);
+      console.log(`[map-to-fields] Updated ${pessoa.nome} with marriage info (conjuge: ${conjuge1Nome})`);
     }
   }
 }
@@ -349,13 +549,66 @@ function mapPropertyRegistry(
 ): Imovel {
   const result = { ...imovel };
 
-  result.matricula_numero = (dados.matricula_numero as string) || result.matricula_numero;
-  result.registro_imoveis = (dados.cartorio as string) || result.registro_imoveis;
-  result.cidade = (dados.cidade as string) || result.cidade;
-  result.estado = (dados.estado as string) || result.estado;
-  result.tipo = (dados.tipo_imovel as string) || result.tipo;
-  result.area_total = (dados.area_total as string) || result.area_total;
-  result.area_privativa = (dados.area_privativa as string) || result.area_privativa;
+  // Handle V2 extraction format with nested structures
+  const matriculaData = dados.matricula as Record<string, unknown> | undefined;
+  const imovelData = dados.imovel as Record<string, unknown> | undefined;
+  const certidaoData = dados.certidao as Record<string, unknown> | undefined;
+  const proprietariosData = dados.proprietarios_atuais as Array<unknown> | undefined;
+
+  // Map matricula fields - try nested V2 format first, then flat format
+  result.matricula_numero = (matriculaData?.numero as string)
+    || (dados.matricula_numero as string)
+    || result.matricula_numero;
+
+  result.registro_imoveis = (matriculaData?.cartorio as string)
+    || (dados.cartorio as string)
+    || result.registro_imoveis;
+
+  result.cidade = (matriculaData?.comarca as string)
+    || (imovelData?.cidade as string)
+    || (dados.cidade as string)
+    || result.cidade;
+
+  result.estado = (imovelData?.uf as string)
+    || (dados.estado as string)
+    || result.estado;
+
+  // Map imovel fields from nested structure
+  result.tipo = (imovelData?.tipo as string)
+    || (dados.tipo_imovel as string)
+    || result.tipo;
+
+  result.area_total = (imovelData?.area_total_m2 as string)
+    || (dados.area_total as string)
+    || result.area_total;
+
+  result.area_privativa = (imovelData?.area_privativa_m2 as string)
+    || (dados.area_privativa as string)
+    || result.area_privativa;
+
+  // Map endereco from imovel nested structure
+  if (imovelData) {
+    if (!result.endereco) {
+      result.endereco = {};
+    }
+    result.endereco.logradouro = (imovelData.logradouro as string) || result.endereco.logradouro;
+    result.endereco.numero = (imovelData.numero as string) || result.endereco.numero;
+    result.endereco.complemento = (imovelData.complemento as string) || result.endereco.complemento;
+    result.endereco.bairro = (imovelData.bairro as string) || result.endereco.bairro;
+    result.endereco.cidade = (imovelData.cidade as string) || result.endereco.cidade;
+    result.endereco.estado = (imovelData.uf as string) || result.endereco.estado;
+    result.endereco.cep = (imovelData.cep as string) || result.endereco.cep;
+
+    // Map fracao ideal
+    if (imovelData.fracao_ideal) {
+      result.fracao_ideal = String(imovelData.fracao_ideal);
+    }
+  }
+
+  // Map certidao data if available
+  if (certidaoData) {
+    console.log('[map-to-fields] Certidao data found:', certidaoData);
+  }
 
   // Capture liens/encumbrances
   const onusAtivos = dados.onus_ativos as Array<unknown> | undefined;
@@ -373,8 +626,10 @@ function mapPropertyRegistry(
     result.onus_historicos = dados.onus_historicos as Imovel['onus_historicos'];
   }
 
-  // Capture current owners
-  if (dados.proprietarios) {
+  // Capture current owners - try V2 format first
+  if (proprietariosData && proprietariosData.length > 0) {
+    result.proprietarios = proprietariosData as Imovel['proprietarios'];
+  } else if (dados.proprietarios) {
     result.proprietarios = dados.proprietarios as Imovel['proprietarios'];
   }
 
@@ -432,6 +687,149 @@ function mapCNDT(
         status: dados.resultado as string | undefined,
       };
       addSource(pessoa, 'cndt', source);
+    }
+  }
+}
+
+/**
+ * Correlate identity documents - match front/back of RGs
+ *
+ * Problem: RG front has name but no CPF, RG back has CPF but no name
+ * Solution: Try to match based on shared attributes (naturalidade, data_nascimento, filiacao)
+ *
+ * Also consolidates entries: if we have both nome:JOHN and a CPF entry for the same person,
+ * merge them into one entry keyed by CPF
+ */
+function correlateIdentityDocuments(pessoas: Map<string, PessoaNatural>) {
+  // Separate entries with only name vs entries with only CPF
+  const onlyName: Array<[string, PessoaNatural]> = [];
+  const onlyCpf: Array<[string, PessoaNatural]> = [];
+  const alreadyMatched = new Set<string>();
+
+  for (const [key, pessoa] of pessoas.entries()) {
+    const hasName = pessoa.nome && pessoa.nome.trim() !== '';
+    const hasCpf = pessoa.cpf && pessoa.cpf.trim() !== '';
+
+    if (hasName && !hasCpf && key.startsWith('nome:')) {
+      onlyName.push([key, pessoa]);
+    } else if (hasCpf && !hasName) {
+      onlyCpf.push([key, pessoa]);
+    }
+  }
+
+  console.log(`[map-to-fields] Correlation: ${onlyName.length} name-only entries, ${onlyCpf.length} CPF-only entries`);
+
+  // Try to match onlyName entries with onlyCpf entries based on shared attributes
+  for (const [nameKey, namePessoa] of onlyName) {
+    let bestMatch: { key: string; pessoa: PessoaNatural; score: number } | null = null;
+
+    for (const [cpfKey, cpfPessoa] of onlyCpf) {
+      if (alreadyMatched.has(cpfKey)) continue;
+
+      // Calculate correlation score based on shared attributes
+      let score = 0;
+
+      // Naturalidade match (strong indicator)
+      if (namePessoa.naturalidade && cpfPessoa.naturalidade) {
+        const nat1 = namePessoa.naturalidade.toUpperCase().replace(/\s+/g, '');
+        const nat2 = cpfPessoa.naturalidade.toUpperCase().replace(/\s+/g, '');
+        if (nat1 === nat2) score += 3;
+        else if (nat1.includes(nat2) || nat2.includes(nat1)) score += 2;
+      }
+
+      // Data nascimento match (very strong indicator)
+      if (namePessoa.data_nascimento && cpfPessoa.data_nascimento) {
+        const date1 = namePessoa.data_nascimento.replace(/\D/g, '');
+        const date2 = cpfPessoa.data_nascimento.replace(/\D/g, '');
+        if (date1 === date2) score += 5;
+      }
+
+      // Filiacao match (strong indicator)
+      if (namePessoa.filiacao_pai && cpfPessoa.filiacao_pai) {
+        const pai1 = namePessoa.filiacao_pai.toUpperCase();
+        const pai2 = cpfPessoa.filiacao_pai.toUpperCase();
+        if (pai1 === pai2) score += 3;
+      }
+      if (namePessoa.filiacao_mae && cpfPessoa.filiacao_mae) {
+        const mae1 = namePessoa.filiacao_mae.toUpperCase();
+        const mae2 = cpfPessoa.filiacao_mae.toUpperCase();
+        if (mae1 === mae2) score += 3;
+      }
+
+      // RG orgao emissor match - same state indicates likely same person
+      if (namePessoa.orgao_emissor_rg && cpfPessoa.orgao_emissor_rg) {
+        const org1 = namePessoa.orgao_emissor_rg.toUpperCase();
+        const org2 = cpfPessoa.orgao_emissor_rg.toUpperCase();
+        // Both from SP (SSP-SP and IIRGD-PCSP are both SP)
+        if ((org1.includes('SP') || org1.includes('PCSP')) && (org2.includes('SP') || org2.includes('PCSP'))) {
+          score += 1;
+        }
+      }
+
+      // Track best match
+      if (score > 0 && (!bestMatch || score > bestMatch.score)) {
+        bestMatch = { key: cpfKey, pessoa: cpfPessoa, score };
+      }
+    }
+
+    // If we found a match with score >= 1, merge
+    if (bestMatch && bestMatch.score >= 1) {
+      console.log(`[map-to-fields] Correlating ${namePessoa.nome} with CPF ${bestMatch.pessoa.cpf} (score: ${bestMatch.score})`);
+
+      bestMatch.pessoa.nome = namePessoa.nome;
+      mergePersonData(bestMatch.pessoa, namePessoa);
+
+      // Merge sources
+      if (namePessoa._fontes) {
+        for (const [field, sources] of Object.entries(namePessoa._fontes)) {
+          if (!bestMatch.pessoa._fontes) bestMatch.pessoa._fontes = {};
+          if (!bestMatch.pessoa._fontes[field]) bestMatch.pessoa._fontes[field] = [];
+          bestMatch.pessoa._fontes[field].push(...sources);
+        }
+      }
+
+      pessoas.delete(nameKey);
+      alreadyMatched.add(bestMatch.key);
+    }
+  }
+
+  // FALLBACK: If we have exactly the same number of unmatched name-only and CPF-only entries,
+  // and both come from the same document type (RG), match them in order
+  // This handles cases like separate front/back photos of the same RG stack
+  const remainingNames = onlyName.filter(([key]) => pessoas.has(key));
+  const remainingCpfs = onlyCpf.filter(([key]) => !alreadyMatched.has(key));
+
+  if (remainingNames.length > 0 && remainingNames.length === remainingCpfs.length) {
+    console.log(`[map-to-fields] Fallback: Matching ${remainingNames.length} remaining entries by order`);
+
+    // Sort by source filename for consistent ordering
+    const sortBySource = (a: [string, PessoaNatural], b: [string, PessoaNatural]) => {
+      const sourceA = a[1]._fontes?.nome?.[0] || a[1]._fontes?.cpf?.[0] || '';
+      const sourceB = b[1]._fontes?.nome?.[0] || b[1]._fontes?.cpf?.[0] || '';
+      return sourceA.localeCompare(sourceB);
+    };
+
+    remainingNames.sort(sortBySource);
+    remainingCpfs.sort(sortBySource);
+
+    for (let i = 0; i < remainingNames.length; i++) {
+      const [nameKey, namePessoa] = remainingNames[i];
+      const [, cpfPessoa] = remainingCpfs[i];
+
+      console.log(`[map-to-fields] Fallback match: ${namePessoa.nome} with CPF ${cpfPessoa.cpf}`);
+
+      cpfPessoa.nome = namePessoa.nome;
+      mergePersonData(cpfPessoa, namePessoa);
+
+      if (namePessoa._fontes) {
+        for (const [field, sources] of Object.entries(namePessoa._fontes)) {
+          if (!cpfPessoa._fontes) cpfPessoa._fontes = {};
+          if (!cpfPessoa._fontes[field]) cpfPessoa._fontes[field] = [];
+          cpfPessoa._fontes[field].push(...sources);
+        }
+      }
+
+      pessoas.delete(nameKey);
     }
   }
 }

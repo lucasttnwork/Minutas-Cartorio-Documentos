@@ -4,7 +4,7 @@ import { ThinkingIndicator } from './ThinkingIndicator';
 import { TypingIndicator } from './TypingIndicator';
 import './StreamingChatMessage.css';
 
-interface StreamingChatMessageProps {
+export interface StreamingChatMessageProps {
   id: string;
   role: 'user' | 'assistant';
   content: string;

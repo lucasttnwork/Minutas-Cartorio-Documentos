@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
   SimpleTooltip
 } from "@/components/ui/tooltip"
-import { Pencil, Check, X, AlertCircle, FileText } from "lucide-react"
+import { Pencil, Check, X, AlertCircle } from "lucide-react"
 
 /* =============================================================================
    EDITABLE FIELD COMPONENT - Premium Design System
@@ -26,6 +26,28 @@ import { Pencil, Check, X, AlertCircle, FileText } from "lucide-react"
    - Keyboard support (Enter to save, Escape to cancel)
    - Accessible with proper ARIA attributes
    ============================================================================= */
+
+/**
+ * Formata uma data ISO (YYYY-MM-DD) para o formato brasileiro (DD/MM/YYYY)
+ */
+function formatDateToBrazilian(isoDate: string): string {
+  if (!isoDate) return ""
+
+  // Se já está no formato brasileiro, retorna como está
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(isoDate)) {
+    return isoDate
+  }
+
+  // Tenta parsear como ISO (YYYY-MM-DD)
+  const match = isoDate.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (match) {
+    const [, year, month, day] = match
+    return `${day}/${month}/${year}`
+  }
+
+  // Se não conseguiu parsear, retorna como está
+  return isoDate
+}
 
 export type EditableFieldType = "text" | "date" | "email" | "tel" | "number"
 
@@ -184,51 +206,13 @@ export function EditableField({
     <div className={cn(variantStyles[variant], className)}>
       {/* Label Row */}
       <div className="flex items-center gap-2">
-        <div className="flex flex-col">
-          <Label
-            htmlFor={fieldId}
-            variant={variant === "compact" ? "overline" : undefined}
-            className={labelStyles[variant]}
-          >
-            {label}
-          </Label>
-
-          {/* Fonte Indicator - Document source badge */}
-          {fonte && fonte.length > 0 && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1 mt-1 px-2 py-0.5",
-                      "text-xs font-medium rounded-full cursor-help",
-                      "bg-muted/50 text-muted-foreground",
-                      "border border-border/50",
-                      "hover:bg-muted hover:border-border",
-                      "transition-colors duration-150"
-                    )}
-                  >
-                    <FileText className="w-3 h-3" />
-                    {fonte.length === 1
-                      ? fonte[0]
-                      : `${fonte.length} fontes`
-                    }
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" align="start">
-                  <div className="text-sm">
-                    <p className="font-medium mb-1">Extraído de:</p>
-                    <ul className="list-disc list-inside space-y-0.5">
-                      {fonte.map((f, i) => (
-                        <li key={i} className="text-xs">{f}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-        </div>
+        <Label
+          htmlFor={fieldId}
+          variant={variant === "compact" ? "overline" : undefined}
+          className={labelStyles[variant]}
+        >
+          {label}
+        </Label>
 
         {/* User Edit Indicator - Premium Deep Teal Badge */}
         {hasUserEdited && (
@@ -356,7 +340,10 @@ export function EditableField({
                   hasUserEdited && "text-foreground font-semibold"
                 )}
               >
-                {value || emptyText}
+                {value
+                  ? (type === "date" ? formatDateToBrazilian(value) : value)
+                  : emptyText
+                }
               </span>
 
               {/* Edit Icon - shown on hover with state-aware styling */}

@@ -238,7 +238,7 @@ export function useMinutaDatabase(): UseMinutaDatabaseReturn {
         },
         imoveis,
         negociosJuridicos,
-        minutaTexto: minutaData.texto_final || '',
+        minutaTexto: minutaData.minuta_texto || '',
       };
     } catch (err) {
       console.error('[useMinutaDatabase] Error loading minuta:', err);
@@ -303,7 +303,7 @@ export function useMinutaDatabase(): UseMinutaDatabaseReturn {
           // Insert new
           const { data, error: dbError } = await supabase
             .from('pessoas_naturais')
-            .insert(dbData)
+            .insert(dbData as any)
             .select('id')
             .single();
 

@@ -114,5 +114,31 @@ describe('HubSidebar', () => {
       expect(screen.getByText('Minutas')).toBeInTheDocument();
       expect(screen.getByText('Agentes')).toBeInTheDocument();
     });
+
+    it('renders Templates navigation item', () => {
+      renderWithRouter(<HubSidebar />);
+
+      expect(screen.getByText('Templates')).toBeInTheDocument();
+      expect(screen.getByText(/minutas padrão/i)).toBeInTheDocument();
+    });
+
+    it('Templates link navigates to /dashboard/templates', () => {
+      renderWithRouter(<HubSidebar />);
+
+      const templatesLink = screen.getByRole('link', { name: /templates/i });
+      expect(templatesLink).toHaveAttribute('href', '/dashboard/templates');
+    });
+
+    it('shows Templates between Minutas and Agentes', () => {
+      renderWithRouter(<HubSidebar />);
+
+      const links = screen.getAllByRole('link');
+      const minutasIndex = links.findIndex(l => l.textContent?.includes('Minutas'));
+      const templatesIndex = links.findIndex(l => l.textContent?.includes('Templates'));
+      const agentesIndex = links.findIndex(l => l.textContent?.includes('Agentes'));
+
+      expect(templatesIndex).toBeGreaterThan(minutasIndex);
+      expect(templatesIndex).toBeLessThan(agentesIndex);
+    });
   });
 });

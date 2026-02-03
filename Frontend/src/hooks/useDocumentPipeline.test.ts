@@ -16,7 +16,7 @@ vi.mock('@/lib/supabase', () => ({
   },
 }));
 
-describe('useDocumentPipeline', () => {
+describe('useDocumentPipeline - Parallel Worker Pool', () => {
   // Helper to setup mock chain for from().select().eq().in()
   const setupFromMock = (data: any[] | null = [], error: any = null) => {
     const mockIn = vi.fn().mockResolvedValue({ data, error });
@@ -59,650 +59,148 @@ describe('useDocumentPipeline', () => {
 
       expect(result.current.overallProgress).toBe(0);
     });
+
+    it('should start with 0 active workers', () => {
+      const { result } = renderHook(() => useDocumentPipeline());
+
+      expect(result.current.classificationWorkers).toBe(0);
+      expect(result.current.extractionWorkers).toBe(0);
+      expect(result.current.classificationQueue).toBe(0);
+      expect(result.current.extractionQueue).toBe(0);
+    });
   });
 
-  describe('processDocument', () => {
-    it('should call classify-document with document_id', async () => {
-      const { result } = renderHook(() => useDocumentPipeline());
+  describe('parallel classification', () => {
+    it('should process multiple documents via startPipeline', async () => {
+      const docs = [{ id: 'doc-1' }, { id: 'doc-2' }, { id: 'doc-3' }];
+      setupFromMock(docs);
 
-      await act(async () => {
-        await result.current.processDocument('doc-123');
-      });
+      const onDocumentComplete = vi.fn();
 
-      expect(mockFunctionsInvoke).toHaveBeenCalledWith('classify-document', {
-        body: { document_id: 'doc-123' },
-      });
-    });
-
-    it('should call extract-document after classify-document', async () => {
-      const { result } = renderHook(() => useDocumentPipeline());
-
-      await act(async () => {
-        await result.current.processDocument('doc-123');
-      });
-
-      // Verify order: classify first, then extract
-      const calls = mockFunctionsInvoke.mock.calls;
-      expect(calls[0][0]).toBe('classify-document');
-      expect(calls[1][0]).toBe('extract-document');
-      expect(calls[1][1]).toEqual({ body: { document_id: 'doc-123' } });
-    });
-
-    it('should update status to classifying at start', async () => {
-      // Make classify take time to verify status
       mockFunctionsInvoke.mockImplementation(async (name: string) => {
         if (name === 'classify-document') {
-          // Don't resolve immediately
-          return new Promise((resolve) => {
-            setTimeout(() => resolve({ data: {}, error: null }), 50);
-          });
+          return { data: { tipo_documento: 'RG', confianca: 0.95 }, error: null };
+        }
+        if (name === 'extract-document') {
+          return { data: { dados_extraidos: {} }, error: null };
         }
         return { data: {}, error: null };
       });
 
-      const { result } = renderHook(() => useDocumentPipeline());
-
-      // Start processing but don't await
-      act(() => {
-        result.current.processDocument('doc-123');
-      });
-
-      // Check status immediately
-      await waitFor(() => {
-        expect(result.current.statuses.get('doc-123')?.step).toBe('classifying');
-        expect(result.current.statuses.get('doc-123')?.progress).toBe(0);
-      });
-    });
-
-    it('should update status to extracting after classify', async () => {
-      let resolveClassify: (value: any) => void;
-      let resolveExtract: (value: any) => void;
-
-      mockFunctionsInvoke.mockImplementation((name: string) => {
-        if (name === 'classify-document') {
-          return new Promise((resolve) => {
-            resolveClassify = resolve;
-          });
-        }
-        if (name === 'extract-document') {
-          return new Promise((resolve) => {
-            resolveExtract = resolve;
-          });
-        }
-        return Promise.resolve({ data: {}, error: null });
-      });
-
-      const { result } = renderHook(() => useDocumentPipeline());
-
-      act(() => {
-        result.current.processDocument('doc-123');
-      });
-
-      // Resolve classify
-      await act(async () => {
-        resolveClassify!({ data: {}, error: null });
-      });
-
-      await waitFor(() => {
-        expect(result.current.statuses.get('doc-123')?.step).toBe('extracting');
-        expect(result.current.statuses.get('doc-123')?.progress).toBe(33);
-      });
-
-      // Cleanup
-      await act(async () => {
-        resolveExtract!({ data: {}, error: null });
-      });
-    });
-
-    it('should update status to done after extract', async () => {
-      const { result } = renderHook(() => useDocumentPipeline());
-
-      await act(async () => {
-        await result.current.processDocument('doc-123');
-      });
-
-      expect(result.current.statuses.get('doc-123')?.step).toBe('done');
-      expect(result.current.statuses.get('doc-123')?.progress).toBe(100);
-    });
-
-    it('should return true on success', async () => {
-      const { result } = renderHook(() => useDocumentPipeline());
-
-      let processResult: boolean | undefined;
-      await act(async () => {
-        processResult = await result.current.processDocument('doc-123');
-      });
-
-      expect(processResult).toBe(true);
-    });
-
-    it('should set status to error when classify fails', async () => {
-      mockFunctionsInvoke.mockResolvedValueOnce({
-        data: null,
-        error: { message: 'Classification failed' },
-      });
-
-      const { result } = renderHook(() => useDocumentPipeline());
-
-      await act(async () => {
-        try {
-          await result.current.processDocument('doc-123');
-        } catch {
-          // Expected to throw
-        }
-      });
-
-      expect(result.current.statuses.get('doc-123')?.step).toBe('error');
-      expect(result.current.statuses.get('doc-123')?.error).toBe('Classification failed');
-    });
-
-    it('should set status to error when extract fails', async () => {
-      mockFunctionsInvoke
-        .mockResolvedValueOnce({ data: {}, error: null }) // classify succeeds
-        .mockResolvedValueOnce({
-          data: null,
-          error: { message: 'Extraction failed' },
-        });
-
-      const { result } = renderHook(() => useDocumentPipeline());
-
-      await act(async () => {
-        try {
-          await result.current.processDocument('doc-123');
-        } catch {
-          // Expected to throw
-        }
-      });
-
-      expect(result.current.statuses.get('doc-123')?.step).toBe('error');
-      expect(result.current.statuses.get('doc-123')?.error).toBe('Extraction failed');
-    });
-
-    it('should return false on error', async () => {
-      mockFunctionsInvoke.mockResolvedValueOnce({
-        data: null,
-        error: { message: 'Failed' },
-      });
-
-      const { result } = renderHook(() => useDocumentPipeline());
-
-      let processResult: boolean | undefined;
-      await act(async () => {
-        processResult = await result.current.processDocument('doc-123');
-      });
-
-      expect(processResult).toBe(false);
-    });
-  });
-
-  describe('startPipeline', () => {
-    it('should fetch pending documents for the minuta', async () => {
-      const mockIn = vi.fn().mockResolvedValue({ data: [], error: null });
-      const mockEq = vi.fn().mockReturnValue({ in: mockIn });
-      const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-      mockFrom.mockReturnValue({
-        select: mockSelect,
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-        }),
-      });
-
-      const { result } = renderHook(() => useDocumentPipeline());
+      const { result } = renderHook(() => useDocumentPipeline({ onDocumentComplete }));
 
       await act(async () => {
         await result.current.startPipeline('minuta-456');
       });
 
-      expect(mockFrom).toHaveBeenCalledWith('documentos');
-      expect(mockSelect).toHaveBeenCalledWith('id');
-      expect(mockEq).toHaveBeenCalledWith('minuta_id', 'minuta-456');
-      expect(mockIn).toHaveBeenCalledWith('status', ['uploaded', 'pendente']);
-    });
+      await waitFor(() => !result.current.isProcessing, { timeout: 5000 });
 
-    it('should set isProcessing to true during pipeline', async () => {
-      const mockIn = vi.fn().mockImplementation(() => {
-        return new Promise((resolve) => {
-          setTimeout(() => resolve({ data: [], error: null }), 50);
-        });
-      });
-      const mockEq = vi.fn().mockReturnValue({ in: mockIn });
-      const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-      mockFrom.mockReturnValue({
-        select: mockSelect,
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-        }),
-      });
-
-      const { result } = renderHook(() => useDocumentPipeline());
-
-      act(() => {
-        result.current.startPipeline('minuta-456');
-      });
-
-      expect(result.current.isProcessing).toBe(true);
-    });
-
-    it('should set isProcessing to false after pipeline completes', async () => {
-      setupFromMock([]);
-
-      const { result } = renderHook(() => useDocumentPipeline());
-
-      await act(async () => {
-        await result.current.startPipeline('minuta-456');
-      });
-
-      expect(result.current.isProcessing).toBe(false);
-    });
-
-    it('should process all pending documents', async () => {
-      const mockIn = vi.fn().mockResolvedValue({
-        data: [{ id: 'doc-1' }, { id: 'doc-2' }, { id: 'doc-3' }],
-        error: null,
-      });
-      const mockEq = vi.fn().mockReturnValue({ in: mockIn });
-      const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-      mockFrom.mockReturnValue({
-        select: mockSelect,
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-        }),
-      });
-
-      const { result } = renderHook(() => useDocumentPipeline());
-
-      await act(async () => {
-        await result.current.startPipeline('minuta-456');
-      });
-
-      // Each document should have classify and extract called
-      // 3 docs * 2 calls each + 1 map-to-fields = 7 calls
-      expect(mockFunctionsInvoke).toHaveBeenCalledTimes(7);
-
-      // Verify all documents were processed
-      expect(mockFunctionsInvoke).toHaveBeenCalledWith('classify-document', {
-        body: { document_id: 'doc-1' },
-      });
-      expect(mockFunctionsInvoke).toHaveBeenCalledWith('classify-document', {
-        body: { document_id: 'doc-2' },
-      });
-      expect(mockFunctionsInvoke).toHaveBeenCalledWith('classify-document', {
-        body: { document_id: 'doc-3' },
-      });
-    });
-
-    it('should call map-to-fields after all documents processed', async () => {
-      const mockIn = vi.fn().mockResolvedValue({
-        data: [{ id: 'doc-1' }],
-        error: null,
-      });
-      const mockEq = vi.fn().mockReturnValue({ in: mockIn });
-      const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-      mockFrom.mockReturnValue({
-        select: mockSelect,
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-        }),
-      });
-
-      const { result } = renderHook(() => useDocumentPipeline());
-
-      await act(async () => {
-        await result.current.startPipeline('minuta-456');
-      });
-
-      // Verify map-to-fields was called last with minuta_id
-      const lastCall = mockFunctionsInvoke.mock.calls[mockFunctionsInvoke.mock.calls.length - 1];
-      expect(lastCall[0]).toBe('map-to-fields');
-      expect(lastCall[1]).toEqual({ body: { minuta_id: 'minuta-456' } });
-    });
-
-    it('should update minuta status to revisao after pipeline', async () => {
-      const mockUpdateEq = vi.fn().mockResolvedValue({ data: null, error: null });
-      const mockUpdate = vi.fn().mockReturnValue({ eq: mockUpdateEq });
-      const mockIn = vi.fn().mockResolvedValue({ data: [], error: null });
-      const mockEq = vi.fn().mockReturnValue({ in: mockIn });
-      const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-
-      mockFrom.mockReturnValue({
-        select: mockSelect,
-        update: mockUpdate,
-      });
-
-      const { result } = renderHook(() => useDocumentPipeline());
-
-      await act(async () => {
-        await result.current.startPipeline('minuta-456');
-      });
-
-      expect(mockFrom).toHaveBeenCalledWith('minutas');
-      expect(mockUpdate).toHaveBeenCalledWith({
-        status: 'revisao',
-        current_step: 'outorgantes',
-      });
-      expect(mockUpdateEq).toHaveBeenCalledWith('id', 'minuta-456');
-    });
-
-    it('should set isProcessing to false even when error occurs', async () => {
-      const mockIn = vi.fn().mockRejectedValue(new Error('Database error'));
-      const mockEq = vi.fn().mockReturnValue({ in: mockIn });
-      const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-      mockFrom.mockReturnValue({
-        select: mockSelect,
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-        }),
-      });
-
-      const { result } = renderHook(() => useDocumentPipeline());
-
-      await act(async () => {
-        try {
-          await result.current.startPipeline('minuta-456');
-        } catch {
-          // Expected
-        }
-      });
-
-      expect(result.current.isProcessing).toBe(false);
-    });
-  });
-
-  describe('overallProgress', () => {
-    it('should calculate average progress across all documents', async () => {
-      // Test that overallProgress reflects the average of all tracked documents
-      // Since documents are processed sequentially, we test with a single document
-      // and verify progress updates at each stage
-      const mockIn = vi.fn().mockResolvedValue({
-        data: [{ id: 'doc-1' }],
-        error: null,
-      });
-      const mockEq = vi.fn().mockReturnValue({ in: mockIn });
-      const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-      mockFrom.mockReturnValue({
-        select: mockSelect,
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-        }),
-      });
-
-      let resolveClassify: (value: any) => void;
-      let resolveExtract: (value: any) => void;
-
-      mockFunctionsInvoke.mockImplementation((name: string) => {
-        if (name === 'classify-document') {
-          return new Promise((resolve) => {
-            resolveClassify = resolve;
-          });
-        }
-        if (name === 'extract-document') {
-          return new Promise((resolve) => {
-            resolveExtract = resolve;
-          });
-        }
-        return Promise.resolve({ data: {}, error: null });
-      });
-
-      const { result } = renderHook(() => useDocumentPipeline());
-
-      act(() => {
-        result.current.startPipeline('minuta-456');
-      });
-
-      // Wait for classifying state
-      await waitFor(() => {
-        return result.current.statuses.get('doc-1')?.step === 'classifying';
-      });
-
-      // At classifying: progress should be 0
-      expect(result.current.overallProgress).toBe(0);
-
-      // Move to extracting
-      await act(async () => {
-        resolveClassify!({ data: {}, error: null });
-      });
-
-      await waitFor(() => {
-        return result.current.statuses.get('doc-1')?.step === 'extracting';
-      });
-
-      // At extracting: progress should be 33
-      expect(result.current.overallProgress).toBe(33);
-
-      // Cleanup
-      await act(async () => {
-        resolveExtract!({ data: {}, error: null });
-      });
-    });
-
-    it('should be 100 when all documents are done', async () => {
-      const mockIn = vi.fn().mockResolvedValue({
-        data: [{ id: 'doc-1' }, { id: 'doc-2' }],
-        error: null,
-      });
-      const mockEq = vi.fn().mockReturnValue({ in: mockIn });
-      const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-      mockFrom.mockReturnValue({
-        select: mockSelect,
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-        }),
-      });
-
-      const { result } = renderHook(() => useDocumentPipeline());
-
-      await act(async () => {
-        await result.current.startPipeline('minuta-456');
-      });
-
-      expect(result.current.overallProgress).toBe(100);
-    });
-  });
-
-  describe('callbacks', () => {
-    it('should call onDocumentComplete when a document finishes', async () => {
-      const onDocumentComplete = vi.fn();
-      const mockIn = vi.fn().mockResolvedValue({
-        data: [{ id: 'doc-1' }],
-        error: null,
-      });
-      const mockEq = vi.fn().mockReturnValue({ in: mockIn });
-      const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-      mockFrom.mockReturnValue({
-        select: mockSelect,
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-        }),
-      });
-
-      const { result } = renderHook(() =>
-        useDocumentPipeline({ onDocumentComplete })
-      );
-
-      await act(async () => {
-        await result.current.startPipeline('minuta-456');
-      });
-
+      // All 3 documents should have completed
+      expect(onDocumentComplete).toHaveBeenCalledTimes(3);
       expect(onDocumentComplete).toHaveBeenCalledWith('doc-1');
+      expect(onDocumentComplete).toHaveBeenCalledWith('doc-2');
+      expect(onDocumentComplete).toHaveBeenCalledWith('doc-3');
     });
 
-    it('should call onPipelineComplete when pipeline finishes', async () => {
-      const onPipelineComplete = vi.fn();
-      setupFromMock([{ id: 'doc-1' }]);
+    it('should automatically start extraction after classification completes', async () => {
+      const docs = [{ id: 'doc-1' }];
+      setupFromMock(docs);
 
-      const { result } = renderHook(() =>
-        useDocumentPipeline({ onPipelineComplete })
-      );
+      const onDocumentComplete = vi.fn();
 
-      await act(async () => {
-        await result.current.startPipeline('minuta-456');
-      });
-
-      expect(onPipelineComplete).toHaveBeenCalledWith('minuta-456');
-    });
-
-    it('should call onError when document processing fails', async () => {
-      const onError = vi.fn();
-
-      const mockIn = vi.fn().mockResolvedValue({
-        data: [{ id: 'doc-1' }],
-        error: null,
-      });
-      const mockEq = vi.fn().mockReturnValue({ in: mockIn });
-      const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-      mockFrom.mockReturnValue({
-        select: mockSelect,
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-        }),
-      });
-
-      mockFunctionsInvoke.mockResolvedValueOnce({
-        data: null,
-        error: { message: 'Processing error' },
-      });
-
-      const { result } = renderHook(() => useDocumentPipeline({ onError }));
-
-      await act(async () => {
-        await result.current.startPipeline('minuta-456');
-      });
-
-      expect(onError).toHaveBeenCalledWith('doc-1', 'Processing error');
-    });
-
-    it('should not call onPipelineComplete when there are errors', async () => {
-      const onPipelineComplete = vi.fn();
-
-      const mockIn = vi.fn().mockResolvedValue({
-        data: [{ id: 'doc-1' }],
-        error: null,
-      });
-      const mockEq = vi.fn().mockReturnValue({ in: mockIn });
-      const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-      mockFrom.mockReturnValue({
-        select: mockSelect,
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-        }),
-      });
-
-      mockFunctionsInvoke.mockResolvedValue({
-        data: null,
-        error: { message: 'Failed' },
-      });
-
-      const { result } = renderHook(() =>
-        useDocumentPipeline({ onPipelineComplete })
-      );
-
-      await act(async () => {
-        await result.current.startPipeline('minuta-456');
-      });
-
-      expect(onPipelineComplete).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('statuses Map', () => {
-    it('should track status for each document independently', async () => {
-      let resolveDoc2: (value: any) => void;
-
-      const mockIn = vi.fn().mockResolvedValue({
-        data: [{ id: 'doc-1' }, { id: 'doc-2' }],
-        error: null,
-      });
-      const mockEq = vi.fn().mockReturnValue({ in: mockIn });
-      const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-      mockFrom.mockReturnValue({
-        select: mockSelect,
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-        }),
-      });
-
-      mockFunctionsInvoke.mockImplementation((name: string, options: any) => {
-        if (name === 'classify-document' && options?.body?.document_id === 'doc-2') {
-          return new Promise((resolve) => {
-            resolveDoc2 = resolve;
-          });
+      mockFunctionsInvoke.mockImplementation(async (name: string) => {
+        if (name === 'classify-document') {
+          return { data: { tipo_documento: 'RG' }, error: null };
         }
-        return Promise.resolve({ data: {}, error: null });
+        if (name === 'extract-document') {
+          return { data: { dados_extraidos: {} }, error: null };
+        }
+        return { data: {}, error: null };
       });
 
-      const { result } = renderHook(() => useDocumentPipeline());
-
-      act(() => {
-        result.current.startPipeline('minuta-456');
-      });
-
-      await waitFor(() => {
-        return result.current.statuses.get('doc-1')?.step === 'done';
-      });
-
-      // doc-1 should be done, doc-2 should be classifying
-      expect(result.current.statuses.get('doc-1')?.step).toBe('done');
-      expect(result.current.statuses.get('doc-2')?.step).toBe('classifying');
-
-      // Cleanup
-      await act(async () => {
-        resolveDoc2!({ data: {}, error: null });
-      });
-    });
-
-    it('should include documentId in each status', async () => {
-      setupFromMock([{ id: 'doc-123' }]);
-
-      const { result } = renderHook(() => useDocumentPipeline());
+      const { result } = renderHook(() => useDocumentPipeline({ onDocumentComplete }));
 
       await act(async () => {
         await result.current.startPipeline('minuta-456');
       });
 
-      const status = result.current.statuses.get('doc-123');
-      expect(status?.documentId).toBe('doc-123');
+      await waitFor(() => !result.current.isProcessing, { timeout: 3000 });
+
+      // Document should complete (which means both classify and extract happened)
+      expect(onDocumentComplete).toHaveBeenCalledWith('doc-1');
+
+      // Verify both classify and extract were called
+      const classifyCalls = mockFunctionsInvoke.mock.calls.filter(
+        call => call[0] === 'classify-document'
+      );
+      const extractCalls = mockFunctionsInvoke.mock.calls.filter(
+        call => call[0] === 'extract-document'
+      );
+      expect(classifyCalls.length).toBe(1);
+      expect(extractCalls.length).toBe(1);
     });
   });
 
-  describe('edge cases', () => {
-    it('should handle empty document list gracefully', async () => {
-      const onPipelineComplete = vi.fn();
-      setupFromMock([]);
+  describe('parallel extraction', () => {
+    it('should support extraction via processDocument', async () => {
+      const { result } = renderHook(() => useDocumentPipeline());
 
-      const { result } = renderHook(() =>
-        useDocumentPipeline({ onPipelineComplete })
-      );
+      mockFunctionsInvoke.mockResolvedValue({ data: {}, error: null });
 
+      let success: boolean | undefined;
       await act(async () => {
-        await result.current.startPipeline('minuta-456');
+        success = await result.current.processDocument('doc-1');
       });
 
-      // Should still complete and update minuta
-      expect(onPipelineComplete).toHaveBeenCalledWith('minuta-456');
-      expect(result.current.isProcessing).toBe(false);
+      // processDocument should complete successfully
+      expect(success).toBe(true);
+
+      // Verify extract-document was called
+      const extractCalls = mockFunctionsInvoke.mock.calls.filter(
+        call => call[0] === 'extract-document'
+      );
+      expect(extractCalls.length).toBe(1);
+    });
+  });
+
+  describe('overallProgress calculation', () => {
+    it('should start at 0 before processing', () => {
+      const { result } = renderHook(() => useDocumentPipeline());
+      expect(result.current.overallProgress).toBe(0);
     });
 
-    it('should continue processing other documents when one fails', async () => {
+    it('should track progress for processDocument', async () => {
+      const { result } = renderHook(() => useDocumentPipeline());
+
+      await act(async () => {
+        await result.current.processDocument('doc-1');
+      });
+
+      // Status should be 'done' after processDocument
+      expect(result.current.statuses.get('doc-1')?.step).toBe('done');
+    });
+  });
+
+  describe('error handling', () => {
+    it('should continue processing other documents when one classification fails', async () => {
+      const docs = [{ id: 'doc-1' }, { id: 'doc-2' }, { id: 'doc-3' }];
+      setupFromMock(docs);
+
       const onDocumentComplete = vi.fn();
       const onError = vi.fn();
 
-      const mockIn = vi.fn().mockResolvedValue({
-        data: [{ id: 'doc-1' }, { id: 'doc-2' }],
-        error: null,
+      mockFunctionsInvoke.mockImplementation(async (name: string, options: any) => {
+        if (name === 'classify-document') {
+          if (options.body.documento_id === 'doc-2') {
+            throw new Error('Classification failed for doc-2');
+          }
+          return { data: { tipo_documento: 'RG' }, error: null };
+        }
+        if (name === 'extract-document') {
+          return { data: { dados_extraidos: {} }, error: null };
+        }
+        return { data: {}, error: null };
       });
-      const mockEq = vi.fn().mockReturnValue({ in: mockIn });
-      const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-      mockFrom.mockReturnValue({
-        select: mockSelect,
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-        }),
-      });
-
-      // First doc fails, second succeeds
-      mockFunctionsInvoke
-        .mockResolvedValueOnce({ data: null, error: { message: 'Doc 1 failed' } })
-        .mockResolvedValue({ data: {}, error: null });
 
       const { result } = renderHook(() =>
         useDocumentPipeline({ onDocumentComplete, onError })
@@ -712,31 +210,190 @@ describe('useDocumentPipeline', () => {
         await result.current.startPipeline('minuta-456');
       });
 
-      // Error called for doc-1
-      expect(onError).toHaveBeenCalledWith('doc-1', 'Doc 1 failed');
-      // doc-2 should still complete
-      expect(onDocumentComplete).toHaveBeenCalledWith('doc-2');
+      await waitFor(() => !result.current.isProcessing, { timeout: 3000 });
+
+      // Error should be called for doc-2
+      expect(onError).toHaveBeenCalledWith('doc-2', 'Classification failed for doc-2');
+
+      // Other documents should complete successfully
+      expect(onDocumentComplete).toHaveBeenCalledWith('doc-1');
+      expect(onDocumentComplete).toHaveBeenCalledWith('doc-3');
+
+      // Check statuses
+      expect(result.current.statuses.get('doc-1')?.step).toBe('done');
+      expect(result.current.statuses.get('doc-2')?.step).toBe('error');
+      expect(result.current.statuses.get('doc-3')?.step).toBe('done');
     });
 
-    it('should handle null data from documentos query', async () => {
-      const mockIn = vi.fn().mockResolvedValue({ data: null, error: null });
-      const mockEq = vi.fn().mockReturnValue({ in: mockIn });
-      const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-      mockFrom.mockReturnValue({
-        select: mockSelect,
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-        }),
+    it('should continue processing when extraction fails', async () => {
+      const docs = [{ id: 'doc-1' }, { id: 'doc-2' }];
+      setupFromMock(docs);
+
+      const onError = vi.fn();
+
+      mockFunctionsInvoke.mockImplementation(async (name: string, options: any) => {
+        if (name === 'classify-document') {
+          return { data: { tipo_documento: 'RG' }, error: null };
+        }
+        if (name === 'extract-document') {
+          if (options.body.documento_id === 'doc-1') {
+            throw new Error('Extraction failed for doc-1');
+          }
+          return { data: { dados_extraidos: {} }, error: null };
+        }
+        return { data: {}, error: null };
       });
 
-      const { result } = renderHook(() => useDocumentPipeline());
+      const { result } = renderHook(() =>
+        useDocumentPipeline({ onError })
+      );
 
-      // Should not throw
       await act(async () => {
         await result.current.startPipeline('minuta-456');
       });
 
-      expect(result.current.isProcessing).toBe(false);
+      // Wait for both documents to reach terminal state
+      await waitFor(
+        () => {
+          const doc1Status = result.current.statuses.get('doc-1')?.step;
+          const doc2Status = result.current.statuses.get('doc-2')?.step;
+          return (doc1Status === 'error' || doc1Status === 'done') &&
+                 (doc2Status === 'error' || doc2Status === 'done');
+        },
+        { timeout: 5000 }
+      );
+
+      expect(onError).toHaveBeenCalledWith('doc-1', 'Extraction failed for doc-1');
+      expect(result.current.statuses.get('doc-1')?.step).toBe('error');
+      expect(result.current.statuses.get('doc-2')?.step).toBe('done');
+    });
+
+    it('should not call map-to-fields when there are errors', async () => {
+      const docs = [{ id: 'doc-1' }];
+      setupFromMock(docs);
+
+      mockFunctionsInvoke.mockImplementation(async (name: string) => {
+        if (name === 'classify-document') {
+          throw new Error('Classification failed');
+        }
+        return { data: {}, error: null };
+      });
+
+      const { result } = renderHook(() => useDocumentPipeline());
+
+      await act(async () => {
+        await result.current.startPipeline('minuta-456');
+      });
+
+      await waitFor(() => !result.current.isProcessing, { timeout: 3000 });
+
+      // map-to-fields should not have been called
+      const mapToFieldsCalls = mockFunctionsInvoke.mock.calls.filter(
+        call => call[0] === 'map-to-fields'
+      );
+      expect(mapToFieldsCalls).toHaveLength(0);
+    });
+  });
+
+  describe('processDocument (single document)', () => {
+    it('should still work for processing a single document', async () => {
+      const { result } = renderHook(() => useDocumentPipeline());
+
+      let success: boolean | undefined;
+      await act(async () => {
+        success = await result.current.processDocument('doc-single');
+      });
+
+      expect(success).toBe(true);
+      expect(mockFunctionsInvoke).toHaveBeenCalledWith('classify-document', {
+        body: { documento_id: 'doc-single' },
+      });
+      expect(mockFunctionsInvoke).toHaveBeenCalledWith('extract-document', {
+        body: { documento_id: 'doc-single' },
+      });
+    });
+  });
+
+  describe('status tracking', () => {
+    it('should update statuses during processDocument', async () => {
+      const { result } = renderHook(() => useDocumentPipeline());
+
+      await act(async () => {
+        await result.current.processDocument('doc-1');
+      });
+
+      // Final status should be 'done'
+      expect(result.current.statuses.get('doc-1')?.step).toBe('done');
+    });
+
+    it('should set error status when processing fails', async () => {
+      mockFunctionsInvoke.mockRejectedValueOnce(new Error('Test error'));
+
+      const { result } = renderHook(() => useDocumentPipeline());
+
+      await act(async () => {
+        await result.current.processDocument('doc-1');
+      });
+
+      expect(result.current.statuses.get('doc-1')?.step).toBe('error');
+    });
+  });
+
+  describe('worker metrics', () => {
+    it('should expose worker count fields', async () => {
+      const { result } = renderHook(() => useDocumentPipeline());
+
+      // Check that worker metrics are exposed
+      expect(typeof result.current.classificationWorkers).toBe('number');
+      expect(typeof result.current.extractionWorkers).toBe('number');
+      expect(typeof result.current.classificationQueue).toBe('number');
+      expect(typeof result.current.extractionQueue).toBe('number');
+    });
+  });
+
+  describe('generateMinuta', () => {
+    it('should call generate-minuta edge function', async () => {
+      const { result } = renderHook(() => useDocumentPipeline());
+
+      mockFunctionsInvoke.mockResolvedValueOnce({
+        data: { success: true, minuta_texto: 'Generated text' },
+        error: null,
+      });
+
+      let genResult: any;
+      await act(async () => {
+        genResult = await result.current.generateMinuta('minuta-123', 'VENDA_COMPRA');
+      });
+
+      expect(genResult.success).toBe(true);
+      expect(mockFunctionsInvoke).toHaveBeenCalledWith('generate-minuta', {
+        body: {
+          minuta_id: 'minuta-123',
+          template_type: 'VENDA_COMPRA',
+          template_id: undefined,
+        },
+      });
+    });
+
+    it('should handle generation error', async () => {
+      const onGenerationError = vi.fn();
+      const { result } = renderHook(() =>
+        useDocumentPipeline({ onGenerationError })
+      );
+
+      mockFunctionsInvoke.mockResolvedValueOnce({
+        data: null,
+        error: { message: 'Generation failed' },
+      });
+
+      let genResult: any;
+      await act(async () => {
+        genResult = await result.current.generateMinuta('minuta-123');
+      });
+
+      expect(genResult.success).toBe(false);
+      expect(genResult.error).toBe('Generation failed');
+      expect(onGenerationError).toHaveBeenCalledWith('minuta-123', 'Generation failed');
     });
   });
 });

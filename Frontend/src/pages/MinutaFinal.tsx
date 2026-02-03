@@ -13,6 +13,9 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AnimatedBackground } from "@/components/layout/AnimatedBackground";
 import { useMinuta } from "@/contexts/MinutaContext";
 import { useDocumentPipeline } from "@/hooks/useDocumentPipeline";
+import { TemplateSelectionModal } from "@/components/minutas-padrao/TemplateSelectionModal";
+import { useMinutasPadrao } from "@/hooks/useMinutasPadrao";
+import type { MinutaPadrao } from "@/types/minutas-padrao";
 import { supabase } from "@/lib/supabase";
 import {
   FileText,
@@ -64,12 +67,15 @@ export default function MinutaFinal() {
   } = useMinuta();
 
   const { generateMinuta, isGenerating, generationStatus } = useDocumentPipeline();
+  const { templates: _templates, loadTemplates: _loadTemplates, incrementUsage } = useMinutasPadrao();
 
   // Local state
   const [dbData, setDbData] = useState<MinutaDbData | null>(null);
   const [isLoadingDb, setIsLoadingDb] = useState(true);
   const [isCopying, setIsCopying] = useState(false);
   const [isSavingEdits, setIsSavingEdits] = useState(false);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<MinutaPadrao | null>(null);
 
   // Track if we need to load from context
   const needsLoad = id && (!currentMinuta || currentMinuta.id !== id);
@@ -228,12 +234,12 @@ export default function MinutaFinal() {
   }, [editor, dbData?.conteudo_gerado]);
 
   // Handle generate minuta
-  const handleGenerate = useCallback(async () => {
+  const handleGenerate = useCallback(async (templateId?: string) => {
     if (!id) return;
 
     toast.info("Gerando minuta com IA...", { duration: 3000 });
 
-    const result = await generateMinuta(id, "VENDA_COMPRA");
+    const result = await generateMinuta(id, "VENDA_COMPRA", templateId);
 
     if (result.success && result.minuta_texto) {
       editor?.commands.setContent(result.minuta_texto);
@@ -245,6 +251,18 @@ export default function MinutaFinal() {
       toast.error(result.error || "Erro ao gerar minuta");
     }
   }, [id, generateMinuta, editor, updateMinutaTexto, loadDbData]);
+
+  // Handle template selection
+  const handleTemplateSelect = useCallback(async (template: MinutaPadrao) => {
+    setSelectedTemplate(template);
+    setIsTemplateModalOpen(false);
+
+    // Increment template usage
+    await incrementUsage(template.id);
+
+    // Generate minuta with the selected template
+    handleGenerate(template.id);
+  }, [incrementUsage, handleGenerate]);
 
   // Handle copy to clipboard
   const handleCopy = useCallback(async () => {
@@ -544,7 +562,7 @@ ${content}
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={handleGenerate}
+                      onClick={() => setIsTemplateModalOpen(true)}
                       disabled={isGenerating}
                     >
                       {isGenerating ? (
@@ -562,7 +580,7 @@ ${content}
                   ) : (
                     <Button
                       size="sm"
-                      onClick={handleGenerate}
+                      onClick={() => setIsTemplateModalOpen(true)}
                       disabled={isGenerating}
                       className="bg-primary hover:bg-primary/90"
                     >
@@ -705,6 +723,14 @@ ${content}
           <FlowNavigation currentStep="minuta" isSaving={isSaving} showSaveIndicator={true} />
         </div>
       </main>
+
+      {/* Template Selection Modal */}
+      <TemplateSelectionModal
+        isOpen={isTemplateModalOpen}
+        onClose={() => setIsTemplateModalOpen(false)}
+        onSelect={handleTemplateSelect}
+        initialSelectedId={selectedTemplate?.id}
+      />
     </AnimatedBackground>
   );
 }

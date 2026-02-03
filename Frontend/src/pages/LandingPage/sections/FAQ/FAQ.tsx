@@ -24,13 +24,16 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
+    transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] as const },
   },
 };
 
+// Type for FAQ questions
+type FAQQuestion = { id: string; categoria: string; pergunta: string; resposta: string };
+
 // Group questions by category
 const categorizeQuestions = () => {
-  const categories = {
+  const categories: Record<string, { label: string; questions: FAQQuestion[] }> = {
     geral: { label: 'Geral', questions: [] },
     tecnico: { label: 'Técnico', questions: [] },
     seguranca: { label: 'Segurança', questions: [] },
@@ -38,8 +41,8 @@ const categorizeQuestions = () => {
   };
 
   faq.perguntas.forEach((pergunta) => {
-    if (categories[pergunta.categoria as keyof typeof categories]) {
-      categories[pergunta.categoria as keyof typeof categories].questions.push(pergunta);
+    if (categories[pergunta.categoria]) {
+      categories[pergunta.categoria].questions.push(pergunta as FAQQuestion);
     }
   });
 

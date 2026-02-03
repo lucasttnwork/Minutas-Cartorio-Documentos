@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { problemaSolucao } from '../../data/landing-copy';
 
-const premiumEasing = [0.16, 1, 0.3, 1];
+const premiumEasing = [0.16, 1, 0.3, 1] as const;
 
 // Mapeamento de ícones
 const iconMap = {

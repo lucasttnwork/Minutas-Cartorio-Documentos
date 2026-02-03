@@ -80,13 +80,10 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
           .upload(storagePath, file, {
             cacheControl: '3600',
             upsert: false,
-            onUploadProgress: (progressEvent) => {
-              const percentage = Math.round(
-                (progressEvent.loaded / progressEvent.total) * 100
-              );
-              setProgress(percentage);
-            },
           });
+
+        // Set progress to 50% after upload starts (Supabase doesn't support progress callback)
+        setProgress(50);
 
         if (uploadError) {
           setError(`Erro ao fazer upload: ${uploadError.message}`);

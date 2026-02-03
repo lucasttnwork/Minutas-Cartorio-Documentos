@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Clock, TrendingUp, Zap, Star } from 'lucide-react';
 import { transformacoes } from '../../data/landing-copy';
 
-const premiumEasing = [0.16, 1, 0.3, 1];
+const premiumEasing = [0.16, 1, 0.3, 1] as const;
 
 export function Transformacoes() {
   return (

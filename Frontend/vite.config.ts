@@ -15,4 +15,20 @@ export default defineConfig({
     host: true,
     port: 5173,
   },
+  optimizeDeps: {
+    include: [
+      '@radix-ui/react-switch',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-label',
+      '@radix-ui/react-slot',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-tooltip',
+      '@radix-ui/react-select',
+      '@radix-ui/react-scroll-area',
+      '@radix-ui/react-separator',
+      '@radix-ui/react-alert-dialog',
+      '@radix-ui/react-accordion',
+    ],
+  },
 })

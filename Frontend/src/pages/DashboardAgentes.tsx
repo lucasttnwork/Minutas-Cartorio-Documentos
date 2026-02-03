@@ -2,10 +2,17 @@
 
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { AgenteCard, AgenteFilter } from '@/components/agentes';
-import { ExecutionHistory } from '@/components/agents';
+import {
+  AgenteCard,
+  AgenteFilter,
+  ExecutionHistoryAgentes,
+  ExecutionDetailModal,
+} from '@/components/agentes';
 import { getAgentesByCategoria } from '@/data/agentes';
 import { History, Bot } from 'lucide-react';
+import type { Database } from '@/types/database.types';
+
+type AgentesEspecialistasRun = Database['public']['Tables']['agentes_especialistas_runs']['Row'];
 
 type TabType = 'agentes' | 'historico';
 
@@ -13,6 +20,21 @@ export default function DashboardAgentes() {
   const [activeTab, setActiveTab] = useState<TabType>('agentes');
   const [categoriaAtiva, setCategoriaAtiva] = useState('todos');
   const [busca, setBusca] = useState('');
+
+  // Modal state for execution details
+  const [selectedExecution, setSelectedExecution] = useState<AgentesEspecialistasRun | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleSelectExecution = (execution: AgentesEspecialistasRun) => {
+    setSelectedExecution(execution);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    // Delay clearing selection for animation
+    setTimeout(() => setSelectedExecution(null), 200);
+  };
 
   const agentesFiltrados = useMemo(() => {
     let resultado = getAgentesByCategoria(categoriaAtiva);
@@ -106,11 +128,21 @@ export default function DashboardAgentes() {
           </>
         ) : (
           <div className="bg-card border border-border rounded-lg p-6">
-            <h2 className="text-lg font-semibold mb-4">Ultimas Execucoes de IA</h2>
-            <ExecutionHistory limit={20} />
+            <h2 className="text-lg font-semibold mb-4">Últimas Execuções de IA</h2>
+            <ExecutionHistoryAgentes
+              limit={20}
+              onSelectExecution={handleSelectExecution}
+            />
           </div>
         )}
       </motion.div>
+
+      {/* Execution Detail Modal */}
+      <ExecutionDetailModal
+        execution={selectedExecution}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }

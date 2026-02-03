@@ -32,7 +32,7 @@ export function ProgressStepper({ steps, currentStep, onStepClick }: ProgressSte
         {steps.map((step, index) => {
           const isCompleted = index < currentStep;
           const isCurrent = index === currentStep;
-          const isPending = index > currentStep;
+          const isFuture = index > currentStep;
 
           return (
             <div
@@ -41,15 +41,14 @@ export function ProgressStepper({ steps, currentStep, onStepClick }: ProgressSte
             >
               <motion.button
                 onClick={() => onStepClick?.(index)}
-                disabled={isPending}
                 className={cn(
-                  "w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all",
-                  isCompleted && "bg-accent text-accent-foreground cursor-pointer hover:bg-accent/90",
+                  "w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all cursor-pointer",
+                  isCompleted && "bg-accent text-accent-foreground hover:bg-accent/90",
                   isCurrent && "bg-accent text-accent-foreground ring-4 ring-accent/30",
-                  isPending && "bg-muted text-muted-foreground cursor-not-allowed"
+                  isFuture && "bg-muted text-muted-foreground hover:bg-muted/80 opacity-60 hover:opacity-100"
                 )}
-                whileHover={!isPending ? { scale: 1.05 } : undefined}
-                whileTap={!isPending ? { scale: 0.95 } : undefined}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 {isCompleted ? (
                   <Check className="w-5 h-5" />

@@ -4,6 +4,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "./components/layout";
 import { Toaster } from "./components/ui/sonner";
+import { HomePage } from "./pages/HomePage";
 import { LandingPage } from "./pages/LandingPage";
 
 export function LandingApp() {
@@ -11,8 +12,9 @@ export function LandingApp() {
     <ErrorBoundary>
       <Router>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="*" element={<LandingPage />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/landing-page" element={<LandingPage />} />
+          <Route path="*" element={<HomePage />} />
         </Routes>
         <Toaster position="top-right" richColors closeButton />
       </Router>
