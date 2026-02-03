@@ -17,6 +17,7 @@ import {
   Loader2,
   Calendar,
   Hash,
+  ArrowLeft,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,6 +26,7 @@ import { cn } from '@/lib/utils';
 import { FormSection } from '@/components/forms/FormSection';
 import { filterJsonSection } from './ResultadoAnalise';
 import { exportToDocx, exportToPdf } from '@/utils/documentExport';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import type { Database } from '@/types/database.types';
 
 type AgentesEspecialistasRun = Database['public']['Tables']['agentes_especialistas_runs']['Row'];
@@ -393,6 +395,7 @@ export function ExecutionDetailModal({
   onClose,
 }: ExecutionDetailModalProps) {
   const [copiedAll, setCopiedAll] = useState(false);
+  const isMobile = useIsMobile();
 
   // Extract structured fields
   const camposExtraidos = useMemo(() => {
@@ -467,115 +470,163 @@ export function ExecutionDetailModal({
 
           {/* Modal */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: isMobile ? 1 : 0.95, y: isMobile ? 20 : 0 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: isMobile ? 1 : 0.95, y: isMobile ? 20 : 0 }}
             transition={{ duration: 0.2 }}
             className={cn(
-              "relative w-[95vw] h-[90vh] max-w-[1800px]",
-              "bg-card border border-border rounded-xl shadow-2xl",
-              "flex flex-col overflow-hidden"
+              "relative bg-card flex flex-col overflow-hidden",
+              isMobile
+                ? "w-full h-full rounded-none"
+                : "w-[95vw] h-[90vh] max-w-[1800px] border border-border rounded-xl shadow-2xl"
             )}
           >
-            {/* Header */}
-            <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-border bg-muted/30">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <span className={statusConfig.color}>{statusConfig.icon}</span>
-                  <h2 className="text-lg font-semibold">
-                    {getAgentLabel(execution.agent_slug, execution.agent_nome)}
-                  </h2>
+            {/* Header - Mobile */}
+            {isMobile ? (
+              <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-border bg-card">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={onClose}
+                    className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors touch-feedback"
+                  >
+                    <ArrowLeft className="h-5 w-5" />
+                  </button>
+                  <div>
+                    <h2 className="text-base font-semibold leading-tight">
+                      {getAgentLabel(execution.agent_slug, execution.agent_nome)}
+                    </h2>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className={cn(
+                        'inline-flex items-center gap-1 text-xs font-medium',
+                        statusConfig.color
+                      )}>
+                        {statusConfig.icon}
+                        {statusConfig.label}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatFullDate(execution.created_at)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* Header - Desktop */
+              <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-border bg-muted/30">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className={statusConfig.color}>{statusConfig.icon}</span>
+                    <h2 className="text-lg font-semibold">
+                      {getAgentLabel(execution.agent_slug, execution.agent_nome)}
+                    </h2>
+                  </div>
+
+                  {/* Status badge */}
+                  <span className={cn(
+                    'px-2 py-0.5 rounded-full text-xs font-medium',
+                    execution.status === 'completed' && 'bg-green-500/10 text-green-500',
+                    execution.status === 'error' && 'bg-red-500/10 text-red-500',
+                    execution.status === 'processing' && 'bg-blue-500/10 text-blue-500',
+                  )}>
+                    {statusConfig.label}
+                  </span>
                 </div>
 
-                {/* Status badge */}
-                <span className={cn(
-                  'px-2 py-0.5 rounded-full text-xs font-medium',
-                  execution.status === 'completed' && 'bg-green-500/10 text-green-500',
-                  execution.status === 'error' && 'bg-red-500/10 text-red-500',
-                  execution.status === 'processing' && 'bg-blue-500/10 text-blue-500',
-                )}>
-                  {statusConfig.label}
-                </span>
-              </div>
+                <div className="flex items-center gap-2">
+                  {/* Action buttons */}
+                  {hasContent && (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCopyAll}
+                        className="gap-2"
+                      >
+                        {copiedAll ? (
+                          <>
+                            <Check className="h-4 w-4 text-green-500" />
+                            Copiado
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="h-4 w-4" />
+                            Copiar
+                          </>
+                        )}
+                      </Button>
+                      <Button variant="outline" size="sm" className="gap-2" onClick={handleDownloadDocx}>
+                        <FileText className="h-4 w-4" />
+                        DOCX
+                      </Button>
+                      <Button variant="outline" size="sm" className="gap-2" onClick={handleDownloadPdf}>
+                        <FileDown className="h-4 w-4" />
+                        PDF
+                      </Button>
+                    </>
+                  )}
 
-              <div className="flex items-center gap-2">
-                {/* Action buttons */}
-                {hasContent && (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleCopyAll}
-                      className="gap-2"
-                    >
-                      {copiedAll ? (
-                        <>
-                          <Check className="h-4 w-4 text-green-500" />
-                          Copiado
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="h-4 w-4" />
-                          Copiar
-                        </>
-                      )}
-                    </Button>
-                    <Button variant="outline" size="sm" className="gap-2" onClick={handleDownloadDocx}>
-                      <FileText className="h-4 w-4" />
-                      DOCX
-                    </Button>
-                    <Button variant="outline" size="sm" className="gap-2" onClick={handleDownloadPdf}>
-                      <FileDown className="h-4 w-4" />
-                      PDF
-                    </Button>
-                  </>
-                )}
-
-                {/* Close button */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onClose}
-                  className="ml-2"
-                >
-                  <X className="h-5 w-5" />
-                </Button>
+                  {/* Close button */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onClose}
+                    className="ml-2"
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Metadata bar */}
-            <div className="flex-shrink-0 flex items-center gap-6 px-6 py-3 border-b border-border/50 bg-muted/10 text-sm">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span>{formatFullDate(execution.created_at)}</span>
-              </div>
+            <div className={cn(
+              "flex-shrink-0 border-b border-border/50 bg-muted/10",
+              isMobile
+                ? "flex flex-wrap gap-x-4 gap-y-2 px-4 py-2 text-xs"
+                : "flex items-center gap-6 px-6 py-3 text-sm"
+            )}>
+              {!isMobile && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  <span>{formatFullDate(execution.created_at)}</span>
+                </div>
+              )}
 
               {execution.duration_ms !== null && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Clock className="h-4 w-4" />
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <Clock className={cn(isMobile ? "h-3 w-3" : "h-4 w-4")} />
                   <span>{formatDuration(execution.duration_ms)}</span>
                 </div>
               )}
 
               {(execution.input_tokens || execution.output_tokens) && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Zap className="h-4 w-4" />
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <Zap className={cn(isMobile ? "h-3 w-3" : "h-4 w-4")} />
                   <span>
-                    {execution.input_tokens ?? 0} / {execution.output_tokens ?? 0} tokens
+                    {execution.input_tokens ?? 0}/{execution.output_tokens ?? 0} tokens
                   </span>
                 </div>
               )}
 
               {documentos && documentos.length > 0 && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <FileText className="h-4 w-4" />
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <FileText className={cn(isMobile ? "h-3 w-3" : "h-4 w-4")} />
                   <span>
-                    {documentos.length} documento{documentos.length > 1 ? 's' : ''}
+                    {documentos.length} doc{documentos.length > 1 ? 's' : ''}
                   </span>
                 </div>
               )}
 
-              {execution.id && (
+              {execution.cost_estimate !== null && (
+                <div className={cn(
+                  "flex items-center text-muted-foreground",
+                  isMobile ? "ml-auto" : ""
+                )}>
+                  <span className="font-medium">${Number(execution.cost_estimate).toFixed(4)}</span>
+                </div>
+              )}
+
+              {!isMobile && execution.id && (
                 <div className="flex items-center gap-2 text-muted-foreground/60 ml-auto">
                   <Hash className="h-3 w-3" />
                   <span className="text-xs font-mono">{execution.id.slice(0, 8)}</span>
@@ -584,18 +635,30 @@ export function ExecutionDetailModal({
             </div>
 
             {/* Content area */}
-            <div className="flex-1 overflow-hidden bg-gradient-to-b from-background/50 to-background/30 p-6">
+            <div className={cn(
+              "flex-1 overflow-hidden bg-gradient-to-b from-background/50 to-background/30",
+              isMobile ? "p-4 pb-20" : "p-6"
+            )}>
               {/* Error state */}
               {execution.status === 'error' && execution.erro_mensagem && (
                 <div className="h-full flex items-center justify-center">
-                  <div className="text-center max-w-md">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
-                      <XCircle className="h-8 w-8 text-red-500" />
+                  <div className="text-center max-w-md px-4">
+                    <div className={cn(
+                      "mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center",
+                      isMobile ? "w-12 h-12" : "w-16 h-16"
+                    )}>
+                      <XCircle className={cn(isMobile ? "h-6 w-6" : "h-8 w-8", "text-red-500")} />
                     </div>
-                    <h3 className="text-lg font-medium text-foreground mb-2">
+                    <h3 className={cn(
+                      "font-medium text-foreground mb-2",
+                      isMobile ? "text-base" : "text-lg"
+                    )}>
                       Erro na execução
                     </h3>
-                    <p className="text-sm text-red-500 bg-red-500/10 rounded-lg p-4">
+                    <p className={cn(
+                      "text-red-500 bg-red-500/10 rounded-lg p-4",
+                      isMobile ? "text-xs" : "text-sm"
+                    )}>
                       {execution.erro_mensagem}
                     </p>
                   </div>
@@ -606,7 +669,10 @@ export function ExecutionDetailModal({
               {!hasContent && execution.status !== 'error' && (
                 <div className="h-full flex items-center justify-center">
                   <div className="text-center">
-                    <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                    <FileText className={cn(
+                      "mx-auto mb-4 text-muted-foreground/50",
+                      isMobile ? "h-10 w-10" : "h-12 w-12"
+                    )} />
                     <p className="text-muted-foreground">
                       Nenhum resultado disponível para esta execução.
                     </p>
@@ -614,11 +680,11 @@ export function ExecutionDetailModal({
                 </div>
               )}
 
-              {/* Two-column layout with content */}
+              {/* Two-column layout with content (single column on mobile) */}
               {hasContent && (
                 <div className={cn(
-                  "h-full grid gap-6",
-                  showDataFields ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"
+                  "h-full overflow-auto",
+                  isMobile ? "space-y-4" : "grid gap-6 grid-cols-1 lg:grid-cols-2"
                 )}>
                   {/* Left column - Markdown text */}
                   <div className="bg-card shadow-sm border border-border/50 rounded-lg overflow-hidden">
@@ -627,10 +693,10 @@ export function ExecutionDetailModal({
                     </DocumentContainer>
                   </div>
 
-                  {/* Right column - Structured form */}
+                  {/* Right column / Below on mobile - Structured form with copy buttons */}
                   {showDataFields && (
                     <div className="bg-card shadow-sm border border-border/50 rounded-lg overflow-hidden">
-                      <DocumentContainer title="Formulário de Dados">
+                      <DocumentContainer title="Copiar Dados">
                         <CamposDados campos={camposExtraidos} />
                       </DocumentContainer>
                     </div>
@@ -638,6 +704,35 @@ export function ExecutionDetailModal({
                 </div>
               )}
             </div>
+
+            {/* Mobile Action Bar */}
+            {isMobile && hasContent && (
+              <div className="flex-shrink-0 px-4 py-3 border-t border-border bg-card/95 backdrop-blur-sm pb-safe">
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopyAll}
+                    className="flex-1 h-10"
+                  >
+                    {copiedAll ? (
+                      <Check className="h-4 w-4 mr-2 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4 mr-2" />
+                    )}
+                    {copiedAll ? 'Copiado' : 'Copiar'}
+                  </Button>
+                  <Button variant="outline" size="sm" className="h-10" onClick={handleDownloadDocx}>
+                    <FileText className="h-4 w-4 mr-1" />
+                    DOCX
+                  </Button>
+                  <Button variant="outline" size="sm" className="h-10" onClick={handleDownloadPdf}>
+                    <FileDown className="h-4 w-4 mr-1" />
+                    PDF
+                  </Button>
+                </div>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}

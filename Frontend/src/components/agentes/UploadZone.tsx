@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { DocumentPreviewModal } from './DocumentPreviewModal';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import type { ArquivoUpload } from '@/types/agente';
 
 interface UploadZoneProps {
@@ -18,6 +19,7 @@ export function UploadZone({ arquivos, onArquivosChange, disabled }: UploadZoneP
   const [isDragging, setIsDragging] = useState(false);
   const [previewArquivo, setPreviewArquivo] = useState<ArquivoUpload | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const openPreview = useCallback((arquivo: ArquivoUpload) => {
     setPreviewArquivo(arquivo);
@@ -88,25 +90,35 @@ export function UploadZone({ arquivos, onArquivosChange, disabled }: UploadZoneP
     <div className="space-y-3">
       {/* Drop Zone */}
       {!disabled && (
-        <label
+        <motion.label
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
+          whileTap={{ scale: 0.98 }}
           className={cn(
-            'flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg cursor-pointer transition-colors',
+            'flex flex-col items-center justify-center border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200',
+            isMobile ? 'p-8 min-h-[180px]' : 'p-6 min-h-[120px]',
             isDragging
-              ? 'border-primary bg-primary/5'
+              ? 'border-primary bg-primary/5 scale-[1.02]'
               : 'border-border hover:border-primary/50 hover:bg-muted/30'
           )}
         >
           <Upload className={cn(
-            'w-8 h-8 mb-2 transition-colors',
+            'mb-3 transition-colors',
+            isMobile ? 'w-10 h-10' : 'w-8 h-8',
             isDragging ? 'text-primary' : 'text-muted-foreground'
           )} />
-          <p className="text-sm text-muted-foreground text-center">
-            Arraste arquivos ou <span className="text-primary">clique aqui</span>
+          <p className={cn(
+            'text-muted-foreground text-center',
+            isMobile ? 'text-base' : 'text-sm'
+          )}>
+            {isMobile ? 'Toque para selecionar' : 'Arraste arquivos ou'}{' '}
+            {!isMobile && <span className="text-primary">clique aqui</span>}
           </p>
-          <p className="text-xs text-muted-foreground/70 mt-1">
+          <p className={cn(
+            'text-muted-foreground/70 mt-1',
+            isMobile ? 'text-sm' : 'text-xs'
+          )}>
             PDF, Imagens, DOCX, TXT, Markdown, CSV
           </p>
           <input
@@ -116,7 +128,7 @@ export function UploadZone({ arquivos, onArquivosChange, disabled }: UploadZoneP
             onChange={handleFileInput}
             className="hidden"
           />
-        </label>
+        </motion.label>
       )}
 
       {/* File List */}

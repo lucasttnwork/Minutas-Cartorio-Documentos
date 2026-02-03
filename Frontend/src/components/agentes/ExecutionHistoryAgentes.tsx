@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import type { Database } from '@/types/database.types';
 
 // Types from database
@@ -158,10 +159,12 @@ function ExecutionItem({
   execution,
   onClick,
   index,
+  isMobile,
 }: {
   execution: AgentesEspecialistasRun;
   onClick?: () => void;
   index: number;
+  isMobile: boolean;
 }) {
   const documentos = execution.documentos as Array<{ nome: string }> | null;
   const documentCount = documentos?.length || 0;
@@ -171,71 +174,85 @@ function ExecutionItem({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, delay: index * 0.05 }}
+      transition={{ duration: 0.2, delay: index * 0.03 }}
     >
       <button
         onClick={onClick}
         className={cn(
-          'w-full text-left p-4 rounded-lg border border-border/50 bg-card',
+          'w-full text-left rounded-xl border border-border/50 bg-card',
           'hover:border-primary/50 hover:bg-card/80 transition-all duration-200',
           'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background',
-          'group'
+          'group touch-feedback',
+          isMobile ? 'p-3' : 'p-4'
         )}
       >
-        <div className="flex items-start justify-between gap-4">
-          {/* Left side - Agent info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="font-medium text-foreground truncate">
-                {getAgentLabel(execution.agent_slug, execution.agent_nome)}
-              </span>
-              <StatusBadge status={execution.status} />
-            </div>
-
-            {/* Document info */}
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <FileText className="h-3.5 w-3.5 flex-shrink-0" />
-              <span className="truncate">
-                {documentCount > 1
-                  ? `${documentCount} documentos`
-                  : firstDocName}
-              </span>
-            </div>
-
-            {/* Metrics row */}
-            <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-              {execution.duration_ms !== null && (
-                <span className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {formatDuration(execution.duration_ms)}
-                </span>
-              )}
-              {(execution.input_tokens || execution.output_tokens) && (
-                <span>
-                  {execution.input_tokens ?? 0}/{execution.output_tokens ?? 0} tokens
-                </span>
-              )}
-              {execution.cost_estimate !== null && (
-                <span>${Number(execution.cost_estimate).toFixed(4)}</span>
-              )}
-            </div>
+        {/* Header row - Agent name + Status + Time */}
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <span className={cn(
+              "font-medium text-foreground truncate",
+              isMobile ? "text-sm" : "text-base"
+            )}>
+              {getAgentLabel(execution.agent_slug, execution.agent_nome)}
+            </span>
+            <StatusBadge status={execution.status} />
           </div>
-
-          {/* Right side - Time and action */}
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             <span
               className="text-xs text-muted-foreground"
               title={formatFullDate(execution.created_at)}
             >
               {formatRelativeTime(execution.created_at)}
             </span>
-            <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            <ChevronRight className={cn(
+              "text-muted-foreground group-hover:text-primary transition-colors",
+              isMobile ? "h-4 w-4" : "h-5 w-5"
+            )} />
           </div>
+        </div>
+
+        {/* Document info */}
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-2">
+          <FileText className="h-3.5 w-3.5 flex-shrink-0" />
+          <span className="truncate">
+            {documentCount > 1
+              ? `${documentCount} documentos`
+              : firstDocName}
+          </span>
+        </div>
+
+        {/* Metrics row - simplified on mobile */}
+        <div className={cn(
+          "flex items-center text-xs text-muted-foreground",
+          isMobile ? "gap-3" : "gap-4"
+        )}>
+          {execution.duration_ms !== null && (
+            <span className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {formatDuration(execution.duration_ms)}
+            </span>
+          )}
+          {!isMobile && (execution.input_tokens || execution.output_tokens) && (
+            <span>
+              {execution.input_tokens ?? 0}/{execution.output_tokens ?? 0} tokens
+            </span>
+          )}
+          {execution.cost_estimate !== null && (
+            <span className={cn(
+              "px-1.5 py-0.5 rounded bg-muted/50",
+              isMobile && "ml-auto"
+            )}>
+              ${Number(execution.cost_estimate).toFixed(4)}
+            </span>
+          )}
         </div>
 
         {/* Error message preview */}
         {execution.status === 'error' && execution.erro_mensagem && (
-          <div className="mt-2 text-xs text-red-500 bg-red-500/10 rounded px-2 py-1 truncate">
+          <div className={cn(
+            "mt-2 text-xs text-red-500 bg-red-500/10 rounded-lg px-2 py-1.5",
+            isMobile ? "line-clamp-2" : "truncate"
+          )}>
             {execution.erro_mensagem}
           </div>
         )}
@@ -255,6 +272,7 @@ export function ExecutionHistoryAgentes({
   const [executions, setExecutions] = useState<AgentesEspecialistasRun[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -345,42 +363,61 @@ export function ExecutionHistoryAgentes({
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">Filtros:</span>
+      <div className={cn(
+        "flex gap-3",
+        isMobile ? "flex-col" : "flex-wrap items-center"
+      )}>
+        {!isMobile && (
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">Filtros:</span>
+          </div>
+        )}
+
+        <div className={cn(
+          "flex gap-2",
+          isMobile && "w-full"
+        )}>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className={cn(
+              "h-10",
+              isMobile ? "flex-1" : "w-[150px]"
+            )}>
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os status</SelectItem>
+              <SelectItem value="completed">Concluídos</SelectItem>
+              <SelectItem value="error">Com erro</SelectItem>
+              <SelectItem value="processing">Processando</SelectItem>
+              <SelectItem value="pending">Pendentes</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={agentFilter} onValueChange={setAgentFilter}>
+            <SelectTrigger className={cn(
+              "h-10",
+              isMobile ? "flex-1" : "w-[180px]"
+            )}>
+              <SelectValue placeholder="Agente" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os agentes</SelectItem>
+              {uniqueAgents.map(([slug, nome]) => (
+                <SelectItem key={slug} value={slug}>
+                  {getAgentLabel(slug, nome)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[150px] h-9">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os status</SelectItem>
-            <SelectItem value="completed">Concluídos</SelectItem>
-            <SelectItem value="error">Com erro</SelectItem>
-            <SelectItem value="processing">Processando</SelectItem>
-            <SelectItem value="pending">Pendentes</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Select value={agentFilter} onValueChange={setAgentFilter}>
-          <SelectTrigger className="w-[180px] h-9">
-            <SelectValue placeholder="Agente" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os agentes</SelectItem>
-            {uniqueAgents.map(([slug, nome]) => (
-              <SelectItem key={slug} value={slug}>
-                {getAgentLabel(slug, nome)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       {/* Results count */}
-      <div className="text-sm text-muted-foreground">
+      <div className={cn(
+        "text-muted-foreground",
+        isMobile ? "text-xs" : "text-sm"
+      )}>
         {executions.length} execuç{executions.length === 1 ? 'ão' : 'ões'} encontrada{executions.length === 1 ? '' : 's'}
       </div>
 
@@ -404,13 +441,14 @@ export function ExecutionHistoryAgentes({
         </div>
       ) : (
         /* Execution list */
-        <div className="space-y-2">
+        <div className={cn("space-y-2", isMobile && "space-y-3")}>
           {executions.map((execution, index) => (
             <ExecutionItem
               key={execution.id}
               execution={execution}
               onClick={() => onSelectExecution?.(execution)}
               index={index}
+              isMobile={isMobile}
             />
           ))}
         </div>

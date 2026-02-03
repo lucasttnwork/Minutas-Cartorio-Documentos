@@ -66,7 +66,7 @@ export default function DashboardMinutas() {
   };
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="flex flex-col min-h-full p-6 md:p-10">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

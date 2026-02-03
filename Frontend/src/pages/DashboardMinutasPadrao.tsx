@@ -131,9 +131,14 @@ export function DashboardMinutasPadrao() {
     : 'Nenhum template global disponivel.';
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col min-h-full">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b">
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex items-center justify-between px-6 py-4 border-b"
+      >
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/10">
             <LayoutTemplate className="w-5 h-5 text-primary" />
@@ -150,10 +155,15 @@ export function DashboardMinutasPadrao() {
           <Plus className="w-4 h-4 mr-2" />
           Adicionar Template
         </Button>
-      </header>
+      </motion.header>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto p-6">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+        className="flex-1 overflow-auto p-6"
+      >
         {/* Error State */}
         {error && (
           <motion.div
@@ -175,7 +185,12 @@ export function DashboardMinutasPadrao() {
         )}
 
         {/* Tabs + Filter */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6"
+        >
           {/* Tab Navigation */}
           <div className="flex gap-2 border-b border-border" role="tablist">
             <button
@@ -212,18 +227,24 @@ export function DashboardMinutasPadrao() {
             value={tipoFilter}
             onChange={handleFilterChange}
           />
-        </div>
+        </motion.div>
 
         {/* Templates Grid */}
-        <TemplateGrid
-          templates={displayedTemplates}
-          isLoading={isLoading}
-          emptyMessage={emptyMessage}
-          onEdit={activeTab === 'user' ? setEditingTemplate : undefined}
-          onDelete={activeTab === 'user' ? setDeletingTemplate : undefined}
-          onViewText={setViewingTextTemplate}
-        />
-      </div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.25 }}
+        >
+          <TemplateGrid
+            templates={displayedTemplates}
+            isLoading={isLoading}
+            emptyMessage={emptyMessage}
+            onEdit={activeTab === 'user' ? setEditingTemplate : undefined}
+            onDelete={activeTab === 'user' ? setDeletingTemplate : undefined}
+            onViewText={setViewingTextTemplate}
+          />
+        </motion.div>
+      </motion.div>
 
       {/* Upload Modal */}
       <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
