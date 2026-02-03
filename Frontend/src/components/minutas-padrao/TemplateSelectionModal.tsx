@@ -316,7 +316,7 @@ export function TemplateSelectionModal({
             <div className="flex-1 overflow-auto p-6">
               {isLoading && <LoadingSkeleton />}
 
-              {error && <ErrorState message={error.message} />}
+              {error && <ErrorState message={error} />}
 
               {!isLoading && !error && filteredTemplates.length === 0 && <EmptyState />}
 

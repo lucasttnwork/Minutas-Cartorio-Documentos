@@ -979,6 +979,84 @@ export type Database = {
           },
         ]
       }
+      minutas_padrao: {
+        Row: {
+          id: string
+          user_id: string | null
+          is_global: boolean
+          nome: string
+          descricao: string | null
+          tipo_negocio: string
+          storage_path: string | null
+          nome_original: string | null
+          mime_type: string | null
+          tamanho_bytes: number | null
+          thumbnail_path: string | null
+          texto_extraido: string | null
+          conteudo_markdown: string | null
+          variaveis_detectadas: Json | null
+          status_extracao: string | null
+          erro_extracao: string | null
+          extraido_em: string | null
+          revisado_em: string | null
+          uso_count: number
+          ativo: boolean
+          deleted_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          is_global?: boolean
+          nome: string
+          descricao?: string | null
+          tipo_negocio: string
+          storage_path?: string | null
+          nome_original?: string | null
+          mime_type?: string | null
+          tamanho_bytes?: number | null
+          thumbnail_path?: string | null
+          texto_extraido?: string | null
+          conteudo_markdown?: string | null
+          variaveis_detectadas?: Json | null
+          status_extracao?: string | null
+          erro_extracao?: string | null
+          extraido_em?: string | null
+          revisado_em?: string | null
+          uso_count?: number
+          ativo?: boolean
+          deleted_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          is_global?: boolean
+          nome?: string
+          descricao?: string | null
+          tipo_negocio?: string
+          storage_path?: string | null
+          nome_original?: string | null
+          mime_type?: string | null
+          tamanho_bytes?: number | null
+          thumbnail_path?: string | null
+          texto_extraido?: string | null
+          conteudo_markdown?: string | null
+          variaveis_detectadas?: Json | null
+          status_extracao?: string | null
+          erro_extracao?: string | null
+          extraido_em?: string | null
+          revisado_em?: string | null
+          uso_count?: number
+          ativo?: boolean
+          deleted_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1053,8 +1131,15 @@ export type Database = {
           versao: number
         }[]
       }
+      increment_template_usage: {
+        Args: { template_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
+      status_minuta: "rascunho" | "em_andamento" | "finalizado" | "cancelado"
+      status_documento: "pendente" | "processando" | "processado" | "erro"
+      tipo_documento: "CNH" | "RG" | "CPF" | "CERTIDAO_CASAMENTO" | "CERTIDAO_NASCIMENTO" | "MATRICULA" | "IPTU" | "CONTRATO" | "PROCURACAO" | "OUTROS"
       agentes_especialistas_status:
         | "pending"
         | "processing"

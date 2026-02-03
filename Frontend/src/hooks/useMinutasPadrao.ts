@@ -8,7 +8,6 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import type {
   MinutaPadrao,
-  MinutaPadraoInsert,
   MinutaPadraoInsertUpload,
   MinutaPadraoInsertText,
   MinutaPadraoUpdate,
@@ -83,7 +82,7 @@ export function useMinutasPadrao(): UseMinutasPadraoReturn {
         throw queryError;
       }
 
-      setTemplates(data || []);
+      setTemplates((data || []) as MinutaPadrao[]);
     } catch (err: any) {
       const errorMessage = err.message || 'Erro ao carregar templates';
       setError(errorMessage);
@@ -157,11 +156,12 @@ export function useMinutasPadrao(): UseMinutasPadraoReturn {
     }
 
     toast.success('Template criado com sucesso!');
-    setTemplates(prev => [template, ...prev]);
+    const typedTemplate = template as MinutaPadrao;
+    setTemplates(prev => [typedTemplate, ...prev]);
 
     // Disparar extração assíncrona de texto (não bloqueia)
     supabase.functions.invoke('extract-template-text', {
-      body: { template_id: template.id }
+      body: { template_id: typedTemplate.id }
     }).then(({ error }) => {
       if (error) {
         console.error('Erro na extração de texto:', error);
@@ -170,7 +170,7 @@ export function useMinutasPadrao(): UseMinutasPadraoReturn {
         toast.success('Texto do template extraído com sucesso!');
         // Atualizar o template local com o novo status
         setTemplates(prev =>
-          prev.map(t => t.id === template.id
+          prev.map(t => t.id === typedTemplate.id
             ? { ...t, status_extracao: 'extraido' as StatusExtracao }
             : t
           )
@@ -178,7 +178,7 @@ export function useMinutasPadrao(): UseMinutasPadraoReturn {
       }
     });
 
-    return template;
+    return typedTemplate;
   }, []);
 
   /**
@@ -217,8 +217,9 @@ export function useMinutasPadrao(): UseMinutasPadraoReturn {
     }
 
     toast.success('Template criado com sucesso!');
-    setTemplates(prev => [template, ...prev]);
-    return template;
+    const typedTemplate = template as MinutaPadrao;
+    setTemplates(prev => [typedTemplate, ...prev]);
+    return typedTemplate;
   }, []);
 
   /**
@@ -333,7 +334,7 @@ export function useMinutasPadrao(): UseMinutasPadraoReturn {
 
     if (updated) {
       setTemplates(prev =>
-        prev.map(t => t.id === id ? updated : t)
+        prev.map(t => t.id === id ? (updated as MinutaPadrao) : t)
       );
     }
 

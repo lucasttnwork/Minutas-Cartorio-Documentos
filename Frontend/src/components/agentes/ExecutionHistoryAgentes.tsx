@@ -275,7 +275,7 @@ export function ExecutionHistoryAgentes({
 
         // Apply status filter
         if (statusFilter !== 'all') {
-          query = query.eq('status', statusFilter);
+          query = query.eq('status', statusFilter as 'pending' | 'processing' | 'streaming' | 'completed' | 'stopped' | 'error');
         }
 
         // Apply agent filter

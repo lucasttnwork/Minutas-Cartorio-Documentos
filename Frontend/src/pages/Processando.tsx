@@ -109,7 +109,7 @@ export default function Processando() {
 
   const {
     startPipeline,
-    isProcessing,
+    isProcessing: _isProcessing,
     overallProgress,
     statuses,
     classificationWorkers,
@@ -159,20 +159,18 @@ export default function Processando() {
     }
   }, [id, startPipeline]);
 
-  // Fallback timeout - if pipeline takes too long or doesn't complete
-  // Increased to 300 seconds (5 minutes) to allow processing of many documents
-  useEffect(() => {
-    const fallbackTimeout = setTimeout(() => {
-      if (!pipelineError && isProcessing) {
-        // Pipeline is taking too long, navigate anyway but log warning
-        console.warn('[Processando] Fallback timeout (5min) - forcing navigation to outorgantes');
-        setCurrentStep('outorgantes');
-        navigate(`/minuta/${id}/outorgantes`);
-      }
-    }, 300000); // 300 second (5 minute) fallback for large document batches
-
-    return () => clearTimeout(fallbackTimeout);
-  }, [id, navigate, setCurrentStep, pipelineError, isProcessing]);
+  // NOTE: Removed fallback timeout - the pipeline should properly signal completion
+  // via onPipelineComplete callback. A timeout-based navigation is dangerous because
+  // it can navigate before data is ready, leaving the form empty.
+  //
+  // If the pipeline gets stuck, the user can:
+  // 1. See the error state (if there's an error)
+  // 2. Refresh the page and check the documents status
+  // 3. Contact support if needed
+  //
+  // The proper flow is:
+  // 1. All documents classified -> 2. All documents extracted ->
+  // 3. map-to-fields executed -> 4. onPipelineComplete called -> 5. Navigate
 
   const getStatusMessage = () => {
     if (classificationWorkers > 0 && extractionWorkers === 0) {
@@ -181,8 +179,13 @@ export default function Processando() {
     if (extractionWorkers > 0) {
       return 'Extraindo dados com IA...';
     }
-    if (overallProgress === 100) {
-      return 'Finalizando...';
+    // If we're at 90% (all extraction done), we're in the mapping phase
+    if (overallProgress >= 90) {
+      return 'Mapeando dados para o formulário...';
+    }
+    // If classification is done but extraction hasn't started
+    if (classificationQueue === 0 && classificationWorkers === 0 && extractionWorkers === 0 && extractionQueue > 0) {
+      return 'Preparando extração...';
     }
     return 'Processando documentos...';
   };
@@ -255,6 +258,11 @@ export default function Processando() {
           />
         </div>
 
+        {/* Progress Percentage */}
+        <p className="text-sm text-muted-foreground mb-4">
+          {overallProgress}% concluído
+        </p>
+
         {/* Workers Status */}
         <div className="mb-6 p-4 rounded-lg bg-muted/30 space-y-2">
           <WorkerIndicator
@@ -271,6 +279,18 @@ export default function Processando() {
             max={10}
             color="purple"
           />
+          {/* Mapping indicator - shown when extraction is done */}
+          {overallProgress >= 90 && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-sm text-muted-foreground">Mapeamento</span>
+              </div>
+              <span className="text-sm font-medium text-green-500">
+                Em progresso...
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Documents List */}

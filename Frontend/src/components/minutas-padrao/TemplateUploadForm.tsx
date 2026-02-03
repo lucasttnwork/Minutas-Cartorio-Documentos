@@ -308,25 +308,28 @@ export function TemplateUploadForm({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  {...getRootProps()}
-                  data-testid="dropzone"
-                  className={cn(
-                    "flex flex-col items-center justify-center gap-2 p-8",
-                    "border-2 border-dashed rounded-lg cursor-pointer",
-                    "transition-colors duration-200",
-                    isDragActive
-                      ? "border-primary bg-primary/5"
-                      : "border-muted-foreground/25 hover:border-primary/50"
-                  )}
                 >
-                  <input {...getInputProps()} data-testid="file-input" />
-                  <Upload className="w-10 h-10 text-muted-foreground" />
-                  <p className="text-sm text-center text-muted-foreground">
-                    <span className="font-medium">Arraste um arquivo</span> ou clique para selecionar
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    PDF ou DOCX (máx. 50MB)
-                  </p>
+                  <div
+                    {...getRootProps()}
+                    data-testid="dropzone"
+                    className={cn(
+                      "flex flex-col items-center justify-center gap-2 p-8",
+                      "border-2 border-dashed rounded-lg cursor-pointer",
+                      "transition-colors duration-200",
+                      isDragActive
+                        ? "border-primary bg-primary/5"
+                        : "border-muted-foreground/25 hover:border-primary/50"
+                    )}
+                  >
+                    <input {...getInputProps()} data-testid="file-input" />
+                    <Upload className="w-10 h-10 text-muted-foreground" />
+                    <p className="text-sm text-center text-muted-foreground">
+                      <span className="font-medium">Arraste um arquivo</span> ou clique para selecionar
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      PDF ou DOCX (máx. 50MB)
+                    </p>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>

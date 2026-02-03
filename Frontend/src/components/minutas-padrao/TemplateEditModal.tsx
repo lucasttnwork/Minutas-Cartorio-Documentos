@@ -20,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
 import type { MinutaPadrao, MinutaPadraoUpdate, TipoNegocio } from '@/types/minutas-padrao';
 import { TIPO_NEGOCIO_LABELS } from '@/types/minutas-padrao';
 
@@ -200,7 +199,7 @@ export function TemplateEditModal({
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{template.nome_original}</p>
                 <p className="text-xs text-muted-foreground">
-                  {getFileTypeLabel(template.mime_type)} - {formatFileSize(template.tamanho_bytes)}
+                  {getFileTypeLabel(template.mime_type || '')} - {formatFileSize(template.tamanho_bytes || 0)}
                 </p>
               </div>
             </div>

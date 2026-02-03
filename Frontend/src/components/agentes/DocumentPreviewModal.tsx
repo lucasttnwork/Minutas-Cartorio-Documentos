@@ -5,7 +5,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { X, Download, FileText, Image as ImageIcon, File, Loader2, ZoomIn, ZoomOut, RotateCw } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import type { ArquivoUpload } from '@/types/agente';
 
 interface DocumentPreviewModalProps {

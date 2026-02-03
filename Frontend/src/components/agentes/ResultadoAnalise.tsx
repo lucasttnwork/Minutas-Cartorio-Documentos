@@ -1,7 +1,7 @@
 // src/components/agentes/ResultadoAnalise.tsx
 // Componente de resultado com suporte a streaming em tempo real
 
-import { useEffect, useRef, memo, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useRef, memo, useMemo, useState, useCallback } from 'react';
 import { Copy, FileDown, Maximize2, FileText as FileIcon, Loader2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -325,7 +325,7 @@ function renderInlineStyles(text: string) {
   // Handle inline code
   const codeRegex = /`([^`]+)`/g;
 
-  const parts: Array<string | JSX.Element> = [];
+  const parts: Array<string | React.ReactElement> = [];
   let lastIndex = 0;
   let match;
   let keyIndex = 0;

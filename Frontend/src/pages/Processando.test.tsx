@@ -228,10 +228,10 @@ describe('Processando Page', () => {
     });
   });
 
-  it('mostra status message finalizando quando progresso é 100%', async () => {
+  it('mostra status message mapeando quando progresso é >= 90%', async () => {
     mockUseDocumentPipeline.mockReturnValue({
       ...defaultPipelineReturn,
-      overallProgress: 100,
+      overallProgress: 90,
       classificationWorkers: 0,
       extractionWorkers: 0,
     });
@@ -239,7 +239,7 @@ describe('Processando Page', () => {
     renderProcessando();
 
     await waitFor(() => {
-      expect(screen.getByText('Finalizando...')).toBeInTheDocument();
+      expect(screen.getByText('Mapeando dados para o formulário...')).toBeInTheDocument();
     });
   });
 

@@ -592,3 +592,467 @@ Deno.test('deduplication - does not create duplicate pessoas with same CPF', asy
   assertEquals(updated.length, 1);
   assertEquals(updated[0].id, existingId);
 });
+
+// ============ MARRIAGE FIELDS TESTS (TDD Fase 3) ============
+
+Deno.test('marriage fields - saves estado_civil on insert', async () => {
+  const mockClient = createMockSupabaseClient();
+  const minutaId = '123e4567-e89b-12d3-a456-426614174000';
+
+  const pessoa: PessoaNatural = {
+    nome: 'MARIA DA SILVA',
+    cpf: '123.456.789-00',
+    estado_civil: 'casada',
+    _fontes: { nome: ['certidao.pdf'], estado_civil: ['certidao.pdf'] },
+  };
+
+  await upsertPessoaNatural(mockClient as unknown, pessoa, minutaId, 'outorgante');
+
+  const inserted = mockClient._getInsertedRows();
+  assertEquals(inserted.length, 1);
+  assertEquals(inserted[0].data.estado_civil, 'casada');
+});
+
+Deno.test('marriage fields - updates estado_civil when existing value is null', async () => {
+  const mockClient = createMockSupabaseClient();
+  const minutaId = '123e4567-e89b-12d3-a456-426614174000';
+  const existingId = 'existing-pessoa-id';
+
+  // Existing person without estado_civil
+  mockClient._setExistingData({
+    pessoas_naturais: [{
+      id: existingId,
+      minuta_id: minutaId,
+      cpf: '12345678900',
+      nome: 'MARIA DA SILVA',
+      estado_civil: null,
+      fontes: { nome: ['rg.pdf'] },
+    }],
+  });
+
+  const pessoa: PessoaNatural = {
+    nome: 'MARIA DA SILVA',
+    cpf: '123.456.789-00',
+    estado_civil: 'casada',
+    _fontes: { estado_civil: ['certidao.pdf'] },
+  };
+
+  await upsertPessoaNatural(mockClient as unknown, pessoa, minutaId, 'outorgante');
+
+  const updated = mockClient._getUpdatedRows();
+  assertEquals(updated.length, 1);
+  assertEquals(updated[0].data.estado_civil, 'casada');
+});
+
+Deno.test('marriage fields - does NOT overwrite existing estado_civil', async () => {
+  const mockClient = createMockSupabaseClient();
+  const minutaId = '123e4567-e89b-12d3-a456-426614174000';
+  const existingId = 'existing-pessoa-id';
+
+  // Existing person WITH estado_civil already set
+  mockClient._setExistingData({
+    pessoas_naturais: [{
+      id: existingId,
+      minuta_id: minutaId,
+      cpf: '12345678900',
+      nome: 'MARIA DA SILVA',
+      estado_civil: 'solteira',  // Already has value
+      fontes: { nome: ['rg.pdf'], estado_civil: ['rg.pdf'] },
+    }],
+  });
+
+  const pessoa: PessoaNatural = {
+    nome: 'MARIA DA SILVA',
+    cpf: '123.456.789-00',
+    estado_civil: 'casada',  // Trying to update to 'casada'
+    _fontes: { estado_civil: ['certidao.pdf'] },
+  };
+
+  await upsertPessoaNatural(mockClient as unknown, pessoa, minutaId, 'outorgante');
+
+  const updated = mockClient._getUpdatedRows();
+  assertEquals(updated.length, 1);
+  // Should NOT have estado_civil in update (not overwriting)
+  assertEquals(updated[0].data.estado_civil, undefined);
+});
+
+Deno.test('marriage fields - saves regime_bens on insert', async () => {
+  const mockClient = createMockSupabaseClient();
+  const minutaId = '123e4567-e89b-12d3-a456-426614174000';
+
+  const pessoa: PessoaNatural = {
+    nome: 'JOAO DA SILVA',
+    cpf: '111.222.333-44',
+    estado_civil: 'casado',
+    regime_bens: 'comunhao parcial de bens',
+    _fontes: {
+      nome: ['certidao.pdf'],
+      estado_civil: ['certidao.pdf'],
+      regime_bens: ['certidao.pdf'],
+    },
+  };
+
+  await upsertPessoaNatural(mockClient as unknown, pessoa, minutaId, 'outorgante');
+
+  const inserted = mockClient._getInsertedRows();
+  assertEquals(inserted.length, 1);
+  assertEquals(inserted[0].data.regime_bens, 'comunhao parcial de bens');
+});
+
+Deno.test('marriage fields - updates regime_bens when existing is null', async () => {
+  const mockClient = createMockSupabaseClient();
+  const minutaId = '123e4567-e89b-12d3-a456-426614174000';
+  const existingId = 'existing-pessoa-id';
+
+  mockClient._setExistingData({
+    pessoas_naturais: [{
+      id: existingId,
+      minuta_id: minutaId,
+      cpf: '11122233344',
+      nome: 'JOAO DA SILVA',
+      estado_civil: 'casado',
+      regime_bens: null,
+      fontes: { nome: ['rg.pdf'] },
+    }],
+  });
+
+  const pessoa: PessoaNatural = {
+    nome: 'JOAO DA SILVA',
+    cpf: '111.222.333-44',
+    regime_bens: 'comunhao parcial de bens',
+    _fontes: { regime_bens: ['certidao.pdf'] },
+  };
+
+  await upsertPessoaNatural(mockClient as unknown, pessoa, minutaId, 'outorgante');
+
+  const updated = mockClient._getUpdatedRows();
+  assertEquals(updated.length, 1);
+  assertEquals(updated[0].data.regime_bens, 'comunhao parcial de bens');
+});
+
+Deno.test('marriage fields - saves conjuge_nome from pessoa.conjuge', async () => {
+  const mockClient = createMockSupabaseClient();
+  const minutaId = '123e4567-e89b-12d3-a456-426614174000';
+
+  const pessoa: PessoaNatural = {
+    nome: 'JOAO DA SILVA',
+    cpf: '111.222.333-44',
+    estado_civil: 'casado',
+    conjuge: 'MARIA OLIVEIRA DA SILVA',  // Interface uses 'conjuge'
+    _fontes: {
+      nome: ['certidao.pdf'],
+      conjuge: ['certidao.pdf'],
+    },
+  };
+
+  await upsertPessoaNatural(mockClient as unknown, pessoa, minutaId, 'outorgante');
+
+  const inserted = mockClient._getInsertedRows();
+  assertEquals(inserted.length, 1);
+  // Database column is 'conjuge_nome', not 'conjuge'
+  assertEquals(inserted[0].data.conjuge_nome, 'MARIA OLIVEIRA DA SILVA');
+});
+
+Deno.test('marriage fields - updates conjuge_nome when existing is null', async () => {
+  const mockClient = createMockSupabaseClient();
+  const minutaId = '123e4567-e89b-12d3-a456-426614174000';
+  const existingId = 'existing-pessoa-id';
+
+  mockClient._setExistingData({
+    pessoas_naturais: [{
+      id: existingId,
+      minuta_id: minutaId,
+      cpf: '11122233344',
+      nome: 'JOAO DA SILVA',
+      estado_civil: 'casado',
+      conjuge_nome: null,  // Database column name
+      fontes: { nome: ['rg.pdf'] },
+    }],
+  });
+
+  const pessoa: PessoaNatural = {
+    nome: 'JOAO DA SILVA',
+    cpf: '111.222.333-44',
+    conjuge: 'MARIA OLIVEIRA DA SILVA',  // Interface field name
+    _fontes: { conjuge: ['certidao.pdf'] },
+  };
+
+  await upsertPessoaNatural(mockClient as unknown, pessoa, minutaId, 'outorgante');
+
+  const updated = mockClient._getUpdatedRows();
+  assertEquals(updated.length, 1);
+  // Update should use database column name 'conjuge_nome'
+  assertEquals(updated[0].data.conjuge_nome, 'MARIA OLIVEIRA DA SILVA');
+});
+
+Deno.test('marriage fields - saves data_casamento in correct date format', async () => {
+  const mockClient = createMockSupabaseClient();
+  const minutaId = '123e4567-e89b-12d3-a456-426614174000';
+
+  const pessoa: PessoaNatural = {
+    nome: 'JOAO DA SILVA',
+    cpf: '111.222.333-44',
+    estado_civil: 'casado',
+    data_casamento: '15/03/2010',  // Brazilian format DD/MM/YYYY
+    _fontes: {
+      nome: ['certidao.pdf'],
+      data_casamento: ['certidao.pdf'],
+    },
+  };
+
+  await upsertPessoaNatural(mockClient as unknown, pessoa, minutaId, 'outorgante');
+
+  const inserted = mockClient._getInsertedRows();
+  assertEquals(inserted.length, 1);
+  // Should be converted to ISO format YYYY-MM-DD
+  assertEquals(inserted[0].data.data_casamento, '2010-03-15');
+});
+
+Deno.test('marriage fields - saves data_casamento when already in ISO format', async () => {
+  const mockClient = createMockSupabaseClient();
+  const minutaId = '123e4567-e89b-12d3-a456-426614174000';
+
+  const pessoa: PessoaNatural = {
+    nome: 'JOAO DA SILVA',
+    cpf: '111.222.333-44',
+    estado_civil: 'casado',
+    data_casamento: '2010-03-15',  // Already ISO format
+    _fontes: {
+      nome: ['certidao.pdf'],
+      data_casamento: ['certidao.pdf'],
+    },
+  };
+
+  await upsertPessoaNatural(mockClient as unknown, pessoa, minutaId, 'outorgante');
+
+  const inserted = mockClient._getInsertedRows();
+  assertEquals(inserted.length, 1);
+  assertEquals(inserted[0].data.data_casamento, '2010-03-15');
+});
+
+Deno.test('marriage fields - updates data_casamento when existing is null', async () => {
+  const mockClient = createMockSupabaseClient();
+  const minutaId = '123e4567-e89b-12d3-a456-426614174000';
+  const existingId = 'existing-pessoa-id';
+
+  mockClient._setExistingData({
+    pessoas_naturais: [{
+      id: existingId,
+      minuta_id: minutaId,
+      cpf: '11122233344',
+      nome: 'JOAO DA SILVA',
+      estado_civil: 'casado',
+      data_casamento: null,
+      fontes: { nome: ['rg.pdf'] },
+    }],
+  });
+
+  const pessoa: PessoaNatural = {
+    nome: 'JOAO DA SILVA',
+    cpf: '111.222.333-44',
+    data_casamento: '15/03/2010',
+    _fontes: { data_casamento: ['certidao.pdf'] },
+  };
+
+  await upsertPessoaNatural(mockClient as unknown, pessoa, minutaId, 'outorgante');
+
+  const updated = mockClient._getUpdatedRows();
+  assertEquals(updated.length, 1);
+  assertEquals(updated[0].data.data_casamento, '2010-03-15');
+});
+
+Deno.test('marriage fields - merge complete: pessoa with RG gets marriage certificate data', async () => {
+  const mockClient = createMockSupabaseClient();
+  const minutaId = '123e4567-e89b-12d3-a456-426614174000';
+  const existingId = 'existing-pessoa-id';
+
+  // Simulate pessoa already registered from RG (no marriage info)
+  mockClient._setExistingData({
+    pessoas_naturais: [{
+      id: existingId,
+      minuta_id: minutaId,
+      cpf: '12345678900',
+      nome: 'JOAO DA SILVA',
+      rg: '12345678',
+      rg_orgao_emissor: 'SSP',
+      rg_estado: 'SP',
+      data_nascimento: '1985-06-20',
+      // Marriage fields are null (not in RG)
+      estado_civil: null,
+      regime_bens: null,
+      conjuge_nome: null,
+      data_casamento: null,
+      fontes: { nome: ['RG.pdf'], cpf: ['RG.pdf'], rg: ['RG.pdf'] },
+    }],
+  });
+
+  // New data from marriage certificate
+  const pessoaCertidao: PessoaNatural = {
+    nome: 'JOAO DA SILVA',
+    cpf: '123.456.789-00',  // Same CPF
+    estado_civil: 'casado',
+    regime_bens: 'comunhao parcial de bens',
+    conjuge: 'MARIA OLIVEIRA DA SILVA',
+    data_casamento: '15/03/2010',
+    _fontes: {
+      estado_civil: ['certidao_casamento.pdf'],
+      regime_bens: ['certidao_casamento.pdf'],
+      conjuge: ['certidao_casamento.pdf'],
+      data_casamento: ['certidao_casamento.pdf'],
+    },
+  };
+
+  const result = await upsertPessoaNatural(mockClient as unknown, pessoaCertidao, minutaId, 'outorgante');
+
+  // Should return existing ID (merged, not duplicated)
+  assertEquals(result, existingId);
+
+  const inserted = mockClient._getInsertedRows();
+  const updated = mockClient._getUpdatedRows();
+
+  // Should NOT create new record
+  assertEquals(inserted.filter(r => r.table === 'pessoas_naturais').length, 0);
+
+  // Should update existing record
+  assertEquals(updated.length, 1);
+  assertEquals(updated[0].id, existingId);
+
+  // Should have all marriage fields in the update
+  const updateData = updated[0].data;
+  assertEquals(updateData.estado_civil, 'casado');
+  assertEquals(updateData.regime_bens, 'comunhao parcial de bens');
+  assertEquals(updateData.conjuge_nome, 'MARIA OLIVEIRA DA SILVA');
+  assertEquals(updateData.data_casamento, '2010-03-15');
+
+  // Should have merged fontes
+  const mergedFontes = updateData.fontes as Record<string, string[]>;
+  assertEquals(mergedFontes.nome, ['RG.pdf']);  // From existing
+  assertEquals(mergedFontes.cpf, ['RG.pdf']);  // From existing
+  assertEquals(mergedFontes.rg, ['RG.pdf']);  // From existing
+  assertEquals(mergedFontes.estado_civil, ['certidao_casamento.pdf']);  // New
+  assertEquals(mergedFontes.regime_bens, ['certidao_casamento.pdf']);  // New
+  assertEquals(mergedFontes.conjuge, ['certidao_casamento.pdf']);  // New
+  assertEquals(mergedFontes.data_casamento, ['certidao_casamento.pdf']);  // New
+});
+
+Deno.test('marriage fields - does NOT overwrite existing regime_bens', async () => {
+  const mockClient = createMockSupabaseClient();
+  const minutaId = '123e4567-e89b-12d3-a456-426614174000';
+  const existingId = 'existing-pessoa-id';
+
+  mockClient._setExistingData({
+    pessoas_naturais: [{
+      id: existingId,
+      minuta_id: minutaId,
+      cpf: '11122233344',
+      nome: 'JOAO DA SILVA',
+      estado_civil: 'casado',
+      regime_bens: 'separacao total de bens',  // Already has value
+      fontes: { regime_bens: ['certidao_anterior.pdf'] },
+    }],
+  });
+
+  const pessoa: PessoaNatural = {
+    nome: 'JOAO DA SILVA',
+    cpf: '111.222.333-44',
+    regime_bens: 'comunhao parcial de bens',  // Different value
+    _fontes: { regime_bens: ['certidao.pdf'] },
+  };
+
+  await upsertPessoaNatural(mockClient as unknown, pessoa, minutaId, 'outorgante');
+
+  const updated = mockClient._getUpdatedRows();
+  assertEquals(updated.length, 1);
+  // Should NOT have regime_bens in update (not overwriting)
+  assertEquals(updated[0].data.regime_bens, undefined);
+});
+
+Deno.test('marriage fields - does NOT overwrite existing conjuge_nome', async () => {
+  const mockClient = createMockSupabaseClient();
+  const minutaId = '123e4567-e89b-12d3-a456-426614174000';
+  const existingId = 'existing-pessoa-id';
+
+  mockClient._setExistingData({
+    pessoas_naturais: [{
+      id: existingId,
+      minuta_id: minutaId,
+      cpf: '11122233344',
+      nome: 'JOAO DA SILVA',
+      estado_civil: 'casado',
+      conjuge_nome: 'MARIA PEREIRA',  // Already has value
+      fontes: { conjuge: ['certidao_anterior.pdf'] },
+    }],
+  });
+
+  const pessoa: PessoaNatural = {
+    nome: 'JOAO DA SILVA',
+    cpf: '111.222.333-44',
+    conjuge: 'MARIA OLIVEIRA DA SILVA',  // Different name
+    _fontes: { conjuge: ['certidao.pdf'] },
+  };
+
+  await upsertPessoaNatural(mockClient as unknown, pessoa, minutaId, 'outorgante');
+
+  const updated = mockClient._getUpdatedRows();
+  assertEquals(updated.length, 1);
+  // Should NOT have conjuge_nome in update (not overwriting)
+  assertEquals(updated[0].data.conjuge_nome, undefined);
+});
+
+Deno.test('marriage fields - does NOT overwrite existing data_casamento', async () => {
+  const mockClient = createMockSupabaseClient();
+  const minutaId = '123e4567-e89b-12d3-a456-426614174000';
+  const existingId = 'existing-pessoa-id';
+
+  mockClient._setExistingData({
+    pessoas_naturais: [{
+      id: existingId,
+      minuta_id: minutaId,
+      cpf: '11122233344',
+      nome: 'JOAO DA SILVA',
+      estado_civil: 'casado',
+      data_casamento: '2010-03-15',  // Already has value
+      fontes: { data_casamento: ['certidao_anterior.pdf'] },
+    }],
+  });
+
+  const pessoa: PessoaNatural = {
+    nome: 'JOAO DA SILVA',
+    cpf: '111.222.333-44',
+    data_casamento: '20/05/2012',  // Different date
+    _fontes: { data_casamento: ['certidao.pdf'] },
+  };
+
+  await upsertPessoaNatural(mockClient as unknown, pessoa, minutaId, 'outorgante');
+
+  const updated = mockClient._getUpdatedRows();
+  assertEquals(updated.length, 1);
+  // Should NOT have data_casamento in update (not overwriting)
+  assertEquals(updated[0].data.data_casamento, undefined);
+});
+
+Deno.test('marriage fields - null values are not saved', async () => {
+  const mockClient = createMockSupabaseClient();
+  const minutaId = '123e4567-e89b-12d3-a456-426614174000';
+
+  const pessoa: PessoaNatural = {
+    nome: 'JOAO DA SILVA',
+    cpf: '111.222.333-44',
+    // All marriage fields undefined/null
+    estado_civil: undefined,
+    regime_bens: undefined,
+    conjuge: undefined,
+    data_casamento: undefined,
+    _fontes: { nome: ['rg.pdf'] },
+  };
+
+  await upsertPessoaNatural(mockClient as unknown, pessoa, minutaId, 'outorgante');
+
+  const inserted = mockClient._getInsertedRows();
+  assertEquals(inserted.length, 1);
+  // Should have null values (not undefined strings)
+  assertEquals(inserted[0].data.estado_civil, null);
+  assertEquals(inserted[0].data.regime_bens, null);
+  assertEquals(inserted[0].data.conjuge_nome, null);
+  assertEquals(inserted[0].data.data_casamento, null);
+});

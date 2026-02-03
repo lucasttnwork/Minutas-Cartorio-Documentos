@@ -10,7 +10,12 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
-import { arrayBufferToBase64 } from '../_shared/gemini-client.ts';
+import {
+  arrayBufferToBase64,
+  uploadFileToGemini,
+  deleteGeminiFile,
+  shouldUseFileApi,
+} from '../_shared/gemini-client.ts';
 import {
   normalizeFilesForGemini,
   isMimeTypeSupported,
@@ -135,62 +140,127 @@ IMPORTANTE: Aplique as instrucoes adicionais do usuario ao analisar este documen
 }
 
 /**
+ * Document input type for Gemini API
+ * Supports both inline data (base64) and file references (URI)
+ */
+interface GeminiDocument {
+  // For inline data (small files)
+  base64?: string;
+  mimeType: string;
+  // For File API (large files)
+  fileUri?: string;
+  // Original buffer for size checking
+  buffer?: ArrayBuffer;
+  // Display name for File API uploads
+  displayName?: string;
+}
+
+/**
  * Call Gemini API with documents
+ * Automatically uses File API for large files (>4MB) to avoid timeouts
  */
 async function callGeminiWithDocuments(
   prompt: string,
-  documents: Array<{ base64: string; mimeType: string }>
-): Promise<{ text: string; inputTokens: number; outputTokens: number }> {
+  documents: GeminiDocument[]
+): Promise<{ text: string; inputTokens: number; outputTokens: number; uploadedFiles?: string[] }> {
   if (!GEMINI_API_KEY) {
     throw new Error('GEMINI_API_KEY not configured');
   }
 
+  // Track uploaded files for cleanup
+  const uploadedFileNames: string[] = [];
+
   // Build parts array with documents first, then prompt
-  const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [];
+  const parts: Array<{
+    text?: string;
+    inlineData?: { mimeType: string; data: string };
+    fileData?: { mimeType: string; fileUri: string };
+  }> = [];
 
-  // Add all documents
-  for (const doc of documents) {
-    parts.push({
-      inlineData: {
-        mimeType: doc.mimeType,
-        data: doc.base64,
+  try {
+    // Process each document
+    for (const doc of documents) {
+      // If file URI is already provided, use it directly
+      if (doc.fileUri) {
+        parts.push({
+          fileData: {
+            mimeType: doc.mimeType,
+            fileUri: doc.fileUri,
+          },
+        });
+        continue;
+      }
+
+      // Check if we should use File API based on size
+      const fileSize = doc.buffer?.byteLength ?? (doc.base64 ? doc.base64.length * 0.75 : 0);
+
+      if (doc.buffer && shouldUseFileApi(fileSize)) {
+        // Upload large file to File API
+        console.log(`[callGeminiWithDocuments] Using File API for large file (${(fileSize / 1024 / 1024).toFixed(2)}MB)`);
+        const uploadResult = await uploadFileToGemini(
+          doc.buffer,
+          doc.mimeType,
+          doc.displayName || 'document'
+        );
+        uploadedFileNames.push(uploadResult.name);
+
+        parts.push({
+          fileData: {
+            mimeType: doc.mimeType,
+            fileUri: uploadResult.uri,
+          },
+        });
+      } else if (doc.base64) {
+        // Use inline data for small files
+        parts.push({
+          inlineData: {
+            mimeType: doc.mimeType,
+            data: doc.base64,
+          },
+        });
+      }
+    }
+
+    // Add prompt
+    parts.push({ text: prompt });
+
+    const request = {
+      contents: [{ parts }],
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 16384,
       },
+    };
+
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request),
     });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Gemini API error: ${response.status} - ${error}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+      throw new Error('No response from Gemini');
+    }
+
+    return {
+      text: data.candidates[0].content.parts[0].text,
+      inputTokens: data.usageMetadata?.promptTokenCount ?? 0,
+      outputTokens: data.usageMetadata?.candidatesTokenCount ?? 0,
+      uploadedFiles: uploadedFileNames,
+    };
+  } finally {
+    // Cleanup uploaded files (fire and forget)
+    for (const fileName of uploadedFileNames) {
+      deleteGeminiFile(fileName).catch(() => {});
+    }
   }
-
-  // Add prompt
-  parts.push({ text: prompt });
-
-  const request = {
-    contents: [{ parts }],
-    generationConfig: {
-      temperature: 0.1,
-      maxOutputTokens: 16384,
-    },
-  };
-
-  const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(request),
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Gemini API error: ${response.status} - ${error}`);
-  }
-
-  const data = await response.json();
-
-  if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
-    throw new Error('No response from Gemini');
-  }
-
-  return {
-    text: data.candidates[0].content.parts[0].text,
-    inputTokens: data.usageMetadata?.promptTokenCount ?? 0,
-    outputTokens: data.usageMetadata?.candidatesTokenCount ?? 0,
-  };
 }
 
 /**
@@ -353,11 +423,17 @@ async function handleRun(req: Request): Promise<Response> {
     }
 
     // Prepare documents for Gemini
-    const documentsForGemini: Array<{ base64: string; mimeType: string }> = [];
+    // Include buffer for size checking - File API will be used for large files
+    const documentsForGemini: GeminiDocument[] = [];
     for (const normalizedFile of normalizationResult.files) {
+      const fileSize = normalizedFile.content.byteLength;
+      console.log(`[handleRun] Preparing file for Gemini: ${normalizedFile.originalName} (${(fileSize / 1024 / 1024).toFixed(2)}MB)`);
+
       documentsForGemini.push({
-        base64: arrayBufferToBase64(normalizedFile.content),
+        buffer: normalizedFile.content,
+        base64: shouldUseFileApi(fileSize) ? undefined : arrayBufferToBase64(normalizedFile.content),
         mimeType: normalizedFile.mimeType,
+        displayName: normalizedFile.originalName,
       });
     }
 

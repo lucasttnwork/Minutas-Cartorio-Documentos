@@ -22,9 +22,6 @@ import type {
   RessalvasMatricula,
   RegistroVigente,
   CertidaoEmpresa,
-  RepresentanteLegal,
-  RepresentanteAdministrador,
-  RepresentanteProcurador,
   ParticipanteNegocio,
   FormaPagamentoDetalhada,
   TermosEspeciais,
@@ -33,6 +30,122 @@ import type {
   FontesCampos,
 } from '../types/minuta';
 import type { Database, Json } from '../types/database.types';
+
+// ============================================================================
+// Estado Civil / Regime de Bens Normalization (Bidirectional)
+// ============================================================================
+
+/**
+ * Maps normalized database values to frontend display values for estado civil
+ * Database stores: "casado", "solteiro", etc.
+ * Frontend displays: "Casado(a)", "Solteiro(a)", etc.
+ */
+const ESTADO_CIVIL_DB_TO_FRONTEND: Record<string, string> = {
+  'solteiro': 'Solteiro(a)',
+  'solteira': 'Solteiro(a)',
+  'casado': 'Casado(a)',
+  'casada': 'Casado(a)',
+  'divorciado': 'Divorciado(a)',
+  'divorciada': 'Divorciado(a)',
+  'viuvo': 'Viúvo(a)',
+  'viúvo': 'Viúvo(a)',
+  'viuva': 'Viúvo(a)',
+  'viúva': 'Viúvo(a)',
+  'separado': 'Separado(a)',
+  'separada': 'Separado(a)',
+  'uniao_estavel': 'União Estável',
+  'uniao estavel': 'União Estável',
+  'união estável': 'União Estável',
+};
+
+const ESTADO_CIVIL_FRONTEND_TO_DB: Record<string, string> = {
+  'Solteiro(a)': 'solteiro',
+  'Casado(a)': 'casado',
+  'Divorciado(a)': 'divorciado',
+  'Viúvo(a)': 'viuvo',
+  'Separado(a)': 'separado',
+  'União Estável': 'uniao_estavel',
+};
+
+/**
+ * Maps normalized database values to frontend display values for regime de bens
+ * Database stores: "comunhao parcial", "comunhao_parcial", etc.
+ * Frontend displays: "Comunhão Parcial", etc.
+ */
+const REGIME_BENS_DB_TO_FRONTEND: Record<string, string> = {
+  'comunhao parcial': 'Comunhão Parcial',
+  'comunhao_parcial': 'Comunhão Parcial',
+  'comunhão parcial': 'Comunhão Parcial',
+  'comunhao parcial de bens': 'Comunhão Parcial',
+  'comunhão parcial de bens': 'Comunhão Parcial',
+  'comunhao universal': 'Comunhão Universal',
+  'comunhao_universal': 'Comunhão Universal',
+  'comunhão universal': 'Comunhão Universal',
+  'comunhao universal de bens': 'Comunhão Universal',
+  'comunhão universal de bens': 'Comunhão Universal',
+  'separacao total': 'Separação Total',
+  'separacao_total': 'Separação Total',
+  'separação total': 'Separação Total',
+  'separacao total de bens': 'Separação Total',
+  'separação total de bens': 'Separação Total',
+  'participacao final': 'Participação Final nos Aquestos',
+  'participacao_final_aquestos': 'Participação Final nos Aquestos',
+  'participação final nos aquestos': 'Participação Final nos Aquestos',
+  'participacao final nos aquestos': 'Participação Final nos Aquestos',
+};
+
+const REGIME_BENS_FRONTEND_TO_DB: Record<string, string> = {
+  'Comunhão Parcial': 'comunhao_parcial',
+  'Comunhão Universal': 'comunhao_universal',
+  'Separação Total': 'separacao_total',
+  'Participação Final nos Aquestos': 'participacao_final_aquestos',
+};
+
+/**
+ * Converts a database estado_civil value to frontend format
+ * @param dbValue - The value from the database (e.g., "casado", "solteiro")
+ * @returns The frontend display value (e.g., "Casado(a)", "Solteiro(a)")
+ */
+export function normalizeEstadoCivilFromDb(dbValue: string | null | undefined): string {
+  if (!dbValue) return '';
+
+  const normalized = dbValue.toLowerCase().trim();
+  return ESTADO_CIVIL_DB_TO_FRONTEND[normalized] || dbValue;
+}
+
+/**
+ * Converts a frontend estado_civil value to database format
+ * @param frontendValue - The value from the frontend (e.g., "Casado(a)")
+ * @returns The database value (e.g., "casado")
+ */
+export function normalizeEstadoCivilToDb(frontendValue: string | null | undefined): string | null {
+  if (!frontendValue) return null;
+
+  return ESTADO_CIVIL_FRONTEND_TO_DB[frontendValue] || frontendValue.toLowerCase();
+}
+
+/**
+ * Converts a database regime_bens value to frontend format
+ * @param dbValue - The value from the database (e.g., "comunhao parcial")
+ * @returns The frontend display value (e.g., "Comunhão Parcial")
+ */
+export function normalizeRegimeBensFromDb(dbValue: string | null | undefined): string {
+  if (!dbValue) return '';
+
+  const normalized = dbValue.toLowerCase().trim();
+  return REGIME_BENS_DB_TO_FRONTEND[normalized] || dbValue;
+}
+
+/**
+ * Converts a frontend regime_bens value to database format
+ * @param frontendValue - The value from the frontend (e.g., "Comunhão Parcial")
+ * @returns The database value (e.g., "comunhao_parcial")
+ */
+export function normalizeRegimeBensToDb(frontendValue: string | null | undefined): string | null {
+  if (!frontendValue) return null;
+
+  return REGIME_BENS_FRONTEND_TO_DB[frontendValue] || frontendValue.toLowerCase().replace(/ /g, '_');
+}
 
 // ============================================================================
 // Helper Functions
@@ -309,17 +422,6 @@ function createEmptyImpostoTransmissao(): ImpostoTransmissao {
 // JSON Helpers
 // ============================================================================
 
-function enderecoToJson(endereco: Endereco): Json {
-  return {
-    logradouro: endereco.logradouro,
-    numero: endereco.numero,
-    complemento: endereco.complemento,
-    bairro: endereco.bairro,
-    cidade: endereco.cidade,
-    estado: endereco.estado,
-    cep: endereco.cep,
-  };
-}
 
 function jsonToEndereco(json: Json | null): Endereco {
   if (!json || typeof json !== 'object' || Array.isArray(json)) {
@@ -355,12 +457,16 @@ function enderecoToString(endereco: Endereco): string {
 // ============================================================================
 
 // Note: Database types are outdated. Using Record<string, unknown> until types are regenerated.
+// IMPORTANT: This mapper only includes fields that are tracked/editable in the frontend.
+// Fields like conjuge_nome, conjuge_cpf, nome_pai, nome_mae are populated by backend extraction
+// and should NOT be overwritten by frontend auto-save (they would be set to null and destroy data).
 export function frontendToDbPessoaNatural(
   pessoa: PessoaNatural,
   minutaId: string,
   papel: 'outorgante' | 'outorgado' | 'anuente'
 ): Record<string, unknown> {
-  return {
+  // Build the base object with all frontend-tracked fields
+  const baseData: Record<string, unknown> = {
     minuta_id: minutaId,
     nome: pessoa.nome,
     cpf: nullIfEmpty(pessoa.cpf),
@@ -369,15 +475,10 @@ export function frontendToDbPessoaNatural(
     rg_estado: nullIfEmpty(pessoa.estadoEmissorRg),
     rg_data_emissao: nullIfEmpty(pessoa.dataEmissaoRg),
     nacionalidade: nullIfEmpty(pessoa.nacionalidade),
-    naturalidade: null,
     data_nascimento: nullIfEmpty(pessoa.dataNascimento),
-    estado_civil: nullIfEmpty(pessoa.dadosFamiliares?.estadoCivil),
-    regime_bens: nullIfEmpty(pessoa.dadosFamiliares?.regimeBens),
+    estado_civil: normalizeEstadoCivilToDb(pessoa.dadosFamiliares?.estadoCivil),
+    regime_bens: normalizeRegimeBensToDb(pessoa.dadosFamiliares?.regimeBens),
     profissao: nullIfEmpty(pessoa.profissao),
-    nome_pai: null,
-    nome_mae: null,
-    conjuge_nome: null,
-    conjuge_cpf: null,
     data_casamento: nullIfEmpty(pessoa.dadosFamiliares?.dataCasamento),
     endereco_logradouro: pessoa.domicilio?.logradouro || null,
     endereco_numero: pessoa.domicilio?.numero || null,
@@ -392,6 +493,17 @@ export function frontendToDbPessoaNatural(
     cndt_data_expedicao: pessoa.cndt?.dataExpedicao || null,
     papel: papel,
   };
+
+  // NOTE: The following backend-only fields are intentionally OMITTED:
+  // - conjuge_nome: Extracted from marriage certificates, not editable in UI
+  // - conjuge_cpf: Extracted from marriage certificates, not editable in UI
+  // - nome_pai: Extracted from documents, not editable in UI
+  // - nome_mae: Extracted from documents, not editable in UI
+  // - naturalidade: Not tracked in frontend
+  //
+  // By omitting these fields from updates, we preserve values set by backend extraction.
+
+  return baseData;
 }
 
 // Note: Database types are outdated. Using Record<string, unknown> until types are regenerated.
@@ -431,8 +543,8 @@ export function dbToFrontendPessoaNatural(
     orgaoEmissorCnh: '',
     dadosFamiliares: {
       ...createEmptyDadosFamiliares(),
-      estadoCivil: emptyIfNull(row.estado_civil as string | null),
-      regimeBens: emptyIfNull(row.regime_bens as string | null),
+      estadoCivil: normalizeEstadoCivilFromDb(row.estado_civil as string | null),
+      regimeBens: normalizeRegimeBensFromDb(row.regime_bens as string | null),
       dataCasamento: emptyIfNull(row.data_casamento as string | null),
     },
     domicilio: endereco,
@@ -466,15 +578,15 @@ export function frontendToDbPessoaJuridica(
     nome_fantasia: nullIfEmpty(pessoa.razaoSocial), // Use razaoSocial as fallback
     cnpj: nullIfEmpty(pessoa.cnpj),
     inscricao_estadual: nullIfEmpty(pessoa.inscricaoEstadual),
-    endereco: pessoa.endereco ? enderecoToJson(pessoa.endereco) : null,
     papel: papel,
-  };
+  } as any;
 }
 
 export function dbToFrontendPessoaJuridica(
   row: Database['public']['Tables']['pessoas_juridicas']['Row']
 ): PessoaJuridica {
-  const endereco = jsonToEndereco(row.endereco);
+  const rowAny = row as any;
+  const endereco = jsonToEndereco(rowAny.endereco);
 
   return {
     id: row.id,
@@ -509,7 +621,7 @@ export function frontendToDbImovel(
     : '';
 
   // Store all complex data in dados_adicionais
-  const dadosAdicionais: Json = {
+  const dadosAdicionais = {
     matriculaCompleta: imovel.matricula,
     descricao: {
       denominacao: imovel.descricao?.denominacao ?? '',
@@ -525,7 +637,7 @@ export function frontendToDbImovel(
     proprietarios: imovel.proprietarios,
     onus: imovel.onus,
     ressalvas: imovel.ressalvas,
-  };
+  } as unknown as Json;
 
   return {
     minuta_id: minutaId,
@@ -537,30 +649,33 @@ export function frontendToDbImovel(
     area_construida: parseNumeric(imovel.descricao?.areaConstruida ?? null),
     inscricao_municipal: nullIfEmpty(imovel.cadastro?.cadastroMunicipalSQL),
     dados_adicionais: dadosAdicionais,
-  };
+  } as any;
 }
 
 export function dbToFrontendImovel(
   row: Database['public']['Tables']['imoveis']['Row']
 ): Imovel {
-  const dados = row.dados_adicionais as Record<string, unknown> | null;
+  const rowAny = row as any;
+  const dados = rowAny.dados_adicionais as Record<string, unknown> | null;
 
   // Extract matricula from dados_adicionais or reconstruct from basic fields
   let matricula: MatriculaImobiliaria;
   if (dados?.matriculaCompleta && typeof dados.matriculaCompleta === 'object') {
     const mc = dados.matriculaCompleta as Record<string, unknown>;
     matricula = {
-      numeroMatricula: emptyIfNull(mc.numeroMatricula as string | null) || emptyIfNull(row.matricula),
-      numeroRegistroImoveis: emptyIfNull(mc.numeroRegistroImoveis as string | null) || emptyIfNull(row.cartorio_registro),
-      cidadeRegistroImoveis: emptyIfNull(mc.cidadeRegistroImoveis as string | null),
-      estadoRegistroImoveis: emptyIfNull(mc.estadoRegistroImoveis as string | null),
+      numeroMatricula: emptyIfNull(mc.numeroMatricula as string | null) || emptyIfNull(rowAny.matricula_numero),
+      numeroRegistroImoveis: emptyIfNull(mc.numeroRegistroImoveis as string | null) || emptyIfNull(rowAny.matricula_registro_imoveis),
+      cidadeRegistroImoveis: emptyIfNull(mc.cidadeRegistroImoveis as string | null) || emptyIfNull(rowAny.matricula_cidade),
+      estadoRegistroImoveis: emptyIfNull(mc.estadoRegistroImoveis as string | null) || emptyIfNull(rowAny.matricula_estado),
       numeroNacionalMatricula: emptyIfNull(mc.numeroNacionalMatricula as string | null),
     };
   } else {
     matricula = {
       ...createEmptyMatricula(),
-      numeroMatricula: emptyIfNull(row.matricula),
-      numeroRegistroImoveis: emptyIfNull(row.cartorio_registro),
+      numeroMatricula: emptyIfNull(rowAny.matricula_numero),
+      numeroRegistroImoveis: emptyIfNull(rowAny.matricula_registro_imoveis),
+      cidadeRegistroImoveis: emptyIfNull(rowAny.matricula_cidade),
+      estadoRegistroImoveis: emptyIfNull(rowAny.matricula_estado),
     };
   }
 
@@ -570,17 +685,17 @@ export function dbToFrontendImovel(
     const d = dados.descricao as Record<string, unknown>;
     descricao = {
       denominacao: emptyIfNull(d.denominacao as string | null),
-      areaTotalM2: emptyIfNull(d.areaTotalM2 as string | null) || formatNumeric(row.area_total),
+      areaTotalM2: emptyIfNull(d.areaTotalM2 as string | null) || formatNumeric(rowAny.area_total),
       areaPrivativaM2: emptyIfNull(d.areaPrivativaM2 as string | null),
-      areaConstruida: emptyIfNull(d.areaConstruida as string | null) || formatNumeric(row.area_construida),
+      areaConstruida: emptyIfNull(d.areaConstruida as string | null) || formatNumeric(rowAny.area_construida),
       endereco: createEmptyEndereco(),
       descricaoConformeMatricula: emptyIfNull(d.descricaoConformeMatricula as string | null),
     };
   } else {
     descricao = {
       ...createEmptyDescricao(),
-      areaTotalM2: formatNumeric(row.area_total),
-      areaConstruida: formatNumeric(row.area_construida),
+      areaTotalM2: formatNumeric(rowAny.area_total),
+      areaConstruida: formatNumeric(rowAny.area_construida),
     };
   }
 
@@ -589,13 +704,13 @@ export function dbToFrontendImovel(
   if (dados?.cadastro && typeof dados.cadastro === 'object') {
     const c = dados.cadastro as Record<string, unknown>;
     cadastro = {
-      cadastroMunicipalSQL: emptyIfNull(c.cadastroMunicipalSQL as string | null) || emptyIfNull(row.inscricao_municipal),
+      cadastroMunicipalSQL: emptyIfNull(c.cadastroMunicipalSQL as string | null) || emptyIfNull(rowAny.inscricao_municipal),
       dataExpedicaoCertidao: emptyIfNull(c.dataExpedicaoCertidao as string | null),
     };
   } else {
     cadastro = {
       ...createEmptyCadastro(),
-      cadastroMunicipalSQL: emptyIfNull(row.inscricao_municipal),
+      cadastroMunicipalSQL: emptyIfNull(rowAny.inscricao_municipal),
     };
   }
 
@@ -654,7 +769,7 @@ export function dbToFrontendImovel(
   }
 
   return {
-    id: row.id,
+    id: rowAny.id,
     matricula,
     descricao,
     cadastro,
@@ -678,7 +793,7 @@ export function frontendToDbNegocio(
   _imovelId: string
 ): Database['public']['Tables']['negocios_juridicos']['Insert'] {
   // Store all complex data in condicoes
-  const condicoes: Json = {
+  const condicoes = {
     imovelId: negocio.imovelId,
     fracaoIdealAlienada: negocio.fracaoIdealAlienada,
     valorTotalAlienacao: negocio.valorTotalAlienacao,
@@ -692,7 +807,7 @@ export function frontendToDbNegocio(
     impostoTransmissao: negocio.impostoTransmissao,
     condicoesEspeciais: negocio.condicoesEspeciais,
     clausulasAdicionais: negocio.clausulasAdicionais,
-  };
+  } as unknown as Json;
 
   return {
     minuta_id: minutaId,
@@ -702,13 +817,14 @@ export function frontendToDbNegocio(
     forma_pagamento: nullIfEmpty(negocio.formaPagamento),
     condicoes,
     data_assinatura: nullIfEmpty(negocio.formaPagamentoDetalhada?.data),
-  };
+  } as any;
 }
 
 export function dbToFrontendNegocio(
   row: Database['public']['Tables']['negocios_juridicos']['Row']
 ): NegocioJuridico {
-  const condicoes = row.condicoes as Record<string, unknown> | null;
+  const rowAny = row as any;
+  const condicoes = rowAny.condicoes as Record<string, unknown> | null;
 
   // Extract impostoTransmissao from condicoes
   let impostoTransmissao: ImpostoTransmissao = createEmptyImpostoTransmissao();
@@ -751,13 +867,13 @@ export function dbToFrontendNegocio(
   }
 
   return {
-    id: row.id,
+    id: rowAny.id,
     imovelId: emptyIfNull(condicoes?.imovelId as string | null),
-    tipoAto: row.tipo_negocio,
+    tipoAto: rowAny.tipo_negocio,
     fracaoIdealAlienada: emptyIfNull(condicoes?.fracaoIdealAlienada as string | null),
     valorTotalAlienacao: emptyIfNull(condicoes?.valorTotalAlienacao as string | null),
-    valorNegocio: formatCurrency(row.valor),
-    formaPagamento: emptyIfNull(row.forma_pagamento),
+    valorNegocio: formatCurrency(rowAny.valor),
+    formaPagamento: emptyIfNull(rowAny.forma_pagamento),
     formaPagamentoDetalhada,
     alienantes,
     adquirentes,

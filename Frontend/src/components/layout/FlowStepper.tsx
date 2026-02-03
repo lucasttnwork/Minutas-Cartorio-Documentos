@@ -38,10 +38,8 @@ export function FlowStepper({
 
   const currentIndex = STEPS.findIndex((s) => s.id === currentStep);
 
-  const handleStepClick = (step: (typeof STEPS)[number], index: number) => {
-    const isClickable = index <= currentIndex || completedSteps.includes(step.id);
-    if (!isClickable) return;
-
+  const handleStepClick = (step: (typeof STEPS)[number]) => {
+    // Navegação livre - qualquer passo pode ser clicado
     if (onStepClick) {
       onStepClick(step.id);
     } else {
@@ -59,7 +57,7 @@ export function FlowStepper({
         {STEPS.map((step, index) => {
           const isCompleted = completedSteps.includes(step.id) || index < currentIndex;
           const isCurrent = step.id === currentStep;
-          const isClickable = index <= currentIndex || completedSteps.includes(step.id);
+          const isFuture = index > currentIndex && !completedSteps.includes(step.id);
           const isLast = index === STEPS.length - 1;
 
           return (
@@ -69,14 +67,10 @@ export function FlowStepper({
             >
               {/* Step Circle */}
               <motion.button
-                onClick={() => handleStepClick(step, index)}
-                disabled={!isClickable}
-                className={cn(
-                  "relative flex flex-col items-center gap-2 group",
-                  isClickable ? "cursor-pointer" : "cursor-not-allowed"
-                )}
-                whileHover={isClickable ? { scale: 1.05 } : undefined}
-                whileTap={isClickable ? { scale: 0.95 } : undefined}
+                onClick={() => handleStepClick(step)}
+                className="relative flex flex-col items-center gap-2 group cursor-pointer"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 {/* Circle indicator */}
                 <motion.div
@@ -97,8 +91,8 @@ export function FlowStepper({
                       ? "bg-primary text-primary-foreground"
                       : isCurrent
                       ? "bg-primary text-primary-foreground"
-                      : "bg-secondary text-muted-foreground",
-                    !isClickable && "opacity-40"
+                      : "bg-secondary text-muted-foreground hover:bg-secondary/80",
+                    isFuture && "opacity-60 hover:opacity-100"
                   )}
                 >
                   {isMinimal ? (
@@ -180,8 +174,8 @@ export function FlowStepper({
                         ? "text-primary"
                         : isCompleted
                         ? "text-foreground"
-                        : "text-muted-foreground",
-                      !isClickable && "opacity-40"
+                        : "text-muted-foreground hover:text-foreground",
+                      isFuture && "opacity-60 group-hover:opacity-100"
                     )}
                   >
                     {step.label}
@@ -235,10 +229,8 @@ export function FlowStepperVertical({
 
   const currentIndex = STEPS.findIndex((s) => s.id === currentStep);
 
-  const handleStepClick = (step: (typeof STEPS)[number], index: number) => {
-    const isClickable = index <= currentIndex || completedSteps.includes(step.id);
-    if (!isClickable) return;
-
+  const handleStepClick = (step: (typeof STEPS)[number]) => {
+    // Navegação livre - qualquer passo pode ser clicado
     if (onStepClick) {
       onStepClick(step.id);
     } else {
@@ -252,7 +244,7 @@ export function FlowStepperVertical({
       {STEPS.map((step, index) => {
         const isCompleted = completedSteps.includes(step.id) || index < currentIndex;
         const isCurrent = step.id === currentStep;
-        const isClickable = index <= currentIndex || completedSteps.includes(step.id);
+        const isFuture = index > currentIndex && !completedSteps.includes(step.id);
         const isLast = index === STEPS.length - 1;
 
         return (
@@ -260,19 +252,18 @@ export function FlowStepperVertical({
             {/* Left: Circle & Line */}
             <div className="flex flex-col items-center mr-4">
               <motion.button
-                onClick={() => handleStepClick(step, index)}
-                disabled={!isClickable}
-                whileHover={isClickable ? { scale: 1.1 } : undefined}
-                whileTap={isClickable ? { scale: 0.9 } : undefined}
+                onClick={() => handleStepClick(step)}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 className={cn(
-                  "relative flex items-center justify-center w-8 h-8 rounded-full",
+                  "relative flex items-center justify-center w-8 h-8 rounded-full cursor-pointer",
                   "transition-all duration-300",
                   isCompleted
                     ? "bg-primary text-primary-foreground"
                     : isCurrent
                     ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-muted-foreground",
-                  isClickable ? "cursor-pointer" : "cursor-not-allowed opacity-50"
+                    : "bg-secondary text-muted-foreground hover:bg-secondary/80",
+                  isFuture && "opacity-60 hover:opacity-100"
                 )}
                 style={{
                   boxShadow: isCurrent
@@ -325,22 +316,18 @@ export function FlowStepperVertical({
             {/* Right: Label & Description */}
             <div className={cn("pb-8", isLast && "pb-0")}>
               <button
-                onClick={() => handleStepClick(step, index)}
-                disabled={!isClickable}
-                className={cn(
-                  "text-left transition-colors duration-200",
-                  isClickable ? "cursor-pointer" : "cursor-not-allowed"
-                )}
+                onClick={() => handleStepClick(step)}
+                className="text-left transition-colors duration-200 cursor-pointer group"
               >
                 <p
                   className={cn(
-                    "font-medium",
+                    "font-medium transition-colors",
                     isCurrent
                       ? "text-primary"
                       : isCompleted
                       ? "text-foreground"
-                      : "text-muted-foreground",
-                    !isClickable && "opacity-50"
+                      : "text-muted-foreground group-hover:text-foreground",
+                    isFuture && "opacity-60 group-hover:opacity-100"
                   )}
                 >
                   {step.label}

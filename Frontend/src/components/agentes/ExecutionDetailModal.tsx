@@ -1,7 +1,7 @@
 // src/components/agentes/ExecutionDetailModal.tsx
 // Modal fullscreen para visualização detalhada de uma execução de agente especialista
 
-import { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -24,6 +24,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { FormSection } from '@/components/forms/FormSection';
 import { filterJsonSection } from './ResultadoAnalise';
+import { exportToDocx, exportToPdf } from '@/utils/documentExport';
 import type { Database } from '@/types/database.types';
 
 type AgentesEspecialistasRun = Database['public']['Tables']['agentes_especialistas_runs']['Row'];
@@ -321,7 +322,7 @@ function MarkdownRenderer({ content }: { content: string }) {
  */
 function renderInlineStyles(text: string) {
   const codeRegex = /`([^`]+)`/g;
-  const parts: Array<string | JSX.Element> = [];
+  const parts: Array<string | React.ReactElement> = [];
   let lastIndex = 0;
   let match;
   let keyIndex = 0;
@@ -413,6 +414,32 @@ export function ExecutionDetailModal({
     }
   }, [execution?.output_texto]);
 
+  // Download as DOCX
+  const handleDownloadDocx = useCallback(async () => {
+    if (!execution?.output_texto) return;
+
+    try {
+      const cleanContent = filterJsonSection(execution.output_texto);
+      const filename = `${execution.agent_slug}-extracao`;
+      await exportToDocx(cleanContent, filename);
+    } catch (err) {
+      console.error('Failed to export DOCX:', err);
+    }
+  }, [execution?.output_texto, execution?.agent_slug]);
+
+  // Download as PDF
+  const handleDownloadPdf = useCallback(() => {
+    if (!execution?.output_texto) return;
+
+    try {
+      const cleanContent = filterJsonSection(execution.output_texto);
+      const filename = `${execution.agent_slug}-extracao`;
+      exportToPdf(cleanContent, filename);
+    } catch (err) {
+      console.error('Failed to export PDF:', err);
+    }
+  }, [execution?.output_texto, execution?.agent_slug]);
+
   if (!execution) return null;
 
   const statusConfig = STATUS_CONFIG[execution.status] || STATUS_CONFIG.pending;
@@ -493,11 +520,11 @@ export function ExecutionDetailModal({
                         </>
                       )}
                     </Button>
-                    <Button variant="outline" size="sm" className="gap-2">
+                    <Button variant="outline" size="sm" className="gap-2" onClick={handleDownloadDocx}>
                       <FileText className="h-4 w-4" />
                       DOCX
                     </Button>
-                    <Button variant="outline" size="sm" className="gap-2">
+                    <Button variant="outline" size="sm" className="gap-2" onClick={handleDownloadPdf}>
                       <FileDown className="h-4 w-4" />
                       PDF
                     </Button>

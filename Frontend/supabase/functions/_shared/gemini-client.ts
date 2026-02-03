@@ -6,12 +6,124 @@ const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') || 'gemini-3-flash-preview';
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
+// File API URLs
+const GEMINI_FILES_UPLOAD_URL = 'https://generativelanguage.googleapis.com/upload/v1beta/files';
+const GEMINI_FILES_URL = 'https://generativelanguage.googleapis.com/v1beta/files';
+
+// Threshold for using File API (files larger than 4MB should use File API)
+const FILE_API_THRESHOLD = 4 * 1024 * 1024; // 4MB
+
 /**
  * Convert ArrayBuffer to base64 string safely (handles large files)
  */
 export function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const uint8Array = new Uint8Array(buffer);
   return base64Encode(uint8Array);
+}
+
+/**
+ * Upload a file to Gemini File API for large files
+ * Returns the file URI to use in generateContent requests
+ */
+export async function uploadFileToGemini(
+  buffer: ArrayBuffer,
+  mimeType: string,
+  displayName: string
+): Promise<{ uri: string; name: string }> {
+  if (!GEMINI_API_KEY) {
+    throw new Error('GEMINI_API_KEY not configured');
+  }
+
+  console.log(`[Gemini File API] Uploading file: ${displayName} (${(buffer.byteLength / 1024 / 1024).toFixed(2)}MB)`);
+
+  // Step 1: Start resumable upload
+  const startUploadResponse = await fetch(
+    `${GEMINI_FILES_UPLOAD_URL}?key=${GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: {
+        'X-Goog-Upload-Protocol': 'resumable',
+        'X-Goog-Upload-Command': 'start',
+        'X-Goog-Upload-Header-Content-Length': buffer.byteLength.toString(),
+        'X-Goog-Upload-Header-Content-Type': mimeType,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        file: {
+          display_name: displayName,
+        },
+      }),
+    }
+  );
+
+  if (!startUploadResponse.ok) {
+    const error = await startUploadResponse.text();
+    throw new Error(`Failed to start file upload: ${startUploadResponse.status} - ${error}`);
+  }
+
+  const uploadUrl = startUploadResponse.headers.get('X-Goog-Upload-URL');
+  if (!uploadUrl) {
+    throw new Error('No upload URL returned from Gemini File API');
+  }
+
+  // Step 2: Upload the file data
+  const uploadResponse = await fetch(uploadUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Length': buffer.byteLength.toString(),
+      'X-Goog-Upload-Offset': '0',
+      'X-Goog-Upload-Command': 'upload, finalize',
+    },
+    body: buffer,
+  });
+
+  if (!uploadResponse.ok) {
+    const error = await uploadResponse.text();
+    throw new Error(`Failed to upload file: ${uploadResponse.status} - ${error}`);
+  }
+
+  const fileInfo = await uploadResponse.json();
+  const fileName = fileInfo.file?.name;
+  const fileUri = fileInfo.file?.uri;
+  
+  if (!fileName || !fileUri) {
+    throw new Error('No file name or URI returned from upload');
+  }
+  
+  console.log(`[Gemini File API] File uploaded successfully: ${fileName}`);
+  console.log(`[Gemini File API] File URI: ${fileUri}`);
+  console.log('[Gemini File API] Skipping status polling - Gemini API will wait for file automatically');
+
+  // Return immediately without waiting for ACTIVE state
+  // The Gemini generateContent API handles waiting for the file to be ready
+  return {
+    uri: fileUri,
+    name: fileName,
+  };
+}
+
+/**
+ * Delete a file from Gemini File API
+ */
+export async function deleteGeminiFile(fileName: string): Promise<void> {
+  if (!GEMINI_API_KEY) return;
+
+  try {
+    await fetch(
+      `${GEMINI_FILES_URL}/${fileName}?key=${GEMINI_API_KEY}`,
+      { method: 'DELETE' }
+    );
+    console.log(`[Gemini File API] Deleted file: ${fileName}`);
+  } catch (error) {
+    console.warn(`[Gemini File API] Failed to delete file ${fileName}:`, error);
+  }
+}
+
+/**
+ * Check if a file should use the File API based on size
+ */
+export function shouldUseFileApi(sizeBytes: number): boolean {
+  return sizeBytes > FILE_API_THRESHOLD;
 }
 
 /**

@@ -67,7 +67,7 @@ export default function MinutaFinal() {
   } = useMinuta();
 
   const { generateMinuta, isGenerating, generationStatus } = useDocumentPipeline();
-  const { templates, loadTemplates, incrementUsage } = useMinutasPadrao();
+  const { templates: _templates, loadTemplates: _loadTemplates, incrementUsage } = useMinutasPadrao();
 
   // Local state
   const [dbData, setDbData] = useState<MinutaDbData | null>(null);

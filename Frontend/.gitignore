@@ -27,3 +27,28 @@ dist-ssr
 supabase/.env.local
 .env.local
 supabase/.temp/
+
+# Test & Coverage
+coverage/
+.playwright-mcp/
+
+# Temporary files
+nul
+test-cnh.jpg
+.tmp/
+
+# Claude/AI artifacts
+.claude/
+
+# Test documents (not needed for deploy)
+Test-Docs/
+Test-Docs copy/
+
+# Documentation (keep only essential)
+Referencias-visuais/
+
+# Python backend reference (not needed for deploy)
+backend-reference/
+*.py
+*.pyc
+__pycache__/

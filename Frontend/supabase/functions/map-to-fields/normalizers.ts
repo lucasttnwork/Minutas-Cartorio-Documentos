@@ -4,13 +4,15 @@
  */
 
 /**
- * Normalizes CPF by removing all non-digit characters
+ * Normalizes CPF to standard format XXX.XXX.XXX-XX
  * @param cpf - CPF string in any format
- * @returns Normalized CPF with only digits, or empty string if invalid
+ * @returns Normalized CPF with standard formatting, or empty string if invalid
  */
 export function normalizeCpf(cpf: string | undefined | null): string {
   if (!cpf) return '';
-  return cpf.replace(/\D/g, '');
+  const digits = cpf.replace(/\D/g, '');
+  if (digits.length !== 11) return digits; // Return as-is if invalid length
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
 }
 
 /**

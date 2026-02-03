@@ -113,6 +113,7 @@ export function useDocumentPipeline(
   const minutaIdRef = useRef<string | null>(null);
   const optionsRef = useRef(options);
   const sentToExtractionRef = useRef<Set<string>>(new Set());
+  const totalDocumentsRef = useRef(0);
 
   // Keep options ref updated
   useEffect(() => {
@@ -275,6 +276,9 @@ export function useDocumentPipeline(
         return;
       }
 
+      // Track total documents for accurate progress calculation
+      totalDocumentsRef.current = docs.length;
+
       // Inicializar status e adicionar todos à fila de classificação
       docs.forEach(doc => {
         updateStatus(doc.id, 'queued');
@@ -388,22 +392,41 @@ export function useDocumentPipeline(
       // Executar map-to-fields se houver pelo menos alguma extracao bem-sucedida
       // Isso permite que o mapeamento funcione com dados parciais em caso de erros
       if (hasSuccessfulExtractions && minutaIdRef.current) {
+        const minutaId = minutaIdRef.current;
         console.log('[Pipeline] Executing map-to-fields with', extractionPool.completedCount, 'successful extractions');
+
         supabase.functions.invoke('map-to-fields', {
-          body: { minuta_id: minutaIdRef.current }
-        }).then(() => {
+          body: { minuta_id: minutaId }
+        }).then((response) => {
+          // Check if map-to-fields succeeded
+          if (response.error) {
+            throw new Error(response.error.message || 'map-to-fields failed');
+          }
+
+          const result = response.data;
+          console.log('[Pipeline] map-to-fields result:', {
+            success: result?.success,
+            pessoasCount: result?.persistence?.pessoas_ids?.length || 0,
+            imovelId: result?.persistence?.imovel_id,
+            negocioId: result?.persistence?.negocio_id,
+          });
+
+          // Update minuta status
           return supabase.from('minutas').update({
             status: 'revisao',
             current_step: 'outorgantes',
-          }).eq('id', minutaIdRef.current);
+          }).eq('id', minutaId);
         }).then(() => {
           if (hasErrors) {
             console.log('[Pipeline] Completed with some errors:', extractionPool.failedCount, 'failed');
           }
-          optionsRef.current?.onPipelineComplete?.(minutaIdRef.current!);
+          console.log('[Pipeline] Pipeline complete, calling onPipelineComplete');
+          optionsRef.current?.onPipelineComplete?.(minutaId);
           setIsProcessing(false);
         }).catch((err) => {
           console.error('[Pipeline] Error in map-to-fields:', err);
+          // Still mark as complete but with error - user can retry or continue manually
+          optionsRef.current?.onError?.('map-to-fields', err.message || 'Mapping failed');
           setIsProcessing(false);
         });
       } else {
@@ -422,14 +445,37 @@ export function useDocumentPipeline(
   ]);
 
   /**
-   * Calcula o progresso geral - 50% classificação, 50% extração
+   * Calcula o progresso geral baseado no número total de documentos
+   * - Classificação: 0-40%
+   * - Extração: 40-90%
+   * - Mapeamento: 90-100% (mostrado como "finalizando")
+   *
+   * Usando contagem absoluta de documentos para evitar instabilidade
+   * quando extraction pool cresce durante o processamento
    */
   const overallProgress = useMemo(() => {
-    const totalDocs = classificationPool.tasks.size || 1;
-    const classifyProgress = classificationPool.progress * 0.5;
-    const extractProgress = extractionPool.progress * 0.5;
-    return Math.round(classifyProgress + extractProgress);
-  }, [classificationPool.progress, extractionPool.progress, classificationPool.tasks.size]);
+    const total = totalDocumentsRef.current;
+    if (total === 0) return 0;
+
+    // Count completed tasks in each stage
+    const classifiedCount = classificationPool.completedCount + classificationPool.failedCount;
+    const extractedCount = extractionPool.completedCount + extractionPool.failedCount;
+
+    // Calculate weighted progress
+    // Classification: 40% weight (0-40%)
+    const classifyProgress = (classifiedCount / total) * 40;
+
+    // Extraction: 50% weight (40-90%)
+    const extractProgress = (extractedCount / total) * 50;
+
+    // Total (mapping adds the final 10% when complete, shown as "finalizing")
+    return Math.min(90, Math.round(classifyProgress + extractProgress));
+  }, [
+    classificationPool.completedCount,
+    classificationPool.failedCount,
+    extractionPool.completedCount,
+    extractionPool.failedCount,
+  ]);
 
   return {
     startPipeline,
