@@ -2,7 +2,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { FormSection } from '../FormSection';
 import { EditableField } from '../EditableField';
-import type { PessoaNatural, FontesCampos } from '@/types/minuta';
+import type { PessoaNatural } from '@/types/minuta';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import {
@@ -122,17 +122,7 @@ function getVisibilidadeCamposFamiliares(estadoCivil: string) {
   }
 }
 
-/**
- * Helper to get fonte array for a field from the fontes object
- * The fontes object maps field names to arrays of source document names
- */
-function getFonte(fontes: FontesCampos | undefined, field: string): string[] | undefined {
-  if (!fontes) return undefined;
-  return fontes[field];
-}
-
 export function PessoaNaturalForm({ pessoa, onUpdate, camposEditados }: PessoaNaturalFormProps) {
-  const fontes = pessoa.fontes;
 
   // Determina visibilidade dos campos baseado no estado civil
   const visibilidade = useMemo(
@@ -159,17 +149,17 @@ export function PessoaNaturalForm({ pessoa, onUpdate, camposEditados }: PessoaNa
     <div className="space-y-2">
       {/* DADOS INDIVIDUAIS */}
       <FormSection title="DADOS INDIVIDUAIS" columns={3}>
-        <EditableField label="Nome Completo" value={pessoa.nome} onChange={(v) => onUpdate('nome', v)} wasEditedByUser={camposEditados.includes('nome')} fonte={getFonte(fontes, 'nome')} />
-        <EditableField label="CPF" value={pessoa.cpf} onChange={(v) => onUpdate('cpf', v)} wasEditedByUser={camposEditados.includes('cpf')} fonte={getFonte(fontes, 'cpf')} />
-        <EditableField label="RG" value={pessoa.rg} onChange={(v) => onUpdate('rg', v)} wasEditedByUser={camposEditados.includes('rg')} fonte={getFonte(fontes, 'rg')} />
-        <EditableField label="Orgao Emissor RG" value={pessoa.orgaoEmissorRg} onChange={(v) => onUpdate('orgaoEmissorRg', v)} wasEditedByUser={camposEditados.includes('orgaoEmissorRg')} fonte={getFonte(fontes, 'orgao_emissor_rg')} />
-        <EditableField label="Estado Emissor RG" value={pessoa.estadoEmissorRg} onChange={(v) => onUpdate('estadoEmissorRg', v)} wasEditedByUser={camposEditados.includes('estadoEmissorRg')} fonte={getFonte(fontes, 'estado_emissor_rg')} />
-        <EditableField label="Data Emissao RG" value={pessoa.dataEmissaoRg} type="date" onChange={(v) => onUpdate('dataEmissaoRg', v)} wasEditedByUser={camposEditados.includes('dataEmissaoRg')} fonte={getFonte(fontes, 'data_emissao_rg')} />
-        <EditableField label="Nacionalidade" value={pessoa.nacionalidade} onChange={(v) => onUpdate('nacionalidade', v)} wasEditedByUser={camposEditados.includes('nacionalidade')} fonte={getFonte(fontes, 'nacionalidade')} />
-        <EditableField label="Profissao" value={pessoa.profissao} onChange={(v) => onUpdate('profissao', v)} wasEditedByUser={camposEditados.includes('profissao')} fonte={getFonte(fontes, 'profissao')} />
-        <EditableField label="Data Nascimento" value={pessoa.dataNascimento} type="date" onChange={(v) => onUpdate('dataNascimento', v)} wasEditedByUser={camposEditados.includes('dataNascimento')} fonte={getFonte(fontes, 'data_nascimento')} />
-        <EditableField label="CNH" value={pessoa.cnh} onChange={(v) => onUpdate('cnh', v)} wasEditedByUser={camposEditados.includes('cnh')} fonte={getFonte(fontes, 'cnh')} />
-        <EditableField label="Orgao Emissor CNH" value={pessoa.orgaoEmissorCnh} onChange={(v) => onUpdate('orgaoEmissorCnh', v)} wasEditedByUser={camposEditados.includes('orgaoEmissorCnh')} fonte={getFonte(fontes, 'orgao_emissor_cnh')} />
+        <EditableField label="Nome Completo" value={pessoa.nome} onChange={(v) => onUpdate('nome', v)} wasEditedByUser={camposEditados.includes('nome')} />
+        <EditableField label="CPF" value={pessoa.cpf} onChange={(v) => onUpdate('cpf', v)} wasEditedByUser={camposEditados.includes('cpf')} />
+        <EditableField label="RG" value={pessoa.rg} onChange={(v) => onUpdate('rg', v)} wasEditedByUser={camposEditados.includes('rg')} />
+        <EditableField label="Orgao Emissor RG" value={pessoa.orgaoEmissorRg} onChange={(v) => onUpdate('orgaoEmissorRg', v)} wasEditedByUser={camposEditados.includes('orgaoEmissorRg')} />
+        <EditableField label="Estado Emissor RG" value={pessoa.estadoEmissorRg} onChange={(v) => onUpdate('estadoEmissorRg', v)} wasEditedByUser={camposEditados.includes('estadoEmissorRg')} />
+        <EditableField label="Data Emissao RG" value={pessoa.dataEmissaoRg} type="date" onChange={(v) => onUpdate('dataEmissaoRg', v)} wasEditedByUser={camposEditados.includes('dataEmissaoRg')} />
+        <EditableField label="Nacionalidade" value={pessoa.nacionalidade} onChange={(v) => onUpdate('nacionalidade', v)} wasEditedByUser={camposEditados.includes('nacionalidade')} />
+        <EditableField label="Profissao" value={pessoa.profissao} onChange={(v) => onUpdate('profissao', v)} wasEditedByUser={camposEditados.includes('profissao')} />
+        <EditableField label="Data Nascimento" value={pessoa.dataNascimento} type="date" onChange={(v) => onUpdate('dataNascimento', v)} wasEditedByUser={camposEditados.includes('dataNascimento')} />
+        <EditableField label="CNH" value={pessoa.cnh} onChange={(v) => onUpdate('cnh', v)} wasEditedByUser={camposEditados.includes('cnh')} />
+        <EditableField label="Orgao Emissor CNH" value={pessoa.orgaoEmissorCnh} onChange={(v) => onUpdate('orgaoEmissorCnh', v)} wasEditedByUser={camposEditados.includes('orgaoEmissorCnh')} />
 
         {/* Toggle Falecido */}
         <div className="col-span-full flex items-center gap-4 p-3 bg-muted/30 border border-muted-foreground/10 rounded-lg">
@@ -199,7 +189,6 @@ export function PessoaNaturalForm({ pessoa, onUpdate, camposEditados }: PessoaNa
               type="date"
               onChange={(v) => onUpdate('dataObito', v)}
               wasEditedByUser={camposEditados.includes('dataObito')}
-              fonte={getFonte(fontes, 'data_obito')}
             />
           </div>
         )}
@@ -386,9 +375,9 @@ export function PessoaNaturalForm({ pessoa, onUpdate, camposEditados }: PessoaNa
         columns={3}
         action={{ label: 'Atualizar', onClick: () => console.log('Atualizar CNDT') }}
       >
-        <EditableField label="Numero CNDT" value={pessoa.cndt.numeroCNDT} onChange={(v) => onUpdate('cndt.numeroCNDT', v)} wasEditedByUser={camposEditados.includes('cndt.numeroCNDT')} fonte={getFonte(fontes, 'cndt')} />
-        <EditableField label="Data Expedicao" value={pessoa.cndt.dataExpedicao} type="date" onChange={(v) => onUpdate('cndt.dataExpedicao', v)} wasEditedByUser={camposEditados.includes('cndt.dataExpedicao')} fonte={getFonte(fontes, 'cndt')} />
-        <EditableField label="Hora Expedicao" value={pessoa.cndt.horaExpedicao} onChange={(v) => onUpdate('cndt.horaExpedicao', v)} wasEditedByUser={camposEditados.includes('cndt.horaExpedicao')} fonte={getFonte(fontes, 'cndt')} />
+        <EditableField label="Numero CNDT" value={pessoa.cndt.numeroCNDT} onChange={(v) => onUpdate('cndt.numeroCNDT', v)} wasEditedByUser={camposEditados.includes('cndt.numeroCNDT')} />
+        <EditableField label="Data Expedicao" value={pessoa.cndt.dataExpedicao} type="date" onChange={(v) => onUpdate('cndt.dataExpedicao', v)} wasEditedByUser={camposEditados.includes('cndt.dataExpedicao')} />
+        <EditableField label="Hora Expedicao" value={pessoa.cndt.horaExpedicao} onChange={(v) => onUpdate('cndt.horaExpedicao', v)} wasEditedByUser={camposEditados.includes('cndt.horaExpedicao')} />
       </FormSection>
 
       {/* CERTIDAO DA UNIAO */}
