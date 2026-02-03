@@ -39,12 +39,19 @@ export function MobileBottomNav() {
                 'mobile-tab-item',
                 isActive && 'active'
               )}
+              // Previne delay de navegação em mobile
+              onClick={(e) => {
+                // Força navegação imediata
+                e.currentTarget.blur();
+              }}
             >
               {/* Liquid Glass Bubble - Animated indicator */}
               {isActive && (
                 <motion.div
                   layoutId="liquid-glass-bubble"
                   className="liquid-glass-indicator"
+                  // Animação não bloqueia interação
+                  style={{ pointerEvents: 'none' }}
                   transition={{
                     type: 'spring',
                     stiffness: 380,

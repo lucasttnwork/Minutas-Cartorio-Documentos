@@ -1368,7 +1368,7 @@
   min-height: 44px;
 }
 
-/* Mobile tab bar styling - Completamente estático e isolado */
+/* Mobile tab bar styling - Fixed to bottom with safe area support */
 .mobile-tab-bar {
   position: fixed !important;
   bottom: 0 !important;
@@ -1376,10 +1376,9 @@
   right: 0 !important;
   z-index: 9999 !important;
 
-  /* Altura totalmente fixa */
-  height: 68px !important;
-  min-height: 68px !important;
-  max-height: 68px !important;
+  /* Altura inclui safe area para iPhone notch/home indicator */
+  height: calc(68px + env(safe-area-inset-bottom, 0)) !important;
+  min-height: calc(68px + env(safe-area-inset-bottom, 0)) !important;
 
   /* Visual */
   background: oklch(from var(--card) l c h / 0.92);
@@ -1387,28 +1386,30 @@
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-top: 1px solid oklch(from var(--border) l c h / 0.4);
 
-  /* Isolamento total do layout */
-  transform: translate3d(0, 0, 0);
-  contain: layout size style paint;
+  /* GPU acceleration para posicionamento consistente */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+
+  /* Garante que fique acima de tudo */
   isolation: isolate;
 
-  /* Bloqueia qualquer interferência */
-  overflow: hidden;
+  /* Permite interação */
   pointer-events: auto;
+  touch-action: manipulation;
 }
 
-/* Container interno para safe area */
+/* Container interno - altura fixa, safe area via padding */
 .mobile-tab-bar-content {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: space-around;
   width: 100%;
   height: 68px;
   padding: 0 8px;
-  padding-bottom: env(safe-area-inset-bottom, 0);
+  /* Safe area fica abaixo do conteúdo, não empurra pra cima */
 }
 
-/* Item individual da tab */
+/* Item individual da tab - otimizado para touch */
 .mobile-tab-item {
   position: relative;
   display: flex;
@@ -1418,7 +1419,15 @@
   flex: 1;
   padding: 8px 0;
   text-decoration: none;
+
+  /* Crítico: previne double-tap zoom e delay de 300ms */
+  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+
+  /* Garante área de toque clicável */
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .mobile-tab-icon {
@@ -1448,9 +1457,15 @@
   background: transparent;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .mobile-tab-logout:active {
+  opacity: 0.7;
+}
+
+/* Active state para feedback tátil imediato */
+.mobile-tab-item:active {
   opacity: 0.7;
 }
 
