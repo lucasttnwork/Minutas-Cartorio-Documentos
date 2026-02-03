@@ -1,5 +1,6 @@
 // src/AuthenticatedApp.tsx
-// Authenticated app with all protected routes for app.* subdomain
+// Authenticated app with all protected routes
+// Supports both app.* subdomain and domain.com/app/* path prefix
 
 import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
@@ -8,6 +9,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { Toaster } from "./components/ui/sonner";
 import { GlobalNavigation, ErrorBoundary } from "./components/layout";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { isAppSubdomain } from "./lib/domain";
 
 // Lazy load all pages for code splitting
 const Login = lazy(() => import("./pages/Login"));
@@ -38,9 +40,12 @@ function PageLoader() {
 }
 
 export function AuthenticatedApp() {
+  // Use empty basename for subdomain, "/app" for path prefix mode
+  const basename = isAppSubdomain() ? '' : '/app';
+
   return (
     <ErrorBoundary>
-      <Router>
+      <Router basename={basename}>
         <AuthProvider>
           <MinutaProvider>
             <div className="min-h-screen bg-background">

@@ -14,7 +14,7 @@ export function LandingApp() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/landing-page" element={<LandingPage />} />
-          <Route path="*" element={<HomePage />} />
+          {/* Note: Removed catch-all route to allow /app/* to be handled by AuthenticatedApp */}
         </Routes>
         <Toaster position="top-right" richColors closeButton />
       </Router>

@@ -36,6 +36,14 @@ export const agentes: AgenteConfig[] = [
     categoria: 'pessoais',
     icone: 'Baby',
   },
+  {
+    id: '12',
+    slug: 'atpv',
+    nome: 'Extrator de ATPV',
+    descricao: 'Extrai dados de Autorização para Transferência de Propriedade de Veículo',
+    categoria: 'pessoais',
+    icone: 'Car',
+  },
   // Imobiliários
   {
     id: '5',
