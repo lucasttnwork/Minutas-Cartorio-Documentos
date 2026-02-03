@@ -475,16 +475,25 @@ export function ExecutionDetailModal({
 
           {/* Modal */}
           <motion.div
-            initial={{ opacity: 0, scale: isMobile ? 1 : 0.95, y: isMobile ? 20 : 0 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: isMobile ? 1 : 0.95, y: isMobile ? 20 : 0 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, scale: isMobile ? 1 : 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: isMobile ? 1 : 0.95 }}
+            transition={{ duration: 0.15 }}
             className={cn(
-              "bg-card flex flex-col overflow-hidden",
-              isMobile
-                ? "fixed inset-0" // Mobile: fullscreen usando inset-0
-                : "relative w-[95vw] h-[90vh] max-w-[1800px] border border-border rounded-xl shadow-2xl"
+              "bg-card flex flex-col",
+              !isMobile && "relative overflow-hidden w-[95vw] h-[90vh] max-w-[1800px] border border-border rounded-xl shadow-2xl"
             )}
+            // Estilos inline para mobile - mais confiável em diferentes navegadores
+            style={isMobile ? {
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: '100%',
+              height: '100%',
+              overflow: 'hidden',
+            } : undefined}
           >
             {/* Header - Mobile */}
             {isMobile ? (
@@ -641,12 +650,17 @@ export function ExecutionDetailModal({
 
             {/* Content area */}
             <div className={cn(
-              "flex-1 overflow-hidden bg-gradient-to-b from-background/50 to-background/30",
-              isMobile ? "p-4 pb-20" : "p-6"
+              "flex-1 min-h-0", // min-h-0 permite flex-1 funcionar com overflow
+              isMobile
+                ? "overflow-y-auto overflow-x-hidden bg-background" // Mobile: scroll no container principal
+                : "overflow-hidden bg-gradient-to-b from-background/50 to-background/30 p-6"
             )}>
               {/* Error state */}
               {execution.status === 'error' && execution.erro_mensagem && (
-                <div className="h-full flex items-center justify-center">
+                <div className={cn(
+                  "flex items-center justify-center",
+                  isMobile ? "min-h-[60vh] p-4" : "h-full"
+                )}>
                   <div className="text-center max-w-md px-4">
                     <div className={cn(
                       "mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center",
@@ -672,7 +686,10 @@ export function ExecutionDetailModal({
 
               {/* No content state */}
               {!hasContent && execution.status !== 'error' && (
-                <div className="h-full flex items-center justify-center">
+                <div className={cn(
+                  "flex items-center justify-center",
+                  isMobile ? "min-h-[60vh] p-4" : "h-full"
+                )}>
                   <div className="text-center">
                     <FileText className={cn(
                       "mx-auto mb-4 text-muted-foreground/50",
@@ -688,8 +705,9 @@ export function ExecutionDetailModal({
               {/* Two-column layout with content (single column on mobile) */}
               {hasContent && (
                 <div className={cn(
-                  "h-full overflow-auto",
-                  isMobile ? "space-y-4" : "grid gap-6 grid-cols-1 lg:grid-cols-2"
+                  isMobile
+                    ? "p-4 pb-24 space-y-4" // Mobile: padding + espaço para action bar, sem h-full
+                    : "h-full overflow-auto grid gap-6 grid-cols-1 lg:grid-cols-2"
                 )}>
                   {/* Left column - Markdown text */}
                   <div className="bg-card shadow-sm border border-border/50 rounded-lg overflow-hidden">
