@@ -1,1 +1,0 @@
-export { ComoFunciona } from './ComoFunciona';

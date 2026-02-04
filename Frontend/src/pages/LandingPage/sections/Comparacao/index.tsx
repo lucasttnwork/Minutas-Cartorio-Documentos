@@ -1,1 +1,0 @@
-export { Comparacao } from './Comparacao';

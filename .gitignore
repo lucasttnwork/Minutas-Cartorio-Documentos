@@ -29,3 +29,6 @@ push_error.txt
 
 # Logs sensiveis
 *.log
+
+# Subdiretório Frontend (repositório Git independente)
+Frontend/
