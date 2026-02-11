@@ -1,0 +1,402 @@
+{
+  "arquivo": "280509-VersaoImpressao.pdf",
+  "caminho": "C:\\Users\\Lucas\\OneDrive\\Documentos\\PROJETOS - CODE\\GOOGLE ANTIGRAVITY PROJECTS\\Minutas-Cartorio-Documentos\\Test-Docs\\Documentos-isolados-tipo\\Escrituras\\280509-VersaoImpressao.pdf",
+  "tipo_documento": "escritura_v3",
+  "data_processamento": "2026-01-29T01:11:29.289421",
+  "modelo": "gemini-3-flash-preview",
+  "status": "sucesso",
+  "erro": null,
+  "reescrita": "",
+  "explicacao": "",
+  "dados_catalogados": {
+    "analise_preliminar": {
+      "tipo_escritura": "ESCRITURA DE VENDA E COMPRA",
+      "complexidade": "MEDIA",
+      "estrutura_propriedade": "Venda de propriedade plena de unidade autônoma (apartamento) e vaga de garagem correspondente.",
+      "quantidade_vendedores": 2,
+      "quantidade_compradores": 1,
+      "quantidade_imoveis": 2,
+      "possui_gravames": false,
+      "possui_intermediacao": true,
+      "observacoes_estruturais": "A transação envolve um apartamento e uma vaga de garagem com matrículas distintas. A venda foi realizada com intermediação da Quinto Andar, que reteve o valor do sinal. O ato foi lavrado via videoconferência pelo sistema e-Notariado."
+    },
+    "documento": {
+      "protocolo": "280.509",
+      "livro": "3633",
+      "folhas": "229/232",
+      "formato": "ELETRONICO",
+      "modalidade": "VIDEOCONFERENCIA",
+      "selo_digital": "1127221ES0000002390741239",
+      "codigo_validacao": "NG2EP-JLFFS-3UXV4-J6UDB",
+      "url_validacao": "https://assinatura.e-notariado.org.br/validate"
+    },
+    "cartorio": {
+      "nome": "2º Tabelião de Notas de São Paulo - SP",
+      "tabeliao": "ANDERSON HENRIQUE TEIXEIRA NOGUEIRA",
+      "substituto": "LUCIANO PEREIRA DA SILVA",
+      "escrevente": "MARIA HELENA DA SILVA",
+      "endereco": "Avenida Paulista, nº 1.776, Bela Vista, São Paulo - SP, CEP: 01310921",
+      "contato": {
+        "telefone": "11 3357-8844",
+        "website": "WWW.CARTORIOPAULISTA.COM.BR"
+      },
+      "data_lavratura": "2023-11-16"
+    },
+    "partes": [
+      {
+        "identificador": "parte_1",
+        "papel": "VENDEDOR",
+        "tipo_propriedade": "PLENA",
+        "pessoa": {
+          "tipo": "FISICA",
+          "nome": "RODOLFO WOLFGANG ORTRIWANO",
+          "nacionalidade": "BRASILEIRO",
+          "profissao": "JORNALISTA",
+          "cpf": "949.735.638-20",
+          "rg": {
+            "numero": "6.075.352-3",
+            "orgao": "SSP/SP"
+          },
+          "email": "rortri@gmail.com",
+          "endereco": {
+            "logradouro": "Rua Vila Prudente",
+            "numero": "1006",
+            "complemento": "apto 102",
+            "bairro": "Vila Prudente",
+            "cidade": "São Paulo",
+            "estado": "SP",
+            "cep": "03156-000"
+          }
+        },
+        "estado_civil": {
+          "status": "CASADO",
+          "regime_bens": "COMUNHAO PARCIAL",
+          "data_casamento": "2002-02-21",
+          "certidao": {
+            "cartorio": "Oficial de Registro Civil das Pessoas Naturais do 9º Subdistrito - Vila Mariana",
+            "matricula": "122044 01 55 2002 2 00081 014 0014106 44",
+            "cidade": "São Paulo",
+            "estado": "SP"
+          }
+        },
+        "conjuge_referencia": "parte_2",
+        "dados_bancarios": {
+          "banco": "Banco Santander S.A.",
+          "agencia": "0167",
+          "conta": "010296387"
+        }
+      },
+      {
+        "identificador": "parte_2",
+        "papel": "VENDEDORA",
+        "tipo_propriedade": "PLENA",
+        "pessoa": {
+          "tipo": "FISICA",
+          "nome": "ELIZETE APARECIDA SILVA",
+          "nacionalidade": "BRASILEIRA",
+          "profissao": "JORNALISTA",
+          "cpf": "949.735.638-20",
+          "rg": {
+            "numero": "7.878.936-9",
+            "orgao": "SSP/SP"
+          },
+          "email": "elizetesilva85@hotmail.com",
+          "endereco": {
+            "logradouro": "Rua Vila Prudente",
+            "numero": "1006",
+            "complemento": "apto 102",
+            "bairro": "Vila Prudente",
+            "cidade": "São Paulo",
+            "estado": "SP",
+            "cep": "03156-000"
+          }
+        },
+        "estado_civil": {
+          "status": "CASADA",
+          "regime_bens": "COMUNHAO PARCIAL",
+          "conjuge": "RODOLFO WOLFGANG ORTRIWANO"
+        },
+        "conjuge_referencia": "parte_1"
+      },
+      {
+        "identificador": "parte_3",
+        "papel": "COMPRADORA",
+        "tipo_propriedade": "PLENA",
+        "pessoa": {
+          "tipo": "FISICA",
+          "nome": "MARINA AYUB",
+          "nacionalidade": "BRASILEIRA",
+          "profissao": "DESENHISTA INDUSTRIAL",
+          "cpf": "368.366.718-43",
+          "rg": {
+            "numero": "35.540.462-X",
+            "orgao": "SSP/SP"
+          },
+          "email": "marina.ayub7@gmail.com",
+          "endereco": {
+            "logradouro": "Rua Doutor Neto de Araujo",
+            "numero": "264",
+            "complemento": "apto 210",
+            "bairro": "Vila Mariana",
+            "cidade": "São Paulo",
+            "estado": "SP",
+            "cep": "04111-000"
+          }
+        },
+        "estado_civil": {
+          "status": "SOLTEIRA",
+          "regime_bens": null,
+          "certidao": {
+            "cartorio": "Oficial de Registro Civil das Pessoas Naturais do 28º Subdistrito - Jardim Paulista",
+            "matricula": "Livro A-133, sob o nº 80631",
+            "cidade": "São Paulo",
+            "estado": "SP"
+          }
+        }
+      }
+    ],
+    "intermediario": {
+      "existe": true,
+      "nome": "QUINTO ANDAR SERVIÇOS IMOBILIARIOS LTDA",
+      "cnpj": "16.788.643/0001-81",
+      "funcao": "INTERMEDIACAO IMOBILIARIA",
+      "valor_retido": 36900.0,
+      "percentual": 6.0,
+      "observacao": "Valor do sinal retido a título de despesas operacionais pela intermediação."
+    },
+    "imoveis": [
+      {
+        "ordem": 1,
+        "tipo": "APARTAMENTO",
+        "descricao": "UNIDADE AUTÔNOMA nº 124 (cento e vinte e quatro), localizado no 12º andar do EDIFÍCIO SERRA DO MAR, Bloco B",
+        "identificacao": {
+          "unidade": "124",
+          "andar": "12",
+          "bloco": "B",
+          "edificio": "SERRA DO MAR",
+          "condominio": "EDIFÍCIO SERRA DO MAR"
+        },
+        "endereco": {
+          "logradouro": "Rua Francisco Cruz",
+          "numero": "515",
+          "bairro": "Vila Mariana",
+          "cidade": "São Paulo",
+          "estado": "SP",
+          "cep": "04117-091"
+        },
+        "areas": {
+          "total_m2": 83.49
+        },
+        "registro": {
+          "matricula": "46.511",
+          "cartorio_ri": "1º Oficial de Registro de Imóveis de São Paulo",
+          "aquisicao_anterior": {
+            "forma": "Instrumento particular",
+            "data": "1984-07-03",
+            "registro": "R.01"
+          }
+        },
+        "cadastro_municipal": {
+          "inscricao": "039.080.0244-3",
+          "valor_venal": 301147.0
+        },
+        "gravames_restricoes": {
+          "existem": false,
+          "lista": []
+        },
+        "valor_atribuido": 460573.5
+      },
+      {
+        "ordem": 2,
+        "tipo": "VAGA",
+        "descricao": "UMA VAGA INDETERMINADA na garagem localizada no 1º ou 2º subsolos do EDIFÍCIO SERRA DO MAR",
+        "identificacao": {
+          "unidade": "Vaga Indeterminada",
+          "edificio": "SERRA DO MAR"
+        },
+        "endereco": {
+          "logradouro": "Rua Francisco Cruz",
+          "numero": "515",
+          "bairro": "Vila Mariana",
+          "cidade": "São Paulo",
+          "estado": "SP",
+          "cep": "04117-091"
+        },
+        "areas": {
+          "total_m2": 28.0
+        },
+        "registro": {
+          "matricula": "46.512",
+          "cartorio_ri": "1º Oficial de Registro de Imóveis de São Paulo",
+          "aquisicao_anterior": {
+            "forma": "Instrumento particular",
+            "data": "1984-07-03",
+            "registro": "R.01"
+          }
+        },
+        "cadastro_municipal": {
+          "inscricao": "039.080.0244-3 (conjunto)",
+          "valor_venal": 301147.0
+        },
+        "gravames_restricoes": {
+          "existem": false,
+          "lista": []
+        },
+        "valor_atribuido": 154426.5
+      }
+    ],
+    "transacao": {
+      "valor_total": 615000.0,
+      "valor_extenso": "seiscentos e quinze mil reais",
+      "compromisso_anterior": {
+        "existe": true,
+        "data": "2023-10-26",
+        "registrado": false,
+        "status": "LIQUIDADO"
+      },
+      "pagamento": {
+        "forma_resumida": "A VISTA",
+        "parcelas": [
+          {
+            "ordem": 1,
+            "tipo": "SINAL",
+            "valor": 36900.0,
+            "percentual": 6.0,
+            "meio": "QR CODE",
+            "beneficiario": "QUINTO ANDAR SERVIÇOS IMOBILIARIOS LTDA",
+            "observacao": "Retido para pagamento de intermediação"
+          },
+          {
+            "ordem": 2,
+            "tipo": "SALDO",
+            "valor": 578100.0,
+            "percentual": 94.0,
+            "meio": "TED",
+            "beneficiario": "RODOLFO WOLFGANG ORTRIWANO",
+            "conta_destino": {
+              "banco": "Santander",
+              "agencia": "0167",
+              "conta": "010296387"
+            }
+          }
+        ]
+      },
+      "quitacao": "PLENA"
+    },
+    "tributos": {
+      "itbi": {
+        "valor": 18450.01,
+        "aliquota": 3.0,
+        "base_calculo": 615000.0,
+        "data_recolhimento": "2023-11-16",
+        "detalhamento": [
+          {
+            "imovel": "Apartamento",
+            "valor": 13817.21
+          },
+          {
+            "imovel": "Vaga",
+            "valor": 4632.8
+          }
+        ]
+      },
+      "custas_cartorio": {
+        "valor_total": 4839.75,
+        "detalhamento": [
+          {
+            "destinatario": "CARTORIO",
+            "valor": 2881.85
+          },
+          {
+            "destinatario": "ESTADO",
+            "valor": 819.06
+          },
+          {
+            "destinatario": "SECRETARIA DA FAZENDA",
+            "valor": 560.59
+          },
+          {
+            "destinatario": "SANTA CASA",
+            "valor": 28.82
+          },
+          {
+            "destinatario": "REGISTRO CIVIL",
+            "valor": 151.68
+          },
+          {
+            "destinatario": "TRIBUNAL DE JUSTIÇA",
+            "valor": 197.79
+          },
+          {
+            "destinatario": "MUNICIPIO",
+            "valor": 61.63
+          },
+          {
+            "destinatario": "MINISTERIO PUBLICO",
+            "valor": 138.33
+          }
+        ]
+      }
+    },
+    "certidoes": [
+      {
+        "tipo": "MATRICULA",
+        "descricao": "Certidão de matrícula atualizada",
+        "numero": "46.511 e 46.512",
+        "resultado": "REGULAR",
+        "data_emissao": "2023-11-14"
+      },
+      {
+        "tipo": "CNDT",
+        "descricao": "Certidão Negativa de Débitos Trabalhistas",
+        "resultado": "NEGATIVA",
+        "validade": "2024-04-07"
+      },
+      {
+        "tipo": "INDISPONIBILIDADE",
+        "descricao": "Relatório de indisponibilidade",
+        "resultado": "NEGATIVA",
+        "codigo_hash": "2224.ddd3.1a10.cbc4.4f9a.924c.7067.8ba2.1885.8ec3/b96e.5a83.6dea.bdb5.d8a8.cfe1.20cd.548f.b78a.7d35/3e78.e937.20c5.e323.34a4.a489.03e8.ed37.3103.a576"
+      }
+    ],
+    "declaracoes_vendedores": {
+      "previdencia_nao_devedor": true,
+      "nao_empregador": true,
+      "inexistencia_acoes": true,
+      "posse_legitima": true,
+      "nao_desapropriacao": true,
+      "inexistencia_debitos": true,
+      "nao_pep": true,
+      "compromisso_indenizacao": true
+    },
+    "assinaturas": {
+      "formato": "DIGITAL",
+      "certificacao": "ICP-BRASIL",
+      "lista": [
+        {
+          "nome": "RODOLFO WOLFGANG ORTRIWANO",
+          "papel": "VENDEDOR",
+          "data_hora": "2023-11-16T10:57:23"
+        },
+        {
+          "nome": "ELIZETE APARECIDA SILVA",
+          "papel": "VENDEDORA",
+          "data_hora": "2023-11-16T10:56:57"
+        },
+        {
+          "nome": "MARINA AYUB",
+          "papel": "COMPRADORA",
+          "data_hora": "2023-11-16T11:26:37"
+        },
+        {
+          "nome": "LUCIANO PEREIRA DA SILVA",
+          "papel": "TABELIAO SUBSTITUTO",
+          "data_hora": "2023-11-27T13:51:00"
+        }
+      ]
+    },
+    "explicacao_contextual": "Esta escritura formaliza a venda e compra de um apartamento (unidade 124) e uma vaga de garagem no Edifício Serra do Mar, localizado na Vila Mariana, São Paulo. A transação ocorreu em 16 de novembro de 2023, entre os vendedores Rodolfo Wolfgang Ortriwano e sua esposa Elizete Aparecida Silva, e a compradora Marina Ayub, pelo valor total de R$ 615.000,00.\n\nO pagamento foi estruturado com um sinal de R$ 36.900,00 pago via QR Code e retido pela imobiliária Quinto Andar como comissão de intermediação, e o saldo remanescente de R$ 578.100,00 pago diretamente ao vendedor Rodolfo via TED. Os imóveis possuem matrículas distintas (46.511 e 46.512) no 1º RI de São Paulo e estão livres de ônus ou gravames.\n\nA lavratura foi realizada de forma totalmente digital através da plataforma e-Notariado, com assinaturas eletrônicas certificadas pelo ICP-Brasil. O ITBI foi devidamente recolhido sobre o valor da transação, totalizando R$ 18.450,01, e todas as certidões negativas necessárias foram apresentadas e arquivadas no cartório.",
+    "campos_nao_localizados": []
+  },
+  "tempo_processamento_s": 0
+}
